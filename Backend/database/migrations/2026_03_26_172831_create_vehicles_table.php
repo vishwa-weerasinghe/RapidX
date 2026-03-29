@@ -19,7 +19,7 @@ return new class extends Migration
 
             $table->foreign('Driver_ID')
                   ->references('Driver_ID')
-                  ->on('driver')
+                  ->on('drivers')
                   ->cascadeOnDelete();
         });
     }
