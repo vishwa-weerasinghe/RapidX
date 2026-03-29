@@ -26,7 +26,7 @@ return new class extends Migration
 
             $table->foreign('Customer_ID')->references('Customer_ID')->on('customers')->onDelete('cascade');
             $table->foreign('Package_ID')->references('Package_ID')->on('packages')->onDelete('cascade');
-            //$table->foreign('Vehicle_ID')->references('Vehicle_ID')->on('vehicles')->onDelete('cascade');
+            $table->foreign('Vehicle_ID')->references('Vehicle_ID')->on('vehicles')->onDelete('cascade');
         });
     }
 
