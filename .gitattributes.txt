@@ -1,0 +1,19 @@
+# Automatically normalize line endings
+* text=auto
+
+# Common project files
+*.js text
+*.jsx text
+*.ts text
+*.tsx text
+*.json text
+*.css text
+*.html text
+*.md text
+
+# Ignore binary files for normalization
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
+*.pdf binary
