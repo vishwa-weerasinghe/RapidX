@@ -10,6 +10,9 @@ function App() {
   return (
     <>
       <section id="center">
+      <div className="text-red-500 text-3xl">
+      Tailwind is working
+      </div>
         <div className="hero">
           <img src={heroImg} className="base" width="170" height="179" alt="" />
           <img src={reactLogo} className="framework" alt="React logo" />
