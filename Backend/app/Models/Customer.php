@@ -6,5 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class Customer extends Model
 {
-    //
+    protected $primaryKey = 'Customer_ID';
+
+    protected $fillable = [
+        'First_Name',
+        'Last_Name',
+        'Email',
+        'Phone_No',
+        'NIC',
+        'Country',
+    ];
 }

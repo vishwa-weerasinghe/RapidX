@@ -10,13 +10,13 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id('Member_ID');
-            $table->string('User_Name',50);
+            $table->string('User_Name',50)->nullable();
             $table->string('Password',100);
             $table->enum('role', ['admin', 'user'])->default('user');
-            $table->string('Email',100);
-            $table->string('Status',20);
+            $table->string('Email',100)->nullable();
+            $table->string('Status',20)->default('Active');;
 
-            $table->unsignedBigInteger('Customer_ID'); // <- match BIGINT UNSIGNED
+            $table->unsignedBigInteger('Customer_ID')->nullable();
 
             $table->timestamps();
 
