@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id('Customer_ID');   
             $table->string('First_Name',50);
             $table->string('Last_Name',50);
-            $table->string('Customer_Type',30);
+            $table->string('Customer_Type',30)->default('Member');
             $table->string('Email',100);
             $table->string('Phone_No',20);
             $table->string('NIC',20);
