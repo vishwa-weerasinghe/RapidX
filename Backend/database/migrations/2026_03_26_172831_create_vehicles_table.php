@@ -10,17 +10,22 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('vehicles', function (Blueprint $table) {
+       Schema::create('vehicles', function (Blueprint $table) {
+
             $table->id('Vehicle_ID');
+
             $table->string('Vehicle_No',20);
             $table->string('Vehicle_Type',50);
             $table->unsignedBigInteger('No_of_Seats');
+
             $table->unsignedBigInteger('Driver_ID');
 
             $table->foreign('Driver_ID')
-                  ->references('Driver_ID')
-                  ->on('drivers')
-                  ->cascadeOnDelete();
+                ->references('Driver_ID')
+                ->on('drivers')
+                ->onDelete('cascade');
+
+            $table->timestamps();
         });
     }
 
