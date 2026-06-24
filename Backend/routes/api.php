@@ -3,6 +3,9 @@
 use App\Http\Controllers\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+//packages
+use App\Http\Controllers\PackageController;
+
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -13,3 +16,5 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);    
 
 Route::get('/dashboard', [AuthController::class, 'dashboard'])->middleware('auth:sanctum'); 
+
+Route::apiResource('packages', PackageController::class);
