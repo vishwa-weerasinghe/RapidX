@@ -1,124 +1,90 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { Link } from "react-router-dom";
+import ThemeToggle from "./components/ThemeToggle";
+import { useTheme } from "./context/ThemeContext";
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const { theme } = useTheme();
 
   return (
-    <>
-      <section id="center">
-      <div className="text-red-500 text-3xl">
-      Tailwind is working
-      </div>
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+    <div
+      className="min-h-screen"
+      style={{
+        backgroundImage:
+          "url('https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=2068&auto=format&fit=crop')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      }}
+    >
+      {/* Navbar */}
+      <header
+        className="fixed top-0 left-0 right-0 z-50 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700"
+        style={{
+          backgroundColor:
+            theme === "dark"
+              ? "rgba(17, 24, 39, 0.85)"
+              : "rgba(255, 255, 255, 0.85)",
+        }}
+      >
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+
+          {/* Brand */}
+          <div className="flex items-center gap-2">
+            <span className="text-2xl">🌿</span>
+            <span className="text-lg font-bold tracking-wide text-[#1B4332] dark:text-green-400">
+              Wild Safari
+            </span>
+          </div>
+
+          {/* Auth Buttons (REVERSED ORDER) */}
+          <div className="flex items-center gap-3">
+
+            {/* Register FIRST */}
+            <Link
+              to="/register"
+              className="text-sm font-semibold px-5 py-2 rounded-lg transition
+                bg-[#6F4E37] dark:bg-green-700
+                text-white
+                hover:bg-[#5a3d2b] dark:hover:bg-green-600"
+            >
+              Register
+            </Link>
+
+            {/* Login SECOND */}
+            <Link
+              to="/login"
+              className="text-sm font-semibold px-5 py-2 rounded-lg border transition
+                text-[#2d6e32] dark:text-green-400
+                border-[#6F4E37] dark:border-green-500
+                bg-white dark:bg-gray-800
+                hover:bg-gray-50 dark:hover:bg-gray-700"
+            >
+              Log in
+            </Link>
+
+            {/* Theme Toggle LAST */}
+            <ThemeToggle />
+
+          </div>
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
+      </header>
+
+      {/* Hero */}
+      <main className="flex flex-col items-center justify-center min-h-screen text-center px-6">
+        <h1
+          className="text-4xl md:text-6xl font-extrabold mb-4"
+          style={{ color: "#ffffff", textShadow: "2px 2px 8px rgba(0,0,0,0.7)" }}
         >
-          Count is {count}
-        </button>
-      </section>
+          Into the Wild
+        </h1>
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+        <p
+          className="text-lg max-w-md"
+          style={{ color: "#ffffff", textShadow: "1px 1px 6px rgba(0,0,0,0.7)" }}
+        >
+          Your gateway to unforgettable safari adventures.
+        </p>
+      </main>
+    </div>
+  );
 }
-
-export default App

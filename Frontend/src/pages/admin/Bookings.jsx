@@ -1,7 +1,7 @@
 export default function Bookings() {
   return (
     <div>
-      <h1 className="text-3xl font-bold text-green-900">
+      <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-900">
         Booking Management
       </h1>
 
