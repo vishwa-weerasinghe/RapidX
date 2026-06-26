@@ -32,6 +32,17 @@ export default function Sidebar() {
         </NavLink>
 
         <NavLink
+          to="/admin/drivers"
+          className={({ isActive }) =>
+            `block p-3 rounded-lg ${
+              isActive ? "bg-green-600" : "hover:bg-green-800"
+            }`
+          }
+        >
+          Drivers
+        </NavLink>
+
+        <NavLink
           to="/admin/bookings"
           className={({ isActive }) =>
             `block p-3 rounded-lg ${
@@ -40,6 +51,17 @@ export default function Sidebar() {
           }
         >
           Bookings
+        </NavLink>
+
+        <NavLink
+          to="/admin/media"
+          className={({ isActive }) =>
+            `block p-3 rounded-lg ${
+              isActive ? "bg-green-600" : "hover:bg-green-800"
+            }`
+          }
+        >
+          Media Gallery
         </NavLink>
 
       </nav>
