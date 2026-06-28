@@ -7,6 +7,7 @@ import App from "./App.jsx";
 import Register from "./pages/user/register.jsx";
 import Login from "./pages/public/login.jsx";
 import Dashboard from "./pages/dashboard.jsx";
+import Review from "./pages/public/Review.jsx";
 
 import AdminLayout from "./layouts/AdminLayout.jsx";
 import AdminDashboard from "./pages/admin/dashboard.jsx";
@@ -21,6 +22,7 @@ import DriverForm from "./pages/admin/DriverForm.jsx";
 
 import MediaList from "./pages/admin/MediaList.jsx";
 import MediaForm from "./pages/admin/MediaForm.jsx";
+import AdminReviews from "./pages/admin/Reviews.jsx";
 
 import { ThemeProvider } from "./context/ThemeContext.jsx";
 
@@ -35,6 +37,7 @@ createRoot(document.getElementById("root")).render(
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/reviews" element={<Review />} />
 
           {/* Admin Layout Routes */}
           <Route path="/admin" element={<AdminLayout />}>
@@ -44,6 +47,7 @@ createRoot(document.getElementById("root")).render(
             <Route path="drivers" element={<Drivers />} />
             <Route path="bookings" element={<Bookings />} />
             <Route path="media" element={<MediaList />} />
+            <Route path="reviews" element={<AdminReviews />} />
           </Route>
 
           {/* Separate CRUD routes */}

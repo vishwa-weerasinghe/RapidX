@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PackageController;
 use App\Http\Controllers\DriverController;
 use App\Http\Controllers\MediaController;
+use App\Http\Controllers\ReviewController;
 
 
 Route::get('/user', function (Request $request) {
@@ -22,3 +23,13 @@ Route::get('/dashboard', [AuthController::class, 'dashboard'])->middleware('auth
 Route::apiResource('packages', PackageController::class);
 Route::apiResource('drivers', DriverController::class);
 Route::apiResource('media', MediaController::class);
+
+Route::get('reviews', [ReviewController::class, 'index']);
+Route::get('reviews/{review}', [ReviewController::class, 'show']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('reviews', [ReviewController::class, 'store']);
+    Route::put('reviews/{review}', [ReviewController::class, 'update']);
+    Route::patch('reviews/{review}', [ReviewController::class, 'update']);
+    Route::delete('reviews/{review}', [ReviewController::class, 'destroy']);
+});
