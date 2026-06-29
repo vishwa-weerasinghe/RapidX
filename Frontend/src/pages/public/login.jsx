@@ -11,54 +11,50 @@ export default function Login() {
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
-  e.preventDefault();
-  setErrors({});
-  setLoading(true);
+    e.preventDefault();
+    setErrors({});
+    setLoading(true);
 
-  try {
-    const response = await axios.post(
-      "http://127.0.0.1:8000/api/login",
-      {
-        Email,
-        Password,
+    try {
+      const response = await axios.post(
+        "http://127.0.0.1:8000/api/login",
+        {
+          Email,
+          Password,
+        }
+      );
+
+      console.log("LOGIN RESPONSE:", response.data);
+
+      const data = response.data;
+
+      const user = data.user;
+      const token = data.token;
+
+      if (!user || !token) {
+        setErrors({ general: "Invalid login response from server" });
+        return;
       }
-    );
 
-    console.log("LOGIN RESPONSE:", response.data);
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
 
-    const data = response.data;
-
-    const user = data.user;
-    const token = data.token;
-
-    if (!user || !token) {
-      setErrors({ general: "Invalid login response from server" });
-      return;
-    }
-
-    localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify(user));
-
-    if (user.role === "admin") {
-      navigate("/admin/dashboard");
-    } else {
       navigate("/dashboard");
+
+    } catch (err) {
+      console.log("LOGIN ERROR:", err.response?.data);
+
+      setErrors({
+        general:
+          err.response?.data?.message ||
+          "Something went wrong. Please try again.",
+      });
+    } finally {
+      setLoading(false);
     }
-
-  } catch (err) {
-    console.log("LOGIN ERROR:", err.response?.data);
-
-    setErrors({
-      general:
-        err.response?.data?.message ||
-        "Something went wrong. Please try again.",
-    });
-  } finally {
-    setLoading(false);
-  }
-};
+  };
   return (
-    
+
     <div
       className="flex min-h-screen items-center justify-center bg-cover bg-center bg-no-repeat px-4 relative"
       style={{

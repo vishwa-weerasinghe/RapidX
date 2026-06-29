@@ -1,19 +1,16 @@
+import Sidebar from "../../components/Sidebar";
+
 export default function AdminDashboard({ user }) {
     return (
-        <div className="transition-colors duration-300">
+        <div className="flex min-h-screen bg-slate-900 text-white">
+            <Sidebar role="admin" />
 
-            <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-900">
-                Admin Dashboard
-            </h1>
-
-            <p className="mt-4 text-gray-600 dark:text-gray-400">
-                Welcome back,
-                <span className="font-semibold text-gray-800 dark:text-gray-900">
-                    {" "}
-                    {user?.User_Name}
-                </span>
-            </p>
-
+            <main className="flex-1 p-8">
+                <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+                <p className="mt-4 text-slate-300">
+                    Welcome back, <strong className="text-emerald-400">{user?.User_Name || "Admin"}</strong>!
+                </p>
+            </main>
         </div>
     );
 }
