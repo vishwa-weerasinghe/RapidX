@@ -9,6 +9,7 @@ const adminLinks = [
   { to: "/admin/bookings", label: "Bookings" },
   { to: "/admin/media", label: "Media Gallery" },
   { to: "/admin/reviews", label: "Reviews" },
+  { to: "/admin/appointments", label: "Appointments" },
 ];
 
 const customerLinks = [

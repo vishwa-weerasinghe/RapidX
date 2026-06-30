@@ -14,6 +14,7 @@ import CustomerLayout from "./layouts/CustomerLayout.jsx";
 import AdminDashboard from "./pages/admin/dashboard.jsx";
 import Packages from "./pages/admin/Packages.jsx";
 import Bookings from "./pages/admin/Bookings.jsx";
+import Appointments from "./pages/admin/appointment.jsx";
 
 import AdminPackages from "./pages/admin/Packages.jsx";
 import PackageForm from "./pages/admin/PackageForm.jsx";
@@ -47,9 +48,10 @@ createRoot(document.getElementById("root")).render(
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Navigate to="dashboard" />} />
             <Route path="dashboard" element={<AdminDashboard />} />
-            <Route path="packages" element={<Packages />} />
+              <Route path="packages" element={<Packages />} />
             <Route path="drivers" element={<Drivers />} />
-            <Route path="bookings" element={<Bookings />} />
+            <Route path="bookings" element={<Appointments />} />
+            <Route path="appointments" element={<Appointments />} />
             <Route path="media" element={<MediaList />} />
             <Route path="reviews" element={<AdminReviews />} />
           </Route>

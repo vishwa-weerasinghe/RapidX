@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PackageController;
 use App\Http\Controllers\DriverController;
 use App\Http\Controllers\MediaController;
+use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\ReviewController;
 
 
@@ -25,6 +26,8 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanc
 Route::apiResource('packages', PackageController::class);
 Route::apiResource('drivers', DriverController::class);
 Route::apiResource('media', MediaController::class);
+Route::get('appointments', [AppointmentController::class, 'index']);
+Route::middleware('auth:sanctum')->put('appointments/{booking}/driver', [AppointmentController::class, 'updateDriver']);
 
 Route::get('reviews', [ReviewController::class, 'index']);
 Route::get('reviews/{review}', [ReviewController::class, 'show']);
