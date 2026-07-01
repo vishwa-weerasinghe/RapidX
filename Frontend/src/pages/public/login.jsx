@@ -39,7 +39,12 @@ export default function Login() {
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
 
-      navigate("/dashboard");
+      const role = `${user?.role ?? user?.Role ?? user?.user_type ?? "customer"}`.toLowerCase();
+      const destination = ["admin", "administrator", "superadmin"].includes(role)
+        ? "/admin/dashboard"
+        : "/user/dashboard";
+
+      navigate(destination);
 
     } catch (err) {
       console.log("LOGIN ERROR:", err.response?.data);

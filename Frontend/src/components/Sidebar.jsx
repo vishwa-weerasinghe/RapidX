@@ -17,6 +17,7 @@ const customerLinks = [
   { to: "/packages", label: "Packages" },
   { to: "/dashboard", label: "My Bookings" },
   { to: "/reviews", label: "Reviews" },
+
 ];
 
 export default function Sidebar({ role = "admin" }) {
