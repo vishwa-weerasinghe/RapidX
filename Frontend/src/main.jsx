@@ -7,7 +7,7 @@ import App from "./App.jsx";
 import Register from "./pages/user/register.jsx";
 import Login from "./pages/public/login.jsx";
 import Dashboard from "./pages/dashboard.jsx";
-import Review from "./pages/public/Review.jsx";
+import Review from "./pages/user/Review.jsx";
 
 import AdminLayout from "./layouts/AdminLayout.jsx";
 import CustomerLayout from "./layouts/CustomerLayout.jsx";
@@ -31,13 +31,21 @@ import PackageForm from "./pages/admin/PackageForm.jsx";
 
 import { ThemeProvider } from "./context/ThemeContext.jsx";
 
-const user = JSON.parse(localStorage.getItem("user"));
+const user = (() => {
+  try {
+    const userData = localStorage.getItem("user");
+    return userData ? JSON.parse(userData) : null;
+  } catch {
+    return null;
+  }
+})();
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <ThemeProvider>
       <BrowserRouter>
         <Routes>
+          {/* Public Routes */}
           <Route path="/" element={<App />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
@@ -47,35 +55,48 @@ createRoot(document.getElementById("root")).render(
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/reviews" element={<Review />} />
             <Route path="/packages" element={<CustomerPackages />} />
+            <Route path="/booking/:id" element={<CustomerBooking />} />
           </Route>
 
-          {/* Admin Layout Routes */}
+          {/* Admin Routes */}
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Navigate to="dashboard" />} />
             <Route path="dashboard" element={<AdminDashboard />} />
-
             <Route path="packages" element={<Packages />} />
             <Route path="drivers" element={<Drivers />} />
-
-            {/* FIXED: bookings vs appointments */}
             <Route path="bookings" element={<Bookings />} />
             <Route path="appointments" element={<Appointments />} />
-
             <Route path="media" element={<MediaList />} />
             <Route path="reviews" element={<AdminReviews />} />
           </Route>
 
-          {/* Separate CRUD routes */}
-          <Route path="/admin/packages/create" element={<PackageForm user={user} />} />
-          <Route path="/admin/packages/:id/edit" element={<PackageForm user={user} />} />
+          {/* Admin CRUD Routes */}
+          <Route
+            path="/admin/packages/create"
+            element={<PackageForm user={user} />}
+          />
+          <Route
+            path="/admin/packages/:id/edit"
+            element={<PackageForm user={user} />}
+          />
 
-          <Route path="/booking/:id" element={<CustomerBooking />} />
+          <Route
+            path="/admin/drivers/create"
+            element={<DriverForm user={user} />}
+          />
+          <Route
+            path="/admin/drivers/:id/edit"
+            element={<DriverForm user={user} />}
+          />
 
-          <Route path="/admin/drivers/create" element={<DriverForm user={user} />} />
-          <Route path="/admin/drivers/:id/edit" element={<DriverForm user={user} />} />
-
-          <Route path="/admin/media/create" element={<MediaForm user={user} />} />
-          <Route path="/admin/media/:id/edit" element={<MediaForm user={user} />} />
+          <Route
+            path="/admin/media/create"
+            element={<MediaForm user={user} />}
+          />
+          <Route
+            path="/admin/media/:id/edit"
+            element={<MediaForm user={user} />}
+          />
 
           {/* fallback */}
           <Route path="*" element={<Navigate to="/login" />} />
