@@ -13,6 +13,7 @@ import AdminLayout from "./layouts/AdminLayout.jsx";
 import CustomerLayout from "./layouts/CustomerLayout.jsx";
 
 import AdminDashboard from "./pages/admin/dashboard.jsx";
+import CustomerDashboard from "./pages/user/dashboard.jsx";
 import Packages from "./pages/admin/Packages.jsx";
 import CustomerPackages from "./pages/user/Packages.jsx";
 
@@ -53,6 +54,7 @@ createRoot(document.getElementById("root")).render(
           {/* Customer Routes */}
           <Route element={<CustomerLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/user/dashboard" element={<CustomerDashboard />} />
             <Route path="/reviews" element={<Review />} />
             <Route path="/packages" element={<CustomerPackages />} />
             <Route path="/booking/:id" element={<CustomerBooking />} />

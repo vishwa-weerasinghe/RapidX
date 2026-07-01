@@ -13,17 +13,16 @@ const adminLinks = [
 ];
 
 const customerLinks = [
-<<<<<<< Updated upstream
-  { to: "/dashboard", label: "Dashboard" },
+  /*{ to: "/dashboard", label: "Dashboard" },
   { to: "/packages", label: "Packages" },
   { to: "/dashboard", label: "My Bookings" },
-  { to: "/reviews", label: "Reviews" },
-=======
+  { to: "/reviews", label: "Reviews" },*/
+
   { to: "/user/dashboard", label: "Dashboard" },
   { to: "/user/packages", label: "Packages" },
   { to: "/user/dashboard", label: "My Bookings" },
   { to: "/user/review", label: "Reviews" },
->>>>>>> Stashed changes
+
 ];
 
 export default function Sidebar({ role = "admin" }) {

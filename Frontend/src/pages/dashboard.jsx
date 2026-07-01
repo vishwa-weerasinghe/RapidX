@@ -17,15 +17,16 @@ export default function Dashboard() {
 
     try {
       const user = JSON.parse(userStr);
-      
-      if (!user || !user.role) {
+      const role = `${user?.role ?? user?.Role ?? user?.user_type ?? "customer"}`.toLowerCase();
+
+      if (!user) {
         console.log("Invalid user data");
         navigate("/login", { replace: true });
         return;
       }
 
       // Redirect based on user role
-      if (user.role === "admin") {
+      if (["admin", "administrator", "superadmin"].includes(role)) {
         console.log("Redirecting to admin dashboard");
         navigate("/admin/dashboard", { replace: true });
       } else {
