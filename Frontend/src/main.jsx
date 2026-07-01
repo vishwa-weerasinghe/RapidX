@@ -7,10 +7,15 @@ import App from "./App.jsx";
 import Register from "./pages/user/register.jsx";
 import Login from "./pages/public/login.jsx";
 import Dashboard from "./pages/dashboard.jsx";
-import Review from "./pages/public/Review.jsx";
+import Review from "./pages/user/Review.jsx";
 
 import AdminLayout from "./layouts/AdminLayout.jsx";
 import CustomerLayout from "./layouts/CustomerLayout.jsx";
+<<<<<<< Updated upstream
+=======
+
+import CustomerDashboard from "./pages/user/dashboard.jsx";
+>>>>>>> Stashed changes
 import AdminDashboard from "./pages/admin/dashboard.jsx";
 import Packages from "./pages/admin/Packages.jsx";
 import Bookings from "./pages/admin/Bookings.jsx";
@@ -27,7 +32,14 @@ import AdminReviews from "./pages/admin/Reviews.jsx";
 
 import { ThemeProvider } from "./context/ThemeContext.jsx";
 
-const user = JSON.parse(localStorage.getItem("user"));
+const user = (() => {
+  try {
+    const userData = localStorage.getItem("user");
+    return userData ? JSON.parse(userData) : null;
+  } catch {
+    return null;
+  }
+})();
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -37,10 +49,22 @@ createRoot(document.getElementById("root")).render(
           <Route path="/" element={<App />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
+<<<<<<< Updated upstream
           
           <Route element={<CustomerLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/reviews" element={<Review />} />
+=======
+          <Route path="/dashboard" element={<Dashboard />} />
+
+          {/* Customer Routes */}
+          <Route path="/user" element={<CustomerLayout />}>
+            <Route index element={<Navigate to="dashboard" />} />
+            <Route path="dashboard" element={<CustomerDashboard />} />
+
+            <Route path="packages" element={<CustomerPackages />} />
+            <Route path="review" element={<Review />} />
+>>>>>>> Stashed changes
           </Route>
 
           {/* Admin Layout Routes */}
