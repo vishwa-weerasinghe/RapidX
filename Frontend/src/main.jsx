@@ -13,7 +13,9 @@ import AdminLayout from "./layouts/AdminLayout.jsx";
 import CustomerLayout from "./layouts/CustomerLayout.jsx";
 import AdminDashboard from "./pages/admin/dashboard.jsx";
 import Packages from "./pages/admin/Packages.jsx";
+import CustomerPackages from "./pages/user/Packages.jsx";
 import Bookings from "./pages/admin/Bookings.jsx";
+import CustomerBooking from "./pages/user/Booking";
 
 import AdminPackages from "./pages/admin/Packages.jsx";
 import PackageForm from "./pages/admin/PackageForm.jsx";
@@ -26,6 +28,7 @@ import MediaForm from "./pages/admin/MediaForm.jsx";
 import AdminReviews from "./pages/admin/Reviews.jsx";
 
 import { ThemeProvider } from "./context/ThemeContext.jsx";
+
 
 const user = JSON.parse(localStorage.getItem("user"));
 
@@ -41,6 +44,7 @@ createRoot(document.getElementById("root")).render(
           <Route element={<CustomerLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/reviews" element={<Review />} />
+             <Route path="/packages" element={<CustomerPackages />} />
           </Route>
 
           {/* Admin Layout Routes */}
@@ -58,6 +62,8 @@ createRoot(document.getElementById("root")).render(
           <Route path="/admin/packages" element={<AdminPackages user={user} />} />
           <Route path="/admin/packages/create" element={<PackageForm user={user} />} />
           <Route path="/admin/packages/:id/edit" element={<PackageForm user={user} />} />
+          <Route path="/booking/:id" element={<CustomerBooking/>} />
+
 
           <Route path="/admin/drivers" element={<Drivers user={user} />} />
           <Route path="/admin/drivers/create" element={<DriverForm user={user} />} />
