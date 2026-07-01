@@ -14,6 +14,7 @@ const adminLinks = [
 
 const customerLinks = [
   { to: "/dashboard", label: "Dashboard" },
+  { to: "/packages", label: "Packages" },
   { to: "/dashboard", label: "My Bookings" },
   { to: "/reviews", label: "Reviews" },
 ];
