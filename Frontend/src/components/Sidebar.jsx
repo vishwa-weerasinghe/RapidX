@@ -13,15 +13,10 @@ const adminLinks = [
 ];
 
 const customerLinks = [
-  /*{ to: "/dashboard", label: "Dashboard" },
+  { to: "/dashboard", label: "Dashboard" },
   { to: "/packages", label: "Packages" },
   { to: "/dashboard", label: "My Bookings" },
-  { to: "/reviews", label: "Reviews" },*/
-
-  { to: "/user/dashboard", label: "Dashboard" },
-  { to: "/user/packages", label: "Packages" },
-  { to: "/user/dashboard", label: "My Bookings" },
-  { to: "/user/review", label: "Reviews" },
+  { to: "/reviews", label: "Reviews" },
 
 ];
 
