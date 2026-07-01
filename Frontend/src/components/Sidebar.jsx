@@ -3,12 +3,13 @@ import { NavLink, useNavigate } from "react-router-dom";
 import api from "../axios";
 
 const adminLinks = [
-  { to: "/dashboard", label: "Dashboard" },
+  { to: "/admin/dashboard", label: "Dashboard" },
   { to: "/admin/packages", label: "Packages" },
   { to: "/admin/drivers", label: "Drivers" },
   { to: "/admin/bookings", label: "Bookings" },
   { to: "/admin/media", label: "Media Gallery" },
   { to: "/admin/reviews", label: "Reviews" },
+  { to: "/admin/appointments", label: "Appointments" },
 ];
 
 const customerLinks = [
