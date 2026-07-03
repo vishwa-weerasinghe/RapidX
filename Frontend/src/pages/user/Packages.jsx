@@ -34,7 +34,7 @@ export default function Packages() {
   };
 
   function handleBook(pkg) {
-     navigate(`/booking/${pkg.id}`);
+     navigate(`/user/booking/${pkg.id}`);
   }
 
   if (loading) {

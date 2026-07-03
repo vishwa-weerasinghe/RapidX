@@ -60,7 +60,7 @@ createRoot(document.getElementById("root")).render(
             <Route path="/user/booking/:id" element={<CustomerBooking />} />
             <Route path="/packages" element={<Navigate to="/user/packages" replace />} />
             <Route path="/reviews" element={<Navigate to="/user/reviews" replace />} />
-            <Route path="/booking/:id" element={<Navigate to="/user/booking/:id" replace />} />
+           {/* <Route path="/booking/:id" element={<Navigate to="/user/booking/:id" replace />} />*/}
           </Route>
 
           {/* Admin Routes */}
