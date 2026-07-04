@@ -10,6 +10,7 @@ use App\Http\Controllers\MediaController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\VehicleController;
 
 
 
@@ -27,6 +28,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanc
 
 Route::apiResource('packages', PackageController::class);
 Route::apiResource('drivers', DriverController::class);
+Route::apiResource('vehicles', VehicleController::class);
 Route::apiResource('media', MediaController::class);
 Route::get('appointments', [AppointmentController::class, 'index']);
 Route::middleware('auth:sanctum')->put('appointments/{booking}/driver', [AppointmentController::class, 'updateDriver']);

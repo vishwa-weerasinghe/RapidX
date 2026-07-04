@@ -29,6 +29,9 @@ import MediaForm from "./pages/admin/MediaForm.jsx";
 import AdminReviews from "./pages/admin/Reviews.jsx";
 
 import PackageForm from "./pages/admin/PackageForm.jsx";
+import AdminVehicles from "./pages/admin/VehicleList.jsx";
+import VehicleFormPage from "./pages/admin/VehicleForm.jsx";
+import UserVehiclePage from "./pages/user/Vehicle.jsx";
 
 import { ThemeProvider } from "./context/ThemeContext.jsx";
 
@@ -58,6 +61,9 @@ createRoot(document.getElementById("root")).render(
             <Route path="/user/packages" element={<CustomerPackages />} />
             <Route path="/user/reviews" element={<Review />} />
             <Route path="/user/booking/:id" element={<CustomerBooking />} />
+            <Route path="/user/vehicle" element={<UserVehiclePage />} />
+            <Route path="/user/Vehicle" element={<UserVehiclePage />} />
+            <Route path="/user/vehicles" element={<UserVehiclePage />} />
             <Route path="/packages" element={<Navigate to="/user/packages" replace />} />
             <Route path="/reviews" element={<Navigate to="/user/reviews" replace />} />
            {/* <Route path="/booking/:id" element={<Navigate to="/user/booking/:id" replace />} />*/}
@@ -73,7 +79,18 @@ createRoot(document.getElementById("root")).render(
             <Route path="appointments" element={<Appointments />} />
             <Route path="media" element={<MediaList />} />
             <Route path="reviews" element={<AdminReviews />} />
+            <Route path="vehicles" element={<AdminVehicles />} />
+            <Route path="vehicles/create" element={<VehicleFormPage user={user} />} />
+            <Route path="vehicles/:id/edit" element={<VehicleFormPage user={user} />} />
           </Route>
+
+          <Route path="/admin/Vehicles" element={<AdminVehicles />} />
+          <Route path="/admin/vehicle" element={<AdminVehicles />} />
+          <Route path="/admin/Vehicle" element={<AdminVehicles />} />
+          <Route path="/admin/addVehicles" element={<VehicleFormPage user={user} />} />
+          <Route path="/admin/addvehicles" element={<VehicleFormPage user={user} />} />
+          <Route path="/admin/addVehicle" element={<VehicleFormPage user={user} />} />
+          <Route path="/admin/addvehicle" element={<VehicleFormPage user={user} />} />
 
           {/* Admin CRUD Routes */}
           <Route

@@ -6,6 +6,7 @@ const adminLinks = [
   { to: "/admin/dashboard", label: "Dashboard" },
   { to: "/admin/packages", label: "Packages" },
   { to: "/admin/drivers", label: "Drivers" },
+  { to: "/admin/vehicles", label: "Vehicles" },
   { to: "/admin/bookings", label: "Bookings" },
   { to: "/admin/media", label: "Media Gallery" },
   { to: "/admin/reviews", label: "Reviews" },
@@ -16,6 +17,7 @@ const customerLinks = [
   { to: "/user/dashboard", label: "Dashboard" },
   { to: "/user/packages", label: "Packages" },
   { to: "/user/dashboard", label: "My Bookings" },
+  { to: "/user/vehicle", label: "My Vehicle" },
   { to: "/user/reviews", label: "Reviews" },
 ];
 
