@@ -17,6 +17,7 @@ const customerLinks = [
   { to: "/user/dashboard", label: "Dashboard" },
   { to: "/user/packages", label: "Packages" },
   { to: "/user/bookings", label: "My Bookings" },
+  { to: "/user/cart", label: "Cart" },
   { to: "/user/vehicle", label: "My Vehicle" },
   { to: "/user/reviews", label: "Reviews" },
 ];
@@ -39,7 +40,7 @@ export default function Sidebar({ role = "admin" }) {
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          }
+          },
         );
       }
     } catch (err) {
@@ -62,12 +63,13 @@ export default function Sidebar({ role = "admin" }) {
         <nav className="p-4 space-y-2">
           {links.map((link) => (
             <NavLink
-              key={link.to + link.label}
-              to={link.to}
+              key={(link.to || link.t0) + link.label}
+              to={link.to || link.t0}
               className={({ isActive }) =>
-                `block p-3 rounded-lg transition ${isActive
-                  ? "bg-green-600 dark:bg-slate-700"
-                  : "hover:bg-green-800 dark:hover:bg-slate-800"
+                `block p-3 rounded-lg transition ${
+                  isActive
+                    ? "bg-green-600 dark:bg-slate-700"
+                    : "hover:bg-green-800 dark:hover:bg-slate-800"
                 }`
               }
             >
