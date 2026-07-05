@@ -18,6 +18,9 @@ import Packages from "./pages/admin/Packages.jsx";
 import CustomerPackages from "./pages/user/Packages.jsx";
 
 import Bookings from "./pages/admin/Bookings.jsx";
+import BookingForm from "./pages/admin/BookingForm.jsx";
+import MyBookings from "./pages/user/MyBookings";
+
 import Appointments from "./pages/admin/appointment.jsx";
 import CustomerBooking from "./pages/user/Booking.jsx";
 
@@ -61,6 +64,7 @@ createRoot(document.getElementById("root")).render(
             <Route path="/user/packages" element={<CustomerPackages />} />
             <Route path="/user/reviews" element={<Review />} />
             <Route path="/user/booking/:id" element={<CustomerBooking />} />
+            <Route path="/user/bookings" element={<MyBookings />} />
             <Route path="/user/vehicle" element={<UserVehiclePage />} />
             <Route path="/user/Vehicle" element={<UserVehiclePage />} />
             <Route path="/user/vehicles" element={<UserVehiclePage />} />
@@ -82,6 +86,7 @@ createRoot(document.getElementById("root")).render(
             <Route path="vehicles" element={<AdminVehicles />} />
             <Route path="vehicles/create" element={<VehicleFormPage user={user} />} />
             <Route path="vehicles/:id/edit" element={<VehicleFormPage user={user} />} />
+            
           </Route>
 
           <Route path="/admin/Vehicles" element={<AdminVehicles />} />
@@ -119,6 +124,12 @@ createRoot(document.getElementById("root")).render(
             path="/admin/media/:id/edit"
             element={<MediaForm user={user} />}
           />
+          <Route
+            path="/admin/bookings/:id/edit"
+            element={<BookingForm />}
+          />
+
+
 
           {/* fallback */}
           <Route path="*" element={<Navigate to="/login" />} />

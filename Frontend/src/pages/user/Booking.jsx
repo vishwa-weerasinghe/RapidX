@@ -69,7 +69,7 @@ export default function Booking() {
 
             alert("Booking Successful 🎉");
 
-            navigate("/user/dashboard");
+            navigate("/user/bookings");
 
         } catch (err) {
             console.log(err);
