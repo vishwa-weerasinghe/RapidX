@@ -11,7 +11,7 @@ use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\VehicleController;
-
+use App\Http\Controllers\CartController;
 
 
 Route::get('/user', function (Request $request) {
@@ -44,6 +44,11 @@ Route::put('/bookings/{id}', [BookingController::class, 'update']);
 Route::delete('/bookings/{id}', [BookingController::class, 'destroy']);
 Route::get('/bookings/{id}', [BookingController::class, 'show']);
 Route::get('/user-bookings/{customerId}', [BookingController::class, 'userBookings']);
+
+Route::post('/cart/checkout', [CartController::class, 'checkout']);
+Route::get('/cart/{customerId}', [CartController::class, 'index']);
+Route::post('/cart', [CartController::class, 'store']);
+Route::delete('/cart/{bookingId}', [CartController::class, 'destroy']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('reviews', [ReviewController::class, 'store']);
