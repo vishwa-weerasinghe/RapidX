@@ -124,9 +124,9 @@ class CartController extends Controller
         // Extract booking IDs
         $bookingIds = $cartEntries->pluck('Booking_ID');
 
-        // Update booking status from 'In Cart' to 'Pending'
+        // Update booking status from 'In Cart' to 'Confirmed'
         Booking::whereIn('Booking_ID', $bookingIds)->update([
-            'Status' => 'Pending'
+            'Status' => 'Confirmed'
         ]);
 
         // Delete cart entries

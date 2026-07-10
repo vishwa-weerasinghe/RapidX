@@ -67,7 +67,7 @@ export default function Cart() {
       await api.post("/cart/checkout", {
         Customer_ID: activeCustomer.Customer_ID,
       });
-      alert("Checkout Successful! 🎉 Your bookings are now pending approval.");
+      alert("Checkout Successful! 🎉 Your bookings are now confirmed.");
       if (user) {
         navigate("/user/dashboard");
       } else {
@@ -251,7 +251,7 @@ export default function Cart() {
                 <ShieldCheck size={18} className="flex-shrink-0 mt-0.5" />
                 <span>
                   By confirming, your bookings will be placed as{" "}
-                  <strong>Pending</strong>, awaiting guide/vehicle allocation by
+                  <strong>Confirmed</strong>, ready for guide/vehicle allocation by
                   our admins. No immediate payment is required.
                 </span>
               </div>

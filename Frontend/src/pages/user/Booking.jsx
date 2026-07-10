@@ -6,18 +6,24 @@ export default function Booking() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const user = JSON.parse(localStorage.getItem("user"));
-  const guestCustomer = JSON.parse(localStorage.getItem("guest_customer"));
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+  const guestCustomer = JSON.parse(localStorage.getItem("guest_customer") || "null");
   const activeCustomer = user || guestCustomer;
 
   const [pkg, setPkg] = useState(null);
 
   const [form, setForm] = useState({
-    Booking_Date: "",
+   Booking_Date: "",
     Pickup_Time: "",
     Pickup_Location: "",
     No_of_adults: 1,
     No_of_child: 0,
+    First_Name: "",
+    Last_Name: "",
+    Email: "",
+    Phone_No: "",
+    NIC: "",
+    Country: "",
   });
 
   // Load package
@@ -56,23 +62,29 @@ export default function Booking() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!activeCustomer?.Customer_ID) {
-      alert("Please log in to add this safari to your cart.");
-      navigate("/login");
-      return;
+    const payload = {
+      Booking_Date: form.Booking_Date,
+      Pickup_Time: form.Pickup_Time,
+      Pickup_Location: form.Pickup_Location,
+      No_of_adults: form.No_of_adults,
+      No_of_child: form.No_of_child,
+      Package_ID: id,
+      Payment: getTotal(),
+    };
+
+    if (activeCustomer?.Customer_ID) {
+      payload.Customer_ID = activeCustomer.Customer_ID;
+    } else {
+      payload.First_Name = form.First_Name;
+      payload.Last_Name = form.Last_Name;
+      payload.Email = form.Email;
+      payload.Phone_No = form.Phone_No;
+      payload.NIC = form.NIC;
+      payload.Country = form.Country;
     }
 
     try {
-      await api.post("/cart", {
-        Booking_Date: form.Booking_Date,
-        Pickup_Time: form.Pickup_Time,
-        Pickup_Location: form.Pickup_Location,
-        No_of_adults: form.No_of_adults,
-        No_of_child: form.No_of_child,
-        Package_ID: id,
-        Customer_ID: activeCustomer.Customer_ID,
-        Payment: getTotal(),
-      });
+      await api.post("/cart", payload);
 
       alert("Added to cart successfully 🎉");
 
@@ -88,6 +100,9 @@ export default function Booking() {
       );
     }
   };
+
+
+
 
   return (
     <div className="min-h-screen bg-[#F4F8F3] flex justify-center py-10">
@@ -142,6 +157,76 @@ export default function Booking() {
               required
             />
           </div>
+
+          {!activeCustomer?.Customer_ID && (
+            <>
+              <div>
+                <label className="text-sm font-semibold">First Name</label>
+                <input
+                  type="text"
+                  name="First_Name"
+                  className="w-full border p-2 rounded"
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-semibold">Last Name</label>
+                <input
+                  type="text"
+                  name="Last_Name"
+                  className="w-full border p-2 rounded"
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-semibold">Email</label>
+                <input
+                  type="email"
+                  name="Email"
+                  className="w-full border p-2 rounded"
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-semibold">Phone Number</label>
+                <input
+                  type="text"
+                  name="Phone_No"
+                  className="w-full border p-2 rounded"
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-semibold">NIC</label>
+                <input
+                  type="text"
+                  name="NIC"
+                  className="w-full border p-2 rounded"
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-semibold">Country</label>
+                <input
+                  type="text"
+                  name="Country"
+                  className="w-full border p-2 rounded"
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </>
+          )}
 
           <div className="flex gap-4">
             <div className="w-1/2">
