@@ -44,16 +44,16 @@ export default function Packages() {
         </h1>
 
         <button
-          onClick={() => navigate("/admin/packages/create")}
-          className="
-            bg-blue-600 dark:bg-slate-700
-            hover:bg-blue-700 dark:hover:bg-slate-600
-            text-white px-4 py-2 rounded-lg text-sm font-medium
-            transition
-          "
-        >
-          + Add Package
-        </button>
+  onClick={() => navigate("/admin/packages/create")}
+  className="
+    bg-emerald-600 dark:bg-gradient-to-r dark:from-black dark:to-emerald-900
+    hover:bg-emerald-700 dark:hover:from-neutral-900 dark:hover:to-emerald-800
+    text-white px-4 py-2 rounded-lg text-sm font-medium
+    transition
+  "
+>
+  + Add Package
+</button>
       </div>
 
       {/* Loading / Empty */}

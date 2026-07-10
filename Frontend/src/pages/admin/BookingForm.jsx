@@ -16,7 +16,7 @@ export default function BookingForm() {
     No_of_adults: 1,
     No_of_child: 0,
     Payment: 0,
-    Status: "Pending",
+    Status: "Confirmed",
     Vehicle_ID: "",
   });
 
@@ -38,7 +38,7 @@ export default function BookingForm() {
         No_of_adults: data.No_of_adults || 1,
         No_of_child: data.No_of_child || 0,
         Payment: data.Payment || 0,
-        Status: data.Status || "Pending",
+        Status: data.Status || "Confirmed",
         Vehicle_ID: data.Vehicle_ID || "",
       });
     } catch (err) {
@@ -184,7 +184,6 @@ export default function BookingForm() {
             onChange={handleChange}
             className="w-full border p-2 rounded"
           >
-            <option value="Pending">Pending</option>
             <option value="Confirmed">Confirmed</option>
             <option value="Completed">Completed</option>
             <option value="Cancelled">Cancelled</option>

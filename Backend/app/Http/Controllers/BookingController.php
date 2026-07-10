@@ -42,9 +42,25 @@ class BookingController extends Controller
             'Pickup_Location' => 'required|string',
             'No_of_adults' => 'required|integer',
             'No_of_child' => 'required|integer',
-            'Customer_ID' => 'required',
+            'Customer_ID' => 'nullable',
             'Package_ID' => 'required',
         ]);
+
+        $customerId = $request->Customer_ID;
+
+        if (!$customerId) {
+            $customer = \App\Models\Customer::create([
+                'First_Name' => $request->First_Name ?? 'Guest',
+                'Last_Name' => $request->Last_Name ?? 'Customer',
+                'Email' => $request->Email ?? null,
+                'Phone_No' => $request->Phone_No ?? null,
+                'NIC' => $request->NIC ?? null,
+                'Country' => $request->Country ?? null,
+                'Customer_Type' => 'Guest',
+            ]);
+
+            $customerId = $customer->Customer_ID;
+        }
 
         $booking = Booking::create([
             'Booking_Date' => $request->Booking_Date,
@@ -53,7 +69,7 @@ class BookingController extends Controller
             'No_of_adults' => $request->No_of_adults,
             'No_of_child' => $request->No_of_child,
             'Payment' => 0,
-            'Status' => 'Pending',
+            'Status' => 'Confirmed',
             'Customer_ID' => $request->Customer_ID,
             'Package_ID' => $request->Package_ID,
             'Vehicle_ID' => $request->Vehicle_ID ?? null,

@@ -57,6 +57,7 @@ createRoot(document.getElementById("root")).render(
           <Route path="/" element={<App />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/booking/:id" element={<CustomerBooking />} />
 
           {/* Customer Routes */}
           <Route element={<CustomerLayout />}>

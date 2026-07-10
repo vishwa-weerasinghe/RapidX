@@ -21,8 +21,14 @@ export default function App() {
     }
   }, [location]);
 
-  const addToCart = (pkg) => {
-    navigate(`/user/booking/${pkg.id}`);
+  const handleBookNow = (pkg) => {
+    if (pkg?.id) {
+      navigate(`/booking/${pkg.id}`);
+    } else if (packages.length > 0) {
+      navigate(`/booking/${packages[0].id}`);
+    } else {
+      scrollToSection("packages");
+    }
   };
 
   // --- STATE MANAGEMENT ---
@@ -436,7 +442,7 @@ export default function App() {
 
             <div className="flex flex-col sm:flex-row gap-4 mb-12">
               <button
-                onClick={() => scrollToSection("packages")}
+                onClick={() => handleBookNow(packages[0])}
                 className="bg-emerald-700 text-white font-semibold text-center px-8 py-4 rounded-full hover:bg-emerald-800 shadow-md transition duration-300 transform hover:-translate-y-0.5"
               >
                 Book Now
@@ -747,13 +753,13 @@ export default function App() {
                     </span>
                   </div>
                   <button
-                    onClick={() => navigate(`/`)}
+                    onClick={() => handleBookNow(pkg)}
                     className="bg-emerald-700 text-white font-bold text-sm px-5 py-3 rounded-full hover:bg-emerald-800 transition duration-300 shadow"
                   >
                     Book Now
                   </button>
                   <button
-                    onClick={() => navigate(`/`)}
+                   // onClick={() => handleBookNow(pkg)}
                     className="bg-emerald-700 text-white font-bold text-sm px-5 py-3 rounded-full hover:bg-emerald-800 transition duration-300 shadow"
                   >
                     Add to Cart
