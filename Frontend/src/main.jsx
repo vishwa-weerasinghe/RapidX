@@ -65,7 +65,7 @@ createRoot(document.getElementById("root")).render(
               path="/dashboard"
               element={<Navigate to="/user/dashboard" replace />}
             />
-            <Route path="/user/dashboard" element={<CustomerDashboard />} />
+            <Route path="/user/dashboard" element={<CustomerDashboard user={user} />} />
             <Route path="/user/packages" element={<CustomerPackages />} />
             <Route path="/user/reviews" element={<Review />} />
             <Route path="/user/booking/:id" element={<CustomerBooking />} />
