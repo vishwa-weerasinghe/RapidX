@@ -115,6 +115,26 @@ class BookingController extends Controller
     }
 
     // =========================
+    // GET NEAREST UPCOMING BOOKING FOR A CUSTOMER
+    // =========================
+    public function upcomingBooking($customerId)
+    {
+        $booking = Booking::with(['package', 'vehicle.driver'])
+            ->where('Customer_ID', $customerId)
+            ->where('Status', 'Confirmed')
+            ->whereDate('Booking_Date', '>=', now()->toDateString())
+            ->orderBy('Booking_Date', 'asc')
+            ->orderBy('Pickup_Time', 'asc')
+            ->first();
+
+        if (!$booking) {
+            return response()->json(null, 200);
+        }
+
+        return response()->json($booking);
+    }
+
+    // =========================
     // DELETE BOOKING (ADMIN)
     // =========================
     public function destroy($id)

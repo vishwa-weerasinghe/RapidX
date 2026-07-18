@@ -44,6 +44,7 @@ Route::put('/bookings/{id}', [BookingController::class, 'update']);
 Route::delete('/bookings/{id}', [BookingController::class, 'destroy']);
 Route::get('/bookings/{id}', [BookingController::class, 'show']);
 Route::get('/user-bookings/{customerId}', [BookingController::class, 'userBookings']);
+Route::get('/user-upcoming-booking/{customerId}', [BookingController::class, 'upcomingBooking']);
 
 Route::post('/cart/checkout', [CartController::class, 'checkout']);
 Route::get('/cart/{customerId}', [CartController::class, 'index']);
