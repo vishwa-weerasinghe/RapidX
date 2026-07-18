@@ -8,6 +8,7 @@ export default {
     extend: {
       colors: {
         safari: {
+          bone: '#f5f0e8',
           green: '#166534',
           greenLight: '#22c55e',
           border: '#e5e7eb',
