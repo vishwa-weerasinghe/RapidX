@@ -1,20 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { CalendarDays, MapPin, Clock, Users, Baby, Truck } from "lucide-react";
 import api from "../../axios";
+import { useTheme } from "../../context/ThemeContext";
 
 export function BookingCard() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [customerId, setCustomerId] = useState(null);
-  const [theme, setTheme] = useState("light");
-
-  useEffect(() => {
-    try {
-      const savedTheme = localStorage.getItem("theme") || "light";
-      setTheme(savedTheme);
-    } catch { /* ignore */ }
-  }, []);
+  const { theme } = useTheme();
 
   useEffect(() => {
     try {
@@ -51,27 +45,27 @@ export function BookingCard() {
 
   // Shared color tokens
   const colors = {
-    bg: isDark ? "#1c1917" : "#ffffff",
-    bgItem: isDark ? "#292524" : "#f0fdf4",
-    bgItemAlt: isDark ? "#292524" : "#ecfdf5",
-    border: isDark ? "#44403c" : "#d1d5db",
-    borderItem: isDark ? "#57534e" : "#bbf7d0",
-    primary: "#059669",
-    primaryDark: "#10b981",
-    accent: "#ea580c",
-    accentDark: "#f97316",
+    bg: isDark ? "#000000" : "#ffffff",
+    bgItem: isDark ? "#1a1a1a" : "#f0fdf4",
+    bgItemAlt: isDark ? "#1a1a1a" : "#ecfdf5",
+    border: isDark ? "#333333" : "#d1d5db",
+    borderItem: isDark ? "#333333" : "#bbf7d0",
+    primary: isDark ? "#eab308" : "#059669",
+    primaryDark: isDark ? "#facc15" : "#10b981",
+    accent: isDark ? "#eab308" : "#ea580c",
+    accentDark: isDark ? "#facc15" : "#f97316",
     text: isDark ? "#e7e5e4" : "#1c1917",
     textMuted: isDark ? "#a8a29e" : "#6b7280",
-    title: isDark ? "#10b981" : "#064e3b",
-    iconBg: isDark ? "rgba(5, 150, 105, 0.2)" : "rgba(5, 150, 105, 0.1)",
-    badgeConfirmed: isDark ? "#064e3b" : "#dcfce7",
+    title: isDark ? "#facc15" : "#064e3b",
+    iconBg: isDark ? "rgba(234, 179, 8, 0.2)" : "rgba(5, 150, 105, 0.1)",
+    badgeConfirmed: isDark ? "#422006" : "#dcfce7",
     badgeCompleted: isDark ? "#1e3a5f" : "#dbeafe",
-    badgeConfirmedText: isDark ? "#6ee7b7" : "#166534",
+    badgeConfirmedText: isDark ? "#fde047" : "#166534",
     badgeCompletedText: isDark ? "#93c5fd" : "#1e40af",
   };
 
   const cardStyle = { background: colors.bg, borderRadius: "24px", padding: "24px", border: `1px solid ${colors.border}`, boxShadow: "0 1px 3px rgba(0,0,0,0.08)" };
-  const iconBoxStyle = { width: "36px", height: "36px", borderRadius: "10px", background: `linear-gradient(135deg, ${colors.primary}, #047857)`, display: "flex", alignItems: "center", justifyContent: "center", color: "white" };
+  const iconBoxStyle = { width: "36px", height: "36px", borderRadius: "10px", background: `linear-gradient(135deg, ${colors.primary}, ${isDark ? '#ca8a04' : '#047857'})`, display: "flex", alignItems: "center", justifyContent: "center", color: "white" };
   const titleStyle = { fontSize: "20px", fontWeight: 600, color: colors.title, fontFamily: "serif" };
   const counterStyle = { width: "32px", height: "32px", borderRadius: "50%", background: colors.iconBg, display: "flex", alignItems: "center", justifyContent: "center", color: colors.primary, fontWeight: 700, fontSize: "14px" };
 

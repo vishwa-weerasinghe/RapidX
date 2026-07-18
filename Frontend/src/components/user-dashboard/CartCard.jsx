@@ -1,20 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { ShoppingCart, Trash2, CalendarDays, Clock, MapPin, Users, Baby } from "lucide-react";
 import api from "../../axios";
+import { useTheme } from "../../context/ThemeContext";
 
 export function CartCard() {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [customerId, setCustomerId] = useState(null);
-  const [theme, setTheme] = useState("light");
-
-  useEffect(() => {
-    try {
-      const savedTheme = localStorage.getItem("theme") || "light";
-      setTheme(savedTheme);
-    } catch { /* ignore */ }
-  }, []);
+  const { theme } = useTheme();
 
   useEffect(() => {
     try {
@@ -61,29 +55,29 @@ export function CartCard() {
 
   const isDark = theme === "dark";
 
-  // Shared color tokens (green theme matching BookingCard)
+  // Shared color tokens
   const colors = {
-    bg: isDark ? "#1c1917" : "#ffffff",
-    bgItem: isDark ? "#292524" : "#f0fdf4",
-    bgItemAlt: isDark ? "#292524" : "#ecfdf5",
-    border: isDark ? "#44403c" : "#d1d5db",
-    borderItem: isDark ? "#57534e" : "#bbf7d0",
-    primary: "#059669",
-    primaryDark: "#10b981",
-    accent: "#059669",
-    accentDark: "#10b981",
+    bg: isDark ? "#000000" : "#ffffff",
+    bgItem: isDark ? "#1a1a1a" : "#f0fdf4",
+    bgItemAlt: isDark ? "#1a1a1a" : "#ecfdf5",
+    border: isDark ? "#333333" : "#d1d5db",
+    borderItem: isDark ? "#333333" : "#bbf7d0",
+    primary: isDark ? "#eab308" : "#059669",
+    primaryDark: isDark ? "#facc15" : "#10b981",
+    accent: isDark ? "#eab308" : "#059669",
+    accentDark: isDark ? "#facc15" : "#10b981",
     text: isDark ? "#e7e5e4" : "#1c1917",
     textMuted: isDark ? "#a8a29e" : "#6b7280",
-    title: isDark ? "#10b981" : "#064e3b",
-    iconBg: isDark ? "rgba(5, 150, 105, 0.2)" : "rgba(5, 150, 105, 0.1)",
-    summary: isDark ? "#292524" : "#f0fdf4",
-    summaryBorder: isDark ? "#57534e" : "#bbf7d0",
-    summaryText: isDark ? "#6ee7b7" : "#166534",
-    summaryTitle: isDark ? "#6ee7b7" : "#065f46",
+    title: isDark ? "#facc15" : "#064e3b",
+    iconBg: isDark ? "rgba(234, 179, 8, 0.2)" : "rgba(5, 150, 105, 0.1)",
+    summary: isDark ? "#1a1a1a" : "#f0fdf4",
+    summaryBorder: isDark ? "#333333" : "#bbf7d0",
+    summaryText: isDark ? "#fde047" : "#166534",
+    summaryTitle: isDark ? "#fde047" : "#065f46",
   };
 
   const cardStyle = { background: colors.bg, borderRadius: "24px", padding: "24px", border: `1px solid ${colors.border}`, boxShadow: "0 1px 3px rgba(0,0,0,0.08)" };
-  const iconBoxStyle = { width: "36px", height: "36px", borderRadius: "10px", background: `linear-gradient(135deg, ${colors.primary}, #047857)`, display: "flex", alignItems: "center", justifyContent: "center", color: "white" };
+  const iconBoxStyle = { width: "36px", height: "36px", borderRadius: "10px", background: `linear-gradient(135deg, ${colors.primary}, ${isDark ? '#ca8a04' : '#047857'})`, display: "flex", alignItems: "center", justifyContent: "center", color: "white" };
   const titleStyle = { fontSize: "20px", fontWeight: 600, color: colors.title, fontFamily: "serif" };
   const counterStyle = { width: "32px", height: "32px", borderRadius: "50%", background: colors.iconBg, display: "flex", alignItems: "center", justifyContent: "center", color: colors.primary, fontWeight: 700, fontSize: "14px" };
 
@@ -215,11 +209,11 @@ export function CartCard() {
             onClick={() => window.location.href = "/user/cart"}
             style={{
               width: "100%",
-              background: `linear-gradient(135deg, ${colors.primary}, #047857)`,
+              background: `linear-gradient(135deg, ${colors.primary}, ${isDark ? '#ca8a04' : '#047857'})`,
               color: "white", fontWeight: 600, padding: "14px 16px", borderRadius: "12px",
               border: "none", cursor: "pointer", fontSize: "15px",
               display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
-              boxShadow: `0 2px 8px rgba(5, 150, 105, 0.3)`
+              boxShadow: `0 2px 8px ${isDark ? 'rgba(234,179,8,0.3)' : 'rgba(5,150,105,0.3)'}`
             }}
           >
             <ShoppingCart size={18} />
