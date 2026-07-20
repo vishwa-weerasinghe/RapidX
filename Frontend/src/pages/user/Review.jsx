@@ -10,10 +10,23 @@ export default function Review() {
   const [reviews, setReviews] = useState([]);
   const [isLoggedIn, setIsLoggedIn] = useState(Boolean(localStorage.getItem("token")));
 
+  const user = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("user") || "null");
+    } catch {
+      return null;
+    }
+  })();
+  const customerId = user?.Customer_ID || user?.customer_id || user?.id || null;
+
   const fetchReviews = async () => {
     try {
       const response = await api.get("/reviews");
-      setReviews(response.data || []);
+      const allReviews = response.data || [];
+      const myReviews = customerId
+        ? allReviews.filter((r) => Number(r.Customer_ID) === Number(customerId))
+        : allReviews;
+      setReviews(myReviews);
     } catch (err) {
       setReviews([]);
     }
@@ -22,7 +35,7 @@ export default function Review() {
   useEffect(() => {
     fetchReviews();
     setIsLoggedIn(Boolean(localStorage.getItem("token")));
-  }, []);
+  }, [customerId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
