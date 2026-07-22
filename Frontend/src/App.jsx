@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { MapPin, Calendar, Users, Search } from "lucide-react";
 import ThemeToggle from "./components/ThemeToggle";
 import { useTheme } from "./context/ThemeContext";
 import api from "./axios";
@@ -22,12 +23,10 @@ export default function App() {
   }, [location]);
 
   const handleBookNow = (pkg) => {
-    if (pkg?.id) {
-      navigate(`/booking/${pkg.id}`);
-    } else if (packages.length > 0) {
-      navigate(`/booking/${packages[0].id}`);
+    if (pkg && (pkg.id || pkg.Package_ID)) {
+      navigate(`/booking/${pkg.id || pkg.Package_ID}`);
     } else {
-      scrollToSection("packages");
+      navigate(`/booking`);
     }
   };
 
@@ -40,6 +39,33 @@ export default function App() {
   const [reviewIndex, setReviewIndex] = useState(0);
   const [lightboxImage, setLightboxImage] = useState(null);
   const [notification, setNotification] = useState(null);
+
+  // Widget States for quick booking overlay
+  const [selectedPark, setSelectedPark] = useState("minneriya");
+  const [bookingDate, setBookingDate] = useState("");
+  const [adultsCount, setAdultsCount] = useState(1);
+  const [childrenCount, setChildrenCount] = useState(0);
+
+  const handleWidgetSubmit = (e) => {
+    e.preventDefault();
+    const matchedPkg = packages.find((p) =>
+      (p.title || "").toLowerCase().includes(selectedPark.toLowerCase())
+    ) || packages[0];
+
+    if (matchedPkg?.id) {
+      localStorage.setItem(
+        "prefilled_booking",
+        JSON.stringify({
+          Booking_Date: bookingDate,
+          No_of_adults: adultsCount,
+          No_of_child: childrenCount,
+        })
+      );
+      navigate(`/booking/${matchedPkg.id}`);
+    } else {
+      scrollToSection("packages");
+    }
+  };
 
   // Contact Form Handling State
   const [formData, setFormData] = useState({
@@ -293,20 +319,18 @@ export default function App() {
 
   return (
     <div
-      className={`font-sans antialiased overflow-x-hidden selection:bg-emerald-700 selection:text-white transition-colors duration-200 ${
-        theme === "dark"
-          ? "bg-neutral-950 text-white"
-          : "bg-white text-neutral-800"
-      }`}
+      className={`font-sans antialiased overflow-x-hidden selection:bg-emerald-700 selection:text-white transition-colors duration-200 ${theme === "dark"
+        ? "bg-neutral-950 text-white"
+        : "bg-white text-neutral-800"
+        }`}
     >
       {/* Toast Notification Alert Box */}
       {notification && (
         <div
-          className={`fixed top-24 right-5 p-5 rounded-xl shadow-2xl z-[9999] border-l-4 border-emerald-700 max-w-sm animate-fade-in-left ${
-            theme === "dark"
-              ? "bg-neutral-900 text-white"
-              : "bg-white text-neutral-800"
-          }`}
+          className={`fixed top-24 right-5 p-5 rounded-xl shadow-2xl z-[9999] border-l-4 border-emerald-700 max-w-sm animate-fade-in-left ${theme === "dark"
+            ? "bg-neutral-900 text-white"
+            : "bg-white text-neutral-800"
+            }`}
         >
           <p className="text-sm font-medium">{notification.text}</p>
         </div>
@@ -314,15 +338,17 @@ export default function App() {
 
       {/* Synchronized Header & Navbar */}
       <header
-        className={`fixed top-0 left-0 w-full z-50 backdrop-blur-md border-b transition-all duration-300 ${
-          isScrolled ? "shadow-md py-2" : "shadow-sm py-4"
-        } ${
-          theme === "dark"
-            ? "bg-neutral-900/85 border-neutral-800"
-            : "bg-white/85 border-neutral-200"
-        }`}
+        className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${isScrolled
+          ? "px-4 pt-3 md:px-8"
+          : "px-0 pt-0"
+          }`}
       >
-        <div className="max-w-7xl mx-auto px-4 md:px-6 flex items-center justify-between">
+        <div
+          className={`max-w-7xl mx-auto px-6 flex items-center justify-between transition-all duration-500 ${isScrolled
+            ? "bg-white/90 dark:bg-neutral-900/90 backdrop-blur-xl rounded-full shadow-lg border border-slate-200/40 dark:border-neutral-800/40 py-2.5"
+            : "bg-transparent py-5 border-b border-white/10"
+            }`}
+        >
           <div
             className="cursor-pointer flex items-center gap-2"
             onClick={() => scrollToSection("home")}
@@ -332,18 +358,18 @@ export default function App() {
               alt="Minneriya Wild Jeep Safari"
               className="h-12 md:h-14 w-auto object-contain"
             />
-            <span className="text-lg font-bold tracking-wide text-[#1B4332] dark:text-green-400 hidden sm:inline-block">
-              Wild Safari
+            <span className={`text-lg font-bold tracking-wide transition-colors duration-300 hidden sm:inline-block ${isScrolled ? "text-[#1B4332] dark:text-white" : "text-white"
+              }`}>
+              Wild Jeep Safari
             </span>
           </div>
 
           {/* Navigation Links Container */}
           <ul
-            className={`fixed md:relative top-[65px] md:top-0 ${isMobileMenuOpen ? "left-0" : "-left-full md:left-0"} w-full md:w-auto h-[calc(100vh-65px)] md:h-auto flex flex-col md:flex-row gap-6 md:gap-8 items-center pt-10 md:pt-0 transition-all duration-300 z-40 shadow-xl md:shadow-none ${
-              theme === "dark"
-                ? "bg-neutral-900 md:bg-transparent"
-                : "bg-white md:bg-transparent"
-            }`}
+            className={`fixed md:relative top-[75px] md:top-0 ${isMobileMenuOpen ? "left-0" : "-left-full md:left-0"} w-full md:w-auto h-[calc(100vh-75px)] md:h-auto flex flex-col md:flex-row gap-2 md:gap-3 items-center pt-10 md:pt-0 transition-all duration-300 z-40 shadow-xl md:shadow-none ${theme === "dark"
+              ? "bg-neutral-900 md:bg-transparent"
+              : "bg-white md:bg-transparent"
+              }`}
           >
             {[
               "home",
@@ -357,11 +383,12 @@ export default function App() {
               <li key={section}>
                 <button
                   onClick={() => scrollToSection(section)}
-                  className={`font-semibold capitalize text-sm relative transition-colors pb-1 after:content-[''] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:bg-emerald-600 after:transition-all ${
-                    activeSection === section
-                      ? "text-emerald-600 dark:text-green-400 after:w-full"
-                      : "text-neutral-600 dark:text-neutral-400 hover:text-emerald-600 dark:hover:text-green-400 after:w-0 hover:after:w-full"
-                  }`}
+                  className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 ${activeSection === section
+                    ? "bg-emerald-600 text-white shadow shadow-emerald-500/25"
+                    : isScrolled
+                      ? "text-slate-600 dark:text-slate-350 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-slate-800/50"
+                      : "text-white/80 hover:text-white hover:bg-white/10"
+                    }`}
                 >
                   {section}
                 </button>
@@ -371,35 +398,45 @@ export default function App() {
 
           {/* Auth & Theme Actions Panel */}
           <div className="flex items-center gap-3">
-            <Link
-              to="/register"
-              className="text-xs font-semibold px-4 py-2 rounded-lg transition bg-[#6F4E37] dark:bg-green-700 text-white hover:bg-[#5a3d2b] dark:hover:bg-green-600 hidden sm:inline-block"
-            >
-              Register
-            </Link>
-            <Link
-              to="/login"
-              className="text-xs font-semibold px-4 py-2 rounded-lg border transition text-[#2d6e32] dark:text-green-400 border-[#6F4E37] dark:border-green-500 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 hidden sm:inline-block"
-            >
-              Log in
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link
+                to="/login"
+                className={`text-xs font-bold px-4 py-2 border rounded-full hover:shadow transition-all duration-300 ${isScrolled
+                  ? "text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-850"
+                  : "text-white border-white/20 hover:bg-white/10"
+                  } hidden sm:inline-block`}
+              >
+                Log in
+              </Link>
+              <Link
+                to="/register"
+                className={`text-xs font-bold px-4 py-2 border rounded-full hover:shadow transition-all duration-300 ${isScrolled
+                  ? "text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-850"
+                  : "text-white border-white/20 hover:bg-white/10"
+                  } hidden sm:inline-block`}
+              >
+                Register
+              </Link>
+            </div>
+
+            <div className="h-6 w-[1px] bg-slate-200/60 dark:bg-slate-800 hidden sm:block" />
 
             <ThemeToggle />
 
             {/* Mobile Navigation Toggle Button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="flex flex-col gap-[5px] cursor-pointer md:hidden p-2"
+              className="flex flex-col gap-[5px] cursor-pointer md:hidden p-2 rounded-lg hover:bg-slate-100/10 transition-colors"
               aria-label="Toggle navigation interface"
             >
               <span
-                className={`w-5 h-[2px] rounded transition-all duration-300 ${theme === "dark" ? "bg-white" : "bg-neutral-800"} ${isMobileMenuOpen ? "transform rotate-45 translate-y-[7px]" : ""}`}
+                className={`w-5.5 h-[2px] rounded transition-all duration-300 ${isScrolled ? "bg-slate-800 dark:bg-white" : "bg-white"} ${isMobileMenuOpen ? "transform rotate-45 translate-y-[7px]" : ""}`}
               ></span>
               <span
-                className={`w-5 h-[2px] rounded transition-all duration-300 ${theme === "dark" ? "bg-white" : "bg-neutral-800"} ${isMobileMenuOpen ? "opacity-0" : ""}`}
+                className={`w-4 h-[2px] rounded transition-all duration-300 ${isScrolled ? "bg-slate-800 dark:bg-white" : "bg-white"} ${isMobileMenuOpen ? "opacity-0" : ""}`}
               ></span>
               <span
-                className={`w-5 h-[2px] rounded transition-all duration-300 ${theme === "dark" ? "bg-white" : "bg-neutral-800"} ${isMobileMenuOpen ? "transform -rotate-45 -translate-y-[7px]" : ""}`}
+                className={`w-5.5 h-[2px] rounded transition-all duration-300 ${isScrolled ? "bg-slate-800 dark:bg-white" : "bg-white"} ${isMobileMenuOpen ? "transform -rotate-45 -translate-y-[7px]" : ""}`}
               ></span>
             </button>
           </div>
@@ -442,16 +479,16 @@ export default function App() {
 
             <div className="flex flex-col sm:flex-row gap-4 mb-12">
               <button
-                onClick={() => handleBookNow(packages[0])}
+                onClick={() => handleBookNow()}
                 className="bg-emerald-700 text-white font-semibold text-center px-8 py-4 rounded-full hover:bg-emerald-800 shadow-md transition duration-300 transform hover:-translate-y-0.5"
               >
                 Book Now
               </button>
               <button
-                onClick={() => scrollToSection("about")}
+                onClick={() => scrollToSection("packages")}
                 className="bg-transparent border-2 border-white text-white font-semibold text-center px-8 py-4 rounded-full hover:bg-white hover:text-emerald-800 transition duration-300"
               >
-                Learn More
+                Explore Safari Packages
               </button>
             </div>
 
@@ -598,11 +635,10 @@ export default function App() {
             ].map((reason, idx) => (
               <div
                 key={idx}
-                className={`p-8 rounded-2xl text-center shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 ${
-                  theme === "dark"
-                    ? "bg-neutral-900 border border-neutral-800"
-                    : "bg-white"
-                }`}
+                className={`p-8 rounded-2xl text-center shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 ${theme === "dark"
+                  ? "bg-neutral-900 border border-neutral-800"
+                  : "bg-white"
+                  }`}
               >
                 <div className="w-14 h-14 bg-gradient-to-br from-emerald-700 to-emerald-500 text-white rounded-full flex items-center justify-center mx-auto mb-6 text-xl shadow">
                   {reason.icon}
@@ -633,11 +669,10 @@ export default function App() {
             {safariLocations.map((loc) => (
               <div
                 key={loc.id}
-                className={`rounded-2xl overflow-hidden shadow-md border hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group ${
-                  theme === "dark"
-                    ? "bg-neutral-900 border-neutral-800"
-                    : "bg-white border-neutral-100"
-                }`}
+                className={`rounded-2xl overflow-hidden shadow-md border hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group ${theme === "dark"
+                  ? "bg-neutral-900 border-neutral-800"
+                  : "bg-white border-neutral-100"
+                  }`}
               >
                 <div className="relative h-56 overflow-hidden">
                   <img
@@ -650,7 +685,7 @@ export default function App() {
                       onClick={() => scrollToSection("packages")}
                       className="bg-white text-emerald-800 font-bold text-xs px-5 py-2.5 rounded-full hover:bg-emerald-700 hover:text-white transition duration-300 shadow-md"
                     >
-                      Book Now
+                      Learn More
                     </button>
                   </div>
                 </div>
@@ -693,11 +728,10 @@ export default function App() {
             {packages.map((pkg, idx) => (
               <div
                 key={idx}
-                className={`rounded-2xl overflow-hidden shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 flex flex-col justify-between border relative ${
-                  theme === "dark"
-                    ? "bg-neutral-900 border-neutral-800"
-                    : "bg-white border-neutral-100"
-                }`}
+                className={`rounded-2xl overflow-hidden shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 flex flex-col justify-between border relative ${theme === "dark"
+                  ? "bg-neutral-900 border-neutral-800"
+                  : "bg-white border-neutral-100"
+                  }`}
               >
                 <div>
                   <div className="relative h-60 overflow-hidden">
@@ -738,11 +772,10 @@ export default function App() {
                 </div>
 
                 <div
-                  className={`p-6 sm:p-8 border-t flex items-center justify-between ${
-                    theme === "dark"
-                      ? "bg-neutral-950/40 border-neutral-800"
-                      : "bg-neutral-50 border-neutral-100"
-                  }`}
+                  className={`p-6 sm:p-8 border-t flex items-center justify-between ${theme === "dark"
+                    ? "bg-neutral-950/40 border-neutral-800"
+                    : "bg-neutral-50 border-neutral-100"
+                    }`}
                 >
                   <div>
                     <span className="text-xs text-neutral-400 block font-medium">
@@ -756,10 +789,10 @@ export default function App() {
                     onClick={() => handleBookNow(pkg)}
                     className="bg-emerald-700 text-white font-bold text-sm px-5 py-3 rounded-full hover:bg-emerald-800 transition duration-300 shadow"
                   >
-                    Book Now
+                    Learn
                   </button>
                   <button
-                   // onClick={() => handleBookNow(pkg)}
+                    // onClick={() => handleBookNow(pkg)}
                     className="bg-emerald-700 text-white font-bold text-sm px-5 py-3 rounded-full hover:bg-emerald-800 transition duration-300 shadow"
                   >
                     Add to Cart
@@ -799,11 +832,10 @@ export default function App() {
               {reviews.map((rev, index) => (
                 <div
                   key={index}
-                  className={`review-card p-6 rounded-2xl shadow-md border min-w-[85vw] sm:min-w-[45vw] md:min-w-0 flex-shrink-0 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ${
-                    theme === "dark"
-                      ? "bg-neutral-900 border-neutral-800"
-                      : "bg-white border-neutral-100"
-                  }`}
+                  className={`review-card p-6 rounded-2xl shadow-md border min-w-[85vw] sm:min-w-[45vw] md:min-w-0 flex-shrink-0 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ${theme === "dark"
+                    ? "bg-neutral-900 border-neutral-800"
+                    : "bg-white border-neutral-100"
+                    }`}
                 >
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex gap-3 items-center">
@@ -1015,11 +1047,10 @@ export default function App() {
 
             {/* Input Form Module Wrapper */}
             <div
-              className={`p-6 sm:p-10 rounded-2xl border shadow-sm ${
-                theme === "dark"
-                  ? "bg-neutral-900 border-neutral-800"
-                  : "bg-neutral-50 border-neutral-100"
-              }`}
+              className={`p-6 sm:p-10 rounded-2xl border shadow-sm ${theme === "dark"
+                ? "bg-neutral-900 border-neutral-800"
+                : "bg-neutral-50 border-neutral-100"
+                }`}
             >
               <form onSubmit={handleFormSubmit} className="space-y-4">
                 <input
@@ -1029,11 +1060,10 @@ export default function App() {
                   onChange={handleFormChange}
                   placeholder="Your Name"
                   required
-                  className={`w-full p-4 border rounded-lg text-sm focus:outline-none focus:border-emerald-700 transition ${
-                    theme === "dark"
-                      ? "bg-neutral-950 border-neutral-800 text-white"
-                      : "bg-white border-neutral-200"
-                  }`}
+                  className={`w-full p-4 border rounded-lg text-sm focus:outline-none focus:border-emerald-700 transition ${theme === "dark"
+                    ? "bg-neutral-950 border-neutral-800 text-white"
+                    : "bg-white border-neutral-200"
+                    }`}
                 />
                 <input
                   type="email"
@@ -1042,11 +1072,10 @@ export default function App() {
                   onChange={handleFormChange}
                   placeholder="Your Email"
                   required
-                  className={`w-full p-4 border rounded-lg text-sm focus:outline-none focus:border-emerald-700 transition ${
-                    theme === "dark"
-                      ? "bg-neutral-950 border-neutral-800 text-white"
-                      : "bg-white border-neutral-200"
-                  }`}
+                  className={`w-full p-4 border rounded-lg text-sm focus:outline-none focus:border-emerald-700 transition ${theme === "dark"
+                    ? "bg-neutral-950 border-neutral-800 text-white"
+                    : "bg-white border-neutral-200"
+                    }`}
                 />
                 <input
                   type="tel"
@@ -1054,11 +1083,10 @@ export default function App() {
                   value={formData.phone}
                   onChange={handleFormChange}
                   placeholder="Your Phone"
-                  className={`w-full p-4 border rounded-lg text-sm focus:outline-none focus:border-emerald-700 transition ${
-                    theme === "dark"
-                      ? "bg-neutral-950 border-neutral-800 text-white"
-                      : "bg-white border-neutral-200"
-                  }`}
+                  className={`w-full p-4 border rounded-lg text-sm focus:outline-none focus:border-emerald-700 transition ${theme === "dark"
+                    ? "bg-neutral-950 border-neutral-800 text-white"
+                    : "bg-white border-neutral-200"
+                    }`}
                 />
                 <div className="relative">
                   <select
@@ -1066,11 +1094,10 @@ export default function App() {
                     value={formData.subject}
                     onChange={handleFormChange}
                     required
-                    className={`w-full p-4 border rounded-lg text-sm focus:outline-none focus:border-emerald-700 transition appearance-none text-neutral-400 ${
-                      theme === "dark"
-                        ? "bg-neutral-950 border-neutral-800"
-                        : "bg-white border-neutral-200"
-                    }`}
+                    className={`w-full p-4 border rounded-lg text-sm focus:outline-none focus:border-emerald-700 transition appearance-none text-neutral-400 ${theme === "dark"
+                      ? "bg-neutral-950 border-neutral-800"
+                      : "bg-white border-neutral-200"
+                      }`}
                   >
                     <option value="">Select Safari Type</option>
                     <option value="minneriya">Minneriya Safari</option>
@@ -1086,11 +1113,10 @@ export default function App() {
                   rows="4"
                   placeholder="Your Message"
                   required
-                  className={`w-full p-4 border rounded-lg text-sm focus:outline-none focus:border-emerald-700 transition resize-y ${
-                    theme === "dark"
-                      ? "bg-neutral-950 border-neutral-800 text-white"
-                      : "bg-white border-neutral-200"
-                  }`}
+                  className={`w-full p-4 border rounded-lg text-sm focus:outline-none focus:border-emerald-700 transition resize-y ${theme === "dark"
+                    ? "bg-neutral-950 border-neutral-800 text-white"
+                    : "bg-white border-neutral-200"
+                    }`}
                 ></textarea>
                 <button
                   type="submit"
