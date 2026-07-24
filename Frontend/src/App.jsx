@@ -789,10 +789,10 @@ export default function App() {
                     onClick={() => handleBookNow(pkg)}
                     className="bg-emerald-700 text-white font-bold text-sm px-5 py-3 rounded-full hover:bg-emerald-800 transition duration-300 shadow"
                   >
-                    Learn
+                    Book Now
                   </button>
                   <button
-                    // onClick={() => handleBookNow(pkg)}
+                    onClick={() => handleBookNow(pkg)}
                     className="bg-emerald-700 text-white font-bold text-sm px-5 py-3 rounded-full hover:bg-emerald-800 transition duration-300 shadow"
                   >
                     Add to Cart

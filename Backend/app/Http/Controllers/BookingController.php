@@ -68,9 +68,9 @@ class BookingController extends Controller
             'Pickup_Location' => $request->Pickup_Location,
             'No_of_adults' => $request->No_of_adults,
             'No_of_child' => $request->No_of_child,
-            'Payment' => 0,
+            'Payment' => $request->Payment ?? 0,
             'Status' => 'Confirmed',
-            'Customer_ID' => $request->Customer_ID,
+            'Customer_ID' => $customerId,
             'Package_ID' => $request->Package_ID,
             'Vehicle_ID' => $request->Vehicle_ID ?? null,
         ]);
