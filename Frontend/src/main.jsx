@@ -23,6 +23,7 @@ import MyBookings from "./pages/user/MyBookings";
 
 import Appointments from "./pages/admin/appointment.jsx";
 import CustomerBooking from "./pages/user/Booking.jsx";
+import GuestBooking from "./pages/public/booking.jsx";
 import Cart from "./pages/user/Cart.jsx";
 
 import Drivers from "./pages/admin/Drivers.jsx";
@@ -57,6 +58,7 @@ createRoot(document.getElementById("root")).render(
           <Route path="/" element={<App />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/booking" element={<GuestBooking />} />
           <Route path="/booking/:id" element={<CustomerBooking />} />
 
           {/* Customer Routes */}
@@ -68,6 +70,7 @@ createRoot(document.getElementById("root")).render(
             <Route path="/user/dashboard" element={<CustomerDashboard user={user} />} />
             <Route path="/user/packages" element={<CustomerPackages />} />
             <Route path="/user/reviews" element={<Review />} />
+            <Route path="/user/booking" element={<CustomerBooking />} />
             <Route path="/user/booking/:id" element={<CustomerBooking />} />
             <Route path="/user/bookings" element={<MyBookings />} />
             <Route path="/user/cart" element={<Cart />} />
@@ -88,7 +91,7 @@ createRoot(document.getElementById("root")).render(
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Navigate to="dashboard" />} />
-            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="dashboard" element={<AdminDashboard user={user} />} />
             <Route path="packages" element={<Packages />} />
             <Route path="drivers" element={<Drivers />} />
             <Route path="bookings" element={<Bookings />} />
