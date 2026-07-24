@@ -14,5 +14,6 @@ class Package extends Model
         'Description',
         'Price_for_adult',
         'Price_for_child',
+        'Image',
     ];
 }

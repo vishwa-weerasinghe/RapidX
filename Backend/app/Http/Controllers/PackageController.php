@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 use App\Models\Package;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class PackageController extends Controller
 {
@@ -18,7 +19,12 @@ class PackageController extends Controller
             'Description'      => 'required|string',
             'Price_for_adult'  => 'required|numeric|min:0',
             'Price_for_child'  => 'required|numeric|min:0',
+            'Image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
+        if ($request->hasFile('Image')) {
+            $validated['Image'] = $request->file('Image')
+                ->store('package-images', 'public');
+        }
 
         $package = Package::create($validated);
 
@@ -37,7 +43,18 @@ class PackageController extends Controller
             'Description'      => 'sometimes|required|string',
             'Price_for_adult'  => 'sometimes|required|numeric|min:0',
             'Price_for_child'  => 'sometimes|required|numeric|min:0',
+            'Image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+    
+
         ]);
+        if ($request->hasFile('Image')) {
+            if ($package->Image) {
+                Storage::disk('public')->delete($package->Image);
+            }
+
+            $validated['Image'] = $request->file('Image')
+                ->store('package-images', 'public');
+        }
 
         $package->update($validated);
 

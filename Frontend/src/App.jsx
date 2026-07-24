@@ -97,30 +97,21 @@ export default function App() {
       .get("/packages")
       .then((res) => {
         if (res.data && res.data.length > 0) {
+          const backendUrl = "http://127.0.0.1:8000";
+          const fallbackImage =
+            "https://images.unsplash.com/photo-1549366021-9f761d450615?q=80&w=2012&auto=format&fit=crop";
+
           const mapped = res.data.map((pkg, idx) => {
             const nameLower = (pkg.Package_Name || "").toLowerCase();
-            let img =
-              "https://minneriyawildjeepsafari.com/wp-content/uploads/2025/08/WhatsApp-Image-2025-08-20-at-12.11.05-1024x683.jpeg";
-            if (nameLower.includes("minneriya")) {
-              img =
-                "https://minneriyawildjeepsafari.com/wp-content/uploads/2025/08/WhatsApp-Image-2025-08-20-at-12.11.05-1024x683.jpeg";
-            } else if (nameLower.includes("kaudulla")) {
-              img =
-                "https://minneriyawildjeepsafari.com/wp-content/uploads/2024/05/cb-1.jpg";
-            } else if (nameLower.includes("wasgamuwa")) {
-              img =
-                "https://minneriyawildjeepsafari.com/wp-content/uploads/2024/05/WhatsApp-Image-2025-08-20-at-12.11.13-1.jpeg";
-            } else if (nameLower.includes("hurulu")) {
-              img =
-                "https://minneriyawildjeepsafari.com/wp-content/uploads/2024/05/Udawalawe-National-Park-4.jpg";
-            }
 
             return {
               id: pkg.id,
               title: pkg.Package_Name,
               desc: pkg.Description,
               price: `$${parseFloat(pkg.Price_for_adult || 0).toFixed(0)}`,
-              img: img,
+              img: pkg.Image
+                ? `${backendUrl}/storage/${pkg.Image}`
+                : fallbackImage,
               popular:
                 idx === 0 ||
                 nameLower.includes("morning") ||

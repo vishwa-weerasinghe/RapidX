@@ -20,6 +20,8 @@ return new class extends Migration
             $table->text('Description');
             $table->decimal('Price_for_adult', 10, 2);
             $table->decimal('Price_for_child', 10, 2);
+            
+            $table->string('Image')->nullable();
             $table->timestamps();
         });
     }
