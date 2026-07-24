@@ -12,6 +12,7 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\DashboardController;
 
 
 Route::get('/user', function (Request $request) {
@@ -45,6 +46,9 @@ Route::delete('/bookings/{id}', [BookingController::class, 'destroy']);
 Route::get('/bookings/{id}', [BookingController::class, 'show']);
 Route::get('/user-bookings/{customerId}', [BookingController::class, 'userBookings']);
 Route::get('/user-upcoming-booking/{customerId}', [BookingController::class, 'upcomingBooking']);
+
+// Admin Dashboard Stats
+Route::get('/admin/stats', [DashboardController::class, 'stats']);
 
 Route::post('/cart/checkout', [CartController::class, 'checkout']);
 Route::get('/cart/{customerId}', [CartController::class, 'index']);
