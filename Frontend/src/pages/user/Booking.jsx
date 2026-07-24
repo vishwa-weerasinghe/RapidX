@@ -9,11 +9,12 @@ export default function Booking() {
   const user = JSON.parse(localStorage.getItem("user") || "null");
   const guestCustomer = JSON.parse(localStorage.getItem("guest_customer") || "null");
   const activeCustomer = user || guestCustomer;
+  const isRegistered = !!user;
 
   const [pkg, setPkg] = useState(null);
 
   const [form, setForm] = useState({
-   Booking_Date: "",
+    Booking_Date: "",
     Pickup_Time: "",
     Pickup_Location: "",
     No_of_adults: 1,
@@ -39,6 +40,37 @@ export default function Booking() {
       console.log(err);
     }
   };
+
+  // Load customer profile if logged in or has guest session
+  useEffect(() => {
+    if (user) {
+      api.get('/customer-profile')
+        .then((res) => {
+          if (res.data) {
+            setForm((prev) => ({
+              ...prev,
+              First_Name: res.data.First_Name || "",
+              Last_Name: res.data.Last_Name || "",
+              Email: res.data.Email || "",
+              Phone_No: res.data.Phone_No || "",
+              NIC: res.data.NIC || "",
+              Country: res.data.Country || "",
+            }));
+          }
+        })
+        .catch((err) => console.error("Error loading customer profile:", err));
+    } else if (guestCustomer) {
+      setForm((prev) => ({
+        ...prev,
+        First_Name: guestCustomer.First_Name || "",
+        Last_Name: guestCustomer.Last_Name || "",
+        Email: guestCustomer.Email || "",
+        Phone_No: guestCustomer.Phone_No || "",
+        NIC: guestCustomer.NIC || "",
+        Country: guestCustomer.Country || "",
+      }));
+    }
+  }, [user, guestCustomer]);
 
   // handle input change
   const handleChange = (e) => {
@@ -83,21 +115,32 @@ export default function Booking() {
       payload.Country = form.Country;
     }
 
-    try {
-      await api.post("/cart", payload);
-
-      alert("Added to cart successfully 🎉");
-
-      navigate("/user/cart");
-    } catch (err) {
-      console.log(err);
-      console.log(err.response);
-
-      alert(
-        err.response?.data?.message ||
+    if (isRegistered) {
+      payload.Customer_ID = user.Customer_ID;
+      try {
+        await api.post("/cart", payload);
+        alert("Added to cart successfully 🎉");
+        navigate("/user/dashboard");
+      } catch (err) {
+        console.log(err);
+        alert(
+          err.response?.data?.message ||
           err.response?.data?.error ||
-          "Unable to add safari to cart",
-      );
+          "Unable to add safari to cart"
+        );
+      }
+    } else {
+      localStorage.setItem("pending_cart", JSON.stringify(payload));
+      localStorage.setItem("guest_profile_prefill", JSON.stringify({
+        First_Name: form.First_Name,
+        Last_Name: form.Last_Name,
+        Email: form.Email,
+        Phone_No: form.Phone_No,
+        NIC: form.NIC,
+        Country: form.Country,
+      }));
+      alert("Please register to add this booking to your cart.");
+      navigate("/register");
     }
   };
 
@@ -130,6 +173,7 @@ export default function Booking() {
             <input
               type="date"
               name="Booking_Date"
+              value={form.Booking_Date}
               className="w-full border p-2 rounded"
               onChange={handleChange}
               required
@@ -141,6 +185,7 @@ export default function Booking() {
             <input
               type="time"
               name="Pickup_Time"
+              value={form.Pickup_Time}
               className="w-full border p-2 rounded"
               onChange={handleChange}
               required
@@ -152,81 +197,84 @@ export default function Booking() {
             <input
               type="text"
               name="Pickup_Location"
+              value={form.Pickup_Location}
               className="w-full border p-2 rounded"
               onChange={handleChange}
               required
             />
           </div>
 
-          {!activeCustomer?.Customer_ID && (
-            <>
-              <div>
-                <label className="text-sm font-semibold">First Name</label>
-                <input
-                  type="text"
-                  name="First_Name"
-                  className="w-full border p-2 rounded"
-                  onChange={handleChange}
-                  required
-                />
-              </div>
+          <div>
+            <label className="text-sm font-semibold">First Name</label>
+            <input
+              type="text"
+              name="First_Name"
+              value={form.First_Name}
+              className="w-full border p-2 rounded"
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-              <div>
-                <label className="text-sm font-semibold">Last Name</label>
-                <input
-                  type="text"
-                  name="Last_Name"
-                  className="w-full border p-2 rounded"
-                  onChange={handleChange}
-                  required
-                />
-              </div>
+          <div>
+            <label className="text-sm font-semibold">Last Name</label>
+            <input
+              type="text"
+              name="Last_Name"
+              value={form.Last_Name}
+              className="w-full border p-2 rounded"
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-              <div>
-                <label className="text-sm font-semibold">Email</label>
-                <input
-                  type="email"
-                  name="Email"
-                  className="w-full border p-2 rounded"
-                  onChange={handleChange}
-                  required
-                />
-              </div>
+          <div>
+            <label className="text-sm font-semibold">Email</label>
+            <input
+              type="email"
+              name="Email"
+              value={form.Email}
+              className="w-full border p-2 rounded"
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-              <div>
-                <label className="text-sm font-semibold">Phone Number</label>
-                <input
-                  type="text"
-                  name="Phone_No"
-                  className="w-full border p-2 rounded"
-                  onChange={handleChange}
-                  required
-                />
-              </div>
+          <div>
+            <label className="text-sm font-semibold">Phone Number</label>
+            <input
+              type="text"
+              name="Phone_No"
+              value={form.Phone_No}
+              className="w-full border p-2 rounded"
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-              <div>
-                <label className="text-sm font-semibold">NIC</label>
-                <input
-                  type="text"
-                  name="NIC"
-                  className="w-full border p-2 rounded"
-                  onChange={handleChange}
-                  required
-                />
-              </div>
+          <div>
+            <label className="text-sm font-semibold">NIC</label>
+            <input
+              type="text"
+              name="NIC"
+              value={form.NIC}
+              className="w-full border p-2 rounded"
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-              <div>
-                <label className="text-sm font-semibold">Country</label>
-                <input
-                  type="text"
-                  name="Country"
-                  className="w-full border p-2 rounded"
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-            </>
-          )}
+          <div>
+            <label className="text-sm font-semibold">Country</label>
+            <input
+              type="text"
+              name="Country"
+              value={form.Country}
+              className="w-full border p-2 rounded"
+              onChange={handleChange}
+              required
+            />
+          </div>
 
           <div className="flex gap-4">
             <div className="w-1/2">
