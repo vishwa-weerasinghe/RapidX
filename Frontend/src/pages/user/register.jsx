@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 
@@ -15,6 +15,23 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const prefillStr = localStorage.getItem("guest_profile_prefill");
+    if (prefillStr) {
+      try {
+        const prefill = JSON.parse(prefillStr);
+        if (prefill.First_Name) setFirstName(prefill.First_Name);
+        if (prefill.Last_Name) setLastName(prefill.Last_Name);
+        if (prefill.Email) setEmail(prefill.Email);
+        if (prefill.Phone_No) setPhone_No(prefill.Phone_No);
+        if (prefill.NIC) setNIC(prefill.NIC);
+        if (prefill.Country) setCountry(prefill.Country);
+      } catch (err) {
+        console.error("Failed to parse prefill guest profile details", err);
+      }
+    }
+  }, []);
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -37,8 +54,41 @@ export default function Register() {
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("user", JSON.stringify(response.data.user));
 
+      // Clean up prefill
+      localStorage.removeItem("guest_profile_prefill");
+
+      // Check if there is a pending cart item
+      const pendingCartStr = localStorage.getItem("pending_cart");
+      if (pendingCartStr) {
+        try {
+          const pendingCart = JSON.parse(pendingCartStr);
+          const tomorrow = new Date();
+          tomorrow.setDate(tomorrow.getDate() + 1);
+          const dateStr = tomorrow.toISOString().split("T")[0];
+
+          const payload = {
+            Booking_Date: pendingCart.Booking_Date || dateStr,
+            Pickup_Time: pendingCart.Pickup_Time || "06:00",
+            Pickup_Location: pendingCart.Pickup_Location || "Hotel Pickup",
+            No_of_adults: pendingCart.No_of_adults || 1,
+            No_of_child: pendingCart.No_of_child || 0,
+            Package_ID: pendingCart.Package_ID,
+            Payment: pendingCart.Payment || 0,
+            Customer_ID: response.data.user.Customer_ID,
+          };
+
+          await axios.post("http://127.0.0.1:8000/api/cart", payload, {
+            headers: { Authorization: `Bearer ${response.data.token}` },
+          });
+          localStorage.removeItem("pending_cart");
+          alert("Safari added to your dashboard cart successfully! 🎉");
+        } catch (cartErr) {
+          console.error("Failed to auto-add pending cart item:", cartErr);
+        }
+      }
+
       // Redirect to the dashboard
-      navigate("/dashboard");
+      navigate("/user/dashboard");
     } catch (err) {
       if (err.response && err.response.data.errors) {
         // Capture specific validation errors from Laravel (e.g., email already taken)

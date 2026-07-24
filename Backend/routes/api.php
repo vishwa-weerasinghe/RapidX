@@ -56,6 +56,9 @@ Route::post('/cart', [CartController::class, 'store']);
 Route::delete('/cart/{bookingId}', [CartController::class, 'destroy']);
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/customer-profile', function (\Illuminate\Http\Request $request) {
+        return response()->json(\App\Models\Customer::find($request->user()->Customer_ID));
+    });
     Route::post('reviews', [ReviewController::class, 'store']);
     Route::put('reviews/{review}', [ReviewController::class, 'update']);
     Route::patch('reviews/{review}', [ReviewController::class, 'update']);

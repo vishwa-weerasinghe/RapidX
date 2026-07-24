@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { MapPin, Calendar, Users, Search } from "lucide-react";
+import { MapPin, Calendar, Users, Search, LayoutDashboard } from "lucide-react";
 import ThemeToggle from "./components/ThemeToggle";
 import { useTheme } from "./context/ThemeContext";
 import api from "./axios";
@@ -10,6 +10,23 @@ export default function App() {
   const { theme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const user = (() => {
+    try {
+      const userData = localStorage.getItem("user");
+      return userData ? JSON.parse(userData) : null;
+    } catch {
+      return null;
+    }
+  })();
+
+  const dashboardLink = (() => {
+    if (!user) return "/login";
+    const role = `${user?.role ?? user?.Role ?? user?.user_type ?? "customer"}`.toLowerCase();
+    return ["admin", "administrator", "superadmin"].includes(role)
+      ? "/admin/dashboard"
+      : "/user/dashboard";
+  })();
 
   useEffect(() => {
     if (location.hash === "#packages") {
@@ -27,6 +44,44 @@ export default function App() {
       navigate(`/booking/${pkg.id || pkg.Package_ID}`);
     } else {
       navigate(`/booking`);
+    }
+  };
+
+  const handleAddToCart = async (pkg) => {
+    if (user && user.Customer_ID) {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const dateStr = tomorrow.toISOString().split("T")[0];
+
+      const payload = {
+        Booking_Date: dateStr,
+        Pickup_Time: "06:00",
+        Pickup_Location: "Hotel Pickup",
+        No_of_adults: 1,
+        No_of_child: 0,
+        Package_ID: pkg.id || pkg.Package_ID,
+        Payment: parseFloat((pkg.price || "0").replace(/[^0-9.]/g, "")) || 0,
+        Customer_ID: user.Customer_ID,
+      };
+
+      try {
+        const token = localStorage.getItem("token");
+        await api.post("/cart", payload, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        alert("Package added to cart successfully! 🎉");
+      } catch (err) {
+        console.error(err);
+        alert("Failed to add package to cart. Please try again.");
+      }
+      navigate("/user/dashboard");
+    } else {
+      localStorage.setItem("pending_cart", JSON.stringify({
+        Package_ID: pkg.id || pkg.Package_ID,
+        Payment: parseFloat((pkg.price || "0").replace(/[^0-9.]/g, "")) || 0,
+      }));
+      alert("Please register to add this package to your cart.");
+      navigate("/register");
     }
   };
 
@@ -151,6 +206,9 @@ export default function App() {
                 idx === 0 ||
                 nameLower.includes("morning") ||
                 nameLower.includes("popular"),
+              Price_for_adult: pkg.Price_for_adult,
+              Price_for_child: pkg.Price_for_child,
+              Package_Name: pkg.Package_Name,
             };
           });
           setPackages(mapped);
@@ -399,24 +457,39 @@ export default function App() {
           {/* Auth & Theme Actions Panel */}
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <Link
-                to="/login"
-                className={`text-xs font-bold px-4 py-2 border rounded-full hover:shadow transition-all duration-300 ${isScrolled
-                  ? "text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-850"
-                  : "text-white border-white/20 hover:bg-white/10"
-                  } hidden sm:inline-block`}
-              >
-                Log in
-              </Link>
-              <Link
-                to="/register"
-                className={`text-xs font-bold px-4 py-2 border rounded-full hover:shadow transition-all duration-300 ${isScrolled
-                  ? "text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-850"
-                  : "text-white border-white/20 hover:bg-white/10"
-                  } hidden sm:inline-block`}
-              >
-                Register
-              </Link>
+              {user ? (
+                <Link
+                  to={dashboardLink}
+                  className={`flex items-center gap-1.5 text-xs font-bold px-4 py-2 border rounded-full hover:shadow transition-all duration-300 ${isScrolled
+                    ? "text-[#1B4332] border-[#1B4332]/25 hover:bg-[#1B4332]/5 dark:text-white dark:border-neutral-800 dark:hover:bg-neutral-800"
+                    : "text-white border-white/20 hover:bg-white/10"
+                    }`}
+                >
+                  <LayoutDashboard size={14} />
+                  Dashboard
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    className={`text-xs font-bold px-4 py-2 border rounded-full hover:shadow transition-all duration-300 ${isScrolled
+                      ? "text-slate-700 dark:text-slate-350 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-850"
+                      : "text-white border-white/20 hover:bg-white/10"
+                      } hidden sm:inline-block`}
+                  >
+                    Log in
+                  </Link>
+                  <Link
+                    to="/register"
+                    className={`text-xs font-bold px-4 py-2 border rounded-full hover:shadow transition-all duration-300 ${isScrolled
+                      ? "text-slate-700 dark:text-slate-350 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-850"
+                      : "text-white border-white/20 hover:bg-white/10"
+                      } hidden sm:inline-block`}
+                  >
+                    Register
+                  </Link>
+                </>
+              )}
             </div>
 
             <div className="h-6 w-[1px] bg-slate-200/60 dark:bg-slate-800 hidden sm:block" />
@@ -792,7 +865,7 @@ export default function App() {
                     Book Now
                   </button>
                   <button
-                    onClick={() => handleBookNow(pkg)}
+                    onClick={() => handleAddToCart(pkg)}
                     className="bg-emerald-700 text-white font-bold text-sm px-5 py-3 rounded-full hover:bg-emerald-800 transition duration-300 shadow"
                   >
                     Add to Cart
@@ -1137,7 +1210,7 @@ export default function App() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
             <div>
               <span className="text-lg font-bold block mb-4">
-                🌿 Wild Safari
+                Wild Safari
               </span>
               <p className="text-neutral-400 text-sm leading-relaxed">
                 Minneriyawildjeepsafari is a leading Sri Lanka jeep safari

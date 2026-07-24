@@ -57,7 +57,13 @@ export function HeroCountdown({ user }) {
     return null
   }
 
-  const safariDate = new Date(booking.Booking_Date)
+  const safariDate = booking?.Booking_Date ? new Date(booking.Booking_Date) : null
+  const isValid = safariDate && !isNaN(safariDate.getTime())
+
+  if (!booking || !isValid) {
+    return null
+  }
+
   const daysUntil = differenceInDays(safariDate, new Date())
   const pkg = booking.package
   const vehicle = booking.vehicle
