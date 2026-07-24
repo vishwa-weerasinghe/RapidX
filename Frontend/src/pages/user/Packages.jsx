@@ -93,8 +93,9 @@ export default function Packages() {
 
                 <img
                   src={
-                    pkg.Image ||
-                    "https://images.unsplash.com/photo-1549366021-9f761d450615?q=80&w=2012&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                    pkg.Image
+                      ? `http://127.0.0.1:8000/storage/${pkg.Image}`
+                      : "https://images.unsplash.com/photo-1549366021-9f761d450615?q=80&w=2012&auto=format&fit=crop"
                   }
                   alt={pkg.Package_Name}
                   className="w-full h-full object-cover group-hover:scale-110 transition duration-700"
