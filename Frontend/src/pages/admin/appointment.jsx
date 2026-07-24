@@ -3,15 +3,20 @@ import api from "../../axios";
 
 export default function Appointments() {
   const [appointments, setAppointments] = useState([]);
+  const [summary, setSummary] = useState({ total_confirmed: 0, total_earnings: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const fetchAppointments = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
       setError("");
-      const res = await api.get("/appointments");
-      setAppointments(res.data || []);
+      const [appRes, sumRes] = await Promise.all([
+        api.get("/appointments"),
+        api.get("/appointments/summary"),
+      ]);
+      setAppointments(appRes.data || []);
+      setSummary(sumRes.data || { total_confirmed: 0, total_earnings: 0 });
     } catch (err) {
       console.error(err);
       setError(err?.response?.data?.message || "Failed to load appointments.");
@@ -21,7 +26,7 @@ export default function Appointments() {
   };
 
   useEffect(() => {
-    fetchAppointments();
+    fetchData();
   }, []);
 
   const sorted = useMemo(() => {
@@ -35,19 +40,26 @@ export default function Appointments() {
 
   return (
     <div className="p-6">
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6">
         <div>
           <h1 className="text-2xl font-semibold text-gray-800">Appointments</h1>
           <p className="text-sm text-gray-500 mt-1">View customer booking details and assigned driver.</p>
         </div>
-
-        <button
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition"
-          type="button"
-        >
-          + Add Appointments
-        </button>
       </div>
+
+      {/* Summary Cards */}
+      {!loading && !error && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+          <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+            <p className="text-xs uppercase tracking-wide text-gray-500">Total Confirmed Appointments</p>
+            <p className="mt-1 text-2xl font-bold text-gray-800">{summary.total_confirmed}</p>
+          </div>
+          <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+            <p className="text-xs uppercase tracking-wide text-gray-500">Total Earnings</p>
+            <p className="mt-1 text-2xl font-bold text-green-600">LKR {Number(summary.total_earnings).toLocaleString()}</p>
+          </div>
+        </div>
+      )}
 
       {loading ? (
         <p className="text-gray-500">Loading...</p>
@@ -64,10 +76,9 @@ export default function Appointments() {
               <tr>
                 <th className="px-4 py-3 text-left">Booking ID</th>
                 <th className="px-4 py-3 text-left">Customer</th>
-                <th className="px-4 py-3 text-left">Phone</th>
-                <th className="px-4 py-3 text-left">Email</th>
-                <th className="px-4 py-3 text-left">Pickup</th>
-                <th className="px-4 py-3 text-left">Assigned Driver</th>
+                <th className="px-4 py-3 text-left">Package</th>
+                <th className="px-4 py-3 text-left">Payment</th>
+                <th className="px-4 py-3 text-left">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -80,17 +91,14 @@ export default function Appointments() {
                     </div>
                     <div className="text-xs text-gray-500">{a.Customer_Type || ""}</div>
                   </td>
-                  <td className="px-4 py-3 text-gray-600 font-mono">{a.Phone_No}</td>
-                  <td className="px-4 py-3 text-gray-600">{a.Email}</td>
                   <td className="px-4 py-3 text-gray-700">
-                    <div className="font-medium">{a.Pickup_Location}</div>
-                    <div className="text-xs text-gray-500">
-                      {a.Booking_Date} • {a.Pickup_Time}
-                    </div>
+                    <div className="font-medium">{a.Package_Name || "—"}</div>
                   </td>
-                  <td className="px-4 py-3 text-gray-800">
-                    <div className="font-medium">{a.Driver_Name || "Unassigned"}</div>
-                    <div className="text-xs text-gray-500">{a.Driver_Phone_Number || ""}</div>
+                  <td className="px-4 py-3 font-mono text-gray-800">LKR {Number(a.Payment || 0).toLocaleString()}</td>
+                  <td className="px-4 py-3">
+                    <span className="inline-block rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
+                      {a.Status || "Confirmed"}
+                    </span>
                   </td>
                 </tr>
               ))}
