@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Menu, Bell, ShoppingCart, Sun, Moon } from 'lucide-react'
+import { Menu, ShoppingCart, Sun, Moon } from 'lucide-react'
 import api from '../../axios'
 import { useTheme } from '../../context/ThemeContext'
 
@@ -82,11 +82,6 @@ export function Header({ user }) {
                 {cartCount}
               </span>
             )}
-          </button>
-
-          <button className="p-2 text-safari-muted hover:text-safari-green dark:text-gray-400 dark:hover:text-yellow-400 transition-colors relative">
-            <Bell className="w-5 h-5" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-safari-terracotta dark:bg-yellow-400 rounded-full border-2 border-safari-bone dark:border-black"></span>
           </button>
 
           <div className="h-6 w-px bg-safari-border/50 dark:bg-gray-700 mx-1"></div>

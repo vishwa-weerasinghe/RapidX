@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import { Header } from "../components/user-dashboard/Header";
+import ProtectedRoute from "../components/ProtectedRoute";
 
 export default function CustomerLayout() {
   const user = (() => {
@@ -13,15 +14,17 @@ export default function CustomerLayout() {
   })();
 
   return (
-    <div className="flex min-h-screen">
-      <Sidebar role="customer" />
+    <ProtectedRoute role="customer">
+      <div className="flex min-h-screen">
+        <Sidebar role="customer" />
 
-      <div className="flex-1 flex flex-col">
-        <Header user={user} />
-        <main className="flex-1">
-          <Outlet />
-        </main>
+        <div className="flex-1 flex flex-col">
+          <Header user={user} />
+          <main className="flex-1">
+            <Outlet />
+          </main>
+        </div>
       </div>
-    </div>
+    </ProtectedRoute>
   );
 }
