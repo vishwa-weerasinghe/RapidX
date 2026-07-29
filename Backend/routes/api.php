@@ -13,6 +13,7 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ContactController;
 
 
 Route::get('/user', function (Request $request) {
@@ -55,6 +56,8 @@ Route::post('/cart/checkout', [CartController::class, 'checkout']);
 Route::get('/cart/{customerId}', [CartController::class, 'index']);
 Route::post('/cart', [CartController::class, 'store']);
 Route::delete('/cart/{bookingId}', [CartController::class, 'destroy']);
+
+Route::post('/contact', [ContactController::class, 'send'])->middleware('throttle:3,1');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/customer-profile', function (\Illuminate\Http\Request $request) {

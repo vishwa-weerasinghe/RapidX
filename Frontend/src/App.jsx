@@ -343,19 +343,28 @@ export default function App() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    setTimeout(() => {
+    try {
+      const response = await api.post("/contact", formData);
       setNotification({
-        text: "Thank you! Your safari booking request inquiry has been sent successfully.",
+        text: response.data.message || "Thank you! Your safari booking request inquiry has been sent successfully.",
         type: "success",
       });
       setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
+    } catch (err) {
+      console.error(err);
+      const errMsg = err.response?.data?.message || "Failed to send message. Please try again later.";
+      setNotification({
+        text: errMsg,
+        type: "error",
+      });
+    } finally {
       setIsSubmitting(false);
       setTimeout(() => setNotification(null), 5000);
-    }, 1500);
+    }
   };
 
   const scrollToSection = (id) => {
@@ -376,7 +385,7 @@ export default function App() {
       {/* Toast Notification Alert Box */}
       {notification && (
         <div
-          className={`fixed top-24 right-5 p-5 rounded-xl shadow-2xl z-[9999] border-l-4 border-emerald-700 max-w-sm animate-fade-in-left ${theme === "dark"
+          className={`fixed top-24 right-5 p-5 rounded-xl shadow-2xl z-[9999] border-l-4 ${notification.type === "error" ? "border-red-500" : "border-emerald-700"} max-w-sm animate-fade-in-left ${theme === "dark"
             ? "bg-neutral-900 text-white"
             : "bg-white text-neutral-800"
             }`}
@@ -1032,165 +1041,229 @@ export default function App() {
       </section>
 
       {/* --- CONTACT SECTION --- */}
-      <section id="contact" className="py-16 md:py-24">
-        <div className="max-w-7xl mx-auto px-4 md:px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
-            <div>
-              <h2 className="font-serif text-3xl font-bold mb-2">
-                Get In Touch
-              </h2>
-              <p className="text-neutral-400 text-sm sm:text-base mb-8">
-                Ready to experience the adventure of a lifetime? Contact us
-                today!
-              </p>
+      <section id="contact" className="relative py-20 md:py-32 overflow-hidden">
+        {/* Decorative background blur */}
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+          <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] rounded-full bg-emerald-500/10 blur-[100px]"></div>
+          <div className="absolute bottom-[-10%] left-[-5%] w-[600px] h-[600px] rounded-full bg-teal-500/10 blur-[120px]"></div>
+        </div>
 
-              <div className="space-y-6 mb-8 text-neutral-500 dark:text-neutral-400 text-sm">
-                <p>
-                  📞{" "}
-                  <a
-                    href="tel:+94778902811"
-                    className="hover:text-emerald-600 ml-2"
-                  >
-                    (+94) 778902811
-                  </a>
+        <div className="max-w-7xl mx-auto px-4 md:px-6 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+
+            {/* Left Column - Contact Info */}
+            <div className="space-y-8">
+              <div>
+                <span className="inline-block py-1.5 px-4 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold uppercase tracking-widest mb-4">
+                  Get In Touch
+                </span>
+                <h2 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 text-neutral-900 dark:text-white leading-tight">
+                  Let's Plan Your <br />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500">Wild Adventure</span>
+                </h2>
+                <p className="text-neutral-600 dark:text-neutral-400 text-lg max-w-md">
+                  Ready to experience the adventure of a lifetime? Our team is here to help you craft the perfect safari itinerary.
                 </p>
-                <p>
-                  ✉️{" "}
-                  <a
-                    href="mailto:info@minneriyawildjeepsafari.com"
-                    className="hover:text-emerald-600 ml-2"
-                  >
-                    info@minneriyawildjeepsafari.com
-                  </a>
-                </p>
-                <p>
-                  📍{" "}
-                  <span className="ml-2">
-                    423, Kiralagolla, Dambulu Oya, Dambulla
-                  </span>
-                </p>
-                <p>
-                  ⏰ <span className="ml-2">24 hours Open</span>
-                </p>
+              </div>
+
+              <div className="space-y-4 text-neutral-700 dark:text-neutral-300">
+                {/* Contact Card 1 */}
+                <div className="flex items-start gap-5 p-4 rounded-2xl hover:bg-white dark:hover:bg-neutral-800/50 transition duration-300 shadow-sm border border-transparent hover:border-neutral-100 dark:hover:border-neutral-800">
+                  <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-sm text-neutral-900 dark:text-white mb-1">Phone</h4>
+                    <a href="tel:+94778902811" className="hover:text-emerald-600 transition block">(+94) 77 890 2811</a>
+                  </div>
+                </div>
+
+                {/* Contact Card 2 */}
+                <div className="flex items-start gap-5 p-4 rounded-2xl hover:bg-white dark:hover:bg-neutral-800/50 transition duration-300 shadow-sm border border-transparent hover:border-neutral-100 dark:hover:border-neutral-800">
+                  <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-sm text-neutral-900 dark:text-white mb-1">Email</h4>
+                    <a href="mailto:info@minneriyawildjeepsafari.com" className="hover:text-emerald-600 transition block">info@minneriyawildjeepsafari.com</a>
+                  </div>
+                </div>
+
+                {/* Contact Card 3 */}
+                <div className="flex items-start gap-5 p-4 rounded-2xl hover:bg-white dark:hover:bg-neutral-800/50 transition duration-300 shadow-sm border border-transparent hover:border-neutral-100 dark:hover:border-neutral-800">
+                  <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-sm text-neutral-900 dark:text-white mb-1">Location</h4>
+                    <span className="block">423, Kiralagolla, Dambulu Oya, Dambulla</span>
+                  </div>
+                </div>
               </div>
 
               {/* Social Network Actions */}
-              <div className="flex gap-3">
-                {[
-                  {
-                    label: "Facebook",
-                    href: "https://facebook.com/share/1AmhHo7Cg2/",
-                    icon: "M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z",
-                  },
-                  {
-                    label: "Instagram",
-                    href: "https://www.instagram.com/minneriyawildjeepsafari",
-                    icon: "M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z",
-                  },
-                  {
-                    label: "YouTube",
-                    href: "https://www.youtube.com/@minneriyawildjeepsafari",
-                    icon: "M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z",
-                  },
-                ].map((soc, sIdx) => (
-                  <a
-                    key={sIdx}
-                    href={soc.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-11 h-11 bg-emerald-700 hover:bg-emerald-800 text-white rounded-full flex items-center justify-center shadow transition-all hover:-translate-y-1"
-                    aria-label={soc.label}
-                  >
-                    <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                      <path d={soc.icon} />
-                    </svg>
-                  </a>
-                ))}
+              <div className="pt-6">
+                <h4 className="text-sm font-bold text-neutral-900 dark:text-white mb-4">Follow Our Journey</h4>
+                <div className="flex gap-4">
+                  {[
+                    {
+                      label: "Facebook",
+                      href: "https://facebook.com/share/1AmhHo7Cg2/",
+                      icon: "M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z",
+                    },
+                    {
+                      label: "Instagram",
+                      href: "https://www.instagram.com/minneriyawildjeepsafari",
+                      icon: "M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z",
+                    },
+                    {
+                      label: "YouTube",
+                      href: "https://www.youtube.com/@minneriyawildjeepsafari",
+                      icon: "M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z",
+                    },
+                  ].map((soc, sIdx) => (
+                    <a
+                      key={sIdx}
+                      href={soc.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-12 h-12 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300 hover:text-white hover:bg-emerald-600 dark:hover:bg-emerald-600 hover:border-emerald-600 rounded-full flex items-center justify-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-emerald-500/30"
+                      aria-label={soc.label}
+                    >
+                      <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                        <path d={soc.icon} />
+                      </svg>
+                    </a>
+                  ))}
+                </div>
               </div>
             </div>
 
-            {/* Input Form Module Wrapper */}
-            <div
-              className={`p-6 sm:p-10 rounded-2xl border shadow-sm ${theme === "dark"
-                ? "bg-neutral-900 border-neutral-800"
-                : "bg-neutral-50 border-neutral-100"
-                }`}
-            >
-              <form onSubmit={handleFormSubmit} className="space-y-4">
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleFormChange}
-                  placeholder="Your Name"
-                  required
-                  className={`w-full p-4 border rounded-lg text-sm focus:outline-none focus:border-emerald-700 transition ${theme === "dark"
-                    ? "bg-neutral-950 border-neutral-800 text-white"
-                    : "bg-white border-neutral-200"
-                    }`}
-                />
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleFormChange}
-                  placeholder="Your Email"
-                  required
-                  className={`w-full p-4 border rounded-lg text-sm focus:outline-none focus:border-emerald-700 transition ${theme === "dark"
-                    ? "bg-neutral-950 border-neutral-800 text-white"
-                    : "bg-white border-neutral-200"
-                    }`}
-                />
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleFormChange}
-                  placeholder="Your Phone"
-                  className={`w-full p-4 border rounded-lg text-sm focus:outline-none focus:border-emerald-700 transition ${theme === "dark"
-                    ? "bg-neutral-950 border-neutral-800 text-white"
-                    : "bg-white border-neutral-200"
-                    }`}
-                />
-                <div className="relative">
-                  <select
-                    name="subject"
-                    value={formData.subject}
-                    onChange={handleFormChange}
-                    required
-                    className={`w-full p-4 border rounded-lg text-sm focus:outline-none focus:border-emerald-700 transition appearance-none text-neutral-400 ${theme === "dark"
-                      ? "bg-neutral-950 border-neutral-800"
-                      : "bg-white border-neutral-200"
-                      }`}
+            {/* Right Column - Glassmorphism Form */}
+            <div className="relative z-10">
+              {/* Form Card */}
+              <div
+                className={`p-8 sm:p-10 rounded-3xl border shadow-2xl backdrop-blur-xl ${theme === "dark"
+                  ? "bg-neutral-900/80 border-neutral-700/50 shadow-black/50"
+                  : "bg-white/90 border-white/60 shadow-neutral-200/50"
+                  }`}
+              >
+                <h3 className="text-2xl font-bold mb-6 text-neutral-900 dark:text-white">Send a Message</h3>
+                <form onSubmit={handleFormSubmit} className="space-y-5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wide ml-1">Name</label>
+                      <input
+                        type="text"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleFormChange}
+                        placeholder="John Doe"
+                        required
+                        className={`w-full px-5 py-4 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all ${theme === "dark"
+                          ? "bg-neutral-950/50 border border-neutral-800 text-white placeholder-neutral-600 focus:bg-neutral-950"
+                          : "bg-neutral-50 border border-neutral-200 text-neutral-900 placeholder-neutral-400 focus:bg-white"
+                          }`}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wide ml-1">Email</label>
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleFormChange}
+                        placeholder="john@example.com"
+                        required
+                        className={`w-full px-5 py-4 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all ${theme === "dark"
+                          ? "bg-neutral-950/50 border border-neutral-800 text-white placeholder-neutral-600 focus:bg-neutral-950"
+                          : "bg-neutral-50 border border-neutral-200 text-neutral-900 placeholder-neutral-400 focus:bg-white"
+                          }`}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wide ml-1">Phone</label>
+                      <input
+                        type="tel"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleFormChange}
+                        placeholder="+94 77 123 4567"
+                        className={`w-full px-5 py-4 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all ${theme === "dark"
+                          ? "bg-neutral-950/50 border border-neutral-800 text-white placeholder-neutral-600 focus:bg-neutral-950"
+                          : "bg-neutral-50 border border-neutral-200 text-neutral-900 placeholder-neutral-400 focus:bg-white"
+                          }`}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wide ml-1">Safari Type</label>
+                      <div className="relative">
+                        <select
+                          name="subject"
+                          value={formData.subject}
+                          onChange={handleFormChange}
+                          required
+                          className={`w-full px-5 py-4 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all appearance-none cursor-pointer ${theme === "dark"
+                            ? "bg-neutral-950/50 border border-neutral-800 text-white focus:bg-neutral-950"
+                            : "bg-neutral-50 border border-neutral-200 text-neutral-900 focus:bg-white text-neutral-900"
+                            }`}
+                        >
+                          <option value="" disabled className="text-neutral-400">Select Destination...</option>
+                          <option value="minneriya">Minneriya Safari</option>
+                          <option value="kaudulla">Kaudulla Safari</option>
+                          <option value="wasgamuwa">Wasgamuwa Safari</option>
+                          <option value="hurulu">Hurulu Eco Park</option>
+                        </select>
+                        <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-emerald-500">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wide ml-1">Message</label>
+                    <textarea
+                      name="message"
+                      value={formData.message}
+                      onChange={handleFormChange}
+                      rows="4"
+                      placeholder="Tell us about your dream safari..."
+                      required
+                      className={`w-full px-5 py-4 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all resize-y ${theme === "dark"
+                        ? "bg-neutral-950/50 border border-neutral-800 text-white placeholder-neutral-600 focus:bg-neutral-950"
+                        : "bg-neutral-50 border border-neutral-200 text-neutral-900 placeholder-neutral-400 focus:bg-white"
+                        }`}
+                    ></textarea>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full bg-gradient-to-r from-emerald-600 to-teal-500 text-white font-bold text-sm py-4 rounded-xl hover:from-emerald-700 hover:to-teal-600 transition-all duration-300 shadow-[0_8px_20px_rgb(16,185,129,0.3)] hover:shadow-[0_10px_25px_rgb(16,185,129,0.4)] hover:-translate-y-0.5 disabled:opacity-60 disabled:hover:translate-y-0 flex items-center justify-center gap-2"
                   >
-                    <option value="">Select Safari Type</option>
-                    <option value="minneriya">Minneriya Safari</option>
-                    <option value="kaudulla">Kaudulla Safari</option>
-                    <option value="wasgamuwa">Wasgamuwa Safari</option>
-                    <option value="hurulu">Hurulu Eco Park</option>
-                  </select>
-                </div>
-                <textarea
-                  name="message"
-                  value={formData.message}
-                  onChange={handleFormChange}
-                  rows="4"
-                  placeholder="Your Message"
-                  required
-                  className={`w-full p-4 border rounded-lg text-sm focus:outline-none focus:border-emerald-700 transition resize-y ${theme === "dark"
-                    ? "bg-neutral-950 border-neutral-800 text-white"
-                    : "bg-white border-neutral-200"
-                    }`}
-                ></textarea>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full bg-emerald-700 text-white font-bold text-sm py-4 rounded-lg hover:bg-emerald-800 transition shadow-md disabled:opacity-50"
-                >
-                  {isSubmitting ? "Sending..." : "Send Message"}
-                </button>
-              </form>
+                    {isSubmitting ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Sending...
+                      </>
+                    ) : (
+                      <>
+                        Send Message
+                        <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                      </>
+                    )}
+                  </button>
+                </form>
+              </div>
             </div>
+
           </div>
         </div>
       </section>
@@ -1290,16 +1363,6 @@ export default function App() {
       >
         ↑
       </button>
-
-      <a
-        href="https://wa.me/94778902811"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="fixed bottom-20 right-6 w-11 h-11 bg-[#25D366] text-white rounded-full flex items-center justify-center shadow-xl z-50 hover:scale-110 transition animate-pulse"
-        aria-label="Contact us on WhatsApp"
-      >
-        💬
-      </a>
     </div>
   );
 }
