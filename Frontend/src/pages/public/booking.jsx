@@ -71,6 +71,37 @@ export default function Booking() {
         }
     };
 
+    // Load customer profile details if logged in (or guest session exists)
+    useEffect(() => {
+        if (user) {
+            api.get('/customer-profile')
+                .then((res) => {
+                    if (res.data) {
+                        setForm((prev) => ({
+                            ...prev,
+                            First_Name: res.data.First_Name || "",
+                            Last_Name: res.data.Last_Name || "",
+                            Email: res.data.Email || "",
+                            Phone_No: res.data.Phone_No || "",
+                            NIC: res.data.NIC || "",
+                            Country: res.data.Country || "",
+                        }));
+                    }
+                })
+                .catch((err) => console.error("Error loading customer profile:", err));
+        } else if (guestCustomer) {
+            setForm((prev) => ({
+                ...prev,
+                First_Name: guestCustomer.First_Name || "",
+                Last_Name: guestCustomer.Last_Name || "",
+                Email: guestCustomer.Email || "",
+                Phone_No: guestCustomer.Phone_No || "",
+                NIC: guestCustomer.NIC || "",
+                Country: guestCustomer.Country || "",
+            }));
+        }
+    }, [user, guestCustomer]);
+
     const handlePackageChange = (e) => {
         const pkgId = e.target.value;
         setSelectedPackageId(pkgId);
@@ -260,15 +291,14 @@ export default function Booking() {
                                 </div>
                             </div>
 
-                            {/* Section 2: Guest Details (Rendered if not logged in) */}
-                            {!activeCustomer?.Customer_ID && (
-                                <div className="space-y-4 pt-2">
-                                    <div className="flex items-center gap-2 pb-2 border-b border-slate-50 dark:border-slate-800/40">
-                                        <User size={16} className="text-emerald-500" />
-                                        <h4 className="text-xs font-extrabold uppercase tracking-widest text-slate-400">
-                                            2. Guest Registration Info
-                                        </h4>
-                                    </div>
+                            {/* Section 2: Guest Details / Traveler Info */}
+                            <div className="space-y-4 pt-2">
+                                <div className="flex items-center gap-2 pb-2 border-b border-slate-50 dark:border-slate-800/40">
+                                    <User size={16} className="text-emerald-500" />
+                                    <h4 className="text-xs font-extrabold uppercase tracking-widest text-slate-400">
+                                        2. Traveler Information
+                                    </h4>
+                                </div>
 
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div className="flex flex-col gap-1.5">
@@ -378,14 +408,13 @@ export default function Booking() {
                                         </div>
                                     </div>
                                 </div>
-                            )}
 
                             {/* Section 3: Travelers Count */}
                             <div className="space-y-4 pt-2">
                                 <div className="flex items-center gap-2 pb-2 border-b border-slate-50 dark:border-slate-800/40">
                                     <Users size={16} className="text-emerald-500" />
                                     <h4 className="text-xs font-extrabold uppercase tracking-widest text-slate-400">
-                                        {activeCustomer?.Customer_ID ? "2. Travelers Configuration" : "3. Travelers Configuration"}
+                                        3. Travelers Configuration
                                     </h4>
                                 </div>
 

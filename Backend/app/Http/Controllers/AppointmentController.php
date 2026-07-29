@@ -18,6 +18,8 @@ class AppointmentController extends Controller
             'bookings.Pickup_Location',
             'bookings.Customer_ID',
             'bookings.Vehicle_ID',
+            'bookings.Payment',
+            'bookings.Status',
             'customers.First_Name',
             'customers.Last_Name',
             'customers.Phone_No',
@@ -25,16 +27,30 @@ class AppointmentController extends Controller
             'customers.Customer_Type',
             'drivers.Driver_ID',
             'drivers.Driver_Name',
-            'drivers.Phone_Number as Driver_Phone_Number'
+            'drivers.Phone_Number as Driver_Phone_Number',
+            'packages.Package_Name'
         )
         ->join('customers', 'bookings.Customer_ID', '=', 'customers.Customer_ID')
         ->leftJoin('vehicles', 'bookings.Vehicle_ID', '=', 'vehicles.Vehicle_ID')
         ->leftJoin('drivers', 'vehicles.Driver_ID', '=', 'drivers.Driver_ID')
+        ->leftJoin('packages', 'bookings.Package_ID', '=', 'packages.id')
+        ->where('bookings.Status', 'Confirmed')
         ->orderBy('bookings.Booking_Date', 'desc')
         ->orderBy('bookings.Pickup_Time')
         ->get();
 
         return response()->json($appointments);
+    }
+
+    public function summary()
+    {
+        $totalConfirmed = Booking::where('Status', 'Confirmed')->count();
+        $totalEarnings = Booking::where('Status', 'Confirmed')->sum('Payment');
+
+        return response()->json([
+            'total_confirmed' => $totalConfirmed,
+            'total_earnings' => $totalEarnings,
+        ]);
     }
 
     public function updateDriver(Request $request, Booking $booking)

@@ -32,6 +32,7 @@ Route::apiResource('drivers', DriverController::class);
 Route::apiResource('vehicles', VehicleController::class);
 Route::apiResource('media', MediaController::class);
 Route::get('appointments', [AppointmentController::class, 'index']);
+Route::get('appointments/summary', [AppointmentController::class, 'summary']);
 Route::middleware('auth:sanctum')->put('appointments/{booking}/driver', [AppointmentController::class, 'updateDriver']);
 
 Route::get('reviews', [ReviewController::class, 'index']);
@@ -56,6 +57,9 @@ Route::post('/cart', [CartController::class, 'store']);
 Route::delete('/cart/{bookingId}', [CartController::class, 'destroy']);
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/customer-profile', function (\Illuminate\Http\Request $request) {
+        return response()->json(\App\Models\Customer::find($request->user()->Customer_ID));
+    });
     Route::post('reviews', [ReviewController::class, 'store']);
     Route::put('reviews/{review}', [ReviewController::class, 'update']);
     Route::patch('reviews/{review}', [ReviewController::class, 'update']);

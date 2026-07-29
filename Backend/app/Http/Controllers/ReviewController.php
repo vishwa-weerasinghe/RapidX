@@ -9,7 +9,7 @@ class ReviewController extends Controller
 {
     public function index()
     {
-        return response()->json(Review::orderByDesc('Review_ID')->get());
+        return response()->json(Review::with('customer')->orderByDesc('Review_ID')->get());
     }
 
     public function store(Request $request)
