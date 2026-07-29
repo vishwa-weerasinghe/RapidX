@@ -7,7 +7,7 @@ export default function AdminReviews() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  const [newReviewCount, setNewReviewCount] = useState(0);
+  const [newReviewIds, setNewReviewIds] = useState(new Set());
   const [showNewOnly, setShowNewOnly] = useState(false);
   const reviewsRef = useRef(reviews);
 
@@ -24,8 +24,10 @@ export default function AdminReviews() {
       setError("");
 
       const storedLastId = parseInt(localStorage.getItem("lastSeenReviewId") || "0", 10);
-      const unseen = data.filter((r) => r.Review_ID > storedLastId).length;
-      setNewReviewCount(unseen);
+      const unseenIds = new Set(
+        data.filter((r) => r.Review_ID > storedLastId).map((r) => r.Review_ID)
+      );
+      setNewReviewIds(unseenIds);
     } catch (err) {
       setError("Unable to load reviews right now.");
     } finally {
@@ -55,8 +57,10 @@ export default function AdminReviews() {
           }
 
           const storedLastId = parseInt(localStorage.getItem("lastSeenReviewId") || "0", 10);
-          const unseen = latest.filter((r) => r.Review_ID > storedLastId).length;
-          setNewReviewCount(unseen);
+          const unseenIds = new Set(
+            latest.filter((r) => r.Review_ID > storedLastId).map((r) => r.Review_ID)
+          );
+          setNewReviewIds(unseenIds);
         })
         .catch(() => {});
     }, 5000);
@@ -83,6 +87,14 @@ export default function AdminReviews() {
   };
 
   const handleBellClick = () => {
+    if (showNewOnly) {
+      // Going back to all reviews - mark all as seen
+      const maxId = reviews.length > 0
+        ? Math.max(...reviews.map((r) => r.Review_ID))
+        : 0;
+      localStorage.setItem("lastSeenReviewId", String(maxId));
+      setNewReviewIds(new Set());
+    }
     setShowNewOnly((prev) => !prev);
   };
 
@@ -91,8 +103,7 @@ export default function AdminReviews() {
       ? review.Description.toLowerCase().includes(searchTerm.toLowerCase())
       : true;
     if (!showNewOnly) return matchesSearch;
-    const storedLastId = parseInt(localStorage.getItem("lastSeenReviewId") || "0", 10);
-    return matchesSearch && review.Review_ID > storedLastId;
+    return matchesSearch && newReviewIds.has(review.Review_ID);
   });
 
   return (
@@ -107,7 +118,7 @@ export default function AdminReviews() {
           <button
             onClick={handleBellClick}
             className="relative rounded-full bg-white p-2 shadow-sm ring-1 ring-gray-200 hover:bg-gray-50"
-            title="New reviews"
+            title={showNewOnly ? "Show all reviews" : "Show new reviews"}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -123,9 +134,9 @@ export default function AdminReviews() {
                 d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
               />
             </svg>
-            {newReviewCount > 0 && (
+            {newReviewIds.size > 0 && (
               <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
-                {newReviewCount}
+                {newReviewIds.size}
               </span>
             )}
           </button>
@@ -172,11 +183,7 @@ export default function AdminReviews() {
       ) : (
         <div className="space-y-4">
           {filteredReviews.map((review) => {
-            const storedLastId = parseInt(
-              localStorage.getItem("lastSeenReviewId") || "0",
-              10
-            );
-            const isNew = review.Review_ID > storedLastId;
+            const isNew = newReviewIds.has(review.Review_ID);
             return (
               <div
                 key={review.Review_ID}
@@ -192,7 +199,9 @@ export default function AdminReviews() {
                       Rating: {review.Rate} / 5
                     </p>
                     <p className="text-sm text-gray-500">
-                      Customer ID: {review.Customer_ID || "Guest"}
+                      {review.customer
+                        ? `${review.customer.First_Name || ""} ${review.customer.Last_Name || ""}`.trim()
+                        : "Guest"}
                     </p>
                     <p className="mt-3 text-gray-700">{review.Description}</p>
                   </div>
@@ -210,7 +219,7 @@ export default function AdminReviews() {
         </div>
       )}
 
-      {showNewOnly && newReviewCount === 0 && !loading && (
+      {showNewOnly && newReviewIds.size === 0 && !loading && (
         <p className="mt-2 text-sm text-gray-500">No new reviews to show.</p>
       )}
     </div>

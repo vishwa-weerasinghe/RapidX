@@ -15,4 +15,9 @@ class Review extends Model
         'Description',
         'Customer_ID',
     ];
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, 'Customer_ID', 'Customer_ID');
+    }
 }

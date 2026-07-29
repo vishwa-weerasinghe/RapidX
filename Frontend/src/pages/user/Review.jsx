@@ -131,7 +131,11 @@ export default function Review() {
                 <div key={review.Review_ID} className="rounded-xl border border-slate-800 bg-slate-800/70 p-4">
                   <div className="flex items-center justify-between">
                     <p className="font-semibold text-white">{Array.from({ length: review.Rate || 0 }).map(() => "★").join("")}</p>
-                    <span className="text-sm text-slate-400">Customer #{review.Customer_ID || "Guest"}</span>
+                    <span className="text-sm text-slate-400">
+                      {review.customer
+                        ? `${review.customer.First_Name || ""} ${review.customer.Last_Name || ""}`.trim()
+                        : "Guest"}
+                    </span>
                   </div>
                   <p className="mt-2 text-slate-300">{review.Description}</p>
                 </div>
