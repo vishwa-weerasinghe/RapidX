@@ -13,6 +13,7 @@ export default function Packages() {
 
   const navigate = useNavigate();
   const [packages, setPackages] = useState([]);
+  const [search, setSearch] = useState("");
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -36,6 +37,15 @@ export default function Packages() {
   function handleBook(pkg) {
      navigate(`/user/booking/${pkg.id}`);
   }
+
+  const filteredPackages = packages.filter((pkg) => {
+    const query = search.trim().toLowerCase();
+
+    return (
+      pkg.Package_Name?.toLowerCase().includes(query) ||
+      pkg.Description?.toLowerCase().includes(query)
+    );
+  });
 
   if (loading) {
     return (
@@ -68,19 +78,30 @@ export default function Packages() {
         </h1>
 
         <p className="text-gray-600 max-w-2xl mx-auto mt-4 text-lg">
-          Discover breathtaking wildlife adventures through carefully curated
-          safari experiences designed for families, couples and explorers.
+        Discover breathtaking wildlife adventures through carefully curated safari 
+        experiences designed to create unforgettable journeys.
         </p>
+
+        <input
+          type="search"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          placeholder="Search safari packages..."
+          aria-label="Search safari packages"
+          className="w-full max-w-xl mx-auto mt-8 block rounded-xl border border-green-200 bg-white px-4 py-3 text-gray-800 outline-none focus:ring-2 focus:ring-green-600"
+        />
       </div>
 
-      {packages.length === 0 ? (
+      {filteredPackages.length === 0 ? (
         <div className="text-center text-xl text-gray-500">
-          No Safari Packages Available
+          {packages.length === 0
+            ? "No Safari Packages Available"
+            : "No safari packages match your search."}
         </div>
       ) : (
         <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-10">
 
-          {packages.map((pkg) => (
+          {filteredPackages.map((pkg) => (
 
             <div
               key={pkg.id}

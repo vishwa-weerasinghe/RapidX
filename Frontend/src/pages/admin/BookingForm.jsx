@@ -7,8 +7,6 @@ export default function BookingForm() {
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
-  const [vehicles, setVehicles] = useState([]);
-
   const [form, setForm] = useState({
     Booking_Date: "",
     Pickup_Time: "",
@@ -17,12 +15,10 @@ export default function BookingForm() {
     No_of_child: 0,
     Payment: 0,
     Status: "Confirmed",
-    Vehicle_ID: "",
   });
 
   useEffect(() => {
     fetchBooking();
-    fetchVehicles();
   }, []);
 
   // Load booking
@@ -39,23 +35,12 @@ export default function BookingForm() {
         No_of_child: data.No_of_child || 0,
         Payment: data.Payment || 0,
         Status: data.Status || "Confirmed",
-        Vehicle_ID: data.Vehicle_ID || "",
       });
     } catch (err) {
       console.log(err);
       alert("Failed to load booking");
     } finally {
       setLoading(false);
-    }
-  };
-
-  // Load vehicles
-  const fetchVehicles = async () => {
-    try {
-      const res = await api.get("/vehicles");
-      setVehicles(res.data);
-    } catch (err) {
-      console.log(err);
     }
   };
 
@@ -187,24 +172,6 @@ export default function BookingForm() {
             <option value="Confirmed">Confirmed</option>
             <option value="Completed">Completed</option>
             <option value="Cancelled">Cancelled</option>
-          </select>
-        </div>
-
-        {/* Vehicle */}
-        <div>
-          <label className="font-semibold">Vehicle</label>
-          <select
-            name="Vehicle_ID"
-            value={form.Vehicle_ID}
-            onChange={handleChange}
-            className="w-full border p-2 rounded"
-          >
-            <option value="">-- Select Vehicle --</option>
-            {vehicles.map((v) => (
-              <option key={v.Vehicle_ID} value={v.Vehicle_ID}>
-                {v.Vehicle_Name || `Vehicle ${v.Vehicle_ID}`}
-              </option>
-            ))}
           </select>
         </div>
 

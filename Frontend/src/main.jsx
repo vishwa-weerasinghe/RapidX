@@ -100,6 +100,31 @@ createRoot(document.getElementById("root")).render(
             <Route path="reviews" element={<AdminReviews />} />
             <Route path="vehicles" element={<AdminVehicles />} />
             <Route
+              path="packages/create"
+              element={<PackageForm user={user} />}
+            />
+            <Route
+              path="packages/:id/edit"
+              element={<PackageForm user={user} />}
+            />
+            <Route
+              path="drivers/create"
+              element={<DriverForm user={user} />}
+            />
+            <Route
+              path="drivers/:id/edit"
+              element={<DriverForm user={user} />}
+            />
+            <Route
+              path="media/create"
+              element={<MediaForm user={user} />}
+            />
+            <Route
+              path="media/:id/edit"
+              element={<MediaForm user={user} />}
+            />
+            <Route path="bookings/:id/edit" element={<BookingForm />} />
+            <Route
               path="vehicles/create"
               element={<VehicleFormPage user={user} />}
             />
@@ -128,35 +153,6 @@ createRoot(document.getElementById("root")).render(
             path="/admin/addvehicle"
             element={<VehicleFormPage user={user} />}
           />
-
-          {/* Admin CRUD Routes */}
-          <Route
-            path="/admin/packages/create"
-            element={<PackageForm user={user} />}
-          />
-          <Route
-            path="/admin/packages/:id/edit"
-            element={<PackageForm user={user} />}
-          />
-
-          <Route
-            path="/admin/drivers/create"
-            element={<DriverForm user={user} />}
-          />
-          <Route
-            path="/admin/drivers/:id/edit"
-            element={<DriverForm user={user} />}
-          />
-
-          <Route
-            path="/admin/media/create"
-            element={<MediaForm user={user} />}
-          />
-          <Route
-            path="/admin/media/:id/edit"
-            element={<MediaForm user={user} />}
-          />
-          <Route path="/admin/bookings/:id/edit" element={<BookingForm />} />
 
           {/* fallback */}
           <Route path="*" element={<Navigate to="/login" />} />

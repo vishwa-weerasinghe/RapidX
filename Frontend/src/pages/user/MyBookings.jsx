@@ -5,6 +5,7 @@ export default function MyBookings() {
   const user = JSON.parse(localStorage.getItem("user"));
 
   const [bookings, setBookings] = useState([]);
+  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -23,6 +24,17 @@ export default function MyBookings() {
     }
   };
 
+  const filteredBookings = bookings.filter((booking) => {
+    const query = search.trim().toLowerCase();
+
+    return (
+      booking.package?.Package_Name?.toLowerCase().includes(query) ||
+      booking.Booking_Date?.toLowerCase().includes(query) ||
+      booking.Pickup_Location?.toLowerCase().includes(query) ||
+      booking.Status?.toLowerCase().includes(query)
+    );
+  });
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -37,6 +49,15 @@ export default function MyBookings() {
       <h1 className="text-3xl font-bold text-green-800 mb-6">
         My Bookings
       </h1>
+
+      <input
+        type="search"
+        value={search}
+        onChange={(event) => setSearch(event.target.value)}
+        placeholder="Search by package, date, pickup location, or status..."
+        aria-label="Search my bookings"
+        className="w-full max-w-xl mb-6 rounded-xl border border-green-200 px-4 py-3 outline-none focus:ring-2 focus:ring-green-600"
+      />
 
       <table className="w-full border">
 
@@ -56,7 +77,17 @@ export default function MyBookings() {
 
         <tbody>
 
-          {bookings.map((booking) => (
+          {filteredBookings.length === 0 && (
+            <tr>
+              <td colSpan="7" className="p-6 text-center text-gray-500">
+                {bookings.length === 0
+                  ? "You do not have any bookings yet."
+                  : "No bookings match your search."}
+              </td>
+            </tr>
+          )}
+
+          {filteredBookings.map((booking) => (
 
             <tr key={booking.Booking_ID} className="border-b">
 
