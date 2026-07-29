@@ -20,6 +20,8 @@ export default function App() {
     }
   })();
 
+  const isGuestUser = !user && !localStorage.getItem("token");
+
   const dashboardLink = (() => {
     if (!user) return "/login";
     const role = `${user?.role ?? user?.Role ?? user?.user_type ?? "customer"}`.toLowerCase();
@@ -91,7 +93,6 @@ export default function App() {
   const [activeSection, setActiveSection] = useState("home");
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [reviewIndex, setReviewIndex] = useState(0);
   const [lightboxImage, setLightboxImage] = useState(null);
   const [notification, setNotification] = useState(null);
 
@@ -133,10 +134,6 @@ export default function App() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // --- REFS & DATA ---
-  const reviewsSliderRef = useRef(null);
-  const touchStartX = useRef(0);
-  const touchEndX = useRef(0);
-
   const heroSlides = [
     "https://minneriyawildjeepsafari.com/wp-content/uploads/2025/08/WhatsApp-Image-2025-08-20-at-12.11.05-1024x683.jpeg",
   ];
@@ -169,7 +166,6 @@ export default function App() {
   ];
 
   const [packages, setPackages] = useState([]);
-  const [reviews, setReviews] = useState([]);
   const [galleryImages, setGalleryImages] = useState([]);
 
   useEffect(() => {
@@ -207,38 +203,7 @@ export default function App() {
       })
       .catch((err) => console.error("Error loading packages:", err));
 
-    // 2. Fetch Reviews from DB
-    api
-      .get("/reviews")
-      .then((res) => {
-        if (res.data && res.data.length > 0) {
-          const mapped = res.data.map((rev) => {
-            const firstName = rev.customer?.First_Name || "";
-            const lastName = rev.customer?.Last_Name || "";
-            const initials =
-              `${firstName[0] || ""}${lastName[0] || ""}`.toUpperCase() || "G";
-            const name = `${firstName} ${lastName}`.trim() || "Guest User";
-            const words = (rev.Description || "").split(" ");
-            const title =
-              words.length > 0
-                ? words.slice(0, 4).join(" ") + (words.length > 4 ? "..." : "")
-                : "Excellent Safari";
-
-            return {
-              initials: initials,
-              name: name,
-              date: "Recently",
-              title: title,
-              text: rev.Description,
-              rate: rev.Rate || 5,
-            };
-          });
-          setReviews(mapped);
-        }
-      })
-      .catch((err) => console.error("Error loading reviews:", err));
-
-    // 3. Fetch Media Gallery from DB
+    // 2. Fetch Media Gallery from DB
     api
       .get("/media")
       .then((res) => {
@@ -310,33 +275,6 @@ export default function App() {
     }
   }, [heroSlides.length]);
 
-  const handleReviewNext = () =>
-    setReviewIndex((prev) => Math.min(reviews.length - 1, prev + 1));
-  const handleReviewPrev = () =>
-    setReviewIndex((prev) => Math.max(0, prev - 1));
-
-  const handleTouchStart = (e) => {
-    touchStartX.current = e.changedTouches[0].screenX;
-  };
-  const handleTouchEnd = (e) => {
-    touchEndX.current = e.changedTouches[0].screenX;
-    if (touchEndX.current < touchStartX.current - 50) handleReviewNext();
-    if (touchEndX.current > touchStartX.current + 50) handleReviewPrev();
-  };
-
-  const getReviewTransformStyle = () => {
-    if (
-      typeof window !== "undefined" &&
-      window.innerWidth <= 768 &&
-      reviewsSliderRef.current
-    ) {
-      const card = reviewsSliderRef.current.querySelector(".review-card");
-      const cardWidth = card ? card.offsetWidth : 0;
-      return { transform: `translateX(-${reviewIndex * (cardWidth + 32)}px)` };
-    }
-    return {};
-  };
-
   // --- ACTION SUBMISSIONS ---
   const handleFormChange = (e) => {
     const { name, value } = e.target;
@@ -374,6 +312,160 @@ export default function App() {
       window.scrollTo({ top: target.offsetTop - 80, behavior: "smooth" });
     }
   };
+
+  const [reviews, setReviews] = useState([]);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [reviewForm, setReviewForm] = useState({
+    name: "",
+    email: "",
+    rating: 5,
+    message: "",
+  });
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [showAllReviews, setShowAllReviews] = useState(false);
+  const [reviewIndex, setReviewIndex] = useState(0);
+  const [reviewNotification, setReviewNotification] = useState(null);
+
+  const reviewsSliderRef = useRef(null);
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
+
+  const getStoredGuestReviews = () => {
+    try {
+      const storedReviews = localStorage.getItem("guestReviews");
+      if (!storedReviews) return [];
+      const parsedReviews = JSON.parse(storedReviews);
+      return Array.isArray(parsedReviews) ? parsedReviews : [];
+    } catch (err) {
+      console.error("Error loading guest reviews:", err);
+      return [];
+    }
+  };
+
+  useEffect(() => {
+    const storedGuestReviews = getStoredGuestReviews();
+
+    api
+      .get("/reviews")
+      .then((res) => {
+        if (res.data && res.data.length > 0) {
+          const mapped = res.data.map((rev) => {
+            const firstName = rev.customer?.First_Name || "";
+            const lastName = rev.customer?.Last_Name || "";
+            const initials =
+              `${firstName[0] || ""}${lastName[0] || ""}`.toUpperCase() || "G";
+            const name = `${firstName} ${lastName}`.trim() || "Guest User";
+            const words = (rev.Description || "").split(" ");
+            const title =
+              words.length > 0
+                ? words.slice(0, 4).join(" ") + (words.length > 4 ? "..." : "")
+                : "Excellent Safari";
+
+            return {
+              initials,
+              name,
+              date: "Recently",
+              title,
+              text: rev.Description,
+              rate: rev.Rate || 5,
+            };
+          });
+
+          setReviews([...storedGuestReviews, ...mapped]);
+        } else if (storedGuestReviews.length > 0) {
+          setReviews(storedGuestReviews);
+        }
+      })
+      .catch((err) => console.error("Error loading reviews:", err));
+  }, []);
+
+  const visibleReviews = showAllReviews ? reviews : reviews.slice(0, 12);
+
+  const handleReviewNext = () =>
+    setReviewIndex((prev) => Math.min(visibleReviews.length - 1, prev + 1));
+  const handleReviewPrev = () =>
+    setReviewIndex((prev) => Math.max(0, prev - 1));
+
+  const handleReviewFormChange = (e) => {
+    const { name, value } = e.target;
+    setReviewForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleGuestReviewSubmit = (e) => {
+    e.preventDefault();
+
+    if (!reviewForm.message.trim()) {
+      setReviewNotification({
+        text: "Please share a few words about your experience.",
+        type: "error",
+      });
+      setTimeout(() => setReviewNotification(null), 4000);
+      return;
+    }
+
+    setReviewSubmitting(true);
+
+    const name = reviewForm.name.trim() || "Guest User";
+    const initials = name
+      .split(" ")
+      .map((word) => word[0] || "")
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || "G";
+
+    const newReview = {
+      initials,
+      name,
+      date: "Just now",
+      title: reviewForm.message.trim().split(" ").slice(0, 4).join(" ") + (reviewForm.message.trim().split(" ").length > 4 ? "..." : ""),
+      text: reviewForm.message.trim(),
+      rate: Number(reviewForm.rating) || 5,
+      isGuest: true,
+    };
+
+    setReviews((prev) => {
+      const updatedReviews = [newReview, ...prev];
+      try {
+        const storedGuestReviews = getStoredGuestReviews();
+        localStorage.setItem("guestReviews", JSON.stringify([newReview, ...storedGuestReviews]));
+      } catch (err) {
+        console.error("Error saving guest review:", err);
+      }
+      return updatedReviews;
+    });
+    setReviewForm({ name: "", email: "", rating: 5, message: "" });
+    setShowReviewForm(false);
+    setReviewNotification({
+      text: "Thank you for your review! It has been added to this page.",
+      type: "success",
+    });
+    setTimeout(() => setReviewNotification(null), 4000);
+    setReviewSubmitting(false);
+  };
+
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.changedTouches[0].screenX;
+  };
+
+  const handleTouchEnd = (e) => {
+    touchEndX.current = e.changedTouches[0].screenX;
+    if (touchEndX.current < touchStartX.current - 50) handleReviewNext();
+    if (touchEndX.current > touchStartX.current + 50) handleReviewPrev();
+  };
+
+  const getReviewTransformStyle = () => {
+    if (
+      typeof window !== "undefined" &&
+      window.innerWidth <= 768 &&
+      reviewsSliderRef.current
+    ) {
+      const card = reviewsSliderRef.current.querySelector(".review-card");
+      const cardWidth = card ? card.offsetWidth : 0;
+      return { transform: `translateX(-${reviewIndex * (cardWidth + 32)}px)` };
+    }
+    return {};
+  };
+
 
   return (
     <div
@@ -937,86 +1029,207 @@ export default function App() {
               </div>
             ))}
           </div>
-        </div>
-      </section>
 
-      {/* --- REVIEWS SECTION --- */}
-      <section id="reviews" className="py-16 md:py-24 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 md:px-6">
-          <div className="text-center max-w-xl mx-auto mb-10">
-            <span className="text-emerald-600 dark:text-green-400 font-semibold uppercase tracking-wider text-xs block mb-2">
-              Customer Reviews
-            </span>
-            <h2 className="font-serif text-3xl sm:text-4xl font-bold mb-4">
-              What Our Guests Say
-            </h2>
-            <img
-              src="https://minneriyawildjeepsafari.com/wp-content/uploads/2025/08/TC25-logo.jpg"
-              alt="TripAdvisor"
-              className="h-16 mx-auto object-contain"
-            />
-          </div>
 
-          <div className="relative max-w-5xl mx-auto px-2">
-            <div
-              className="md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 flex transition-transform duration-300 ease-out"
-              ref={reviewsSliderRef}
-              style={getReviewTransformStyle()}
-              onTouchStart={handleTouchStart}
-              onTouchEnd={handleTouchEnd}
-            >
-              {reviews.map((rev, index) => (
-                <div
-                  key={index}
-                  className={`review-card p-6 rounded-2xl shadow-md border min-w-[85vw] sm:min-w-[45vw] md:min-w-0 flex-shrink-0 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ${theme === "dark"
-                    ? "bg-neutral-900 border-neutral-800"
-                    : "bg-white border-neutral-100"
-                    }`}
-                >
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex gap-3 items-center">
-                      <div className="w-10 h-10 bg-gradient-to-br from-emerald-700 to-emerald-500 text-white font-bold text-xs rounded-full flex items-center justify-center">
-                        {rev.initials}
+//review section
+          <div className="mt-12">
+            <section id="reviews" className="py-16 md:py-24 overflow-hidden">
+              <div className="max-w-7xl mx-auto px-4 md:px-6">
+                <div className="text-center max-w-xl mx-auto mb-10">
+                  <span className="text-emerald-600 dark:text-green-400 font-semibold uppercase tracking-wider text-xs block mb-2">
+                    Customer Reviews
+                  </span>
+                  <h2 className="font-serif text-3xl sm:text-4xl font-bold mb-4">
+                    Their Journey. Their Words
+                    <h3  className="text-sm sm:text-base font-normal text-neutral-400 dark:text-neutral-400 mt-2">
+                      From unforgettable wildlife encounters to exceptional service, see what our guests have shared about their journeys.
+                    </h3>
+                  </h2>
+                  <img
+                    src="https://minneriyawildjeepsafari.com/wp-content/uploads/2025/08/TC25-logo.jpg"
+                    alt="TripAdvisor"
+                    className="h-16 mx-auto object-contain"
+                  />
+                </div>
+
+                {reviewNotification && (
+                  <div className={`mx-auto mb-6 max-w-md rounded-xl border px-4 py-3 text-sm ${reviewNotification.type === "error" ? "border-red-500 text-red-600" : "border-emerald-600 text-emerald-700"}`}>
+                    {reviewNotification.text}
+                  </div>
+                )}
+
+                {isGuestUser && (
+                  <div className="flex justify-center mb-6">
+                    <button
+                      type="button"
+                      onClick={() => setShowReviewForm((prev) => !prev)}
+                      className="bg-emerald-700 text-white font-semibold px-6 py-3 rounded-full hover:bg-emerald-800 shadow transition duration-300"
+                    >
+                      {showReviewForm ? "Cancel" : "Write Review"}
+                    </button>
+                  </div>
+                )}
+
+                {isGuestUser && showReviewForm && (
+                  <form
+                    onSubmit={handleGuestReviewSubmit}
+                    className={`max-w-3xl mx-auto mb-8 rounded-2xl border p-6 shadow-sm ${theme === "dark"
+                      ? "bg-neutral-900 border-neutral-800"
+                      : "bg-white border-neutral-100"
+                      }`}
+                  >
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Your name</label>
+                        <input
+                          type="text"
+                          name="name"
+                          value={reviewForm.name}
+                          onChange={handleReviewFormChange}
+                          placeholder="Enter your name"
+                          className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${theme === "dark"
+                            ? "border-neutral-700 bg-neutral-950 text-white"
+                            : "border-neutral-200 bg-white text-neutral-800"
+                            }`}
+                        />
                       </div>
                       <div>
-                        <h4 className="text-sm font-bold leading-tight">
-                          {rev.name}
-                        </h4>
-                        <span className="text-amber-400 text-xs">
-                          {"★".repeat(rev.rate || 5)}
-                          {"☆".repeat(5 - (rev.rate || 5))}
-                        </span>
+                        <label className="block text-sm font-medium mb-2">Your email</label>
+                        <input
+                          type="email"
+                          name="email"
+                          value={reviewForm.email}
+                          onChange={handleReviewFormChange}
+                          placeholder="Enter your email"
+                          className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${theme === "dark"
+                            ? "border-neutral-700 bg-neutral-950 text-white"
+                            : "border-neutral-200 bg-white text-neutral-800"
+                            }`}
+                        />
                       </div>
                     </div>
-                    <span className="text-neutral-400 text-xs">{rev.date}</span>
-                  </div>
-                  <h3 className="text-base font-bold mb-2 line-clamp-1">
-                    "{rev.title}"
-                  </h3>
-                  <p className="text-neutral-400 text-xs sm:text-sm leading-relaxed mb-4 line-clamp-5">
-                    {rev.text}
-                  </p>
-                  <span className="bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-400 font-bold text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider">
-                    Verified
-                  </span>
-                </div>
-              ))}
-            </div>
 
-            <div className="flex justify-center gap-3 mt-8 md:hidden">
-              <button
-                onClick={handleReviewPrev}
-                className="w-10 h-10 bg-emerald-700 text-white rounded-full flex items-center justify-center transition shadow-md"
-              >
-                ←
-              </button>
-              <button
-                onClick={handleReviewNext}
-                className="w-10 h-10 bg-emerald-700 text-white rounded-full flex items-center justify-center transition shadow-md"
-              >
-                →
-              </button>
-            </div>
+                    <div className="mt-4">
+                      <label className="block text-sm font-medium mb-2">Rating</label>
+                      <select
+                        name="rating"
+                        value={reviewForm.rating}
+                        onChange={handleReviewFormChange}
+                        className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${theme === "dark"
+                          ? "border-neutral-700 bg-neutral-950 text-white"
+                          : "border-neutral-200 bg-white text-neutral-800"
+                          }`}
+                      >
+                        {[5, 4, 3, 2, 1].map((value) => (
+                          <option key={value} value={value}>
+                            {value} star{value > 1 ? "s" : ""}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="mt-4">
+                      <label className="block text-sm font-medium mb-2">Your review</label>
+                      <textarea
+                        name="message"
+                        value={reviewForm.message}
+                        onChange={handleReviewFormChange}
+                        rows="4"
+                        placeholder="Share your safari experience"
+                        className={`w-full rounded-xl border px-4 py-3 text-sm outline-none resize-none ${theme === "dark"
+                          ? "border-neutral-700 bg-neutral-950 text-white"
+                          : "border-neutral-200 bg-white text-neutral-800"
+                          }`}
+                      />
+                    </div>
+
+                    <div className="mt-5 flex justify-end">
+                      <button
+                        type="submit"
+                        disabled={reviewSubmitting}
+                        className="bg-emerald-700 text-white font-semibold px-5 py-3 rounded-full hover:bg-emerald-800 disabled:opacity-70 transition duration-300"
+                      >
+                        {reviewSubmitting ? "Submitting..." : "Submit Review"}
+                      </button>
+                    </div>
+                  </form>
+                )}
+
+                <div className="relative max-w-5xl mx-auto px-2">
+                  <div
+                    className="md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 flex transition-transform duration-300 ease-out"
+                    ref={reviewsSliderRef}
+                    style={getReviewTransformStyle()}
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={handleTouchEnd}
+                  >
+                    {visibleReviews.map((rev, index) => (
+                      <div
+                        key={index}
+                        className={`review-card p-6 rounded-2xl shadow-md border min-w-[85vw] sm:min-w-[45vw] md:min-w-0 flex-shrink-0 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ${theme === "dark"
+                          ? "bg-neutral-900 border-neutral-800"
+                          : "bg-white border-neutral-100"
+                          }`}
+                      >
+                        <div className="flex justify-between items-start mb-4">
+                          <div className="flex gap-3 items-center">
+                            <div className="w-10 h-10 bg-gradient-to-br from-emerald-700 to-emerald-500 text-white font-bold text-xs rounded-full flex items-center justify-center">
+                              {rev.initials}
+                            </div>
+                            <div>
+                              <h4 className="text-sm font-bold leading-tight">
+                                {rev.name}
+                              </h4>
+                              <span className="text-amber-400 text-xs">
+                                {"★".repeat(rev.rate || 5)}
+                                {"☆".repeat(5 - (rev.rate || 5))}
+                              </span>
+                            </div>
+                          </div>
+                          <span className="text-neutral-400 text-xs">{rev.date}</span>
+                        </div>
+                        <h3 className="text-base font-bold mb-2 line-clamp-1">
+                          "{rev.title}"
+                        </h3>
+                        <p className="text-neutral-400 text-xs sm:text-sm leading-relaxed mb-4 line-clamp-5">
+                          {rev.text}
+                        </p>
+                        <span className={`font-bold text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider ${rev.isGuest ? "bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-400" : "bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-400"}`}>
+                          {rev.isGuest ? "Guest" : "Verified"}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {reviews.length > 12 && (
+                    <div className="flex justify-center mt-8">
+                      <button
+                        type="button"
+                        onClick={() => setShowAllReviews((prev) => !prev)}
+                        className="bg-emerald-700 text-white font-semibold px-6 py-3 rounded-full hover:bg-emerald-800 shadow transition duration-300"
+                      >
+                        {showAllReviews ? "Show Less" : "See All Reviews"}
+                      </button>
+                    </div>
+                  )}
+
+                  <div className="flex justify-center gap-3 mt-8 md:hidden">
+                    <button
+                      onClick={handleReviewPrev}
+                      className="w-10 h-10 bg-emerald-700 text-white rounded-full flex items-center justify-center transition shadow-md"
+                    >
+                      ←
+                    </button>
+                    <button
+                      onClick={handleReviewNext}
+                      className="w-10 h-10 bg-emerald-700 text-white rounded-full flex items-center justify-center transition shadow-md"
+                    >
+                      →
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </section>
           </div>
         </div>
       </section>
