@@ -13,20 +13,16 @@ export function HeroCountdown({ user }) {
   const customerId = user?.Customer_ID
   const isDark = theme === 'dark'
 
-  // Dark mode: golden brown background + chocolate brown content
-  // Light mode: olive green background + hunter green content
-  const primaryBg = isDark ? 'bg-amber-700' : 'bg-emerald-700'
-  const primaryGradient = isDark
-    ? 'from-amber-700 via-amber-700/60 to-transparent'
-    : 'from-emerald-700 via-emerald-700/60 to-transparent'
-  const badgeBg = isDark ? 'bg-amber-800/40' : 'bg-emerald-800/40'
-  const badgeBorder = isDark ? 'border-amber-600/30' : 'border-emerald-600/30'
-  const infoBg = isDark ? 'bg-amber-800/40' : 'bg-emerald-800/40'
-  const infoBorder = isDark ? 'border-amber-600/20' : 'border-emerald-600/20'
-  const accentText = isDark ? 'text-amber-200' : 'text-emerald-200'
-  const countdownNum = isDark ? 'text-amber-200' : 'text-emerald-200'
-  const pulseDot = isDark ? 'bg-amber-300' : 'bg-emerald-300'
-  const textMuted = isDark ? 'text-amber-100/70' : 'text-emerald-100/70'
+  const primaryBg = 'bg-[#0f3d2e]'
+  const primaryGradient = 'from-[#0f3d2e] via-[#0f3d2e]/70 to-transparent'
+  const badgeBg = 'bg-[#144b38]/50'
+  const badgeBorder = 'border-[#1f6a4e]/40'
+  const infoBg = 'bg-[#144b38]/50'
+  const infoBorder = 'border-[#1f6a4e]/30'
+  const accentText = 'text-[#eaf5ee]'
+  const countdownNum = 'text-[#f5f7f2]'
+  const pulseDot = 'bg-[#9fd8b4]'
+  const textMuted = 'text-[#eaf5ee]/80'
 
   useEffect(() => {
     if (!customerId) {

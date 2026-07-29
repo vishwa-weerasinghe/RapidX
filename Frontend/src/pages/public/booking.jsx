@@ -173,7 +173,7 @@ export default function Booking() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 py-12 px-4 md:px-6 transition-colors duration-300">
+        <div className="min-h-screen bg-[#f8f4eb] dark:bg-[#050505] text-[#1f2b20] dark:text-[#f5f7f2] py-12 px-4 md:px-6 transition-colors duration-300">
             <div className="max-w-4xl mx-auto space-y-6">
                 {/* Navigation Action */}
                 <button
@@ -185,7 +185,7 @@ export default function Booking() {
                 </button>
 
                 <div className="flex justify-center">
-                    <div className="w-full max-w-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl shadow-xl p-6 md:p-8 space-y-8">
+                    <div className="w-full max-w-2xl bg-[#fcfaf5] dark:bg-[#0d0d0d] border border-[#dce8d7] dark:border-[#15311f] rounded-3xl shadow-xl p-6 md:p-8 space-y-8">
                         <div>
                             <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
                                 Book Your Adventure

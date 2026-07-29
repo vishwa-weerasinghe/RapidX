@@ -470,8 +470,8 @@ export default function App() {
   return (
     <div
       className={`font-sans antialiased overflow-x-hidden selection:bg-emerald-700 selection:text-white transition-colors duration-200 ${theme === "dark"
-        ? "bg-neutral-950 text-white"
-        : "bg-white text-neutral-800"
+        ? "bg-[#050505] text-[#f5f7f2]"
+        : "bg-[#f8f4eb] text-[#1f2b20]"
         }`}
     >
       {/* Toast Notification Alert Box */}
@@ -940,7 +940,7 @@ export default function App() {
       {/* --- TOUR PACKAGES --- */}
       <section
         id="packages"
-        className={`py-16 md:py-24 ${theme === "dark" ? "bg-neutral-900/40" : "bg-neutral-50"}`}
+        className={`py-16 md:py-24 ${theme === "dark" ? "bg-[#0d0d0d]" : "bg-[#f3efe7]"}`}
       >
         <div className="max-w-7xl mx-auto px-4 md:px-6">
           <div className="text-center max-w-xl mx-auto mb-12">
@@ -1237,7 +1237,7 @@ export default function App() {
       {/* --- PHOTO GALLERY --- */}
       <section
         id="gallery"
-        className={`py-16 md:py-24 ${theme === "dark" ? "bg-neutral-900/40" : "bg-neutral-50"}`}
+        className={`py-16 md:py-24 ${theme === "dark" ? "bg-[#0d0d0d]" : "bg-[#f3efe7]"}`}
       >
         <div className="max-w-7xl mx-auto px-4 md:px-6">
           <div className="text-center max-w-xl mx-auto mb-12">

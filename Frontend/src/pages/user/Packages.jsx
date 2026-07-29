@@ -64,7 +64,7 @@ export default function Packages() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#F5F9F3] via-[#EDF5E8] to-[#DCE9D4] py-12 px-6">
+    <div className="min-h-screen bg-gradient-to-b from-[#f8f4eb] via-[#f2ebdc] to-[#e4edd8] dark:from-[#050505] dark:via-[#0d0d0d] dark:to-[#111b14] py-12 px-6 text-[#1f2b20] dark:text-[#f5f7f2]">
 
       {/* Heading */}
       <div className="text-center mb-14">
@@ -88,7 +88,7 @@ export default function Packages() {
           onChange={(event) => setSearch(event.target.value)}
           placeholder="Search safari packages..."
           aria-label="Search safari packages"
-          className="w-full max-w-xl mx-auto mt-8 block rounded-xl border border-green-200 bg-white px-4 py-3 text-gray-800 outline-none focus:ring-2 focus:ring-green-600"
+          className="w-full max-w-xl mx-auto mt-8 block rounded-xl border border-[#cfe0c8] dark:border-[#1e3a23] bg-[#fcfaf5] dark:bg-[#0d0d0d] px-4 py-3 text-[#1f2b20] dark:text-[#f5f7f2] outline-none focus:ring-2 focus:ring-emerald-600"
         />
       </div>
 
@@ -105,7 +105,7 @@ export default function Packages() {
 
             <div
               key={pkg.id}
-              className="group rounded-3xl overflow-hidden bg-white/80 backdrop-blur-md shadow-lg hover:shadow-2xl transition duration-500 hover:-translate-y-3 border border-green-100"
+              className="group rounded-3xl overflow-hidden bg-[#fcfaf5]/90 dark:bg-[#0d0d0d]/95 backdrop-blur-md shadow-lg hover:shadow-2xl transition duration-500 hover:-translate-y-3 border border-[#dce8d7] dark:border-[#15311f]"
             >
 
               {/* Image */}
