@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Menu, ShoppingCart, Sun, Moon } from 'lucide-react'
+import { Menu, ShoppingCart, Sun, Moon, LogOut } from 'lucide-react'
 import api from '../../axios'
 import { useTheme } from '../../context/ThemeContext'
 
-export function Header({ user, toggleSidebar }) {
+export function Header({ user }) {
   const navigate = useNavigate()
   const { theme, toggleTheme } = useTheme()
   const [cartCount, setCartCount] = useState(0)
+  const [newCartCount, setNewCartCount] = useState(0)
+  const [loading, setLoading] = useState(false)
 
   const customerName = user?.User_Name || 'Customer'
-  const firstLetter = customerName.charAt(0).toUpperCase()
 
   const customerId = user?.Customer_ID
 
@@ -19,12 +20,49 @@ export function Header({ user, toggleSidebar }) {
 
     api.get(`/cart/${customerId}`)
       .then((res) => {
-        setCartCount(Array.isArray(res.data) ? res.data.length : 0)
+        const total = Array.isArray(res.data) ? res.data.length : 0
+        setCartCount(total)
+        const lastSeen = parseInt(localStorage.getItem("lastSeenCartCount") || "0", 10)
+        setNewCartCount(Math.max(0, total - lastSeen))
       })
       .catch(() => {
         setCartCount(0)
+        setNewCartCount(0)
       })
   }, [customerId])
+
+  const handleCartClick = () => {
+    localStorage.setItem("lastSeenCartCount", String(cartCount))
+    setNewCartCount(0)
+    navigate('/user/cart')
+  }
+
+  const handleLogout = async () => {
+    setLoading(true)
+
+    try {
+      const token = localStorage.getItem('token')
+
+      if (token) {
+        await api.post(
+          '/logout',
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+      }
+    } catch (err) {
+      console.error(err)
+    } finally {
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      setLoading(false)
+      navigate('/')
+    }
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full bg-stone-50 dark:bg-neutral-900 backdrop-blur-md transition-colors duration-300">
@@ -73,35 +111,29 @@ export function Header({ user, toggleSidebar }) {
           </button>
 
           <button
-            onClick={() => navigate('/user/cart')}
+            onClick={handleCartClick}
             className="p-2 text-safari-muted hover:text-safari-green dark:text-gray-400 dark:hover:text-yellow-400 transition-colors relative"
           >
             <ShoppingCart className="w-5 h-5" />
-            {cartCount > 0 && (
+            {newCartCount > 0 && (
               <span className="absolute top-1 right-1 w-4 h-4 bg-safari-terracotta dark:bg-yellow-400 text-white dark:text-black text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-safari-bone dark:border-black">
-                {cartCount}
+                {newCartCount}
               </span>
             )}
           </button>
 
           <div className="h-6 w-px bg-safari-border/50 dark:bg-gray-700 mx-1"></div>
 
-          <button className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <div className="text-right hidden sm:block">
-              <div className="text-sm font-medium text-safari-text dark:text-gray-200">
-                {customerName}
-              </div>
-              <div className="text-xs text-safari-muted dark:text-gray-400">My Account</div>
-            </div>
-            <div className="w-9 h-9 rounded-full bg-safari-green dark:bg-yellow-400 flex items-center justify-center text-white dark:text-black font-bold text-sm shadow-sm">
-              {firstLetter}
-            </div>
+          <button
+            onClick={handleLogout}
+            disabled={loading}
+            className="flex items-center gap-2 rounded-full border border-safari-border/60 dark:border-gray-700 bg-white dark:bg-neutral-800 px-3 py-2 text-sm font-medium text-red-600 dark:text-red-400 shadow-sm hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <LogOut className="w-4 h-4" />
+            <span>{loading ? 'Logging out...' : 'Logout'}</span>
           </button>
 
-          <button 
-            onClick={toggleSidebar}
-            className="p-2 text-safari-text dark:text-gray-200 md:hidden"
-          >
+          <button className="p-2 text-safari-text dark:text-gray-200 sm:hidden">
             <Menu className="w-6 h-6" />
           </button>
         </div>
