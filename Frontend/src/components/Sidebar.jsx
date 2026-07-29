@@ -51,32 +51,6 @@ export default function Sidebar({ role = "admin" }) {
 
   const [loading, setLoading] = useState(false);
 
-  const handleLogout = async () => {
-    setLoading(true);
-
-    try {
-      const token = localStorage.getItem("token");
-
-      if (token) {
-        await api.post(
-          "/logout",
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      setLoading(false);
-      navigate("/");
-    }
-  };
 
   return (
     <aside
@@ -171,9 +145,8 @@ export default function Sidebar({ role = "admin" }) {
                   transition-all
                   duration-300
 
-                  ${
-                    isActive
-                      ? `
+                  ${isActive
+                    ? `
                       bg-white
                       text-green-700
 
@@ -185,7 +158,7 @@ export default function Sidebar({ role = "admin" }) {
                       border-l-4
                       border-green-600
                     `
-                      : `
+                    : `
                       text-white
 
                       hover:bg-white/15
@@ -216,67 +189,6 @@ export default function Sidebar({ role = "admin" }) {
           })}
 
         </nav>
-
-      </div>
-            {/* LOGOUT SECTION */}
-
-      <div
-        className="
-          p-5
-          border-t
-          border-white/20
-          dark:border-slate-700
-        "
-      >
-
-       <button
-          onClick={handleLogout}
-          disabled={loading}
-          className="
-            w-full
-
-            flex
-            items-center
-            justify-center
-            gap-3
-
-            py-3
-
-            rounded-xl
-
-            bg-red-500/20
-            hover:bg-red-500
-
-            dark:bg-red-500/20
-            dark:hover:bg-red-500
-
-            text-red-400
-            hover:text-white
-
-            border
-            border-red-500/30
-
-            font-semibold
-
-            shadow-lg
-            hover:shadow-xl
-
-            transition-all
-            duration-300
-
-            disabled:opacity-50
-          "
-        >
-
-          {!loading && (
-            <LogOut size={20} />
-          )}
-
-          <span>
-            {loading ? "Logging out..." : "Logout"}
-          </span>
-
-        </button>
 
       </div>
 
