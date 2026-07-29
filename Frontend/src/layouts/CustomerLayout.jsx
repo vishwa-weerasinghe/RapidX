@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import { Header } from "../components/user-dashboard/Header";
 import ProtectedRoute from "../components/ProtectedRoute";
 
 export default function CustomerLayout() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const user = (() => {
     try {
       const userData = localStorage.getItem("user");
@@ -15,12 +17,20 @@ export default function CustomerLayout() {
 
   return (
     <ProtectedRoute role="customer">
-      <div className="flex min-h-screen">
-        <Sidebar role="customer" />
+      <div className="flex min-h-screen bg-gray-50 dark:bg-neutral-900 relative">
+        <Sidebar role="customer" isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+        
+        {/* Mobile Sidebar Backdrop */}
+        {isSidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
 
-        <div className="flex-1 flex flex-col">
-          <Header user={user} />
-          <main className="flex-1">
+        <div className="flex-1 flex flex-col min-w-0">
+          <Header user={user} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+          <main className="flex-1 p-4 sm:p-6 overflow-x-auto">
             <Outlet />
           </main>
         </div>

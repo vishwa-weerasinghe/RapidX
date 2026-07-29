@@ -39,7 +39,7 @@ const customerLinks = [
   { to: "/user/reviews", label: "Reviews", icon: Star },
 ];
 
-export default function Sidebar({ role = "admin" }) {
+export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
   const links = role === "customer" ? customerLinks : adminLinks;
 
   const title =
@@ -51,15 +51,20 @@ export default function Sidebar({ role = "admin" }) {
 
   const [loading, setLoading] = useState(false);
 
-
   return (
     <aside
-      className="
+      className={`
+        fixed md:sticky
+        top-0 left-0
+        z-50
         w-72
-        min-h-screen
+        h-screen
+        overflow-y-auto
         flex
         flex-col
         justify-between
+        ${isOpen ? "translate-x-0" : "-translate-x-full"}
+        md:translate-x-0
 
         bg-gradient-to-b
         from-lime-500
@@ -80,7 +85,7 @@ export default function Sidebar({ role = "admin" }) {
 
         transition-all
         duration-300
-      "
+      `}
     >
       {/* HEADER */}
 

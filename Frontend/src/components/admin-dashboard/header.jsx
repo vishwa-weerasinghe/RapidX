@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Menu, Search, Bell, Sun, Moon, LogOut, Settings, ChevronDown } from 'lucide-react'
 import { useTheme } from '../../context/ThemeContext'
 import api from '../../axios'
-export function Header({ user }) {
+export function Header({ user, toggleSidebar }) {
     const navigate = useNavigate()
     const { theme, toggleTheme } = useTheme()
     const [showProfileMenu, setShowProfileMenu] = useState(false)
@@ -42,7 +42,10 @@ export function Header({ user }) {
 
                 {/* Brand & Mobile Menu */}
                 <div className="flex items-center gap-4">
-                    <button className="p-2 text-gray-500 hover:text-emerald-600 dark:text-gray-400 dark:hover:text-emerald-400 lg:hidden rounded-lg hover:bg-emerald-50 dark:hover:bg-neutral-800 transition-colors">
+                    <button 
+                        onClick={toggleSidebar}
+                        className="p-2 text-gray-500 hover:text-emerald-600 dark:text-gray-400 dark:hover:text-emerald-400 md:hidden rounded-lg hover:bg-emerald-50 dark:hover:bg-neutral-800 transition-colors"
+                    >
                         <Menu className="w-5 h-5" />
                     </button>
 
