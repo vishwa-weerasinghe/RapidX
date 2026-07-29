@@ -142,6 +142,17 @@ export default function PackageForm() {
             Package Image
           </label>
 
+          {isEdit && typeof form.Image === "string" && (
+            <div className="mb-3">
+              <p className="mb-2 text-sm text-gray-600">Current image</p>
+              <img
+                src={`http://127.0.0.1:8000/storage/${form.Image}`}
+                alt="Current package"
+                className="h-40 w-full rounded-lg border border-gray-300 object-cover"
+              />
+            </div>
+          )}
+
           <input
             type="file"
             name="Image"
@@ -156,6 +167,7 @@ export default function PackageForm() {
           />
 
           <p className="mt-1 text-xs text-gray-500">
+            Upload a new image only if you want to replace the current one.
             JPG, PNG, JPEG or WEBP. Maximum size: 2 MB.
           </p>
 

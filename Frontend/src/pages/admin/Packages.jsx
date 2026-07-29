@@ -4,6 +4,7 @@ import api from "../../axios";
 
 export default function Packages() {
   const [packages, setPackages] = useState([]);
+  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -34,6 +35,17 @@ export default function Packages() {
     }
   };
 
+  const filteredPackages = packages.filter((pkg) => {
+    const query = search.trim().toLowerCase();
+
+    return (
+      pkg.Package_Name?.toLowerCase().includes(query) ||
+      pkg.Description?.toLowerCase().includes(query) ||
+      String(pkg.Price_for_adult ?? "").includes(query) ||
+      String(pkg.Price_for_child ?? "").includes(query)
+    );
+  });
+
   return (
     <div className="p-6 transition-colors duration-300">
 
@@ -55,6 +67,15 @@ export default function Packages() {
   + Add Package
 </button>
       </div>
+
+      <input
+        type="search"
+        value={search}
+        onChange={(event) => setSearch(event.target.value)}
+        placeholder="Search by package name, description, or price..."
+        aria-label="Search packages"
+        className="w-full max-w-xl mb-6 rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-800 outline-none focus:ring-2 focus:ring-emerald-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+      />
 
       {/* Loading / Empty */}
       {loading ? (
@@ -80,7 +101,15 @@ export default function Packages() {
             {/* Body */}
             <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
 
-              {packages.map((pkg) => (
+              {filteredPackages.length === 0 && (
+                <tr>
+                  <td colSpan="5" className="px-4 py-6 text-center text-gray-500 dark:text-gray-400">
+                    No packages match your search.
+                  </td>
+                </tr>
+              )}
+
+              {filteredPackages.map((pkg) => (
                 <tr
                   key={pkg.id}
                   className="hover:bg-gray-50 dark:hover:bg-gray-800 transition"

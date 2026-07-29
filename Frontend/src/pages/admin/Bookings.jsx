@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function Bookings() {
   const [bookings, setBookings] = useState([]);
+  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
@@ -43,6 +44,21 @@ export default function Bookings() {
     }
   };
 
+  const filteredBookings = bookings.filter((booking) => {
+    const query = search.trim().toLowerCase();
+    const customerName = `${booking.customer?.First_Name ?? ""} ${booking.customer?.Last_Name ?? ""}`;
+
+    return (
+      String(booking.Booking_ID ?? "").toLowerCase().includes(query) ||
+      customerName.toLowerCase().includes(query) ||
+      booking.package?.Package_Name?.toLowerCase().includes(query) ||
+      booking.Booking_Date?.toLowerCase().includes(query) ||
+      booking.Pickup_Time?.toLowerCase().includes(query) ||
+      booking.Pickup_Location?.toLowerCase().includes(query) ||
+      booking.Status?.toLowerCase().includes(query)
+    );
+  });
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -57,6 +73,15 @@ export default function Bookings() {
       <h1 className="text-3xl font-bold text-green-800 mb-6">
         Booking Management
       </h1>
+
+      <input
+        type="search"
+        value={search}
+        onChange={(event) => setSearch(event.target.value)}
+        placeholder="Search ID, customer, package, date, location, or status..."
+        aria-label="Search bookings"
+        className="w-full max-w-xl mb-6 rounded-xl border border-green-200 px-4 py-3 outline-none focus:ring-2 focus:ring-green-600"
+      />
 
       <div className="overflow-x-auto bg-white rounded-xl shadow">
 
@@ -80,14 +105,16 @@ export default function Bookings() {
 
           <tbody>
 
-            {bookings.length === 0 ? (
+            {filteredBookings.length === 0 ? (
               <tr>
                 <td colSpan="11" className="text-center py-6 text-gray-500">
-                  No bookings found.
+                  {bookings.length === 0
+                    ? "No bookings found."
+                    : "No bookings match your search."}
                 </td>
               </tr>
             ) : (
-              bookings.map((booking) => (
+              filteredBookings.map((booking) => (
                 <tr key={booking.Booking_ID} className="border-b hover:bg-gray-50">
 
                   <td className="px-4 py-3">{booking.Booking_ID}</td>
