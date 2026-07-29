@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Menu, Search, Bell, Sun, Moon, LogOut, Settings, ChevronDown } from 'lucide-react'
+import { Menu, Search, Bell, LogOut, Settings, ChevronDown } from 'lucide-react'
 import { useTheme } from '../../context/ThemeContext'
 import api from '../../axios'
+import ThemeModeIcon from '../ThemeModeIcon'
 export function Header({ user, toggleSidebar }) {
     const navigate = useNavigate()
     const { theme, toggleTheme } = useTheme()
@@ -64,10 +65,10 @@ export function Header({ user, toggleSidebar }) {
                     {/* Dark/Light Mode Toggle */}
                     <button
                         onClick={toggleTheme}
-                        className="p-2 text-gray-500 hover:text-emerald-600 dark:text-gray-400 dark:hover:text-emerald-400 transition-colors rounded-lg hover:bg-emerald-50 dark:hover:bg-neutral-800"
+                        className="flex items-center rounded-full p-1 transition-all duration-300 bg-slate-200 dark:bg-slate-700"
                         title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
                     >
-                        {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                        <ThemeModeIcon className="w-5 h-5" />
                     </button>
                     {/* Notifications */}
                     <button className="p-2 text-gray-500 hover:text-emerald-600 dark:text-gray-400 dark:hover:text-emerald-400 transition-colors rounded-lg hover:bg-emerald-50 dark:hover:bg-neutral-800 relative">
