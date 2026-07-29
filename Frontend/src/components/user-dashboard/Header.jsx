@@ -4,7 +4,7 @@ import { Menu, ShoppingCart, Sun, Moon } from 'lucide-react'
 import api from '../../axios'
 import { useTheme } from '../../context/ThemeContext'
 
-export function Header({ user }) {
+export function Header({ user, toggleSidebar }) {
   const navigate = useNavigate()
   const { theme, toggleTheme } = useTheme()
   const [cartCount, setCartCount] = useState(0)
@@ -98,7 +98,10 @@ export function Header({ user }) {
             </div>
           </button>
 
-          <button className="p-2 text-safari-text dark:text-gray-200 sm:hidden">
+          <button 
+            onClick={toggleSidebar}
+            className="p-2 text-safari-text dark:text-gray-200 md:hidden"
+          >
             <Menu className="w-6 h-6" />
           </button>
         </div>

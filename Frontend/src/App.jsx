@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { MapPin, Calendar, Users, Search, LayoutDashboard } from "lucide-react";
+import { MapPin, Calendar, Users, Search, LayoutDashboard, Menu, X } from "lucide-react";
 import ThemeToggle from "./components/ThemeToggle";
 import { useTheme } from "./context/ThemeContext";
 import api from "./axios";
@@ -394,19 +394,28 @@ export default function App() {
         </div>
       )}
 
+      {/* Backdrop overlay for mobile menu */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-xs md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Synchronized Header & Navbar */}
       <header
         className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${isScrolled
-          ? "px-4 pt-3 md:px-8"
+          ? "px-3 pt-3 md:px-8"
           : "px-0 pt-0"
           }`}
       >
         <div
-          className={`max-w-7xl mx-auto px-6 flex items-center justify-between transition-all duration-500 ${isScrolled
+          className={`max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between transition-all duration-500 relative ${isScrolled
             ? "bg-white/90 dark:bg-neutral-900/90 backdrop-blur-xl rounded-full shadow-lg border border-slate-200/40 dark:border-neutral-800/40 py-2.5"
             : "bg-transparent py-5 border-b border-white/10"
             }`}
         >
+          {/* Logo & Brand Name */}
           <div
             className="cursor-pointer flex items-center gap-2"
             onClick={() => scrollToSection("home")}
@@ -414,49 +423,46 @@ export default function App() {
             <img
               src="https://minneriyawildjeepsafari.com/wp-content/uploads/2025/08/lgo.jpg"
               alt="Minneriya Wild Jeep Safari"
-              className="h-12 md:h-14 w-auto object-contain"
+              className="h-10 sm:h-12 md:h-14 w-auto object-contain"
             />
-            <span className={`text-lg font-bold tracking-wide transition-colors duration-300 hidden sm:inline-block ${isScrolled ? "text-[#1B4332] dark:text-white" : "text-white"
+            <span className={`text-base sm:text-lg font-bold tracking-wide transition-colors duration-300 ${isScrolled ? "text-[#1B4332] dark:text-white" : "text-white"
               }`}>
               Wild Jeep Safari
             </span>
           </div>
 
-          {/* Navigation Links Container */}
-          <ul
-            className={`fixed md:relative top-[75px] md:top-0 ${isMobileMenuOpen ? "left-0" : "-left-full md:left-0"} w-full md:w-auto h-[calc(100vh-75px)] md:h-auto flex flex-col md:flex-row gap-2 md:gap-3 items-center pt-10 md:pt-0 transition-all duration-300 z-40 shadow-xl md:shadow-none ${theme === "dark"
-              ? "bg-neutral-900 md:bg-transparent"
-              : "bg-white md:bg-transparent"
-              }`}
-          >
-            {[
-              "home",
-              "about",
-              "safaris",
-              "packages",
-              "reviews",
-              "gallery",
-              "contact",
-            ].map((section) => (
-              <li key={section}>
-                <button
-                  onClick={() => scrollToSection(section)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 ${activeSection === section
-                    ? "bg-emerald-600 text-white shadow shadow-emerald-500/25"
-                    : isScrolled
-                      ? "text-slate-600 dark:text-slate-350 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-slate-800/50"
-                      : "text-white/80 hover:text-white hover:bg-white/10"
-                    }`}
-                >
-                  {section}
-                </button>
-              </li>
-            ))}
-          </ul>
+          {/* Desktop Navigation Links */}
+          <nav className="hidden md:flex items-center gap-2">
+            <ul className="flex items-center gap-1 lg:gap-2">
+              {[
+                "home",
+                "about",
+                "safaris",
+                "packages",
+                "reviews",
+                "gallery",
+                "contact",
+              ].map((section) => (
+                <li key={section}>
+                  <button
+                    onClick={() => scrollToSection(section)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 ${activeSection === section
+                        ? "bg-emerald-600 text-white shadow shadow-emerald-500/25"
+                        : isScrolled
+                          ? "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-slate-800/50"
+                          : "text-white/80 hover:text-white hover:bg-white/10"
+                      }`}
+                  >
+                    {section}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </nav>
 
           {/* Auth & Theme Actions Panel */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="hidden sm:flex items-center gap-2">
               {user ? (
                 <Link
                   to={dashboardLink}
@@ -475,16 +481,13 @@ export default function App() {
                     className={`text-xs font-bold px-4 py-2 border rounded-full hover:shadow transition-all duration-300 ${isScrolled
                       ? "text-slate-700 dark:text-slate-350 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-850"
                       : "text-white border-white/20 hover:bg-white/10"
-                      } hidden sm:inline-block`}
+                      }`}
                   >
                     Log in
                   </Link>
                   <Link
                     to="/register"
-                    className={`text-xs font-bold px-4 py-2 border rounded-full hover:shadow transition-all duration-300 ${isScrolled
-                      ? "text-slate-700 dark:text-slate-350 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-850"
-                      : "text-white border-white/20 hover:bg-white/10"
-                      } hidden sm:inline-block`}
+                    className="text-xs font-bold px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full shadow"
                   >
                     Register
                   </Link>
@@ -496,23 +499,83 @@ export default function App() {
 
             <ThemeToggle />
 
-            {/* Mobile Navigation Toggle Button */}
+            {/* Simple Modern Mobile Menu Toggle Button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="flex flex-col gap-[5px] cursor-pointer md:hidden p-2 rounded-lg hover:bg-slate-100/10 transition-colors"
+              className={`md:hidden flex items-center justify-center p-2.5 rounded-full transition-all duration-300 active:scale-95 ${
+                isMobileMenuOpen
+                  ? "bg-emerald-600 text-white shadow-md"
+                  : isScrolled
+                  ? "bg-slate-100 dark:bg-neutral-800 text-slate-800 dark:text-white"
+                  : "bg-white/20 text-white backdrop-blur-md"
+              }`}
               aria-label="Toggle navigation interface"
             >
-              <span
-                className={`w-5.5 h-[2px] rounded transition-all duration-300 ${isScrolled ? "bg-slate-800 dark:bg-white" : "bg-white"} ${isMobileMenuOpen ? "transform rotate-45 translate-y-[7px]" : ""}`}
-              ></span>
-              <span
-                className={`w-4 h-[2px] rounded transition-all duration-300 ${isScrolled ? "bg-slate-800 dark:bg-white" : "bg-white"} ${isMobileMenuOpen ? "opacity-0" : ""}`}
-              ></span>
-              <span
-                className={`w-5.5 h-[2px] rounded transition-all duration-300 ${isScrolled ? "bg-slate-800 dark:bg-white" : "bg-white"} ${isMobileMenuOpen ? "transform -rotate-45 -translate-y-[7px]" : ""}`}
-              ></span>
+              {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
+
+          {/* Simple Modern Mobile Navigation Dropdown Menu */}
+          {isMobileMenuOpen && (
+            <div className="absolute top-full left-0 right-0 mt-3 p-4 rounded-3xl bg-white/95 dark:bg-neutral-900/95 backdrop-blur-2xl border border-slate-200/80 dark:border-neutral-800/80 shadow-2xl transition-all duration-300 md:hidden z-50 flex flex-col gap-3">
+              <div className="grid grid-cols-2 gap-1.5">
+                {[
+                  "home",
+                  "about",
+                  "safaris",
+                  "packages",
+                  "reviews",
+                  "gallery",
+                  "contact",
+                ].map((section) => (
+                  <button
+                    key={section}
+                    onClick={() => scrollToSection(section)}
+                    className={`py-2.5 px-3 rounded-xl text-xs font-bold capitalize tracking-wide transition-all duration-200 text-left ${
+                      activeSection === section
+                        ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/30"
+                        : "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-neutral-800"
+                    }`}
+                  >
+                    {section}
+                  </button>
+                ))}
+              </div>
+
+              <div className="h-[1px] bg-slate-200/80 dark:bg-neutral-800 my-1" />
+
+              {/* Mobile Auth Actions */}
+              <div>
+                {user ? (
+                  <Link
+                    to={dashboardLink}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="w-full py-2.5 text-center rounded-xl text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 shadow flex items-center justify-center gap-2"
+                  >
+                    <LayoutDashboard size={16} />
+                    Dashboard
+                  </Link>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2">
+                    <Link
+                      to="/login"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="py-2.5 text-center rounded-xl text-xs font-bold border border-slate-300 dark:border-neutral-700 text-slate-800 dark:text-white hover:bg-slate-100 dark:hover:bg-neutral-800 transition-colors"
+                    >
+                      Log in
+                    </Link>
+                    <Link
+                      to="/register"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="py-2.5 text-center rounded-xl text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 shadow transition-colors"
+                    >
+                      Register
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </header>
 
