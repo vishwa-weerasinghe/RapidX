@@ -14,7 +14,7 @@ class BookingController extends Controller
     public function index()
     {
         return response()->json(
-            Booking::with(['customer', 'package', 'vehicle'])->latest()->get()
+            Booking::with(['customer', 'package', 'vehicle.driver'])->latest()->get()
         );
     }
 
@@ -95,6 +95,10 @@ class BookingController extends Controller
     // =========================
     public function update(Request $request, $id)
     {
+        $request->validate([
+            'Vehicle_ID' => 'nullable|exists:vehicles,Vehicle_ID',
+        ]);
+
         $booking = Booking::findOrFail($id);
 
         $booking->update($request->only([

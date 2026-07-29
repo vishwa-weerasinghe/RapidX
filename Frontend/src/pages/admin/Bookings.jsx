@@ -4,24 +4,43 @@ import { useNavigate } from "react-router-dom";
 
 export default function Bookings() {
   const [bookings, setBookings] = useState([]);
+  const [vehicles, setVehicles] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchBookings();
+    fetchData();
   }, []);
 
-  const fetchBookings = async () => {
+  const fetchData = async () => {
     try {
-      const res = await api.get("/bookings");
-      setBookings(res.data);
+      const [bookingsResponse, vehiclesResponse] = await Promise.all([
+        api.get("/bookings"),
+        api.get("/vehicles"),
+      ]);
+
+      setBookings(bookingsResponse.data);
+      setVehicles(vehiclesResponse.data);
     } catch (err) {
       console.error(err);
       alert("Failed to load bookings.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleVehicleChange = async (bookingId, vehicleId) => {
+    try {
+      await api.put(`/bookings/${bookingId}`, {
+        Vehicle_ID: vehicleId || null,
+      });
+
+      await fetchData();
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || "Failed to update vehicle assignment.");
     }
   };
 
@@ -37,7 +56,7 @@ export default function Bookings() {
     try {
       await api.delete(`/bookings/${id}`);
       alert("Booking deleted successfully.");
-      fetchBookings();
+      fetchData();
     } catch (err) {
       console.error(err);
       alert("Failed to delete booking.");
@@ -99,6 +118,8 @@ export default function Bookings() {
               <th className="px-4 py-3 text-center">Children</th>
               <th className="px-4 py-3 text-right">Payment</th>
               <th className="px-4 py-3 text-center">Status</th>
+              <th className="px-4 py-3 text-left">Vehicle</th>
+              <th className="px-4 py-3 text-left">Driver</th>
               <th className="px-4 py-3 text-center">Actions</th>
             </tr>
           </thead>
@@ -107,7 +128,7 @@ export default function Bookings() {
 
             {filteredBookings.length === 0 ? (
               <tr>
-                <td colSpan="11" className="text-center py-6 text-gray-500">
+                <td colSpan="13" className="text-center py-6 text-gray-500">
                   {bookings.length === 0
                     ? "No bookings found."
                     : "No bookings match your search."}
@@ -140,6 +161,26 @@ export default function Bookings() {
                     <span className="px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 text-sm font-semibold">
                       {booking.Status}
                     </span>
+                  </td>
+
+                  <td className="px-4 py-3">
+                    <select
+                      value={booking.Vehicle_ID ?? ""}
+                      onChange={(event) => handleVehicleChange(booking.Booking_ID, event.target.value)}
+                      className="min-w-40 border border-gray-300 rounded px-2 py-1"
+                      aria-label={`Vehicle for booking ${booking.Booking_ID}`}
+                    >
+                      <option value="">Not assigned</option>
+                      {vehicles.map((vehicle) => (
+                        <option key={vehicle.Vehicle_ID} value={vehicle.Vehicle_ID}>
+                          {vehicle.Vehicle_No} ({vehicle.Vehicle_Type})
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+
+                  <td className="px-4 py-3">
+                    {booking.vehicle?.driver?.Driver_Name || "—"}
                   </td>
 
                   {/*  ACTIONS */}

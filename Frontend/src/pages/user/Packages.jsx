@@ -78,8 +78,8 @@ export default function Packages() {
         </h1>
 
         <p className="text-gray-600 max-w-2xl mx-auto mt-4 text-lg">
-          Discover breathtaking wildlife adventures through carefully curated
-          safari experiences designed for families, couples and explorers.
+        Discover breathtaking wildlife adventures through carefully curated safari 
+        experiences designed to create unforgettable journeys.
         </p>
 
         <input

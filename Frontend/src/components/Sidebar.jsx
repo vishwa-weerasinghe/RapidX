@@ -123,7 +123,8 @@ export default function Sidebar({ role = "admin" }) {
                 h-20
                 w-20
                 rounded-full
-                object-cover
+                object-contain
+                
                 border-4
                 border-white
                 shadow-xl
