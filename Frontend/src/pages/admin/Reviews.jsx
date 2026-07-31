@@ -11,6 +11,12 @@ export default function AdminReviews() {
   const [showNewOnly, setShowNewOnly] = useState(false);
   const reviewsRef = useRef(reviews);
 
+  const isTripAdvisorReview = (review) => {
+    return `${review?.source || review?.Source || ""}`.toLowerCase() === "tripadvisor";
+  };
+
+  const getSystemReviews = (items) => items.filter((review) => !isTripAdvisorReview(review));
+
   useEffect(() => {
     reviewsRef.current = reviews;
   }, [reviews]);
@@ -19,7 +25,7 @@ export default function AdminReviews() {
     try {
       setLoading(true);
       const response = await api.get("/reviews");
-      const data = response.data || [];
+      const data = getSystemReviews(response.data || []);
       setReviews(data);
       setError("");
 
@@ -44,7 +50,7 @@ export default function AdminReviews() {
       api
         .get("/reviews")
         .then((res) => {
-          const latest = res.data || [];
+          const latest = getSystemReviews(res.data || []);
           const currentMaxId =
             reviewsRef.current.length > 0
               ? Math.max(...reviewsRef.current.map((r) => r.Review_ID))
@@ -155,22 +161,6 @@ export default function AdminReviews() {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="flex-1 rounded-l-lg border border-gray-300 px-4 py-2 text-sm focus:border-indigo-500 focus:outline-none"
           />
-          <button className="rounded-r-lg bg-indigo-600 px-4 text-white hover:bg-indigo-700">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"
-              />
-            </svg>
-          </button>
         </div>
       </div>
 
@@ -197,6 +187,10 @@ export default function AdminReviews() {
                   <div>
                     <p className="font-semibold text-gray-800">
                       Rating: {review.Rate} / 5
+                    </p>
+                    <p className="mt-1 text-amber-400 text-sm leading-none">
+                      {Array.from({ length: review.Rate || 0 }).map(() => "★").join("")}
+                      {Array.from({ length: 5 - (review.Rate || 0) }).map(() => "☆").join("")}
                     </p>
                     <p className="text-sm text-gray-500">
                       {review.customer
