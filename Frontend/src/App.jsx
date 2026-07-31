@@ -469,15 +469,15 @@ export default function App() {
 
   return (
     <div
-      className={`font-sans antialiased overflow-x-hidden selection:bg-emerald-700 selection:text-white transition-colors duration-200 ${theme === "dark"
-        ? "bg-[#050505] text-[#f5f7f2]"
-        : "bg-[#f8f4eb] text-[#1f2b20]"
+      className={`font-sans antialiased overflow-x-hidden selection:bg-[var(--primary)] selection:text-white transition-colors duration-200 ${theme === "dark"
+        ? "bg-[#101813] text-[#F5F5F5]"
+        : "bg-[#F8F6F0] text-[#263238]"
         }`}
     >
       {/* Toast Notification Alert Box */}
       {notification && (
         <div
-          className={`fixed top-24 right-5 p-5 rounded-xl shadow-2xl z-[9999] border-l-4 ${notification.type === "error" ? "border-red-500" : "border-emerald-700"} max-w-sm animate-fade-in-left ${theme === "dark"
+          className={`fixed top-24 right-5 p-5 rounded-xl shadow-2xl z-[9999] border-l-4 ${notification.type === "error" ? "border-red-500" : "border-sacramento"} max-w-sm animate-fade-in-left ${theme === "dark"
             ? "bg-neutral-900 text-white"
             : "bg-white text-neutral-800"
             }`}
@@ -503,7 +503,7 @@ export default function App() {
       >
         <div
           className={`max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between transition-all duration-500 relative ${isScrolled
-            ? "bg-white/90 dark:bg-neutral-900/90 backdrop-blur-xl rounded-full shadow-lg border border-slate-200/40 dark:border-neutral-800/40 py-2.5"
+            ? "bg-[var(--page-bg)]/90 dark:bg-[var(--surface)]/90 backdrop-blur-xl rounded-full shadow-lg border border-[var(--border)]/40 py-2.5"
             : "bg-transparent py-5 border-b border-white/10"
             }`}
         >
@@ -517,7 +517,7 @@ export default function App() {
               alt="Minneriya Wild Jeep Safari"
               className="h-10 sm:h-12 md:h-14 w-auto object-contain"
             />
-            <span className={`text-base sm:text-lg font-bold tracking-wide transition-colors duration-300 ${isScrolled ? "text-[#1B4332] dark:text-white" : "text-white"
+            <span className={`text-base sm:text-lg font-bold tracking-wide transition-colors duration-300 ${isScrolled ? "text-sacramento dark:text-white" : "text-white"
               }`}>
               Wild Jeep Safari
             </span>
@@ -539,7 +539,7 @@ export default function App() {
                   <button
                     onClick={() => scrollToSection(section)}
                     className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 ${activeSection === section
-                        ? "bg-emerald-600 text-white shadow shadow-emerald-500/25"
+                        ? "bg-sacramento text-white shadow shadow-sacramento/25"
                         : isScrolled
                           ? "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-slate-800/50"
                           : "text-white/80 hover:text-white hover:bg-white/10"
@@ -559,7 +559,7 @@ export default function App() {
                 <Link
                   to={dashboardLink}
                   className={`flex items-center gap-1.5 text-xs font-bold px-4 py-2 border rounded-full hover:shadow transition-all duration-300 ${isScrolled
-                    ? "text-[#1B4332] border-[#1B4332]/25 hover:bg-[#1B4332]/5 dark:text-white dark:border-neutral-800 dark:hover:bg-neutral-800"
+                    ? "text-sacramento border-sacramento/25 hover:bg-sacramento/5 dark:text-white dark:border-neutral-800 dark:hover:bg-neutral-800"
                     : "text-white border-white/20 hover:bg-white/10"
                     }`}
                 >
@@ -579,7 +579,7 @@ export default function App() {
                   </Link>
                   <Link
                     to="/register"
-                    className="text-xs font-bold px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full shadow"
+                    className="text-xs font-bold px-4 py-2 bg-sacramento hover:bg-sacramento-600 text-white rounded-full shadow"
                   >
                     Register
                   </Link>
@@ -596,7 +596,7 @@ export default function App() {
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className={`md:hidden flex items-center justify-center p-2.5 rounded-full transition-all duration-300 active:scale-95 ${
                 isMobileMenuOpen
-                  ? "bg-emerald-600 text-white shadow-md"
+                  ? "bg-sacramento text-white shadow-md"
                   : isScrolled
                   ? "bg-slate-100 dark:bg-neutral-800 text-slate-800 dark:text-white"
                   : "bg-white/20 text-white backdrop-blur-md"
@@ -625,7 +625,7 @@ export default function App() {
                     onClick={() => scrollToSection(section)}
                     className={`py-2.5 px-3 rounded-xl text-xs font-bold capitalize tracking-wide transition-all duration-200 text-left ${
                       activeSection === section
-                        ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/30"
+                        ? "bg-sacramento text-white shadow-md shadow-sacramento/30"
                         : "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-neutral-800"
                     }`}
                   >
@@ -642,7 +642,7 @@ export default function App() {
                   <Link
                     to={dashboardLink}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="w-full py-2.5 text-center rounded-xl text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 shadow flex items-center justify-center gap-2"
+                    className="w-full py-2.5 text-center rounded-xl text-xs font-bold bg-sacramento text-white hover:bg-sacramento-600 shadow flex items-center justify-center gap-2"
                   >
                     <LayoutDashboard size={16} />
                     Dashboard
@@ -659,7 +659,7 @@ export default function App() {
                     <Link
                       to="/register"
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="py-2.5 text-center rounded-xl text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 shadow transition-colors"
+                      className="py-2.5 text-center rounded-xl text-xs font-bold bg-sacramento text-white hover:bg-sacramento-600 shadow transition-colors"
                     >
                       Register
                     </Link>
@@ -687,7 +687,7 @@ export default function App() {
                 alt="Elephant Gathering Scene"
                 className="w-full h-full object-cover"
               />
-              <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-emerald-950/85 to-emerald-900/65 z-10"></div>
+              <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-sacramento/85 to-castleton/65 z-10"></div>
             </div>
           ))}
         </div>
@@ -708,13 +708,13 @@ export default function App() {
             <div className="flex flex-col sm:flex-row gap-4 mb-12">
               <button
                 onClick={() => handleBookNow()}
-                className="bg-emerald-700 text-white font-semibold text-center px-8 py-4 rounded-full hover:bg-emerald-800 shadow-md transition duration-300 transform hover:-translate-y-0.5"
+                className="bg-sacramento text-white font-semibold text-center px-8 py-4 rounded-full hover:bg-sacramento-600 shadow-md transition duration-300 transform hover:-translate-y-0.5"
               >
                 Book Now
               </button>
               <button
                 onClick={() => scrollToSection("packages")}
-                className="bg-transparent border-2 border-white text-white font-semibold text-center px-8 py-4 rounded-full hover:bg-white hover:text-emerald-800 transition duration-300"
+                className="bg-transparent border-2 border-white text-white font-semibold text-center px-8 py-4 rounded-full hover:bg-white hover:text-sacramento transition duration-300"
               >
                 Explore Safari Packages
               </button>
@@ -766,7 +766,7 @@ export default function App() {
             </div>
 
             <div>
-              <span className="text-emerald-600 dark:text-green-400 font-semibold uppercase tracking-wider text-xs block mb-2">
+              <span className="text-castleton dark:text-castleton-300 font-semibold uppercase tracking-wider text-xs block mb-2">
                 About Us
               </span>
               <h2 className="font-serif text-3xl sm:text-4xl font-bold mb-6">
@@ -783,7 +783,7 @@ export default function App() {
 
               <div className="space-y-6 mb-8">
                 <div className="flex gap-4 items-start">
-                  <div className="flex-shrink-0 w-12 h-12 bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 rounded-full flex items-center justify-center">
+                  <div className="flex-shrink-0 w-12 h-12 bg-castleton-50 dark:bg-castleton-900/50 text-castleton dark:text-castleton-300 rounded-full flex items-center justify-center">
                     🐾
                   </div>
                   <div>
@@ -798,7 +798,7 @@ export default function App() {
                 </div>
 
                 <div className="flex gap-4 items-start">
-                  <div className="flex-shrink-0 w-12 h-12 bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 rounded-full flex items-center justify-center">
+                  <div className="flex-shrink-0 w-12 h-12 bg-castleton-50 dark:bg-castleton-900/50 text-castleton dark:text-castleton-300 rounded-full flex items-center justify-center">
                     🗺️
                   </div>
                   <div>
@@ -815,7 +815,7 @@ export default function App() {
 
               <button
                 onClick={() => scrollToSection("contact")}
-                className="bg-emerald-700 text-white font-semibold px-6 py-3 rounded-full hover:bg-emerald-800 shadow transition duration-300"
+                className="bg-sacramento text-white font-semibold px-6 py-3 rounded-full hover:bg-sacramento-600 shadow transition duration-300"
               >
                 More About Us
               </button>
@@ -830,7 +830,7 @@ export default function App() {
       >
         <div className="max-w-7xl mx-auto px-4 md:px-6">
           <div className="text-center max-w-xl mx-auto mb-12">
-            <span className="text-emerald-600 dark:text-green-400 font-semibold uppercase tracking-wider text-xs block mb-2">
+            <span className="text-castleton dark:text-castleton-300 font-semibold uppercase tracking-wider text-xs block mb-2">
               Why Choose Us
             </span>
             <h2 className="font-serif text-3xl sm:text-4xl font-bold">
@@ -868,7 +868,7 @@ export default function App() {
                   : "bg-white"
                   }`}
               >
-                <div className="w-14 h-14 bg-gradient-to-br from-emerald-700 to-emerald-500 text-white rounded-full flex items-center justify-center mx-auto mb-6 text-xl shadow">
+                <div className="w-14 h-14 bg-gradient-to-br from-sacramento to-castleton text-white rounded-full flex items-center justify-center mx-auto mb-6 text-xl shadow">
                   {reason.icon}
                 </div>
                 <h3 className="text-base font-bold mb-3">{reason.title}</h3>
@@ -885,7 +885,7 @@ export default function App() {
       <section id="safaris" className="py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 md:px-6">
           <div className="text-center max-w-xl mx-auto mb-12">
-            <span className="text-emerald-600 dark:text-green-400 font-semibold uppercase tracking-wider text-xs block mb-2">
+            <span className="text-castleton dark:text-castleton-300 font-semibold uppercase tracking-wider text-xs block mb-2">
               Explore Safari Locations
             </span>
             <h2 className="font-serif text-3xl sm:text-4xl font-bold">
@@ -908,10 +908,10 @@ export default function App() {
                     alt={loc.title}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
-                  <div className="absolute top-0 left-0 w-full h-full bg-emerald-900/75 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="absolute top-0 left-0 w-full h-full bg-sacramento/75 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <button
                       onClick={() => scrollToSection("packages")}
-                      className="bg-white text-emerald-800 font-bold text-xs px-5 py-2.5 rounded-full hover:bg-emerald-700 hover:text-white transition duration-300 shadow-md"
+                      className="bg-white text-sacramento font-bold text-xs px-5 py-2.5 rounded-full hover:bg-sacramento hover:text-white transition duration-300 shadow-md"
                     >
                       Learn More
                     </button>
@@ -940,11 +940,11 @@ export default function App() {
       {/* --- TOUR PACKAGES --- */}
       <section
         id="packages"
-        className={`py-16 md:py-24 ${theme === "dark" ? "bg-[#0d0d0d]" : "bg-[#f3efe7]"}`}
+        className={`py-16 md:py-24 ${theme === "dark" ? "bg-[#0d0d0d]" : "bg-offwhite"}`}
       >
         <div className="max-w-7xl mx-auto px-4 md:px-6">
           <div className="text-center max-w-xl mx-auto mb-12">
-            <span className="text-emerald-600 dark:text-green-400 font-semibold uppercase tracking-wider text-xs block mb-2">
+            <span className="text-castleton dark:text-castleton-300 font-semibold uppercase tracking-wider text-xs block mb-2">
               Tour Packages
             </span>
             <h2 className="font-serif text-3xl sm:text-4xl font-bold">
@@ -1009,19 +1009,19 @@ export default function App() {
                     <span className="text-xs text-neutral-400 block font-medium">
                       From
                     </span>
-                    <span className="text-2xl font-extrabold text-emerald-600 dark:text-green-400">
+                    <span className="text-2xl font-extrabold text-castleton dark:text-castleton-300">
                       {pkg.price}
                     </span>
                   </div>
                   <button
                     onClick={() => handleBookNow(pkg)}
-                    className="bg-emerald-700 text-white font-bold text-sm px-5 py-3 rounded-full hover:bg-emerald-800 transition duration-300 shadow"
+                    className="bg-sacramento text-white font-bold text-sm px-5 py-3 rounded-full hover:bg-sacramento-600 transition duration-300 shadow"
                   >
                     Book Now
                   </button>
                   <button
                     onClick={() => handleAddToCart(pkg)}
-                    className="bg-emerald-700 text-white font-bold text-sm px-5 py-3 rounded-full hover:bg-emerald-800 transition duration-300 shadow"
+                    className="bg-sacramento text-white font-bold text-sm px-5 py-3 rounded-full hover:bg-sacramento-600 transition duration-300 shadow"
                   >
                     Add to Cart
                   </button>
@@ -1036,7 +1036,7 @@ export default function App() {
             <section id="reviews" className="py-16 md:py-24 overflow-hidden">
               <div className="max-w-7xl mx-auto px-4 md:px-6">
                 <div className="text-center max-w-xl mx-auto mb-10">
-                  <span className="text-emerald-600 dark:text-green-400 font-semibold uppercase tracking-wider text-xs block mb-2">
+                  <span className="text-castleton dark:text-castleton-300 font-semibold uppercase tracking-wider text-xs block mb-2">
                     Customer Reviews
                   </span>
                   <h2 className="font-serif text-3xl sm:text-4xl font-bold mb-4">
@@ -1053,7 +1053,7 @@ export default function App() {
                 </div>
 
                 {reviewNotification && (
-                  <div className={`mx-auto mb-6 max-w-md rounded-xl border px-4 py-3 text-sm ${reviewNotification.type === "error" ? "border-red-500 text-red-600" : "border-emerald-600 text-emerald-700"}`}>
+                  <div className={`mx-auto mb-6 max-w-md rounded-xl border px-4 py-3 text-sm ${reviewNotification.type === "error" ? "border-red-500 text-red-600" : "border-castleton text-castleton"}`}>
                     {reviewNotification.text}
                   </div>
                 )}
@@ -1063,7 +1063,7 @@ export default function App() {
                     <button
                       type="button"
                       onClick={() => setShowReviewForm((prev) => !prev)}
-                      className="bg-emerald-700 text-white font-semibold px-6 py-3 rounded-full hover:bg-emerald-800 shadow transition duration-300"
+                      className="bg-sacramento text-white font-semibold px-6 py-3 rounded-full hover:bg-sacramento-600 shadow transition duration-300"
                     >
                       {showReviewForm ? "Cancel" : "Write Review"}
                     </button>
@@ -1147,7 +1147,7 @@ export default function App() {
                       <button
                         type="submit"
                         disabled={reviewSubmitting}
-                        className="bg-emerald-700 text-white font-semibold px-5 py-3 rounded-full hover:bg-emerald-800 disabled:opacity-70 transition duration-300"
+                        className="bg-sacramento text-white font-semibold px-5 py-3 rounded-full hover:bg-sacramento-600 disabled:opacity-70 transition duration-300"
                       >
                         {reviewSubmitting ? "Submitting..." : "Submit Review"}
                       </button>
@@ -1173,7 +1173,7 @@ export default function App() {
                       >
                         <div className="flex justify-between items-start mb-4">
                           <div className="flex gap-3 items-center">
-                            <div className="w-10 h-10 bg-gradient-to-br from-emerald-700 to-emerald-500 text-white font-bold text-xs rounded-full flex items-center justify-center">
+                            <div className="w-10 h-10 bg-gradient-to-br from-sacramento to-castleton text-white font-bold text-xs rounded-full flex items-center justify-center">
                               {rev.initials}
                             </div>
                             <div>
@@ -1194,7 +1194,7 @@ export default function App() {
                         <p className="text-neutral-400 text-xs sm:text-sm leading-relaxed mb-4 line-clamp-5">
                           {rev.text}
                         </p>
-                        <span className={`font-bold text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider ${rev.isGuest ? "bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-400" : "bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-400"}`}>
+                        <span className={`font-bold text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider ${rev.isGuest ? "bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-400" : "bg-castleton-50 dark:bg-castleton-900/80 text-castleton dark:text-castleton-300"}`}>
                           {rev.isGuest ? "Guest" : "Verified"}
                         </span>
                       </div>
@@ -1206,7 +1206,7 @@ export default function App() {
                       <button
                         type="button"
                         onClick={() => setShowAllReviews((prev) => !prev)}
-                        className="bg-emerald-700 text-white font-semibold px-6 py-3 rounded-full hover:bg-emerald-800 shadow transition duration-300"
+                        className="bg-sacramento text-white font-semibold px-6 py-3 rounded-full hover:bg-sacramento-600 shadow transition duration-300"
                       >
                         {showAllReviews ? "Show Less" : "See All Reviews"}
                       </button>
@@ -1216,13 +1216,13 @@ export default function App() {
                   <div className="flex justify-center gap-3 mt-8 md:hidden">
                     <button
                       onClick={handleReviewPrev}
-                      className="w-10 h-10 bg-emerald-700 text-white rounded-full flex items-center justify-center transition shadow-md"
+                      className="w-10 h-10 bg-sacramento text-white rounded-full flex items-center justify-center transition shadow-md"
                     >
                       ←
                     </button>
                     <button
                       onClick={handleReviewNext}
-                      className="w-10 h-10 bg-emerald-700 text-white rounded-full flex items-center justify-center transition shadow-md"
+                      className="w-10 h-10 bg-sacramento text-white rounded-full flex items-center justify-center transition shadow-md"
                     >
                       →
                     </button>
@@ -1237,11 +1237,11 @@ export default function App() {
       {/* --- PHOTO GALLERY --- */}
       <section
         id="gallery"
-        className={`py-16 md:py-24 ${theme === "dark" ? "bg-[#0d0d0d]" : "bg-[#f3efe7]"}`}
+        className={`py-16 md:py-24 ${theme === "dark" ? "bg-[#0d0d0d]" : "bg-offwhite"}`}
       >
         <div className="max-w-7xl mx-auto px-4 md:px-6">
           <div className="text-center max-w-xl mx-auto mb-12">
-            <span className="text-emerald-600 dark:text-green-400 font-semibold uppercase tracking-wider text-xs block mb-2">
+            <span className="text-castleton dark:text-castleton-300 font-semibold uppercase tracking-wider text-xs block mb-2">
               Photo Gallery
             </span>
             <h2 className="font-serif text-3xl sm:text-4xl font-bold">
@@ -1261,7 +1261,7 @@ export default function App() {
                   alt={img.alt}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
-                <div className="absolute top-0 left-0 w-full h-full bg-emerald-900/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 text-white text-xl">
+                <div className="absolute top-0 left-0 w-full h-full bg-sacramento/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 text-white text-xl">
                   🔍
                 </div>
               </div>
@@ -1299,7 +1299,7 @@ export default function App() {
       )}
 
       {/* --- CTA BANNER --- */}
-      <section className="py-16 md:py-20 bg-gradient-to-br from-emerald-950 to-emerald-800 text-white text-center">
+      <section className="py-16 md:py-20 bg-gradient-to-br from-sacramento to-castleton text-white text-center">
         <div className="max-w-4xl mx-auto px-4 md:px-6">
           <h2 className="font-serif text-2xl sm:text-4xl font-bold mb-4">
             Ready To Minneriya Elephant Gathering Safari
@@ -1309,7 +1309,7 @@ export default function App() {
           </p>
           <a
             href="mailto:info@minneriyawildjeepsafari.com"
-            className="bg-white text-emerald-900 font-bold px-6 sm:px-8 py-3.5 sm:py-4 rounded-full hover:bg-emerald-700 hover:text-white transition duration-300 inline-block shadow-lg text-sm sm:text-base break-all max-w-full"
+            className="bg-white text-sacramento font-bold px-6 sm:px-8 py-3.5 sm:py-4 rounded-full hover:bg-sacramento hover:text-white transition duration-300 inline-block shadow-lg text-sm sm:text-base break-all max-w-full"
           >
             Contact Us: info@minneriyawildjeepsafari.com
           </a>
@@ -1320,7 +1320,7 @@ export default function App() {
       <section id="contact" className="relative py-20 md:py-32 overflow-hidden">
         {/* Decorative background blur */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
-          <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] rounded-full bg-emerald-500/10 blur-[100px]"></div>
+          <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] rounded-full bg-castleton/10 blur-[100px]"></div>
           <div className="absolute bottom-[-10%] left-[-5%] w-[600px] h-[600px] rounded-full bg-teal-500/10 blur-[120px]"></div>
         </div>
 
@@ -1330,12 +1330,12 @@ export default function App() {
             {/* Left Column - Contact Info */}
             <div className="space-y-8">
               <div>
-                <span className="inline-block py-1.5 px-4 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold uppercase tracking-widest mb-4">
+                <span className="inline-block py-1.5 px-4 rounded-full bg-castleton-50 dark:bg-castleton-900/30 text-castleton dark:text-castleton-300 text-xs font-bold uppercase tracking-widest mb-4">
                   Get In Touch
                 </span>
                 <h2 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 text-neutral-900 dark:text-white leading-tight">
                   Let's Plan Your <br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500">Wild Adventure</span>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-castleton to-teal-500">Wild Adventure</span>
                 </h2>
                 <p className="text-neutral-600 dark:text-neutral-400 text-lg max-w-md">
                   Ready to experience the adventure of a lifetime? Our team is here to help you craft the perfect safari itinerary.
@@ -1345,29 +1345,29 @@ export default function App() {
               <div className="space-y-4 text-neutral-700 dark:text-neutral-300">
                 {/* Contact Card 1 */}
                 <div className="flex items-start gap-5 p-4 rounded-2xl hover:bg-white dark:hover:bg-neutral-800/50 transition duration-300 shadow-sm border border-transparent hover:border-neutral-100 dark:hover:border-neutral-800">
-                  <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-castleton-50 dark:bg-castleton-900/40 flex items-center justify-center text-castleton dark:text-castleton-300 shrink-0">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
                   </div>
                   <div>
                     <h4 className="font-bold text-sm text-neutral-900 dark:text-white mb-1">Phone</h4>
-                    <a href="tel:+94778902811" className="hover:text-emerald-600 transition block">(+94) 77 890 2811</a>
+                    <a href="tel:+94778902811" className="hover:text-castleton transition block">(+94) 77 890 2811</a>
                   </div>
                 </div>
 
                 {/* Contact Card 2 */}
                 <div className="flex items-start gap-5 p-4 rounded-2xl hover:bg-white dark:hover:bg-neutral-800/50 transition duration-300 shadow-sm border border-transparent hover:border-neutral-100 dark:hover:border-neutral-800">
-                  <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-castleton-50 dark:bg-castleton-900/40 flex items-center justify-center text-castleton dark:text-castleton-300 shrink-0">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
                   </div>
                   <div>
                     <h4 className="font-bold text-sm text-neutral-900 dark:text-white mb-1">Email</h4>
-                    <a href="mailto:info@minneriyawildjeepsafari.com" className="hover:text-emerald-600 transition block">info@minneriyawildjeepsafari.com</a>
+                    <a href="mailto:info@minneriyawildjeepsafari.com" className="hover:text-castleton transition block">info@minneriyawildjeepsafari.com</a>
                   </div>
                 </div>
 
                 {/* Contact Card 3 */}
                 <div className="flex items-start gap-5 p-4 rounded-2xl hover:bg-white dark:hover:bg-neutral-800/50 transition duration-300 shadow-sm border border-transparent hover:border-neutral-100 dark:hover:border-neutral-800">
-                  <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-castleton-50 dark:bg-castleton-900/40 flex items-center justify-center text-castleton dark:text-castleton-300 shrink-0">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                   </div>
                   <div>
@@ -1403,7 +1403,7 @@ export default function App() {
                       href={soc.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-12 h-12 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300 hover:text-white hover:bg-emerald-600 dark:hover:bg-emerald-600 hover:border-emerald-600 rounded-full flex items-center justify-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-emerald-500/30"
+                      className="w-12 h-12 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300 hover:text-white hover:bg-sacramento dark:hover:bg-sacramento hover:border-sacramento rounded-full flex items-center justify-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-sacramento/30"
                       aria-label={soc.label}
                     >
                       <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
@@ -1436,7 +1436,7 @@ export default function App() {
                         onChange={handleFormChange}
                         placeholder="John Doe"
                         required
-                        className={`w-full px-5 py-4 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all ${theme === "dark"
+                        className={`w-full px-5 py-4 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-castleton/50 transition-all ${theme === "dark"
                           ? "bg-neutral-950/50 border border-neutral-800 text-white placeholder-neutral-600 focus:bg-neutral-950"
                           : "bg-neutral-50 border border-neutral-200 text-neutral-900 placeholder-neutral-400 focus:bg-white"
                           }`}
@@ -1451,7 +1451,7 @@ export default function App() {
                         onChange={handleFormChange}
                         placeholder="john@example.com"
                         required
-                        className={`w-full px-5 py-4 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all ${theme === "dark"
+                        className={`w-full px-5 py-4 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-castleton/50 transition-all ${theme === "dark"
                           ? "bg-neutral-950/50 border border-neutral-800 text-white placeholder-neutral-600 focus:bg-neutral-950"
                           : "bg-neutral-50 border border-neutral-200 text-neutral-900 placeholder-neutral-400 focus:bg-white"
                           }`}
@@ -1468,7 +1468,7 @@ export default function App() {
                         value={formData.phone}
                         onChange={handleFormChange}
                         placeholder="+94 77 123 4567"
-                        className={`w-full px-5 py-4 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all ${theme === "dark"
+                        className={`w-full px-5 py-4 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-castleton/50 transition-all ${theme === "dark"
                           ? "bg-neutral-950/50 border border-neutral-800 text-white placeholder-neutral-600 focus:bg-neutral-950"
                           : "bg-neutral-50 border border-neutral-200 text-neutral-900 placeholder-neutral-400 focus:bg-white"
                           }`}
@@ -1482,7 +1482,7 @@ export default function App() {
                           value={formData.subject}
                           onChange={handleFormChange}
                           required
-                          className={`w-full px-5 py-4 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all appearance-none cursor-pointer ${theme === "dark"
+                          className={`w-full px-5 py-4 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-castleton/50 transition-all appearance-none cursor-pointer ${theme === "dark"
                             ? "bg-neutral-950/50 border border-neutral-800 text-white focus:bg-neutral-950"
                             : "bg-neutral-50 border border-neutral-200 text-neutral-900 focus:bg-white text-neutral-900"
                             }`}
@@ -1493,7 +1493,7 @@ export default function App() {
                           <option value="wasgamuwa">Wasgamuwa Safari</option>
                           <option value="hurulu">Hurulu Eco Park</option>
                         </select>
-                        <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-emerald-500">
+                        <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-castleton">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                       </div>
@@ -1509,7 +1509,7 @@ export default function App() {
                       rows="4"
                       placeholder="Tell us about your dream safari..."
                       required
-                      className={`w-full px-5 py-4 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all resize-y ${theme === "dark"
+                      className={`w-full px-5 py-4 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-castleton/50 transition-all resize-y ${theme === "dark"
                         ? "bg-neutral-950/50 border border-neutral-800 text-white placeholder-neutral-600 focus:bg-neutral-950"
                         : "bg-neutral-50 border border-neutral-200 text-neutral-900 placeholder-neutral-400 focus:bg-white"
                         }`}
@@ -1519,7 +1519,7 @@ export default function App() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full bg-gradient-to-r from-emerald-600 to-teal-500 text-white font-bold text-sm py-4 rounded-xl hover:from-emerald-700 hover:to-teal-600 transition-all duration-300 shadow-[0_8px_20px_rgb(16,185,129,0.3)] hover:shadow-[0_10px_25px_rgb(16,185,129,0.4)] hover:-translate-y-0.5 disabled:opacity-60 disabled:hover:translate-y-0 flex items-center justify-center gap-2"
+                    className="w-full bg-gradient-to-r from-sacramento to-castleton text-white font-bold text-sm py-4 rounded-xl hover:from-sacramento-600 hover:to-castleton-600 transition-all duration-300 shadow-[0_8px_20px_rgba(4,57,39,0.3)] hover:shadow-[0_10px_25px_rgba(4,57,39,0.4)] hover:-translate-y-0.5 disabled:opacity-60 disabled:hover:translate-y-0 flex items-center justify-center gap-2"
                   >
                     {isSubmitting ? (
                       <>
@@ -1634,7 +1634,7 @@ export default function App() {
       {/* Floating Action Buttons */}
       <button
         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-        className={`fixed bottom-6 right-6 w-11 h-11 bg-emerald-700 hover:bg-emerald-800 text-white rounded-full flex items-center justify-center transition-all duration-300 shadow-xl z-50 transform ${showScrollTop ? "scale-100 opacity-100" : "scale-75 opacity-0 pointer-events-none"}`}
+        className={`fixed bottom-6 right-6 w-11 h-11 bg-sacramento hover:bg-sacramento-600 text-white rounded-full flex items-center justify-center transition-all duration-300 shadow-xl z-50 transform ${showScrollTop ? "scale-100 opacity-100" : "scale-75 opacity-0 pointer-events-none"}`}
         aria-label="Scroll back up to top"
       >
         ↑

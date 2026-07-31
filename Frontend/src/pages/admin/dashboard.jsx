@@ -34,8 +34,8 @@ const statusStyles = (status) => {
   switch ((status ?? "").toLowerCase()) {
     case "confirmed":
       return {
-        bg: "bg-emerald-500/10 text-emerald-500 border-emerald-500/25",
-        dot: "bg-emerald-500",
+        bg: "bg-sacramento/10 text-sacramento border-sacramento/25",
+        dot: "bg-sacramento",
       };
     case "cancelled":
       return {
@@ -264,9 +264,9 @@ function Stars({ rating }) {
 function StatCard({ icon: Icon, label, value, sub, color, link, index }) {
   const colorMap = {
     emerald: {
-      bg: "from-emerald-500 to-teal-500",
-      light: "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400",
-      ring: "ring-emerald-100 dark:ring-emerald-950/20",
+      bg: "from-sacramento to-castleton",
+      light: "bg-castleton-50 dark:bg-sacramento-900/30 text-sacramento dark:text-castleton-300",
+      ring: "ring-castleton-50 dark:ring-sacramento-900/20",
     },
     blue: {
       bg: "from-blue-500 to-indigo-500",
@@ -287,7 +287,7 @@ function StatCard({ icon: Icon, label, value, sub, color, link, index }) {
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.1 }}
-      className={`relative overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 p-6 flex flex-col gap-4 group cursor-pointer shadow-sm hover:shadow-xl dark:hover:shadow-emerald-950/10 hover:-translate-y-1 transition-all duration-300 ring-1 ${c.ring}`}
+      className={`relative overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 p-6 flex flex-col gap-4 group cursor-pointer shadow-sm hover:shadow-xl dark:hover:shadow-sacramento-950/10 hover:-translate-y-1 transition-all duration-300 ring-1 ${c.ring}`}
     >
       {/* Decorative background glow */}
       <div className={`absolute top-0 right-0 -mr-6 -mt-6 w-24 h-24 bg-gradient-to-br ${c.bg} opacity-[0.03] dark:opacity-[0.06] rounded-full blur-xl group-hover:scale-150 transition-transform duration-500`} />
@@ -354,8 +354,8 @@ export default function AdminDashboard({ user }) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[80vh] gap-4">
         <div className="relative flex items-center justify-center">
-          <div className="w-16 h-16 rounded-full border-4 border-emerald-100 dark:border-slate-800 border-t-emerald-500 dark:border-t-emerald-400 animate-spin" />
-          <Activity size={24} className="absolute text-emerald-500 dark:text-emerald-400 animate-pulse" />
+          <div className="w-16 h-16 rounded-full border-4 border-castleton-50 dark:border-slate-800 border-t-sacramento dark:border-t-castleton-300 animate-spin" />
+          <Activity size={24} className="absolute text-sacramento dark:text-castleton-300 animate-pulse" />
         </div>
         <p className="text-slate-500 dark:text-slate-400 font-semibold tracking-wide animate-pulse">
           Syncing system overview…
@@ -408,7 +408,7 @@ export default function AdminDashboard({ user }) {
       {/* ── Header Area ── */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 text-sm font-bold tracking-wider uppercase mb-1">
+          <div className="flex items-center gap-2 text-sacramento dark:text-castleton-300 text-sm font-bold tracking-wider uppercase mb-1">
             <Sparkles size={14} className="animate-spin-slow" />
             Live Operations Control
           </div>
@@ -429,14 +429,14 @@ export default function AdminDashboard({ user }) {
           <button
             onClick={() => fetchStats(true)}
             disabled={refreshing}
-            className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:text-emerald-500 dark:hover:text-emerald-400 hover:shadow active:scale-95 transition-all"
+            className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:text-sacramento dark:hover:text-castleton-300 hover:shadow active:scale-95 transition-all"
             title="Refresh Statistics"
           >
             <RefreshCw size={16} className={`${refreshing ? "animate-spin" : ""}`} />
           </button>
 
           <div className="flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-xl px-4 py-2.5 shadow-sm text-sm text-slate-600 dark:text-slate-300 font-semibold">
-            <Clock size={15} className="text-emerald-500 dark:text-emerald-400" />
+            <Clock size={15} className="text-sacramento dark:text-castleton-300" />
             {new Date().toLocaleDateString("en-US", {
               weekday: "short",
               month: "short",
@@ -495,7 +495,7 @@ export default function AdminDashboard({ user }) {
                   Monthly trend for the last 6 months
                 </p>
               </div>
-              <div className="flex items-center gap-1.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold px-3 py-1.5 rounded-full">
+              <div className="flex items-center gap-1.5 bg-sacramento/10 text-sacramento dark:text-castleton-300 text-xs font-bold px-3 py-1.5 rounded-full">
                 <TrendingUp size={13} />
                 Volume Rate
               </div>
@@ -526,7 +526,7 @@ export default function AdminDashboard({ user }) {
               </div>
               <Link
                 to="/admin/bookings"
-                className="text-xs text-emerald-600 dark:text-emerald-400 hover:underline font-bold flex items-center gap-1 group"
+                className="text-xs text-sacramento dark:text-castleton-300 hover:underline font-bold flex items-center gap-1 group"
               >
                 Detailed Ledger
                 <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
@@ -617,7 +617,7 @@ export default function AdminDashboard({ user }) {
               </div>
               <Link
                 to="/admin/reviews"
-                className="text-xs text-emerald-600 dark:text-emerald-400 hover:underline font-bold flex items-center gap-1 group"
+                className="text-xs text-sacramento dark:text-castleton-300 hover:underline font-bold flex items-center gap-1 group"
               >
                 All Feedback
                 <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
@@ -633,7 +633,7 @@ export default function AdminDashboard({ user }) {
                   >
                     <div className="flex items-center justify-between gap-3 mb-2">
                       <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-[10px] font-bold">
+                        <div className="w-6 h-6 rounded-full bg-sacramento/10 text-sacramento dark:text-castleton-300 flex items-center justify-center text-[10px] font-bold">
                           U
                         </div>
                         <span className="text-xs text-slate-500 dark:text-slate-400 font-bold">
@@ -674,7 +674,7 @@ export default function AdminDashboard({ user }) {
               icon: Package,
               label: "Manage Packages",
               desc: "Adjust tour parameters",
-              color: "bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border-emerald-100/50 dark:border-emerald-900/30",
+              color: "bg-castleton-50 dark:bg-sacramento-900/20 text-sacramento dark:text-castleton-300 border-castleton-50/50 dark:border-sacramento-900/30",
             },
             {
               to: "/admin/bookings",

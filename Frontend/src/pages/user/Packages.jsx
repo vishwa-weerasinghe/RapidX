@@ -50,7 +50,7 @@ export default function Packages() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen bg-[#F4F8F3]">
-        <div className="w-14 h-14 border-[5px] border-green-700 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-14 h-14 border-[5px] border-sacramento border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -64,16 +64,16 @@ export default function Packages() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#f8f4eb] via-[#f2ebdc] to-[#e4edd8] dark:from-[#050505] dark:via-[#0d0d0d] dark:to-[#111b14] py-12 px-6 text-[#1f2b20] dark:text-[#f5f7f2]">
+    <div className="min-h-screen bg-gradient-to-b from-offwhite via-[#f2ebdc] to-[#e4edd8] dark:from-[#050505] dark:via-[#0d0d0d] dark:to-[#111b14] py-12 px-6 text-[#1f2b20] dark:text-[#f5f7f2]">
 
       {/* Heading */}
       <div className="text-center mb-14">
 
-        <p className="uppercase tracking-[5px] text-green-700 font-semibold">
+        <p className="uppercase tracking-[5px] text-sacramento font-semibold">
           Explore Nature
         </p>
 
-        <h1 className="text-5xl font-black text-[#1F3D2B] mt-2">
+        <h1 className="text-5xl font-black text-sacramento mt-2">
           Wild Safari Packages
         </h1>
 
@@ -88,7 +88,7 @@ export default function Packages() {
           onChange={(event) => setSearch(event.target.value)}
           placeholder="Search safari packages..."
           aria-label="Search safari packages"
-          className="w-full max-w-xl mx-auto mt-8 block rounded-xl border border-[#cfe0c8] dark:border-[#1e3a23] bg-[#fcfaf5] dark:bg-[#0d0d0d] px-4 py-3 text-[#1f2b20] dark:text-[#f5f7f2] outline-none focus:ring-2 focus:ring-emerald-600"
+          className="w-full max-w-xl mx-auto mt-8 block rounded-xl border border-[#cfe0c8] dark:border-[#1e3a23] bg-[#fcfaf5] dark:bg-[#0d0d0d] px-4 py-3 text-[#1f2b20] dark:text-[#f5f7f2] outline-none focus:ring-2 focus:ring-sacramento"
         />
       </div>
 
@@ -150,14 +150,14 @@ export default function Packages() {
 
                       <Users
                         size={18}
-                        className="text-green-700"
+                        className="text-sacramento"
                       />
 
                       <span>Adult</span>
 
                     </div>
 
-                    <span className="font-bold text-green-800">
+                    <span className="font-bold text-sacramento">
                       Rs. {pkg.Price_for_adult}
                     </span>
 
@@ -169,14 +169,14 @@ export default function Packages() {
 
                       <Baby
                         size={18}
-                        className="text-green-700"
+                        className="text-sacramento"
                       />
 
                       <span>Child</span>
 
                     </div>
 
-                    <span className="font-bold text-green-800">
+                    <span className="font-bold text-sacramento">
                       Rs. {pkg.Price_for_child}
                     </span>
 
@@ -186,7 +186,7 @@ export default function Packages() {
 
                 <button
                   onClick={() => handleBook(pkg)}
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-green-700 to-emerald-600 hover:from-emerald-600 hover:to-green-800 text-white font-semibold transition duration-300 flex justify-center items-center gap-2"
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-sacramento to-castleton hover:from-sacramento-600 hover:to-castleton-600 text-white font-semibold transition duration-300 flex justify-center items-center gap-2"
                 >
                   Book Safari
                   <ArrowRight size={18} />

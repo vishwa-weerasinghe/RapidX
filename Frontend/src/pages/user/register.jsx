@@ -118,7 +118,7 @@ export default function Register() {
           <h2 className="mt-4 text-3xl font-extrabold tracking-tight text-white drop-shadow-sm">
             Create Your Account
           </h2>
-          <p className="text-xs font-semibold tracking-widest text-emerald-300 uppercase mt-1">
+          <p className="text-xs font-semibold tracking-widest text-castleton-300 uppercase mt-1">
             — Join the Adventure—
           </p>
         </div>
@@ -158,7 +158,7 @@ export default function Register() {
                 <input
                   type="text"
                   required
-                  className="block w-full rounded-lg border border-white/20 bg-white/10 py-2.5 pl-10 pr-3 text-white placeholder-gray-400 backdrop-blur-sm transition focus:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-400 sm:text-sm"
+                  className="block w-full rounded-lg border border-white/20 bg-white/10 py-2.5 pl-10 pr-3 text-white placeholder-gray-400 backdrop-blur-sm transition focus:border-castleton-300 focus:outline-none focus:ring-1 focus:ring-castleton-300 sm:text-sm"
                   placeholder="John"
                   value={First_Name}
                   onChange={(e) => setFirstName(e.target.value)}
@@ -196,7 +196,7 @@ export default function Register() {
                 <input
                   type="text"
                   required
-                  className="block w-full rounded-lg border border-white/20 bg-white/10 py-2.5 pl-10 pr-3 text-white placeholder-gray-400 backdrop-blur-sm transition focus:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-400 sm:text-sm"
+                  className="block w-full rounded-lg border border-white/20 bg-white/10 py-2.5 pl-10 pr-3 text-white placeholder-gray-400 backdrop-blur-sm transition focus:border-castleton-300 focus:outline-none focus:ring-1 focus:ring-castleton-300 sm:text-sm"
                   placeholder="Doe"
                   value={Last_Name}
                   onChange={(e) => setLastName(e.target.value)}
@@ -236,7 +236,7 @@ export default function Register() {
               <input
                 type="email"
                 required
-                className="block w-full rounded-lg border border-white/20 bg-white/10 py-2.5 pl-10 pr-3 text-white placeholder-gray-400 backdrop-blur-sm transition focus:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-400 sm:text-sm"
+                className="block w-full rounded-lg border border-white/20 bg-white/10 py-2.5 pl-10 pr-3 text-white placeholder-gray-400 backdrop-blur-sm transition focus:border-castleton-300 focus:outline-none focus:ring-1 focus:ring-castleton-300 sm:text-sm"
                 placeholder="johndoe@gmail.com"
                 value={Email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -274,7 +274,7 @@ export default function Register() {
                 <input
                   type="text"
                   required
-                  className="block w-full rounded-lg border border-white/20 bg-white/10 py-2.5 pl-10 pr-3 text-white placeholder-gray-400 backdrop-blur-sm transition focus:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-400 sm:text-sm"
+                  className="block w-full rounded-lg border border-white/20 bg-white/10 py-2.5 pl-10 pr-3 text-white placeholder-gray-400 backdrop-blur-sm transition focus:border-castleton-300 focus:outline-none focus:ring-1 focus:ring-castleton-300 sm:text-sm"
                   placeholder="+94 77 123 4567"
                   value={Phone_No}
                   onChange={(e) => setPhone_No(e.target.value)}
@@ -313,7 +313,7 @@ export default function Register() {
                 <input
                   type="text"
                   required
-                  className="block w-full rounded-lg border border-white/20 bg-white/10 py-2.5 pl-10 pr-3 text-white placeholder-gray-400 backdrop-blur-sm transition focus:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-400 sm:text-sm"
+                  className="block w-full rounded-lg border border-white/20 bg-white/10 py-2.5 pl-10 pr-3 text-white placeholder-gray-400 backdrop-blur-sm transition focus:border-castleton-300 focus:outline-none focus:ring-1 focus:ring-castleton-300 sm:text-sm"
                   placeholder="Sri Lanka"
                   value={Country}
                   onChange={(e) => setCountry(e.target.value)}
@@ -354,7 +354,7 @@ export default function Register() {
               <input
                 type="text"
                 required
-                className="block w-full rounded-lg border border-white/20 bg-white/10 py-2.5 pl-10 pr-3 text-white placeholder-gray-400 backdrop-blur-sm transition focus:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-400 sm:text-sm"
+                className="block w-full rounded-lg border border-white/20 bg-white/10 py-2.5 pl-10 pr-3 text-white placeholder-gray-400 backdrop-blur-sm transition focus:border-castleton-300 focus:outline-none focus:ring-1 focus:ring-castleton-300 sm:text-sm"
                 placeholder="199512345678 or N1234567"
                 value={NIC}
                 onChange={(e) => setNIC(e.target.value)}
@@ -395,7 +395,7 @@ export default function Register() {
                 <input
                   type="password"
                   required
-                  className="block w-full rounded-lg border border-white/20 bg-white/10 py-2.5 pl-10 pr-3 text-white placeholder-gray-400 backdrop-blur-sm transition focus:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-400 sm:text-sm"
+                  className="block w-full rounded-lg border border-white/20 bg-white/10 py-2.5 pl-10 pr-3 text-white placeholder-gray-400 backdrop-blur-sm transition focus:border-castleton-300 focus:outline-none focus:ring-1 focus:ring-castleton-300 sm:text-sm"
                   placeholder="••••••••"
                   value={Password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -434,7 +434,7 @@ export default function Register() {
                 <input
                   type="password"
                   required
-                  className="block w-full rounded-lg border border-white/20 bg-white/10 py-2.5 pl-10 pr-3 text-white placeholder-gray-400 backdrop-blur-sm transition focus:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-400 sm:text-sm"
+                  className="block w-full rounded-lg border border-white/20 bg-white/10 py-2.5 pl-10 pr-3 text-white placeholder-gray-400 backdrop-blur-sm transition focus:border-castleton-300 focus:outline-none focus:ring-1 focus:ring-castleton-300 sm:text-sm"
                   placeholder="••••••••"
                   value={Password_Confirmation}
                   onChange={(e) => setPasswordConfirmation(e.target.value)}
@@ -448,7 +448,7 @@ export default function Register() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex justify-center items-center rounded-lg bg-gradient-to-r from-emerald-400 to-teal-500 px-4 py-3 text-sm font-bold uppercase tracking-wider text-white shadow-lg transition hover:from-emerald-500 hover:to-teal-600 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50"
+              className="w-full flex justify-center items-center rounded-lg bg-gradient-to-r from-sacramento to-castleton px-4 py-3 text-sm font-bold uppercase tracking-wider text-white shadow-lg transition hover:from-sacramento-600 hover:to-castleton-600 focus:outline-none focus:ring-2 focus:ring-sacramento focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50"
             >
               {loading ? "Registering Now..." : "Register Now →"}
             </button>
@@ -460,7 +460,7 @@ export default function Register() {
           Already have an account?{" "}
           <Link
             to="/login"
-            className="font-bold text-emerald-400 hover:text-emerald-300 transition underline underline-offset-4"
+            className="font-bold text-castleton-300 hover:text-castleton-200 transition underline underline-offset-4"
           >
             Sign In
           </Link>
@@ -469,7 +469,7 @@ export default function Register() {
         {/* Terms footer notice */}
         <p className="mt-4 text-center text-[11px] text-gray-400">
           By signing up, you agree to our{" "}
-          <span className="text-emerald-400/80 cursor-pointer">
+          <span className="text-castleton-300/80 cursor-pointer">
             Terms of Service
           </span>
           .

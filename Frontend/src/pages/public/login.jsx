@@ -105,7 +105,7 @@ export default function Login() {
           <h2 className="text-3xl font-extrabold tracking-tight text-white drop-shadow-sm">
             Welcome Back
           </h2>
-          <p className="text-xs font-semibold tracking-widest text-emerald-300 uppercase mt-1">
+          <p className="text-xs font-semibold tracking-widest text-castleton-300 uppercase mt-1">
             — JOIN THE ADVENTURE —
           </p>
         </div>
@@ -144,7 +144,7 @@ export default function Login() {
                 type="email"
                 name="Email"
                 required
-                className="block w-full rounded-lg border border-white/20 bg-white/10 py-2.5 pl-10 pr-3 text-white placeholder-gray-400 backdrop-blur-sm transition focus:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-400 sm:text-sm"
+                className="block w-full rounded-lg border border-white/20 bg-white/10 py-2.5 pl-10 pr-3 text-white placeholder-gray-400 backdrop-blur-sm transition focus:border-castleton-300 focus:outline-none focus:ring-1 focus:ring-castleton-300 sm:text-sm"
                 placeholder="john@email.com"
                 value={Email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -186,7 +186,7 @@ export default function Login() {
                 type="password"
                 name="Password"
                 required
-                className="block w-full rounded-lg border border-white/20 bg-white/10 py-2.5 pl-10 pr-3 text-white placeholder-gray-400 backdrop-blur-sm transition focus:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-400 sm:text-sm"
+                className="block w-full rounded-lg border border-white/20 bg-white/10 py-2.5 pl-10 pr-3 text-white placeholder-gray-400 backdrop-blur-sm transition focus:border-castleton-300 focus:outline-none focus:ring-1 focus:ring-castleton-300 sm:text-sm"
                 placeholder="••••••••"
                 value={Password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -201,7 +201,7 @@ export default function Login() {
 
           <a
             href="#"
-            className="text-xs text-emerald-400 hover:underline text-right block transition"
+            className="text-xs text-castleton-300 hover:underline text-right block transition"
           >
             Forgot Password?
           </a>
@@ -211,7 +211,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex justify-center items-center rounded-lg bg-gradient-to-r from-emerald-400 to-teal-500 px-4 py-3 text-sm font-bold uppercase tracking-wider text-white shadow-lg transition hover:from-emerald-500 hover:to-teal-600 disabled:opacity-50"
+              className="w-full flex justify-center items-center rounded-lg bg-gradient-to-r from-sacramento to-castleton px-4 py-3 text-sm font-bold uppercase tracking-wider text-white shadow-lg transition hover:from-sacramento-600 hover:to-castleton-600 disabled:opacity-50"
             >
               {loading ? "Signing In..." : "Sign In →"}
             </button>
@@ -223,7 +223,7 @@ export default function Login() {
           Don't have an account?{" "}
           <Link
             to="/register"
-            className="font-bold text-emerald-400 hover:text-emerald-300 transition underline"
+            className="font-bold text-castleton-300 hover:text-castleton-200 transition underline"
           >
             Register Here
           </Link>

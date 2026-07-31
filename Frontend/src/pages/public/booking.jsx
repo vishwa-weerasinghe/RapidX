@@ -173,12 +173,12 @@ export default function Booking() {
     };
 
     return (
-        <div className="min-h-screen bg-[#f8f4eb] dark:bg-[#050505] text-[#1f2b20] dark:text-[#f5f7f2] py-12 px-4 md:px-6 transition-colors duration-300">
+        <div className="min-h-screen bg-offwhite dark:bg-[#050505] text-[#1f2b20] dark:text-[#f5f7f2] py-12 px-4 md:px-6 transition-colors duration-300">
             <div className="max-w-4xl mx-auto space-y-6">
                 {/* Navigation Action */}
                 <button
                     onClick={() => navigate("/")}
-                    className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-slate-500 hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-400 transition-colors"
+                    className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-slate-500 hover:text-sacramento dark:text-slate-400 dark:hover:text-castleton-300 transition-colors"
                 >
                     <ChevronLeft size={16} />
                     Back to Home
@@ -199,7 +199,7 @@ export default function Booking() {
                             {/* Section 0: Package Selector */}
                             <div className="space-y-4">
                                 <div className="flex items-center gap-2 pb-2 border-b border-slate-50 dark:border-slate-800/40">
-                                    <Compass size={16} className="text-emerald-500" />
+                                    <Compass size={16} className="text-castleton" />
                                     <h4 className="text-xs font-extrabold uppercase tracking-widest text-slate-400">
                                         Choose Safari Package
                                     </h4>
@@ -213,7 +213,7 @@ export default function Booking() {
                                         <select
                                             value={selectedPackageId}
                                             onChange={handlePackageChange}
-                                            className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3.5 px-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all appearance-none cursor-pointer"
+                                            className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3.5 px-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all appearance-none cursor-pointer"
                                             required
                                         >
                                             <option value="" disabled>-- Select a tour package --</option>
@@ -235,7 +235,7 @@ export default function Booking() {
                             {/* Section 1: Schedule */}
                             <div className="space-y-4">
                                 <div className="flex items-center gap-2 pb-2 border-b border-slate-50 dark:border-slate-800/40">
-                                    <Calendar size={16} className="text-emerald-500" />
+                                    <Calendar size={16} className="text-castleton" />
                                     <h4 className="text-xs font-extrabold uppercase tracking-widest text-slate-400">
                                         1. Safari Schedule
                                     </h4>
@@ -252,7 +252,7 @@ export default function Booking() {
                                             value={form.Booking_Date}
                                             min={new Date().toISOString().split("T")[0]}
                                             onChange={handleChange}
-                                            className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 px-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                                            className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 px-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all"
                                             required
                                         />
                                     </div>
@@ -266,7 +266,7 @@ export default function Booking() {
                                             name="Pickup_Time"
                                             value={form.Pickup_Time}
                                             onChange={handleChange}
-                                            className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 px-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                                            className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 px-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all"
                                             required
                                         />
                                     </div>
@@ -284,7 +284,7 @@ export default function Booking() {
                                             placeholder="e.g. Cinnamon Lodge Habarana"
                                             value={form.Pickup_Location}
                                             onChange={handleChange}
-                                            className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 pl-10 pr-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                                            className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 pl-10 pr-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all"
                                             required
                                         />
                                     </div>
@@ -294,7 +294,7 @@ export default function Booking() {
                             {/* Section 2: Guest Details / Traveler Info */}
                             <div className="space-y-4 pt-2">
                                 <div className="flex items-center gap-2 pb-2 border-b border-slate-50 dark:border-slate-800/40">
-                                    <User size={16} className="text-emerald-500" />
+                                    <User size={16} className="text-castleton" />
                                     <h4 className="text-xs font-extrabold uppercase tracking-widest text-slate-400">
                                         2. Traveler Information
                                     </h4>
@@ -311,7 +311,7 @@ export default function Booking() {
                                                 placeholder="John"
                                                 value={form.First_Name}
                                                 onChange={handleChange}
-                                                className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 px-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                                                className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 px-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all"
                                                 required
                                             />
                                         </div>
@@ -326,7 +326,7 @@ export default function Booking() {
                                                 placeholder="Doe"
                                                 value={form.Last_Name}
                                                 onChange={handleChange}
-                                                className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 px-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                                                className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 px-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all"
                                                 required
                                             />
                                         </div>
@@ -345,7 +345,7 @@ export default function Booking() {
                                                     placeholder="john@example.com"
                                                     value={form.Email}
                                                     onChange={handleChange}
-                                                    className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 pl-10 pr-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                                                    className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 pl-10 pr-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all"
                                                     required
                                                 />
                                             </div>
@@ -363,7 +363,7 @@ export default function Booking() {
                                                     placeholder="+94 77 123 4567"
                                                     value={form.Phone_No}
                                                     onChange={handleChange}
-                                                    className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 pl-10 pr-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                                                    className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 pl-10 pr-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all"
                                                     required
                                                 />
                                             </div>
@@ -383,7 +383,7 @@ export default function Booking() {
                                                     placeholder="e.g. 199512345678"
                                                     value={form.NIC}
                                                     onChange={handleChange}
-                                                    className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 pl-10 pr-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                                                    className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 pl-10 pr-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all"
                                                     required
                                                 />
                                             </div>
@@ -401,7 +401,7 @@ export default function Booking() {
                                                     placeholder="e.g. Sri Lanka"
                                                     value={form.Country}
                                                     onChange={handleChange}
-                                                    className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 pl-10 pr-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                                                    className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 pl-10 pr-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all"
                                                     required
                                                 />
                                             </div>
@@ -412,7 +412,7 @@ export default function Booking() {
                             {/* Section 3: Travelers Count */}
                             <div className="space-y-4 pt-2">
                                 <div className="flex items-center gap-2 pb-2 border-b border-slate-50 dark:border-slate-800/40">
-                                    <Users size={16} className="text-emerald-500" />
+                                    <Users size={16} className="text-castleton" />
                                     <h4 className="text-xs font-extrabold uppercase tracking-widest text-slate-400">
                                         3. Travelers Configuration
                                     </h4>
@@ -430,7 +430,7 @@ export default function Booking() {
                                             max="30"
                                             value={form.No_of_adults}
                                             onChange={handleChange}
-                                            className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 px-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                                            className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 px-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all"
                                         />
                                     </div>
 
@@ -445,7 +445,7 @@ export default function Booking() {
                                             max="30"
                                             value={form.No_of_child}
                                             onChange={handleChange}
-                                            className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 px-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                                            className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 px-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all"
                                         />
                                     </div>
                                 </div>
@@ -453,9 +453,9 @@ export default function Booking() {
 
                             {/* Bill Details Summary */}
                             {pkg && (
-                                <div className="bg-emerald-500/5 dark:bg-emerald-950/10 border border-emerald-500/20 dark:border-emerald-500/10 rounded-2xl p-5 flex items-center justify-between shadow-sm">
+                                <div className="bg-castleton/5 dark:bg-sacramento-900/10 border border-castleton/20 dark:border-castleton/10 rounded-2xl p-5 flex items-center justify-between shadow-sm">
                                     <div className="flex items-center gap-3">
-                                        <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                                        <div className="p-2.5 rounded-xl bg-castleton/10 text-castleton dark:text-castleton-300">
                                             <Info size={16} />
                                         </div>
                                         <div>
@@ -479,7 +479,7 @@ export default function Booking() {
                             {/* Submit & Cart Action */}
                             <button
                                 type="submit"
-                                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm uppercase py-4 rounded-xl shadow-lg shadow-emerald-500/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2 group"
+                                className="w-full bg-sacramento hover:bg-sacramento-600 text-white font-extrabold text-sm uppercase py-4 rounded-xl shadow-lg shadow-sacramento/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2 group"
                             >
                                 <ShoppingCart size={16} />
                                 Book Now

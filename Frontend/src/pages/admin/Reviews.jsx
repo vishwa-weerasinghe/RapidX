@@ -143,7 +143,7 @@ export default function AdminReviews() {
         </div>
       </div>
 
-      {message ? <p className="rounded-lg bg-emerald-100 p-3 text-emerald-700">{message}</p> : null}
+      {message ? <p className="rounded-lg bg-castleton-50 p-3 text-sacramento">{message}</p> : null}
       {error ? <p className="rounded-lg bg-red-100 p-3 text-red-700">{error}</p> : null}
 
       <div className="flex items-center gap-3">

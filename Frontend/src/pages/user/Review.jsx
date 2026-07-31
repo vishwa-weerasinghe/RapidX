@@ -87,7 +87,7 @@ export default function Review() {
             <select
               value={rate}
               onChange={(e) => setRate(e.target.value)}
-              className="w-full rounded-lg border border-[#dce8d7] bg-[#fdfcf8] px-3 py-2 text-[#1f2b20] outline-none focus:ring-2 focus:ring-emerald-600 dark:border-[#15311f] dark:bg-[#111111] dark:text-[#f5f7f2]"
+              className="w-full rounded-lg border border-[#dce8d7] bg-[#fdfcf8] px-3 py-2 text-[#1f2b20] outline-none focus:ring-2 focus:ring-sacramento dark:border-[#15311f] dark:bg-[#111111] dark:text-[#f5f7f2]"
             >
               <option value="5">5 - Excellent</option>
               <option value="4">4 - Very good</option>
@@ -104,18 +104,18 @@ export default function Review() {
               onChange={(e) => setDescription(e.target.value)}
               rows="5"
               required
-              className="w-full rounded-lg border border-[#dce8d7] bg-[#fdfcf8] px-3 py-2 text-[#1f2b20] outline-none focus:ring-2 focus:ring-emerald-600 dark:border-[#15311f] dark:bg-[#111111] dark:text-[#f5f7f2]"
+              className="w-full rounded-lg border border-[#dce8d7] bg-[#fdfcf8] px-3 py-2 text-[#1f2b20] outline-none focus:ring-2 focus:ring-sacramento dark:border-[#15311f] dark:bg-[#111111] dark:text-[#f5f7f2]"
               placeholder="Tell us what you liked or what we can improve..."
             />
           </div>
 
-          {message ? <p className="rounded-lg bg-emerald-100 p-3 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400">{message}</p> : null}
+          {message ? <p className="rounded-lg bg-castleton-50 p-3 text-sacramento dark:bg-sacramento-900/40 dark:text-castleton-300">{message}</p> : null}
           {error ? <p className="rounded-lg bg-red-100 p-3 text-red-700 dark:bg-red-950/40 dark:text-red-400">{error}</p> : null}
 
           <button
             type="submit"
             disabled={loading || !isLoggedIn}
-            className="w-full rounded-lg bg-emerald-700 px-4 py-3 font-semibold text-[#f8f4eb] transition hover:bg-emerald-800 disabled:opacity-50 dark:bg-emerald-600 dark:hover:bg-emerald-500"
+            className="w-full rounded-lg bg-sacramento px-4 py-3 font-semibold text-offwhite transition hover:bg-sacramento-600 disabled:opacity-50"
           >
             {loading ? "Submitting..." : isLoggedIn ? "Submit Review" : "Log in to review"}
           </button>
