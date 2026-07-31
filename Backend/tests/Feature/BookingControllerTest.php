@@ -162,6 +162,39 @@ class BookingControllerTest extends TestCase
         ]);
     }
 
+    public function test_guest_booking_can_be_created_without_existing_customer_id(): void
+    {
+        $package = $this->createPackage();
+
+        $response = $this->postJson('/api/bookings', [
+            'Booking_Date' => '2026-07-15',
+            'Pickup_Time' => '14:00:00',
+            'Pickup_Location' => 'Ella',
+            'No_of_adults' => 2,
+            'No_of_child' => 1,
+            'Package_ID' => $package->id,
+            'First_Name' => 'Guest',
+            'Last_Name' => 'User',
+            'Email' => 'guest@example.com',
+            'Phone_No' => '0712345678',
+            'NIC' => '987654321V',
+            'Country' => 'Sri Lanka',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('message', 'Booking created successfully');
+
+        $this->assertDatabaseHas('customers', [
+            'Email' => 'guest@example.com',
+            'Phone_No' => '0712345678',
+        ]);
+
+        $this->assertDatabaseHas('bookings', [
+            'Pickup_Location' => 'Ella',
+            'Package_ID' => $package->id,
+        ]);
+    }
+
     public function test_store_returns_validation_errors_for_missing_required_fields(): void
     {
         $response = $this->postJson('/api/bookings', [

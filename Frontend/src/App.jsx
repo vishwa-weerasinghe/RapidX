@@ -258,7 +258,7 @@ export default function App() {
               id: pkg.id,
               title: pkg.Package_Name,
               desc: pkg.Description,
-              price: `$${parseFloat(pkg.Price_for_adult || 0).toFixed(0)}`,
+              price: Number(pkg.Price_for_adult) || 0,
               img: pkg.Image
                 ? `${backendUrl}/storage/${pkg.Image}`
                 : fallbackImage,
@@ -1043,84 +1043,109 @@ export default function App() {
         </div>
       </section>
 
-      {/* --- TOUR PACKAGES --- */}
-      <section id="packages" className="py-20 md:py-28 bg-white border-t border-gray-100">
+     {/* --- TOUR PACKAGES --- */}
+      <section
+        id="packages"
+        className="py-20 bg-white border-t border-gray-100"
+      >
         <div className="max-w-7xl mx-auto px-4 md:px-6">
-          <div className="text-center max-w-xl mx-auto mb-16">
-            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-50 text-castleton text-xs font-bold uppercase tracking-widest mb-6 border border-gray-100">
+
+          {/* Section Header */}
+          <div className="text-center max-w-xl mx-auto mb-14">
+            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-50 text-castleton text-xs font-bold uppercase tracking-widest border border-gray-100">
               <span className="w-2 h-2 rounded-full bg-castleton"></span>
               Tour Packages
             </span>
-            <h2 className="font-outfit text-3xl sm:text-5xl font-bold text-gray-900">
+
+            <h2 className="mt-5 font-outfit text-3xl sm:text-5xl font-bold text-gray-900">
               Choose Your Adventure
             </h2>
+
+            <p className="mt-4 text-gray-500">
+              Discover unforgettable safari experiences with expert guides,
+              comfortable jeeps, and affordable prices.
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {packages.map((pkg, idx) => (
               <div
                 key={idx}
-                className="rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-500 flex flex-col justify-between border border-gray-100 relative bg-white group"
+                className="bg-white rounded-3xl overflow-hidden border border-gray-200 shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col"
               >
-                <div>
-                  <div className="relative h-60 overflow-hidden">
-                    <img
-                      src={pkg.img}
-                      alt={pkg.title}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-                    {pkg.popular && (
-                      <span className="absolute top-4 right-4 bg-rose-500 text-white font-bold text-xs px-4 py-1.5 rounded-full uppercase tracking-wider shadow">
-                        Popular
-                      </span>
-                    )}
-                  </div>
+                {/* Image */}
+                <div className="relative h-48 overflow-hidden">
+                  <img
+                    src={pkg.img}
+                    alt={pkg.title}
+                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                  />
 
-                  <div className="p-6 sm:p-8">
-                    <div className="mb-4">
-                      <h3 className="text-xl font-bold mb-1 text-gray-900">{pkg.title}</h3>
-                      <div className="flex items-center gap-1">
-                        <span className="text-amber-400 text-sm">★★★★★</span>
-                        <span className="text-gray-400 text-xs font-medium">
-                          (3 Reviews)
-                        </span>
-                      </div>
-                    </div>
-
-                    <p className="text-gray-500 text-sm mb-6 leading-relaxed">
-                      {pkg.desc}
-                    </p>
-
-                    <ul className="space-y-2.5 mb-6 text-gray-600 text-sm font-medium">
-                      <li>✓ Professional Guide</li>
-                      <li>✓ Comfortable Jeep</li>
-                      <li>✓ Refreshments</li>
-                      <li>✓ 6 Persons Max</li>
-                    </ul>
-                  </div>
+                  {pkg.popular && (
+                    <span className="absolute top-4 right-4 bg-amber-500 text-white text-xs font-semibold px-3 py-1 rounded-full">
+                      Popular
+                    </span>
+                  )}
                 </div>
 
-                <div className="p-6 sm:p-8 border-t border-gray-100 bg-gray-50 flex items-center justify-between">
-                  <div>
-                    <span className="text-xs text-gray-400 block font-bold uppercase tracking-wider mb-1">
-                      From
+                {/* Content */}
+                <div className="p-5 flex flex-col flex-grow">
+
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">
+                    {pkg.title}
+                  </h3>
+
+                  <p className="text-sm text-gray-500 leading-relaxed mb-4">
+                    {pkg.desc}
+                  </p>
+
+                  {/* Features */}
+                  <ul className="space-y-2 text-sm text-gray-600 mb-4">
+                    <li className="flex items-center gap-2">
+                      <span className="text-green-600">✓</span>
+                      Professional Guide
+                    </li>
+
+                    <li className="flex items-center gap-2">
+                      <span className="text-green-600">✓</span>
+                      Comfortable Jeep
+                    </li>
+
+                    <li className="flex items-center gap-2">
+                      <span className="text-green-600">✓</span>
+                      Reasonable Prices
+                    </li>
+                  </ul>
+
+                  {/* Price */}
+                  <div className="flex items-center justify-between border-t border-gray-100 pt-4 mb-4">
+                    <span className="text-sm text-gray-500">
+                      Starting From
                     </span>
-                    <span className="text-2xl font-extrabold text-castleton">
-                      {pkg.price}
+
+                    <span className="text-xl font-bold text-castleton">
+                      LKR {pkg.price.toLocaleString()}
                     </span>
                   </div>
-                  <button
-                    onClick={() => handleBookNow(pkg)}
-                    className="bg-sacramento text-white font-bold text-sm px-5 py-3 rounded-full hover:bg-sacramento-600 transition duration-300 shadow"
-                  >
-                    Book Now
-                  </button>
-                  <button
-                    onClick={() => handleAddToCart(pkg)}
-                    className="bg-sacramento text-white font-bold text-sm px-5 py-3 rounded-full hover:bg-sacramento-600 transition duration-300 shadow"
-                  >
-                    Add to Cart
-                  </button>
+
+                  {/* Buttons */}
+                  <div className="flex gap-3 mt-auto">
+                    <button
+                      onClick={() => handleBookNow(pkg)}
+                      className="flex-1 bg-sacramento text-white py-2.5 rounded-xl font-semibold hover:bg-castleton transition"
+                    >
+                      Book Now
+                    </button>
+
+                    <button
+                      onClick={() => handleAddToCart(pkg)}
+                      className="flex-1 border border-sacramento text-sacramento py-2.5 rounded-xl font-semibold hover:bg-sacramento hover:text-white transition"
+                    >
+                      Add to Cart
+                    </button>
+                  </div>
+
                 </div>
               </div>
             ))}
