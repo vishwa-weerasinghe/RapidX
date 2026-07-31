@@ -1,9 +1,82 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { MapPin, Calendar, Users, Search, LayoutDashboard, Menu, X } from "lucide-react";
 import ThemeToggle from "./components/ThemeToggle";
 import { useTheme } from "./context/ThemeContext";
 import api from "./axios";
+
+const tripadvisorReviews = [
+  {
+    initials: "TA",
+    name: "TripAdvisor Traveler",
+    date: "Jul 2026",
+    title: "Incredible Minneriya Elephant Safari Experience",
+    text:
+      "Seeing so many elephants in one place was absolutely amazing. We watched large herds moving freely across the open fields, while several baby elephants played close to their mothers.",
+    rate: 5,
+    source: "TripAdvisor",
+  },
+  {
+    initials: "TA",
+    name: "TripAdvisor Traveler",
+    date: "Jun 2026",
+    title: "Amazing Elephants And Friendly Driver",
+    text:
+      "Our Minneriya Safari was an unforgettable wildlife experience. The highlight of the trip was seeing so many elephants in their natural habitat.",
+    rate: 5,
+    source: "TripAdvisor",
+  },
+  {
+    initials: "TA",
+    name: "TripAdvisor Traveler",
+    date: "Jun 2026",
+    title: "Memorable Elephant Safari Adventure",
+    text:
+      "Booking the Minneriya Safari was quick and easy, and everything went smoothly from the start. The safari itself was adventurous and memorable.",
+    rate: 5,
+    source: "TripAdvisor",
+  },
+  {
+    initials: "TA",
+    name: "TripAdvisor Traveler",
+    date: "Jun 2026",
+    title: "Unforgettable Elephant Safari Experience",
+    text:
+      "Visiting Minneriya National Park was a fantastic experience, especially because of the incredible number of elephants we were able to see.",
+    rate: 5,
+    source: "TripAdvisor",
+  },
+  {
+    initials: "TA",
+    name: "TripAdvisor Traveler",
+    date: "Jun 2026",
+    title: "Amazing Wildlife Experience At Minneriya",
+    text:
+      "I recently visited Minneriya National Park for a safari, and it was an incredible experience. The park was filled with beautiful scenery and an amazing variety of wildlife.",
+    rate: 5,
+    source: "TripAdvisor",
+  },
+  {
+    initials: "TA",
+    name: "TripAdvisor Traveler",
+    date: "Jun 2026",
+    title: "Memorable Family Safari with Responsible Wildlife Viewing",
+    text:
+      "Our family recently enjoyed a wonderful safari experience in Minneriya, and it exceeded our expectations. The trip felt educational, peaceful, and enjoyable for the whole family.",
+    rate: 5,
+    source: "TripAdvisor",
+  },
+  {
+    initials: "TA",
+    name: "TripAdvisor Traveler",
+    date: "Jun 2026",
+    title: "Amazing Safari Experience for Couples",
+    text:
+      "My partner and I had an unforgettable safari experience in Minneriya. The beautiful scenery, incredible wildlife sightings, and professional guidance made this safari truly memorable.",
+    rate: 5,
+    source: "TripAdvisor",
+  },
+];
 
 export default function App() {
   // --- CONSUME SYSTEM THEME ---
@@ -229,6 +302,8 @@ export default function App() {
       setIsScrolled(window.scrollY > 100);
       setShowScrollTop(window.scrollY > 300);
 
+      const headerHeight = document.querySelector("header")?.offsetHeight || 120;
+
       // Active Section Navigation Tracker Spying Logic
       const sections = [
         "home",
@@ -242,7 +317,7 @@ export default function App() {
       for (const sectionId of sections) {
         const el = document.getElementById(sectionId);
         if (el) {
-          const top = el.offsetTop - 120;
+          const top = el.offsetTop - headerHeight;
           const height = el.offsetHeight;
           if (window.scrollY >= top && window.scrollY < top + height) {
             setActiveSection(sectionId);
@@ -309,7 +384,8 @@ export default function App() {
     setIsMobileMenuOpen(false);
     const target = document.getElementById(id);
     if (target) {
-      window.scrollTo({ top: target.offsetTop - 80, behavior: "smooth" });
+      const headerHeight = document.querySelector("header")?.offsetHeight || 120;
+      window.scrollTo({ top: target.offsetTop - headerHeight - 12, behavior: "smooth" });
     }
   };
 
@@ -322,13 +398,28 @@ export default function App() {
     message: "",
   });
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [showAllTripadvisorReviews, setShowAllTripadvisorReviews] = useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
-  const [reviewIndex, setReviewIndex] = useState(0);
   const [reviewNotification, setReviewNotification] = useState(null);
 
-  const reviewsSliderRef = useRef(null);
-  const touchStartX = useRef(0);
-  const touchEndX = useRef(0);
+  const tripadvisorUrl = "https://www.tripadvisor.com/Attraction_Review-g304133-d15640558-Reviews-Minneriya_Wild_Jeep_Safari-Dambulla_Central_Province.html";
+
+  const isTripAdvisorReview = (review) => {
+    const searchable = [
+      review?.source,
+      review?.Source,
+      review?.name,
+      review?.title,
+      review?.Title,
+      review?.text,
+      review?.Description,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+
+    return searchable.includes("tripadvisor");
+  };
 
   const getStoredGuestReviews = () => {
     try {
@@ -368,23 +459,25 @@ export default function App() {
               title,
               text: rev.Description,
               rate: rev.Rate || 5,
+              source: "Verified",
             };
           });
 
-          setReviews([...storedGuestReviews, ...mapped]);
+          setReviews([...storedGuestReviews, ...mapped].filter((review) => !isTripAdvisorReview(review)));
         } else if (storedGuestReviews.length > 0) {
-          setReviews(storedGuestReviews);
+          setReviews([...storedGuestReviews].filter((review) => !isTripAdvisorReview(review)));
+        } else {
+          setReviews([]);
         }
       })
       .catch((err) => console.error("Error loading reviews:", err));
   }, []);
 
-  const visibleReviews = showAllReviews ? reviews : reviews.slice(0, 12);
-
-  const handleReviewNext = () =>
-    setReviewIndex((prev) => Math.min(visibleReviews.length - 1, prev + 1));
-  const handleReviewPrev = () =>
-    setReviewIndex((prev) => Math.max(0, prev - 1));
+  const tripadvisorVisibleReviews = showAllTripadvisorReviews
+    ? tripadvisorReviews
+    : tripadvisorReviews.slice(0, 6);
+  const systemReviews = reviews.filter((review) => !isTripAdvisorReview(review));
+  const systemVisibleReviews = showAllReviews ? systemReviews : systemReviews.slice(0, 6);
 
   const handleReviewFormChange = (e) => {
     const { name, value } = e.target;
@@ -421,6 +514,7 @@ export default function App() {
       text: reviewForm.message.trim(),
       rate: Number(reviewForm.rating) || 5,
       isGuest: true,
+      source: "Guest",
     };
 
     setReviews((prev) => {
@@ -443,28 +537,42 @@ export default function App() {
     setReviewSubmitting(false);
   };
 
-  const handleTouchStart = (e) => {
-    touchStartX.current = e.changedTouches[0].screenX;
-  };
-
-  const handleTouchEnd = (e) => {
-    touchEndX.current = e.changedTouches[0].screenX;
-    if (touchEndX.current < touchStartX.current - 50) handleReviewNext();
-    if (touchEndX.current > touchStartX.current + 50) handleReviewPrev();
-  };
-
-  const getReviewTransformStyle = () => {
-    if (
-      typeof window !== "undefined" &&
-      window.innerWidth <= 768 &&
-      reviewsSliderRef.current
-    ) {
-      const card = reviewsSliderRef.current.querySelector(".review-card");
-      const cardWidth = card ? card.offsetWidth : 0;
-      return { transform: `translateX(-${reviewIndex * (cardWidth + 32)}px)` };
-    }
-    return {};
-  };
+  const renderReviewCard = (rev, index) => (
+    <div
+      key={`${rev.source || "review"}-${index}`}
+      className="review-card p-6 md:p-8 rounded-3xl shadow-sm border border-gray-100 bg-white hover:shadow-xl hover:-translate-y-2 transition-all duration-300 group"
+    >
+      <div className="flex justify-between items-start mb-4">
+        <div className="flex gap-3 items-center">
+          <div className="w-10 h-10 bg-gradient-to-br from-sacramento to-castleton text-white font-bold text-xs rounded-full flex items-center justify-center shadow-sm">
+            {rev.initials}
+          </div>
+          <div>
+            <h4 className="text-sm font-bold leading-tight text-gray-900 group-hover:text-castleton transition-colors">{rev.name}</h4>
+            <span className="text-amber-400 text-xs">
+              {"★".repeat(rev.rate || 5)}
+              {"☆".repeat(5 - (rev.rate || 5))}
+            </span>
+          </div>
+        </div>
+        <span className="text-gray-400 text-xs font-medium">{rev.date}</span>
+      </div>
+      <h3 className="text-lg font-bold mb-3 text-gray-900 line-clamp-1 group-hover:text-castleton transition-colors">"{rev.title}"</h3>
+      <p className="text-gray-500 text-sm leading-relaxed mb-6 line-clamp-5">
+        {rev.text}
+      </p>
+      <span
+        className={`font-bold text-[10px] px-3 py-1.5 rounded-full uppercase tracking-wider ${rev.isGuest
+          ? "bg-amber-50 text-amber-700 border border-amber-100"
+          : rev.source === "TripAdvisor"
+            ? "bg-blue-50 text-blue-700 border border-blue-100"
+            : "bg-gray-50 text-castleton border border-gray-100"
+          }`}
+      >
+        {rev.source || (rev.isGuest ? "Guest" : "Verified")}
+      </span>
+    </div>
+  );
 
 
   return (
@@ -1023,13 +1131,13 @@ export default function App() {
           <div className="text-center max-w-xl mx-auto mb-16">
             <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white text-castleton text-xs font-bold uppercase tracking-widest mb-6 border border-gray-200 shadow-sm">
               <span className="w-2 h-2 rounded-full bg-castleton"></span>
-              Customer Reviews
+              Reviews
             </span>
             <h2 className="font-outfit text-3xl sm:text-5xl font-bold text-gray-900 mb-4">
-              Their Journey. Their Words
+              Their Journey. Their Words.
             </h2>
             <p className="text-sm sm:text-base text-gray-500 mb-6">
-              From unforgettable wildlife encounters to exceptional service, see what our guests have shared about their journeys.
+              Explore genuine guest experiences and trusted TripAdvisor reviews from travelers who chose us.
             </p>
             <img
               src="https://minneriyawildjeepsafari.com/wp-content/uploads/2025/08/TC25-logo.jpg"
@@ -1039,164 +1147,156 @@ export default function App() {
           </div>
 
           {reviewNotification && (
-            <div className={`mx-auto mb-6 max-w-md rounded-xl border px-4 py-3 text-sm ${reviewNotification.type === "error" ? "border-red-500 text-red-600" : "border-castleton text-castleton"}`}>
+            <div className={`mx-auto mb-6 max-w-md rounded-xl border px-4 py-3 text-sm ${reviewNotification.type === "error" ? "border-red-500 text-red-600 bg-red-50" : "border-castleton text-castleton bg-castleton-50"}`}>
               {reviewNotification.text}
             </div>
           )}
 
-          {isGuestUser && (
-            <div className="flex justify-center mb-6">
-              <button
-                type="button"
-                onClick={() => setShowReviewForm((prev) => !prev)}
-                className="bg-sacramento text-white font-semibold px-6 py-3 rounded-full hover:bg-sacramento-600 shadow transition duration-300"
-              >
-                {showReviewForm ? "Cancel" : "Write Review"}
-              </button>
+          <div className="mb-14 rounded-3xl border border-gray-100 bg-white p-6 md:p-8 shadow-sm">
+            <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5 mb-8">
+              <div>
+                <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-50 text-castleton text-xs font-bold uppercase tracking-widest mb-4 border border-gray-100">
+                  TripAdvisor Reviews
+                </span>
+                <h3 className="font-outfit text-2xl sm:text-3xl font-bold text-gray-900">
+                  What our Trip Advisor guests say
+                </h3>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <a
+                  href={tripadvisorUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="bg-sacramento text-white font-semibold px-6 py-3 rounded-full hover:bg-opacity-90 shadow transition duration-300 text-sm"
+                >
+                  Explore in TripAdvisor
+                </a>
+                {tripadvisorReviews.length > 6 && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllTripadvisorReviews((prev) => !prev)}
+                    className="border border-gray-200 bg-white text-gray-700 font-semibold px-6 py-3 rounded-full hover:bg-gray-50 transition duration-300 text-sm"
+                  >
+                    {showAllTripadvisorReviews ? "Show Less" : "Show More"}
+                  </button>
+                )}
+              </div>
             </div>
-          )}
 
-          {isGuestUser && showReviewForm && (
-            <form
-              onSubmit={handleGuestReviewSubmit}
-              className="max-w-3xl mx-auto mb-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm"
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">Your name</label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={reviewForm.name}
-                    onChange={handleReviewFormChange}
-                    placeholder="Enter your name"
-                    className="w-full rounded-xl border border-gray-200 bg-white text-gray-800 px-4 py-3 text-sm outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Your email</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={reviewForm.email}
-                    onChange={handleReviewFormChange}
-                    placeholder="Enter your email"
-                    className="w-full rounded-xl border border-gray-200 bg-white text-gray-800 px-4 py-3 text-sm outline-none"
-                  />
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {tripadvisorVisibleReviews.map((rev, index) => renderReviewCard(rev, index))}
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-gray-100 bg-white p-6 md:p-8 shadow-sm">
+            <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5 mb-8">
+              <div>
+                <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-50 text-castleton text-xs font-bold uppercase tracking-widest mb-4 border border-gray-100">
+                  Our Guests
+                </span>
+                <h3 className="font-outfit text-2xl sm:text-3xl font-bold text-gray-900">
+                  What our guests say
+                </h3>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                {systemReviews.length > 6 && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllReviews((prev) => !prev)}
+                    className="border border-gray-200 bg-white text-gray-700 font-semibold px-6 py-3 rounded-full hover:bg-gray-50 transition duration-300 text-sm"
+                  >
+                    {showAllReviews ? "Show Less" : "More Reviews"}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] gap-6 lg:items-start">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {systemVisibleReviews.map((rev, index) => renderReviewCard(rev, index))}
               </div>
 
-              <div className="mt-4">
-                <label className="block text-sm font-medium mb-2">Rating</label>
-                <select
-                  name="rating"
-                  value={reviewForm.rating}
-                  onChange={handleReviewFormChange}
-                  className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${theme === "dark"
-                    ? "border-neutral-700 bg-neutral-950 text-white"
-                    : "border-neutral-200 bg-white text-neutral-800"
-                    }`}
-                >
-                  {[5, 4, 3, 2, 1].map((value) => (
-                    <option key={value} value={value}>
-                      {value} star{value > 1 ? "s" : ""}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="mt-4">
-                <label className="block text-sm font-medium mb-2">Your review</label>
-                <textarea
-                  name="message"
-                  value={reviewForm.message}
-                  onChange={handleReviewFormChange}
-                  rows="4"
-                  placeholder="Share your safari experience"
-                  className="w-full rounded-xl border border-gray-200 bg-white text-gray-800 px-4 py-3 text-sm outline-none resize-none"
-                />
-              </div>
-
-              <div className="mt-5 flex justify-end">
-                <button
-                  type="submit"
-                  disabled={reviewSubmitting}
-                  className="bg-sacramento text-white font-semibold px-5 py-3 rounded-full hover:bg-sacramento-600 disabled:opacity-70 transition duration-300"
-                >
-                  {reviewSubmitting ? "Submitting..." : "Submit Review"}
-                </button>
-              </div>
-            </form>
-          )}
-
-          <div className="relative max-w-5xl mx-auto px-2">
-            <div
-              className="md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 flex transition-transform duration-300 ease-out"
-              ref={reviewsSliderRef}
-              style={getReviewTransformStyle()}
-              onTouchStart={handleTouchStart}
-              onTouchEnd={handleTouchEnd}
-            >
-              {visibleReviews.map((rev, index) => (
-                <div
-                  key={index}
-                  className="review-card p-8 rounded-3xl shadow-sm border border-gray-100 bg-white min-w-[85vw] sm:min-w-[45vw] md:min-w-0 flex-shrink-0 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 group"
-                >
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex gap-3 items-center">
-                      <div className="w-10 h-10 bg-gradient-to-br from-sacramento to-castleton text-white font-bold text-xs rounded-full flex items-center justify-center">
-                        {rev.initials}
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-bold leading-tight text-gray-900">
-                          {rev.name}
-                        </h4>
-                        <span className="text-amber-400 text-xs">
-                          {"★".repeat(rev.rate || 5)}
-                          {"☆".repeat(5 - (rev.rate || 5))}
-                        </span>
-                      </div>
-                    </div>
-                    <span className="text-gray-400 text-xs font-medium">{rev.date}</span>
-                  </div>
-                  <h3 className="text-lg font-bold mb-3 text-gray-900 line-clamp-1 group-hover:text-castleton transition-colors">
-                    "{rev.title}"
-                  </h3>
-                  <p className="text-gray-500 text-sm leading-relaxed mb-6 line-clamp-5">
-                    {rev.text}
+              <form
+                onSubmit={handleGuestReviewSubmit}
+                className="rounded-2xl border border-gray-100 bg-gray-50 p-6 shadow-sm lg:sticky lg:top-24"
+              >
+                <div className="mb-7">
+                  <h4 className="font-outfit text-xl font-bold text-gray-900">Write Review</h4>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Tell us about the moments that made your adventure unforgettable. Your experience helps inspire future explorers.
                   </p>
-                  <span className={`font-bold text-[10px] px-3 py-1.5 rounded-full uppercase tracking-wider ${rev.isGuest ? "bg-amber-50 text-amber-700 border border-amber-100" : "bg-gray-50 text-castleton border border-gray-100"}`}>
-                    {rev.isGuest ? "Guest" : "Verified"}
-                  </span>
                 </div>
-              ))}
-            </div>
 
-            {reviews.length > 12 && (
-              <div className="flex justify-center mt-8">
-                <button
-                  type="button"
-                  onClick={() => setShowAllReviews((prev) => !prev)}
-                  className="bg-sacramento text-white font-semibold px-6 py-3 rounded-full hover:bg-sacramento-600 shadow transition duration-300"
-                >
-                  {showAllReviews ? "Show Less" : "See All Reviews"}
-                </button>
-              </div>
-            )}
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-900 mb-2">Your name</label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={reviewForm.name}
+                      onChange={handleReviewFormChange}
+                      placeholder="Enter your name"
+                      className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-castleton"
+                    />
+                  </div>
 
-            <div className="flex justify-center gap-3 mt-8 md:hidden">
-              <button
-                onClick={handleReviewPrev}
-                className="w-10 h-10 bg-sacramento text-white rounded-full flex items-center justify-center transition shadow-md"
-              >
-                ←
-              </button>
-              <button
-                onClick={handleReviewNext}
-                className="w-10 h-10 bg-sacramento text-white rounded-full flex items-center justify-center transition shadow-md"
-              >
-                →
-              </button>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-900 mb-2">Your email</label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={reviewForm.email}
+                      onChange={handleReviewFormChange}
+                      placeholder="Enter your email"
+                      className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-castleton"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-900 mb-2">Rating</label>
+                    <select
+                      name="rating"
+                      value={reviewForm.rating}
+                      onChange={handleReviewFormChange}
+                      className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-castleton"
+                    >
+                      {[
+                        { value: 5, label: "Excellent" },
+                        { value: 4, label: "Very Good" },
+                        { value: 3, label: "Good" },
+                        { value: 2, label: "Fair" },
+                        { value: 1, label: "Poor" },
+                      ].map(({ value, label }) => (
+                        <option key={value} value={value}>
+                          {"⭐".repeat(value)} - {label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-900 mb-2">Your review</label>
+                    <textarea
+                      name="message"
+                      value={reviewForm.message}
+                      onChange={handleReviewFormChange}
+                      rows="4"
+                      placeholder="Share your safari story"
+                      className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-castleton resize-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-6 flex justify-end">
+                  <button
+                    type="submit"
+                    disabled={reviewSubmitting}
+                    className="bg-sacramento text-white font-semibold px-6 py-3 rounded-full hover:bg-opacity-90 disabled:opacity-70 transition duration-300 w-full"
+                  >
+                    {reviewSubmitting ? "Submitting..." : "Submit Review"}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
