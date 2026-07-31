@@ -540,33 +540,36 @@ export default function App() {
   const renderReviewCard = (rev, index) => (
     <div
       key={`${rev.source || "review"}-${index}`}
-      className="review-card p-6 md:p-8 rounded-3xl shadow-sm border border-gray-100 bg-white hover:shadow-xl hover:-translate-y-2 transition-all duration-300 group"
+      className={`review-card p-6 rounded-2xl shadow-md border hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ${theme === "dark"
+        ? "bg-neutral-900 border-neutral-800"
+        : "bg-white border-neutral-100"
+        }`}
     >
       <div className="flex justify-between items-start mb-4">
         <div className="flex gap-3 items-center">
-          <div className="w-10 h-10 bg-gradient-to-br from-sacramento to-castleton text-white font-bold text-xs rounded-full flex items-center justify-center shadow-sm">
+          <div className="w-10 h-10 bg-gradient-to-br from-sacramento to-castleton text-white font-bold text-xs rounded-full flex items-center justify-center">
             {rev.initials}
           </div>
           <div>
-            <h4 className="text-sm font-bold leading-tight text-gray-900 group-hover:text-castleton transition-colors">{rev.name}</h4>
+            <h4 className="text-sm font-bold leading-tight">{rev.name}</h4>
             <span className="text-amber-400 text-xs">
               {"★".repeat(rev.rate || 5)}
               {"☆".repeat(5 - (rev.rate || 5))}
             </span>
           </div>
         </div>
-        <span className="text-gray-400 text-xs font-medium">{rev.date}</span>
+        <span className="text-neutral-400 text-xs">{rev.date}</span>
       </div>
-      <h3 className="text-lg font-bold mb-3 text-gray-900 line-clamp-1 group-hover:text-castleton transition-colors">"{rev.title}"</h3>
-      <p className="text-gray-500 text-sm leading-relaxed mb-6 line-clamp-5">
+      <h3 className="text-base font-bold mb-2 line-clamp-1">"{rev.title}"</h3>
+      <p className="text-neutral-400 text-xs sm:text-sm leading-relaxed mb-4 line-clamp-5">
         {rev.text}
       </p>
       <span
-        className={`font-bold text-[10px] px-3 py-1.5 rounded-full uppercase tracking-wider ${rev.isGuest
-          ? "bg-amber-50 text-amber-700 border border-amber-100"
+        className={`font-bold text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider ${rev.isGuest
+          ? "bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-400"
           : rev.source === "TripAdvisor"
-            ? "bg-blue-50 text-blue-700 border border-blue-100"
-            : "bg-gray-50 text-castleton border border-gray-100"
+            ? "bg-blue-50 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300"
+            : "bg-castleton-50 dark:bg-castleton-900/80 text-castleton dark:text-castleton-300"
           }`}
       >
         {rev.source || (rev.isGuest ? "Guest" : "Verified")}
