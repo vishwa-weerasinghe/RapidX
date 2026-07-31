@@ -82,8 +82,8 @@ export default function App() {
         Package_ID: pkg.id || pkg.Package_ID,
         Payment: parseFloat((pkg.price || "0").replace(/[^0-9.]/g, "")) || 0,
       }));
-      alert("Please register to add this package to your cart.");
-      navigate("/register");
+      alert("Please login to add this package to your cart.");
+      navigate("/login");
     }
   };
 
@@ -539,10 +539,10 @@ export default function App() {
                   <button
                     onClick={() => scrollToSection(section)}
                     className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 ${activeSection === section
-                        ? "bg-sacramento text-white shadow shadow-sacramento/25"
-                        : isScrolled
-                          ? "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-slate-800/50"
-                          : "text-white/80 hover:text-white hover:bg-white/10"
+                      ? "bg-sacramento text-white shadow shadow-sacramento/25"
+                      : isScrolled
+                        ? "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-slate-800/50"
+                        : "text-white/80 hover:text-white hover:bg-white/10"
                       }`}
                   >
                     {section}
@@ -594,13 +594,12 @@ export default function App() {
             {/* Simple Modern Mobile Menu Toggle Button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className={`md:hidden flex items-center justify-center p-2.5 rounded-full transition-all duration-300 active:scale-95 ${
-                isMobileMenuOpen
-                  ? "bg-sacramento text-white shadow-md"
-                  : isScrolled
+              className={`md:hidden flex items-center justify-center p-2.5 rounded-full transition-all duration-300 active:scale-95 ${isMobileMenuOpen
+                ? "bg-sacramento text-white shadow-md"
+                : isScrolled
                   ? "bg-slate-100 dark:bg-neutral-800 text-slate-800 dark:text-white"
                   : "bg-white/20 text-white backdrop-blur-md"
-              }`}
+                }`}
               aria-label="Toggle navigation interface"
             >
               {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
@@ -623,11 +622,10 @@ export default function App() {
                   <button
                     key={section}
                     onClick={() => scrollToSection(section)}
-                    className={`py-2.5 px-3 rounded-xl text-xs font-bold capitalize tracking-wide transition-all duration-200 text-left ${
-                      activeSection === section
-                        ? "bg-sacramento text-white shadow-md shadow-sacramento/30"
-                        : "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-neutral-800"
-                    }`}
+                    className={`py-2.5 px-3 rounded-xl text-xs font-bold capitalize tracking-wide transition-all duration-200 text-left ${activeSection === section
+                      ? "bg-sacramento text-white shadow-md shadow-sacramento/30"
+                      : "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-neutral-800"
+                      }`}
                   >
                     {section}
                   </button>
@@ -751,73 +749,74 @@ export default function App() {
       </section>
 
       {/* --- ABOUT SECTION --- */}
-      <section id="about" className="py-16 md:py-24">
+      <section id="about" className="py-20 md:py-32 overflow-hidden bg-white">
         <div className="max-w-7xl mx-auto px-4 md:px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            <div className="relative group rounded-2xl overflow-hidden shadow-xl">
-              <img
-                src="https://minneriyawildjeepsafari.com/wp-content/uploads/2025/08/WhatsApp-Image-2025-08-20-at-12.11.05-1024x683.jpeg"
-                alt="Elephant Gathering"
-                className="w-full h-[350px] sm:h-[450px] lg:h-[500px] object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-              <div className="absolute top-5 right-5 bg-amber-400 text-neutral-950 font-bold px-6 py-3 rounded-full shadow-md text-sm">
-                Since 2020
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+
+            {/* Image Side with Modern Overlap effect */}
+            <div className="relative">
+              <div className="absolute -inset-4 bg-gray-50 rounded-[2rem] transform -rotate-3 z-0"></div>
+              <div className="relative z-10 rounded-2xl overflow-hidden shadow-lg border border-gray-100">
+                <img
+                  src="https://minneriyawildjeepsafari.com/wp-content/uploads/2025/08/WhatsApp-Image-2025-08-20-at-12.11.05-1024x683.jpeg"
+                  alt="Elephant Gathering"
+                  className="w-full h-[400px] lg:h-[550px] object-cover hover:scale-105 transition-transform duration-700"
+                />
+                <div className="absolute bottom-6 left-6 bg-white/90 backdrop-blur-sm px-6 py-4 rounded-xl shadow-md border border-gray-100 flex items-center gap-4">
+                  <div className="w-12 h-12 bg-gray-50 text-castleton rounded-full flex items-center justify-center font-bold text-xl">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                  </div>
+                  <div>
+                    <span className="block text-gray-800 font-bold text-lg leading-none">Since 2020</span>
+                    <span className="text-gray-500 text-sm">Trusted Safari</span>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div>
-              <span className="text-castleton dark:text-castleton-300 font-semibold uppercase tracking-wider text-xs block mb-2">
+            {/* Content Side */}
+            <div className="relative z-10">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-50 text-castleton text-xs font-bold uppercase tracking-widest mb-6 border border-gray-100">
+                <span className="w-2 h-2 rounded-full bg-castleton"></span>
                 About Us
-              </span>
-              <h2 className="font-serif text-3xl sm:text-4xl font-bold mb-6">
-                Minneriya & Kaudulla Largest Wild Elephant Gathering
+              </div>
+
+              <h2 className="font-outfit text-4xl sm:text-5xl font-bold mb-6 text-gray-900 leading-[1.15]">
+                Witness the World's Largest <br /><span className="text-castleton">Elephant Gathering</span>
               </h2>
-              <p
-                className={`mb-8 leading-relaxed text-sm sm:text-base ${theme === "dark" ? "text-neutral-400" : "text-neutral-606"}`}
-              >
-                Experience the world-famous largest wild elephant gathering at
-                Minneriya and Kaudulla National Parks in Sri Lanka. Join our
-                expert-guided jeep safaris for unforgettable close-up encounters
-                with hundreds of majestic elephants in their natural habitat.
+
+              <p className="text-gray-500 text-lg leading-relaxed mb-10">
+                Experience the world-famous gathering at Minneriya and Kaudulla National Parks. Join our expert-guided jeep safaris for unforgettable, close-up encounters with hundreds of majestic elephants in their natural habitat.
               </p>
 
-              <div className="space-y-6 mb-8">
-                <div className="flex gap-4 items-start">
-                  <div className="flex-shrink-0 w-12 h-12 bg-castleton-50 dark:bg-castleton-900/50 text-castleton dark:text-castleton-300 rounded-full flex items-center justify-center">
-                    🐾
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-10">
+                <div className="flex flex-col gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-gray-50 text-castleton flex items-center justify-center border border-gray-100 shadow-sm">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                   </div>
-                  <div>
-                    <h3 className="text-lg font-bold mb-1">
-                      Trusted Travel Guide
-                    </h3>
-                    <p className="text-neutral-400 text-sm">
-                      Expert advice, personalized itineraries, and local
-                      insights for safe, memorable experiences
-                    </p>
-                  </div>
+                  <h3 className="font-bold text-gray-800 text-lg">Trusted Guides</h3>
+                  <p className="text-gray-500 text-sm leading-relaxed">
+                    Local experts with deep knowledge of wildlife and safe terrains.
+                  </p>
                 </div>
 
-                <div className="flex gap-4 items-start">
-                  <div className="flex-shrink-0 w-12 h-12 bg-castleton-50 dark:bg-castleton-900/50 text-castleton dark:text-castleton-300 rounded-full flex items-center justify-center">
-                    🗺️
+                <div className="flex flex-col gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-gray-50 text-castleton flex items-center justify-center border border-gray-100 shadow-sm">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                   </div>
-                  <div>
-                    <h3 className="text-lg font-bold mb-1">
-                      Personalized Safari
-                    </h3>
-                    <p className="text-neutral-400 text-sm">
-                      Tailored experiences with expert guides, private jeeps,
-                      and flexible schedules
-                    </p>
-                  </div>
+                  <h3 className="font-bold text-gray-800 text-lg">Personalized Tours</h3>
+                  <p className="text-gray-500 text-sm leading-relaxed">
+                    Tailored experiences, private jeeps, and flexible safari schedules.
+                  </p>
                 </div>
               </div>
 
               <button
                 onClick={() => scrollToSection("contact")}
-                className="bg-sacramento text-white font-semibold px-6 py-3 rounded-full hover:bg-sacramento-600 shadow transition duration-300"
+                className="inline-flex items-center gap-2 bg-castleton text-white font-bold px-8 py-4 rounded-xl hover:bg-opacity-90 shadow-lg shadow-castleton/30 transition-all duration-300 hover:-translate-y-1"
               >
                 More About Us
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
               </button>
             </div>
           </div>
@@ -825,54 +824,50 @@ export default function App() {
       </section>
 
       {/* --- WHY CHOOSE US SECTION --- */}
-      <section
-        className={`py-16 md:py-24 ${theme === "dark" ? "bg-neutral-900/40" : "bg-neutral-50"}`}
-      >
+      <section className="py-20 md:py-28 bg-white border-t border-gray-100">
         <div className="max-w-7xl mx-auto px-4 md:px-6">
-          <div className="text-center max-w-xl mx-auto mb-12">
-            <span className="text-castleton dark:text-castleton-300 font-semibold uppercase tracking-wider text-xs block mb-2">
+          <div className="text-center max-w-xl mx-auto mb-16">
+            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-50 text-castleton text-xs font-bold uppercase tracking-widest mb-6 border border-gray-100">
+              <span className="w-2 h-2 rounded-full bg-castleton"></span>
               Why Choose Us
             </span>
-            <h2 className="font-serif text-3xl sm:text-4xl font-bold">
+            <h2 className="font-outfit text-3xl sm:text-5xl font-bold text-gray-900">
               What Makes Us Special
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
               {
                 title: "Local Experts",
-                desc: "We are locals living in Habarana & Minneriya with deep knowledge of the area",
-                icon: "🪵",
+                desc: "Deeply rooted in Habarana & Minneriya with intimate knowledge of the best safari routes.",
+                icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>,
               },
               {
                 title: "Flexible Tours",
-                desc: "Customized safaris with flexibility to change based on your preferences",
-                icon: "🔄",
+                desc: "Customized safari experiences with the flexibility to adapt to your schedule.",
+                icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>,
               },
               {
                 title: "Safe & Secure",
-                desc: "Easy & safe payments with no hidden fees - great value for money",
-                icon: "🛡️",
+                desc: "Transparent pricing and easy, safe payments with absolutely no hidden fees.",
+                icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>,
               },
               {
-                title: "Professional Drivers",
-                desc: "Certified safari drivers with extensive experience",
-                icon: "🛞",
+                title: "Expert Drivers",
+                desc: "Fully certified and highly experienced safari drivers dedicated to your safety.",
+                icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" /></svg>,
               },
             ].map((reason, idx) => (
               <div
                 key={idx}
-                className={`p-8 rounded-2xl text-center shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 ${theme === "dark"
-                  ? "bg-neutral-900 border border-neutral-800"
-                  : "bg-white"
-                  }`}
+                className="p-8 rounded-3xl text-center shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 bg-gray-50 border border-gray-100 group"
               >
-                <div className="w-14 h-14 bg-gradient-to-br from-sacramento to-castleton text-white rounded-full flex items-center justify-center mx-auto mb-6 text-xl shadow">
+                <div className="w-16 h-16 bg-white text-castleton border border-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm group-hover:scale-110 transition-transform duration-300">
                   {reason.icon}
                 </div>
-                <h3 className="text-base font-bold mb-3">{reason.title}</h3>
-                <p className="text-neutral-400 text-sm leading-relaxed">
+                <h3 className="text-lg font-bold mb-3 text-gray-900">{reason.title}</h3>
+                <p className="text-gray-500 text-sm leading-relaxed">
                   {reason.desc}
                 </p>
               </div>
@@ -882,52 +877,52 @@ export default function App() {
       </section>
 
       {/* --- SAFARI LOCATIONS --- */}
-      <section id="safaris" className="py-16 md:py-24">
+      <section id="safaris" className="py-20 md:py-28 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 md:px-6">
-          <div className="text-center max-w-xl mx-auto mb-12">
-            <span className="text-castleton dark:text-castleton-300 font-semibold uppercase tracking-wider text-xs block mb-2">
+          <div className="text-center max-w-xl mx-auto mb-16">
+            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white text-castleton text-xs font-bold uppercase tracking-widest mb-6 border border-gray-200 shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-castleton"></span>
               Explore Safari Locations
             </span>
-            <h2 className="font-serif text-3xl sm:text-4xl font-bold">
+            <h2 className="font-outfit text-3xl sm:text-5xl font-bold text-gray-900">
               Beautiful Places Around Sri Lanka
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {safariLocations.map((loc) => (
               <div
                 key={loc.id}
-                className={`rounded-2xl overflow-hidden shadow-md border hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group ${theme === "dark"
-                  ? "bg-neutral-900 border-neutral-800"
-                  : "bg-white border-neutral-100"
-                  }`}
+                className="rounded-3xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-500 group bg-white flex flex-col"
               >
                 <div className="relative h-56 overflow-hidden">
                   <img
                     src={loc.img}
                     alt={loc.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />
-                  <div className="absolute top-0 left-0 w-full h-full bg-sacramento/75 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
                     <button
                       onClick={() => scrollToSection("packages")}
-                      className="bg-white text-sacramento font-bold text-xs px-5 py-2.5 rounded-full hover:bg-sacramento hover:text-white transition duration-300 shadow-md"
+                      className="bg-castleton text-white font-bold text-sm px-6 py-3 rounded-full hover:bg-opacity-90 transition duration-300 shadow-lg transform translate-y-4 group-hover:translate-y-0"
                     >
                       Learn More
                     </button>
                   </div>
                 </div>
-                <div className="p-5">
-                  <h3 className="text-base font-bold mb-2">{loc.title}</h3>
-                  <p className="text-neutral-400 text-xs sm:text-sm mb-4 line-clamp-2">
+                <div className="p-6 flex-1 flex flex-col">
+                  <h3 className="text-lg font-bold mb-2 text-gray-900">{loc.title}</h3>
+                  <p className="text-gray-500 text-sm mb-6 line-clamp-2 flex-1">
                     {loc.desc}
                   </p>
-                  <div className="flex gap-4 text-neutral-400 text-xs font-medium border-t pt-3 border-neutral-100 dark:border-neutral-800">
-                    <span className="flex items-center gap-1">
-                      🌅 Morning & Evening
+                  <div className="flex gap-4 text-gray-400 text-xs font-semibold border-t pt-4 border-gray-100 uppercase tracking-wide">
+                    <span className="flex items-center gap-1.5">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                      Anytime
                     </span>
-                    <span className="flex items-center gap-1">
-                      👥 6 Persons
+                    <span className="flex items-center gap-1.5">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                      6 Pax
                     </span>
                   </div>
                 </div>
@@ -938,16 +933,14 @@ export default function App() {
       </section>
 
       {/* --- TOUR PACKAGES --- */}
-      <section
-        id="packages"
-        className={`py-16 md:py-24 ${theme === "dark" ? "bg-[#0d0d0d]" : "bg-offwhite"}`}
-      >
+      <section id="packages" className="py-20 md:py-28 bg-white border-t border-gray-100">
         <div className="max-w-7xl mx-auto px-4 md:px-6">
-          <div className="text-center max-w-xl mx-auto mb-12">
-            <span className="text-castleton dark:text-castleton-300 font-semibold uppercase tracking-wider text-xs block mb-2">
+          <div className="text-center max-w-xl mx-auto mb-16">
+            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-50 text-castleton text-xs font-bold uppercase tracking-widest mb-6 border border-gray-100">
+              <span className="w-2 h-2 rounded-full bg-castleton"></span>
               Tour Packages
             </span>
-            <h2 className="font-serif text-3xl sm:text-4xl font-bold">
+            <h2 className="font-outfit text-3xl sm:text-5xl font-bold text-gray-900">
               Choose Your Adventure
             </h2>
           </div>
@@ -956,17 +949,14 @@ export default function App() {
             {packages.map((pkg, idx) => (
               <div
                 key={idx}
-                className={`rounded-2xl overflow-hidden shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 flex flex-col justify-between border relative ${theme === "dark"
-                  ? "bg-neutral-900 border-neutral-800"
-                  : "bg-white border-neutral-100"
-                  }`}
+                className="rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-500 flex flex-col justify-between border border-gray-100 relative bg-white group"
               >
                 <div>
                   <div className="relative h-60 overflow-hidden">
                     <img
                       src={pkg.img}
                       alt={pkg.title}
-                      className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
                     {pkg.popular && (
                       <span className="absolute top-4 right-4 bg-rose-500 text-white font-bold text-xs px-4 py-1.5 rounded-full uppercase tracking-wider shadow">
@@ -977,20 +967,20 @@ export default function App() {
 
                   <div className="p-6 sm:p-8">
                     <div className="mb-4">
-                      <h3 className="text-xl font-bold mb-1">{pkg.title}</h3>
+                      <h3 className="text-xl font-bold mb-1 text-gray-900">{pkg.title}</h3>
                       <div className="flex items-center gap-1">
                         <span className="text-amber-400 text-sm">★★★★★</span>
-                        <span className="text-neutral-400 text-xs font-medium">
+                        <span className="text-gray-400 text-xs font-medium">
                           (3 Reviews)
                         </span>
                       </div>
                     </div>
 
-                    <p className="text-neutral-400 text-sm mb-6 leading-relaxed">
+                    <p className="text-gray-500 text-sm mb-6 leading-relaxed">
                       {pkg.desc}
                     </p>
 
-                    <ul className="space-y-2.5 mb-6 text-neutral-500 dark:text-neutral-400 text-sm">
+                    <ul className="space-y-2.5 mb-6 text-gray-600 text-sm font-medium">
                       <li>✓ Professional Guide</li>
                       <li>✓ Comfortable Jeep</li>
                       <li>✓ Refreshments</li>
@@ -999,17 +989,12 @@ export default function App() {
                   </div>
                 </div>
 
-                <div
-                  className={`p-6 sm:p-8 border-t flex items-center justify-between ${theme === "dark"
-                    ? "bg-neutral-950/40 border-neutral-800"
-                    : "bg-neutral-50 border-neutral-100"
-                    }`}
-                >
+                <div className="p-6 sm:p-8 border-t border-gray-100 bg-gray-50 flex items-center justify-between">
                   <div>
-                    <span className="text-xs text-neutral-400 block font-medium">
+                    <span className="text-xs text-gray-400 block font-bold uppercase tracking-wider mb-1">
                       From
                     </span>
-                    <span className="text-2xl font-extrabold text-castleton dark:text-castleton-300">
+                    <span className="text-2xl font-extrabold text-castleton">
                       {pkg.price}
                     </span>
                   </div>
@@ -1029,222 +1014,203 @@ export default function App() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
 
+      {/* --- REVIEW SECTION --- */}
+      <section id="reviews" className="py-20 md:py-28 overflow-hidden bg-gray-50 border-t border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 md:px-6">
+          <div className="text-center max-w-xl mx-auto mb-16">
+            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white text-castleton text-xs font-bold uppercase tracking-widest mb-6 border border-gray-200 shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-castleton"></span>
+              Customer Reviews
+            </span>
+            <h2 className="font-outfit text-3xl sm:text-5xl font-bold text-gray-900 mb-4">
+              Their Journey. Their Words
+            </h2>
+            <p className="text-sm sm:text-base text-gray-500 mb-6">
+              From unforgettable wildlife encounters to exceptional service, see what our guests have shared about their journeys.
+            </p>
+            <img
+              src="https://minneriyawildjeepsafari.com/wp-content/uploads/2025/08/TC25-logo.jpg"
+              alt="TripAdvisor"
+              className="h-16 mx-auto object-contain"
+            />
+          </div>
 
-//review section
-          <div className="mt-12">
-            <section id="reviews" className="py-16 md:py-24 overflow-hidden">
-              <div className="max-w-7xl mx-auto px-4 md:px-6">
-                <div className="text-center max-w-xl mx-auto mb-10">
-                  <span className="text-castleton dark:text-castleton-300 font-semibold uppercase tracking-wider text-xs block mb-2">
-                    Customer Reviews
-                  </span>
-                  <h2 className="font-serif text-3xl sm:text-4xl font-bold mb-4">
-                    Their Journey. Their Words
-                    <h3  className="text-sm sm:text-base font-normal text-neutral-400 dark:text-neutral-400 mt-2">
-                      From unforgettable wildlife encounters to exceptional service, see what our guests have shared about their journeys.
-                    </h3>
-                  </h2>
-                  <img
-                    src="https://minneriyawildjeepsafari.com/wp-content/uploads/2025/08/TC25-logo.jpg"
-                    alt="TripAdvisor"
-                    className="h-16 mx-auto object-contain"
+          {reviewNotification && (
+            <div className={`mx-auto mb-6 max-w-md rounded-xl border px-4 py-3 text-sm ${reviewNotification.type === "error" ? "border-red-500 text-red-600" : "border-castleton text-castleton"}`}>
+              {reviewNotification.text}
+            </div>
+          )}
+
+          {isGuestUser && (
+            <div className="flex justify-center mb-6">
+              <button
+                type="button"
+                onClick={() => setShowReviewForm((prev) => !prev)}
+                className="bg-sacramento text-white font-semibold px-6 py-3 rounded-full hover:bg-sacramento-600 shadow transition duration-300"
+              >
+                {showReviewForm ? "Cancel" : "Write Review"}
+              </button>
+            </div>
+          )}
+
+          {isGuestUser && showReviewForm && (
+            <form
+              onSubmit={handleGuestReviewSubmit}
+              className="max-w-3xl mx-auto mb-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Your name</label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={reviewForm.name}
+                    onChange={handleReviewFormChange}
+                    placeholder="Enter your name"
+                    className="w-full rounded-xl border border-gray-200 bg-white text-gray-800 px-4 py-3 text-sm outline-none"
                   />
                 </div>
-
-                {reviewNotification && (
-                  <div className={`mx-auto mb-6 max-w-md rounded-xl border px-4 py-3 text-sm ${reviewNotification.type === "error" ? "border-red-500 text-red-600" : "border-castleton text-castleton"}`}>
-                    {reviewNotification.text}
-                  </div>
-                )}
-
-                {isGuestUser && (
-                  <div className="flex justify-center mb-6">
-                    <button
-                      type="button"
-                      onClick={() => setShowReviewForm((prev) => !prev)}
-                      className="bg-sacramento text-white font-semibold px-6 py-3 rounded-full hover:bg-sacramento-600 shadow transition duration-300"
-                    >
-                      {showReviewForm ? "Cancel" : "Write Review"}
-                    </button>
-                  </div>
-                )}
-
-                {isGuestUser && showReviewForm && (
-                  <form
-                    onSubmit={handleGuestReviewSubmit}
-                    className={`max-w-3xl mx-auto mb-8 rounded-2xl border p-6 shadow-sm ${theme === "dark"
-                      ? "bg-neutral-900 border-neutral-800"
-                      : "bg-white border-neutral-100"
-                      }`}
-                  >
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Your name</label>
-                        <input
-                          type="text"
-                          name="name"
-                          value={reviewForm.name}
-                          onChange={handleReviewFormChange}
-                          placeholder="Enter your name"
-                          className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${theme === "dark"
-                            ? "border-neutral-700 bg-neutral-950 text-white"
-                            : "border-neutral-200 bg-white text-neutral-800"
-                            }`}
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Your email</label>
-                        <input
-                          type="email"
-                          name="email"
-                          value={reviewForm.email}
-                          onChange={handleReviewFormChange}
-                          placeholder="Enter your email"
-                          className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${theme === "dark"
-                            ? "border-neutral-700 bg-neutral-950 text-white"
-                            : "border-neutral-200 bg-white text-neutral-800"
-                            }`}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="mt-4">
-                      <label className="block text-sm font-medium mb-2">Rating</label>
-                      <select
-                        name="rating"
-                        value={reviewForm.rating}
-                        onChange={handleReviewFormChange}
-                        className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${theme === "dark"
-                          ? "border-neutral-700 bg-neutral-950 text-white"
-                          : "border-neutral-200 bg-white text-neutral-800"
-                          }`}
-                      >
-                        {[5, 4, 3, 2, 1].map((value) => (
-                          <option key={value} value={value}>
-                            {value} star{value > 1 ? "s" : ""}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="mt-4">
-                      <label className="block text-sm font-medium mb-2">Your review</label>
-                      <textarea
-                        name="message"
-                        value={reviewForm.message}
-                        onChange={handleReviewFormChange}
-                        rows="4"
-                        placeholder="Share your safari experience"
-                        className={`w-full rounded-xl border px-4 py-3 text-sm outline-none resize-none ${theme === "dark"
-                          ? "border-neutral-700 bg-neutral-950 text-white"
-                          : "border-neutral-200 bg-white text-neutral-800"
-                          }`}
-                      />
-                    </div>
-
-                    <div className="mt-5 flex justify-end">
-                      <button
-                        type="submit"
-                        disabled={reviewSubmitting}
-                        className="bg-sacramento text-white font-semibold px-5 py-3 rounded-full hover:bg-sacramento-600 disabled:opacity-70 transition duration-300"
-                      >
-                        {reviewSubmitting ? "Submitting..." : "Submit Review"}
-                      </button>
-                    </div>
-                  </form>
-                )}
-
-                <div className="relative max-w-5xl mx-auto px-2">
-                  <div
-                    className="md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 flex transition-transform duration-300 ease-out"
-                    ref={reviewsSliderRef}
-                    style={getReviewTransformStyle()}
-                    onTouchStart={handleTouchStart}
-                    onTouchEnd={handleTouchEnd}
-                  >
-                    {visibleReviews.map((rev, index) => (
-                      <div
-                        key={index}
-                        className={`review-card p-6 rounded-2xl shadow-md border min-w-[85vw] sm:min-w-[45vw] md:min-w-0 flex-shrink-0 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ${theme === "dark"
-                          ? "bg-neutral-900 border-neutral-800"
-                          : "bg-white border-neutral-100"
-                          }`}
-                      >
-                        <div className="flex justify-between items-start mb-4">
-                          <div className="flex gap-3 items-center">
-                            <div className="w-10 h-10 bg-gradient-to-br from-sacramento to-castleton text-white font-bold text-xs rounded-full flex items-center justify-center">
-                              {rev.initials}
-                            </div>
-                            <div>
-                              <h4 className="text-sm font-bold leading-tight">
-                                {rev.name}
-                              </h4>
-                              <span className="text-amber-400 text-xs">
-                                {"★".repeat(rev.rate || 5)}
-                                {"☆".repeat(5 - (rev.rate || 5))}
-                              </span>
-                            </div>
-                          </div>
-                          <span className="text-neutral-400 text-xs">{rev.date}</span>
-                        </div>
-                        <h3 className="text-base font-bold mb-2 line-clamp-1">
-                          "{rev.title}"
-                        </h3>
-                        <p className="text-neutral-400 text-xs sm:text-sm leading-relaxed mb-4 line-clamp-5">
-                          {rev.text}
-                        </p>
-                        <span className={`font-bold text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider ${rev.isGuest ? "bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-400" : "bg-castleton-50 dark:bg-castleton-900/80 text-castleton dark:text-castleton-300"}`}>
-                          {rev.isGuest ? "Guest" : "Verified"}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-
-                  {reviews.length > 12 && (
-                    <div className="flex justify-center mt-8">
-                      <button
-                        type="button"
-                        onClick={() => setShowAllReviews((prev) => !prev)}
-                        className="bg-sacramento text-white font-semibold px-6 py-3 rounded-full hover:bg-sacramento-600 shadow transition duration-300"
-                      >
-                        {showAllReviews ? "Show Less" : "See All Reviews"}
-                      </button>
-                    </div>
-                  )}
-
-                  <div className="flex justify-center gap-3 mt-8 md:hidden">
-                    <button
-                      onClick={handleReviewPrev}
-                      className="w-10 h-10 bg-sacramento text-white rounded-full flex items-center justify-center transition shadow-md"
-                    >
-                      ←
-                    </button>
-                    <button
-                      onClick={handleReviewNext}
-                      className="w-10 h-10 bg-sacramento text-white rounded-full flex items-center justify-center transition shadow-md"
-                    >
-                      →
-                    </button>
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Your email</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={reviewForm.email}
+                    onChange={handleReviewFormChange}
+                    placeholder="Enter your email"
+                    className="w-full rounded-xl border border-gray-200 bg-white text-gray-800 px-4 py-3 text-sm outline-none"
+                  />
                 </div>
               </div>
-            </section>
+
+              <div className="mt-4">
+                <label className="block text-sm font-medium mb-2">Rating</label>
+                <select
+                  name="rating"
+                  value={reviewForm.rating}
+                  onChange={handleReviewFormChange}
+                  className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${theme === "dark"
+                    ? "border-neutral-700 bg-neutral-950 text-white"
+                    : "border-neutral-200 bg-white text-neutral-800"
+                    }`}
+                >
+                  {[5, 4, 3, 2, 1].map((value) => (
+                    <option key={value} value={value}>
+                      {value} star{value > 1 ? "s" : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="mt-4">
+                <label className="block text-sm font-medium mb-2">Your review</label>
+                <textarea
+                  name="message"
+                  value={reviewForm.message}
+                  onChange={handleReviewFormChange}
+                  rows="4"
+                  placeholder="Share your safari experience"
+                  className="w-full rounded-xl border border-gray-200 bg-white text-gray-800 px-4 py-3 text-sm outline-none resize-none"
+                />
+              </div>
+
+              <div className="mt-5 flex justify-end">
+                <button
+                  type="submit"
+                  disabled={reviewSubmitting}
+                  className="bg-sacramento text-white font-semibold px-5 py-3 rounded-full hover:bg-sacramento-600 disabled:opacity-70 transition duration-300"
+                >
+                  {reviewSubmitting ? "Submitting..." : "Submit Review"}
+                </button>
+              </div>
+            </form>
+          )}
+
+          <div className="relative max-w-5xl mx-auto px-2">
+            <div
+              className="md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 flex transition-transform duration-300 ease-out"
+              ref={reviewsSliderRef}
+              style={getReviewTransformStyle()}
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+            >
+              {visibleReviews.map((rev, index) => (
+                <div
+                  key={index}
+                  className="review-card p-8 rounded-3xl shadow-sm border border-gray-100 bg-white min-w-[85vw] sm:min-w-[45vw] md:min-w-0 flex-shrink-0 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 group"
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex gap-3 items-center">
+                      <div className="w-10 h-10 bg-gradient-to-br from-sacramento to-castleton text-white font-bold text-xs rounded-full flex items-center justify-center">
+                        {rev.initials}
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-bold leading-tight text-gray-900">
+                          {rev.name}
+                        </h4>
+                        <span className="text-amber-400 text-xs">
+                          {"★".repeat(rev.rate || 5)}
+                          {"☆".repeat(5 - (rev.rate || 5))}
+                        </span>
+                      </div>
+                    </div>
+                    <span className="text-gray-400 text-xs font-medium">{rev.date}</span>
+                  </div>
+                  <h3 className="text-lg font-bold mb-3 text-gray-900 line-clamp-1 group-hover:text-castleton transition-colors">
+                    "{rev.title}"
+                  </h3>
+                  <p className="text-gray-500 text-sm leading-relaxed mb-6 line-clamp-5">
+                    {rev.text}
+                  </p>
+                  <span className={`font-bold text-[10px] px-3 py-1.5 rounded-full uppercase tracking-wider ${rev.isGuest ? "bg-amber-50 text-amber-700 border border-amber-100" : "bg-gray-50 text-castleton border border-gray-100"}`}>
+                    {rev.isGuest ? "Guest" : "Verified"}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {reviews.length > 12 && (
+              <div className="flex justify-center mt-8">
+                <button
+                  type="button"
+                  onClick={() => setShowAllReviews((prev) => !prev)}
+                  className="bg-sacramento text-white font-semibold px-6 py-3 rounded-full hover:bg-sacramento-600 shadow transition duration-300"
+                >
+                  {showAllReviews ? "Show Less" : "See All Reviews"}
+                </button>
+              </div>
+            )}
+
+            <div className="flex justify-center gap-3 mt-8 md:hidden">
+              <button
+                onClick={handleReviewPrev}
+                className="w-10 h-10 bg-sacramento text-white rounded-full flex items-center justify-center transition shadow-md"
+              >
+                ←
+              </button>
+              <button
+                onClick={handleReviewNext}
+                className="w-10 h-10 bg-sacramento text-white rounded-full flex items-center justify-center transition shadow-md"
+              >
+                →
+              </button>
+            </div>
           </div>
         </div>
       </section>
 
       {/* --- PHOTO GALLERY --- */}
-      <section
-        id="gallery"
-        className={`py-16 md:py-24 ${theme === "dark" ? "bg-[#0d0d0d]" : "bg-offwhite"}`}
-      >
+      <section id="gallery" className="py-20 md:py-28 bg-white border-t border-gray-100">
         <div className="max-w-7xl mx-auto px-4 md:px-6">
-          <div className="text-center max-w-xl mx-auto mb-12">
-            <span className="text-castleton dark:text-castleton-300 font-semibold uppercase tracking-wider text-xs block mb-2">
+          <div className="text-center max-w-xl mx-auto mb-16">
+            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-50 text-castleton text-xs font-bold uppercase tracking-widest mb-6 border border-gray-100">
+              <span className="w-2 h-2 rounded-full bg-castleton"></span>
               Photo Gallery
             </span>
-            <h2 className="font-serif text-3xl sm:text-4xl font-bold">
+            <h2 className="font-outfit text-3xl sm:text-5xl font-bold text-gray-900">
               Captured Moments
             </h2>
           </div>
@@ -1254,15 +1220,17 @@ export default function App() {
               <div
                 key={idx}
                 onClick={() => setLightboxImage(img)}
-                className="relative h-64 sm:h-72 rounded-2xl overflow-hidden cursor-pointer group shadow-md"
+                className="relative h-64 sm:h-72 rounded-3xl overflow-hidden cursor-pointer group shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-500"
               >
                 <img
                   src={img.src}
                   alt={img.alt}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
-                <div className="absolute top-0 left-0 w-full h-full bg-sacramento/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 text-white text-xl">
-                  🔍
+                <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-10 text-castleton">
+                  <div className="w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" /></svg>
+                  </div>
                 </div>
               </div>
             ))}
@@ -1418,12 +1386,7 @@ export default function App() {
             {/* Right Column - Glassmorphism Form */}
             <div className="relative z-10">
               {/* Form Card */}
-              <div
-                className={`p-8 sm:p-10 rounded-3xl border shadow-2xl backdrop-blur-xl ${theme === "dark"
-                  ? "bg-neutral-900/80 border-neutral-700/50 shadow-black/50"
-                  : "bg-white/90 border-white/60 shadow-neutral-200/50"
-                  }`}
-              >
+              <div className="p-8 sm:p-10 rounded-3xl border border-gray-200 bg-white shadow-xl">
                 <h3 className="text-2xl font-bold mb-6 text-neutral-900 dark:text-white">Send a Message</h3>
                 <form onSubmit={handleFormSubmit} className="space-y-5">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -1436,10 +1399,7 @@ export default function App() {
                         onChange={handleFormChange}
                         placeholder="John Doe"
                         required
-                        className={`w-full px-5 py-4 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-castleton/50 transition-all ${theme === "dark"
-                          ? "bg-neutral-950/50 border border-neutral-800 text-white placeholder-neutral-600 focus:bg-neutral-950"
-                          : "bg-neutral-50 border border-neutral-200 text-neutral-900 placeholder-neutral-400 focus:bg-white"
-                          }`}
+                        className="w-full px-5 py-4 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-castleton/50 transition-all bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 focus:bg-white"
                       />
                     </div>
                     <div className="space-y-1">
@@ -1451,10 +1411,7 @@ export default function App() {
                         onChange={handleFormChange}
                         placeholder="john@example.com"
                         required
-                        className={`w-full px-5 py-4 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-castleton/50 transition-all ${theme === "dark"
-                          ? "bg-neutral-950/50 border border-neutral-800 text-white placeholder-neutral-600 focus:bg-neutral-950"
-                          : "bg-neutral-50 border border-neutral-200 text-neutral-900 placeholder-neutral-400 focus:bg-white"
-                          }`}
+                        className="w-full px-5 py-4 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-castleton/50 transition-all bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 focus:bg-white"
                       />
                     </div>
                   </div>
@@ -1468,10 +1425,7 @@ export default function App() {
                         value={formData.phone}
                         onChange={handleFormChange}
                         placeholder="+94 77 123 4567"
-                        className={`w-full px-5 py-4 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-castleton/50 transition-all ${theme === "dark"
-                          ? "bg-neutral-950/50 border border-neutral-800 text-white placeholder-neutral-600 focus:bg-neutral-950"
-                          : "bg-neutral-50 border border-neutral-200 text-neutral-900 placeholder-neutral-400 focus:bg-white"
-                          }`}
+                        className="w-full px-5 py-4 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-castleton/50 transition-all bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 focus:bg-white"
                       />
                     </div>
                     <div className="space-y-1">
@@ -1482,10 +1436,7 @@ export default function App() {
                           value={formData.subject}
                           onChange={handleFormChange}
                           required
-                          className={`w-full px-5 py-4 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-castleton/50 transition-all appearance-none cursor-pointer ${theme === "dark"
-                            ? "bg-neutral-950/50 border border-neutral-800 text-white focus:bg-neutral-950"
-                            : "bg-neutral-50 border border-neutral-200 text-neutral-900 focus:bg-white text-neutral-900"
-                            }`}
+                          className="w-full px-5 py-4 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-castleton/50 transition-all appearance-none cursor-pointer bg-gray-50 border border-gray-200 text-gray-900 focus:bg-white"
                         >
                           <option value="" disabled className="text-neutral-400">Select Destination...</option>
                           <option value="minneriya">Minneriya Safari</option>
@@ -1509,10 +1460,7 @@ export default function App() {
                       rows="4"
                       placeholder="Tell us about your dream safari..."
                       required
-                      className={`w-full px-5 py-4 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-castleton/50 transition-all resize-y ${theme === "dark"
-                        ? "bg-neutral-950/50 border border-neutral-800 text-white placeholder-neutral-600 focus:bg-neutral-950"
-                        : "bg-neutral-50 border border-neutral-200 text-neutral-900 placeholder-neutral-400 focus:bg-white"
-                        }`}
+                      className="w-full px-5 py-4 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-castleton/50 transition-all resize-y bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 focus:bg-white"
                     ></textarea>
                   </div>
 
@@ -1545,31 +1493,37 @@ export default function App() {
       </section>
 
       {/* --- FOOTER --- */}
-      <footer className="bg-neutral-900 text-white pt-16 pb-8 border-t border-neutral-800">
+      <footer className="bg-gray-50 pt-16 pb-8 border-t border-gray-100">
         <div className="max-w-7xl mx-auto px-4 md:px-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
             <div>
-              <span className="text-lg font-bold block mb-4">
-                Wild Safari
-              </span>
-              <p className="text-neutral-400 text-sm leading-relaxed">
+              <div className="flex items-center gap-2 mb-6">
+                <div className="w-8 h-8 bg-castleton rounded-lg flex items-center justify-center shadow-sm">
+                  <span className="text-white font-serif font-bold text-lg leading-none">W</span>
+                </div>
+                <span className="font-outfit font-bold text-xl text-gray-900 tracking-wide">
+                  Wild Jeep Safari
+                </span>
+              </div>
+              <p className="text-gray-500 text-sm leading-relaxed">
                 Minneriyawildjeepsafari is a leading Sri Lanka jeep safari
                 company offering unforgettable wildlife experiences.
               </p>
             </div>
 
             <div>
-              <h4 className="text-sm font-bold tracking-wider mb-4 uppercase text-neutral-300">
+              <h4 className="text-sm font-bold tracking-wider mb-6 uppercase text-gray-900">
                 Quick Links
               </h4>
-              <ul className="space-y-2.5 text-xs sm:text-sm text-neutral-400">
+              <ul className="space-y-3 text-sm text-gray-500 font-medium">
                 {["home", "about", "safaris", "packages", "reviews"].map(
                   (sect) => (
                     <li key={sect}>
                       <button
                         onClick={() => scrollToSection(sect)}
-                        className="hover:text-amber-400 transition-colors capitalize"
+                        className="hover:text-castleton hover:translate-x-1 transition-all duration-300 capitalize flex items-center gap-2"
                       >
+                        <span className="w-1 h-1 rounded-full bg-gray-300"></span>
                         {sect}
                       </button>
                     </li>
@@ -1579,10 +1533,10 @@ export default function App() {
             </div>
 
             <div>
-              <h4 className="text-sm font-bold tracking-wider mb-4 uppercase text-neutral-300">
+              <h4 className="text-sm font-bold tracking-wider mb-6 uppercase text-gray-900">
                 Safari Parks
               </h4>
-              <ul className="space-y-2.5 text-xs sm:text-sm text-neutral-400">
+              <ul className="space-y-3 text-sm text-gray-500 font-medium">
                 {[
                   "Minneriya Park",
                   "Kaudulla Park",
@@ -1592,8 +1546,9 @@ export default function App() {
                   <li key={idx}>
                     <button
                       onClick={() => scrollToSection("packages")}
-                      className="hover:text-amber-400 transition-colors"
+                      className="hover:text-castleton hover:translate-x-1 transition-all duration-300 flex items-center gap-2"
                     >
+                      <span className="w-1 h-1 rounded-full bg-gray-300"></span>
                       {park}
                     </button>
                   </li>
@@ -1602,17 +1557,18 @@ export default function App() {
             </div>
 
             <div>
-              <h4 className="text-sm font-bold tracking-wider mb-4 uppercase text-neutral-300">
+              <h4 className="text-sm font-bold tracking-wider mb-6 uppercase text-gray-900">
                 Legal
               </h4>
-              <ul className="space-y-2.5 text-xs sm:text-sm text-neutral-400">
+              <ul className="space-y-3 text-sm text-gray-500 font-medium">
                 {["Privacy Policy", "Terms & Conditions", "FAQs"].map(
                   (item, idx) => (
                     <li key={idx}>
                       <a
                         href="#"
-                        className="hover:text-amber-400 transition-colors"
+                        className="hover:text-castleton hover:translate-x-1 transition-all duration-300 flex items-center gap-2"
                       >
+                        <span className="w-1 h-1 rounded-full bg-gray-300"></span>
                         {item}
                       </a>
                     </li>
@@ -1622,11 +1578,15 @@ export default function App() {
             </div>
           </div>
 
-          <div className="text-center pt-6 border-t border-neutral-800 text-neutral-500 text-xs sm:text-sm">
+          <div className="flex flex-col sm:flex-row items-center justify-between pt-8 border-t border-gray-200 text-gray-400 text-sm font-medium">
             <p>
-              &copy; {new Date().getFullYear()} Minneriyawildjeepsafari.com. All
-              Rights Reserved.
+              &copy; {new Date().getFullYear()} Minneriyawildjeepsafari.com. All Rights Reserved.
             </p>
+            <div className="flex gap-4 mt-4 sm:mt-0">
+              <a href="https://facebook.com/share/1AmhHo7Cg2/" className="hover:text-castleton transition-colors">Facebook</a>
+              <a href="https://www.instagram.com/minneriyawildjeepsafari" className="hover:text-castleton transition-colors">Instagram</a>
+              <a href="https://www.tripadvisor.com/Attraction_Review-g304133-d15640558-Reviews-Minneriya_Wild_Jeep_Safari-Dambulla_Central_Province.html" className="hover:text-castleton transition-colors">TripAdvisor</a>
+            </div>
           </div>
         </div>
       </footer>

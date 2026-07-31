@@ -105,7 +105,7 @@ export default function Register() {
     <div
       className="flex min-h-screen items-center justify-center bg-cover bg-center bg-no-repeat px-4 relative"
       style={{
-        backgroundImage: `url('https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=2068&auto=format&fit=crop')`,
+        backgroundImage: `url('https://minneriyawildjeepsafari.com/wp-content/uploads/2024/05/Udawalawe-National-Park-4.jpg')`,
       }}
     >
       {/* Dark overlay to make the glass card pop */}

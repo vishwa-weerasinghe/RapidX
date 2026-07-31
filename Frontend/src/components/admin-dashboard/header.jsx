@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Menu, Search, Bell, LogOut, Settings, ChevronDown } from 'lucide-react'
+import { Menu, Bell, LogOut, Home } from 'lucide-react'
 import { useTheme } from '../../context/ThemeContext'
 import api from '../../axios'
 import ThemeModeIcon from '../ThemeModeIcon'
@@ -43,7 +43,7 @@ export function Header({ user, toggleSidebar }) {
 
                 {/* Brand & Mobile Menu */}
                 <div className="flex items-center gap-4">
-                    <button 
+                    <button
                         onClick={toggleSidebar}
                         className="p-2 text-gray-500 hover:text-sacramento dark:text-gray-400 dark:hover:text-castleton-300 md:hidden rounded-lg hover:bg-castleton-50 dark:hover:bg-neutral-800 transition-colors"
                     >
@@ -62,6 +62,14 @@ export function Header({ user, toggleSidebar }) {
 
                 {/* Right Nav */}
                 <div className="flex items-center gap-2 sm:gap-4">
+                    {/* Navigate Home */}
+                    <button
+                        onClick={() => navigate('/')}
+                        className="p-2 text-gray-500 hover:text-sacramento dark:text-gray-400 dark:hover:text-castleton-300 transition-colors rounded-lg hover:bg-castleton-50 dark:hover:bg-neutral-800"
+                        title="Go to Website Home"
+                    >
+                        <Home className="w-5 h-5" />
+                    </button>
                     {/* Dark/Light Mode Toggle */}
                     <button
                         onClick={toggleTheme}
