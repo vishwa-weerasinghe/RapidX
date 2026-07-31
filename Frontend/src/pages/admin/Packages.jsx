@@ -58,8 +58,8 @@ export default function Packages() {
         <button
   onClick={() => navigate("/admin/packages/create")}
   className="
-    bg-emerald-600 dark:bg-gradient-to-r dark:from-black dark:to-emerald-900
-    hover:bg-emerald-700 dark:hover:from-neutral-900 dark:hover:to-emerald-800
+    bg-sacramento dark:bg-gradient-to-r dark:from-black dark:to-sacramento-900
+    hover:bg-sacramento-600 dark:hover:from-neutral-900 dark:hover:to-sacramento-800
     text-white px-4 py-2 rounded-lg text-sm font-medium
     transition
   "
@@ -74,7 +74,7 @@ export default function Packages() {
         onChange={(event) => setSearch(event.target.value)}
         placeholder="Search by package name, description, or price..."
         aria-label="Search packages"
-        className="w-full max-w-xl mb-6 rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-800 outline-none focus:ring-2 focus:ring-emerald-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+        className="w-full max-w-xl mb-6 rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-800 outline-none focus:ring-2 focus:ring-sacramento dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
       />
 
       {/* Loading / Empty */}

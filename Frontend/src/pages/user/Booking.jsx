@@ -148,13 +148,13 @@ export default function Booking() {
 
 
   return (
-    <div className="min-h-screen bg-[#F4F8F3] flex justify-center py-10">
+    <div className="min-h-screen bg-offwhite flex justify-center py-10">
       <div className="w-full max-w-2xl bg-white rounded-2xl shadow-lg p-6">
-        <h2 className="text-2xl font-bold text-green-800 mb-4">Book Safari</h2>
+        <h2 className="text-2xl font-bold text-sacramento mb-4">Book Safari</h2>
 
         {/* Package Info */}
         {pkg && (
-          <div className="mb-6 p-4 bg-green-50 rounded-xl">
+          <div className="mb-6 p-4 bg-castleton-50 rounded-xl">
             <h3 className="text-xl font-semibold">{pkg.Package_Name}</h3>
 
             <p className="text-gray-600 mt-2">{pkg.Description}</p>
@@ -303,14 +303,14 @@ export default function Booking() {
           </div>
 
           {/* Total */}
-          <div className="bg-green-100 p-3 rounded-lg font-bold">
+          <div className="bg-castleton-50 p-3 rounded-lg font-bold">
             Total Price: Rs {getTotal()}
           </div>
 
           {/* Submit */}
           <button
             type="submit"
-            className="w-full bg-green-700 text-white py-2 rounded hover:bg-green-800"
+            className="w-full bg-sacramento text-white py-2 rounded hover:bg-sacramento-600"
           >
             Add to Cart
           </button>

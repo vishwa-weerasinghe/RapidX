@@ -14,8 +14,8 @@ export default function ThemeToggle() {
             transition-all duration-300
             ${
             theme === "dark"
-                 ? "bg-slate-700 justify-end"
-                 : "bg-slate-200 justify-start"
+                 ? "bg-[var(--primary)] justify-end"
+                 : "bg-[var(--primary)]/40 justify-start"
             }
         `}
         >

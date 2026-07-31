@@ -43,41 +43,37 @@ export function BookingCard() {
 
   const isDark = theme === "dark";
 
-  // Shared color tokens
-  const colors = {
-    bg: isDark ? "#000000" : "#ffffff",
-    bgItem: isDark ? "#1a1a1a" : "#f0fdf4",
-    bgItemAlt: isDark ? "#1a1a1a" : "#ecfdf5",
-    border: isDark ? "#333333" : "#d1d5db",
-    borderItem: isDark ? "#333333" : "#bbf7d0",
-    primary: "#059669",
-    primaryDark: "#10b981",
-    accent: "#059669",
-    accentDark: "#10b981",
-    text: isDark ? "#e7e5e4" : "#1c1917",
-    textMuted: isDark ? "#a8a29e" : "#6b7280",
-    title: "#064e3b",
-    iconBg: "rgba(5, 150, 105, 0.1)",
-    badgeConfirmed: isDark ? "#052e16" : "#dcfce7",
-    badgeCompleted: isDark ? "#111827" : "#dbeafe",
-    badgeConfirmedText: "#166534",
-    badgeCompletedText: "#1e40af",
-  };
-
-  const cardStyle = { background: colors.bg, borderRadius: "24px", padding: "24px", border: `1px solid ${colors.border}`, boxShadow: "0 1px 3px rgba(0,0,0,0.08)" };
-  const iconBoxStyle = { width: "36px", height: "36px", borderRadius: "10px", background: `linear-gradient(135deg, ${colors.primary}, ${isDark ? '#ca8a04' : '#047857'})`, display: "flex", alignItems: "center", justifyContent: "center", color: "white" };
-  const titleStyle = { fontSize: "20px", fontWeight: 600, color: colors.title, fontFamily: "serif" };
-  const counterStyle = { width: "32px", height: "32px", borderRadius: "50%", background: colors.iconBg, display: "flex", alignItems: "center", justifyContent: "center", color: colors.primary, fontWeight: 700, fontSize: "14px" };
+  const cardClass = isDark
+    ? "rounded-3xl border border-[#2F4437] bg-[#1D2B22] p-6 shadow-sm"
+    : "rounded-3xl border border-[#E6E2D8] bg-[#FFFFFF] p-6 shadow-sm";
+  const iconBoxClass = isDark
+    ? "flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#43A047] to-[#66BB6A] text-white"
+    : "flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#2E7D32] to-[#1B5E20] text-white";
+  const titleClass = isDark
+    ? "text-xl font-semibold text-[#F5F5F5] font-serif"
+    : "text-xl font-semibold text-[#263238] font-serif";
+  const counterClass = isDark
+    ? "flex h-8 w-8 items-center justify-center rounded-full bg-[#2F4437] text-sm font-bold text-[#F5F5F5]"
+    : "flex h-8 w-8 items-center justify-center rounded-full bg-[#E6E2D8] text-sm font-bold text-[#2E7D32]";
+  const mutedTextClass = isDark ? "text-[#C7D0CB]" : "text-[#6B7280]";
+  const fieldTextClass = isDark ? "text-[#F5F5F5]" : "text-[#263238]";
+  const borderLineClass = isDark ? "border-[#2F4437]" : "border-[#E6E2D8]";
+  const confirmedBadgeClass = isDark
+    ? "bg-[#2E7D32] text-[#F5F5F5]"
+    : "bg-[#E8F5E9] text-[#2E7D32]";
+  const completedBadgeClass = isDark
+    ? "bg-[#2F4437] text-[#E6C15A]"
+    : "bg-[#FFF6D8] text-[#D4A017]";
 
   if (loading) {
     return (
-      <div style={cardStyle}>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "20px" }}>
-          <div style={iconBoxStyle}><CalendarDays size={18} /></div>
-          <h2 style={titleStyle}>My Safari Bookings</h2>
+      <div className={cardClass}>
+        <div className="mb-5 flex items-center gap-2.5">
+          <div className={iconBoxClass}><CalendarDays size={18} /></div>
+          <h2 className={titleClass}>My Safari Bookings</h2>
         </div>
-        <p style={{ color: colors.textMuted, fontSize: "14px", textAlign: "center", padding: "16px 0" }}>
-          <span style={{ display: "inline-block", width: "20px", height: "20px", border: `3px solid ${colors.primary}`, borderTopColor: "transparent", borderRadius: "50%", animation: "spin 1s linear infinite", marginRight: "8px", verticalAlign: "middle" }}></span>
+        <p className={`py-4 text-center text-sm ${mutedTextClass}`}>
+          <span className="mr-2 inline-block h-5 w-5 align-middle rounded-full border-[3px] border-[#2E7D32] border-t-transparent animate-spin dark:border-[#43A047]"></span>
           Loading your adventures...
         </p>
       </div>
@@ -86,69 +82,64 @@ export function BookingCard() {
 
   if (error) {
     return (
-      <div style={cardStyle}>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "20px" }}>
-          <div style={iconBoxStyle}><CalendarDays size={18} /></div>
-          <h2 style={titleStyle}>My Safari Bookings</h2>
+      <div className={cardClass}>
+        <div className="mb-5 flex items-center gap-2.5">
+          <div className={iconBoxClass}><CalendarDays size={18} /></div>
+          <h2 className={titleClass}>My Safari Bookings</h2>
         </div>
-        <p style={{ color: "#dc2626", fontSize: "14px", textAlign: "center" }}>{error}</p>
+        <p className="text-center text-sm text-red-600">{error}</p>
       </div>
     );
   }
 
   return (
-    <div style={cardStyle}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <div style={iconBoxStyle}><CalendarDays size={18} /></div>
-          <h2 style={titleStyle}>My Safari Bookings</h2>
+    <div className={cardClass}>
+      <div className="mb-5 flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <div className={iconBoxClass}><CalendarDays size={18} /></div>
+          <h2 className={titleClass}>My Safari Bookings</h2>
         </div>
-        <div style={counterStyle}>{bookings.length}</div>
+        <div className={counterClass}>{bookings.length}</div>
       </div>
 
       {bookings.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "32px 16px" }}>
-          <div style={{ fontSize: "48px", marginBottom: "12px" }}>🦁</div>
-          <p style={{ color: colors.textMuted, fontSize: "15px", fontWeight: 500 }}>No safari adventures booked yet!</p>
-          <p style={{ color: isDark ? "#78716c" : "#9ca3af", fontSize: "13px", marginTop: "4px" }}>Explore our packages and start your journey.</p>
+        <div className="px-4 py-8 text-center">
+          <div className="mb-3 text-5xl">🦁</div>
+          <p className={`text-[15px] font-medium ${mutedTextClass}`}>No safari adventures booked yet!</p>
+          <p className={isDark ? "mt-1 text-sm text-[#A3A3A3]" : "mt-1 text-sm text-[#6B7280]"}>Explore our packages and start your journey.</p>
         </div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: "16px", maxHeight: "500px", overflowY: "auto" }}>
+        <div className="flex max-h-[500px] flex-col gap-4 overflow-y-auto">
           {bookings.map((booking) => {
             const pkg = booking.package;
             return (
-              <div key={booking.Booking_ID} style={{ background: colors.bgItem, borderRadius: "16px", padding: "16px", border: `1px solid ${colors.borderItem}` }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
-                  <h4 style={{ fontWeight: 700, color: colors.title, fontSize: "16px" }}>{pkg?.Package_Name || "Unknown Safari"}</h4>
-                  <span style={{
-                    fontSize: "11px", fontWeight: 700, padding: "4px 10px", borderRadius: "9999px",
-                    textTransform: "uppercase", letterSpacing: "0.5px", whiteSpace: "nowrap", marginLeft: "8px",
-                    background: booking.Status === "Completed" ? colors.badgeCompleted : colors.badgeConfirmed,
-                    color: booking.Status === "Completed" ? colors.badgeCompletedText : colors.badgeConfirmedText
-                  }}>
+              <div key={booking.Booking_ID} className={isDark ? "rounded-2xl border border-[#2F4437] bg-[#101813] p-4" : "rounded-2xl border border-[#E6E2D8] bg-[#F8F6F0] p-4"}>
+                <div className="mb-3 flex items-start justify-between">
+                  <h4 className={`text-[16px] font-bold ${isDark ? "text-[#F5F5F5]" : "text-[#263238]"}`}>{pkg?.Package_Name || "Unknown Safari"}</h4>
+                  <span className={booking.Status === "Completed" ? `ml-2 whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.5px] ${completedBadgeClass}` : `ml-2 whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.5px] ${confirmedBadgeClass}`}>
                     {booking.Status === "Completed" ? "✓ Completed" : "● Confirmed"}
                   </span>
                 </div>
 
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", fontSize: "13px", color: colors.text, marginBottom: "12px" }}>
-                  <DateField Icon={CalendarDays} value={booking.Booking_Date} color={colors.primary} />
-                  <DateField Icon={Clock} value={booking.Pickup_Time} color={colors.primary} />
-                  <div style={{ display: "flex", alignItems: "center", gap: "6px", gridColumn: "span 2" }}>
-                    <MapPin size={14} color={colors.primary} />
-                    <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{booking.Pickup_Location}</span>
+                <div className={`mb-3 grid grid-cols-2 gap-2 text-sm ${fieldTextClass}`}>
+                  <DateField Icon={CalendarDays} value={booking.Booking_Date} dark={isDark} />
+                  <DateField Icon={Clock} value={booking.Pickup_Time} dark={isDark} />
+                  <div className="col-span-2 flex items-center gap-1.5">
+                    <MapPin size={14} className={isDark ? "text-[#43A047]" : "text-[#2E7D32]"} />
+                    <span className="truncate">{booking.Pickup_Location}</span>
                   </div>
-                  <DateField Icon={Users} value={`${booking.No_of_adults} ${booking.No_of_adults === 1 ? "Adult" : "Adults"}`} color={colors.primary} />
-                  <DateField Icon={Baby} value={`${booking.No_of_child} ${booking.No_of_child === 1 ? "Child" : "Children"}`} color={colors.primary} />
+                  <DateField Icon={Users} value={`${booking.No_of_adults} ${booking.No_of_adults === 1 ? "Adult" : "Adults"}`} dark={isDark} />
+                  <DateField Icon={Baby} value={`${booking.No_of_child} ${booking.No_of_child === 1 ? "Child" : "Children"}`} dark={isDark} />
                 </div>
 
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "12px", borderTop: `1px solid ${colors.borderItem}` }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", color: colors.textMuted }}>
-                    <Truck size={14} color={colors.primary} />
+                <div className={`flex items-center justify-between border-t pt-3 ${borderLineClass}`}>
+                  <div className={`flex items-center gap-1.5 text-sm ${mutedTextClass}`}>
+                    <Truck size={14} className={isDark ? "text-[#43A047]" : "text-[#2E7D32]"} />
                     <span>{booking.vehicle ? booking.vehicle.Registration_No || "Assigned" : "Awaiting vehicle"}</span>
                   </div>
-                  <div style={{ textAlign: "right" }}>
-                    <span style={{ fontSize: "11px", color: colors.textMuted, display: "block" }}>Total</span>
-                    <span style={{ fontWeight: 700, color: colors.primaryDark || colors.primary, fontSize: "16px" }}>Rs. {Number(booking.Payment || 0).toLocaleString()}</span>
+                  <div className="text-right">
+                    <span className={`block text-[11px] ${mutedTextClass}`}>Total</span>
+                    <span className={`text-[16px] font-bold ${isDark ? "text-[#66BB6A]" : "text-[#1B5E20]"}`}>Rs. {Number(booking.Payment || 0).toLocaleString()}</span>
                   </div>
                 </div>
               </div>
@@ -160,10 +151,10 @@ export function BookingCard() {
   );
 }
 
-function DateField({ Icon, value, color }) {
+function DateField({ Icon, value, dark }) {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-      <Icon size={14} color={color} />
+    <div className="flex items-center gap-1.5">
+      <Icon size={14} className={dark ? "text-[#43A047]" : "text-[#2E7D32]"} />
       <span>{value}</span>
     </div>
   );

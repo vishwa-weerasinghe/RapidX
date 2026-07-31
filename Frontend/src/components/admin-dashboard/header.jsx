@@ -45,16 +45,16 @@ export function Header({ user, toggleSidebar }) {
                 <div className="flex items-center gap-4">
                     <button 
                         onClick={toggleSidebar}
-                        className="p-2 text-gray-500 hover:text-emerald-600 dark:text-gray-400 dark:hover:text-emerald-400 md:hidden rounded-lg hover:bg-emerald-50 dark:hover:bg-neutral-800 transition-colors"
+                        className="p-2 text-gray-500 hover:text-sacramento dark:text-gray-400 dark:hover:text-castleton-300 md:hidden rounded-lg hover:bg-castleton-50 dark:hover:bg-neutral-800 transition-colors"
                     >
                         <Menu className="w-5 h-5" />
                     </button>
 
                     <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/admin')}>
-                        <div className="w-8 h-8 bg-emerald-700 dark:bg-emerald-600 rounded-lg flex items-center justify-center shadow-sm">
+                        <div className="w-8 h-8 bg-sacramento rounded-lg flex items-center justify-center shadow-sm">
                             <span className="text-white font-serif font-bold text-lg leading-none">W</span>
                         </div>
-                        <span className="font-serif font-semibold text-xl text-emerald-800 dark:text-emerald-400 tracking-wide hidden sm:block">
+                        <span className="font-serif font-semibold text-xl text-sacramento dark:text-castleton-300 tracking-wide hidden sm:block">
                             Admin Portal
                         </span>
                     </div>
@@ -71,7 +71,7 @@ export function Header({ user, toggleSidebar }) {
                         <ThemeModeIcon className="w-5 h-5" />
                     </button>
                     {/* Notifications */}
-                    <button className="p-2 text-gray-500 hover:text-emerald-600 dark:text-gray-400 dark:hover:text-emerald-400 transition-colors rounded-lg hover:bg-emerald-50 dark:hover:bg-neutral-800 relative">
+                    <button className="p-2 text-gray-500 hover:text-sacramento dark:text-gray-400 dark:hover:text-castleton-300 transition-colors rounded-lg hover:bg-castleton-50 dark:hover:bg-neutral-800 relative">
                         <Bell className="w-5 h-5" />
                         <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-neutral-900"></span>
                     </button>

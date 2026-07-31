@@ -13,16 +13,16 @@ export function HeroCountdown({ user }) {
   const customerId = user?.Customer_ID
   const isDark = theme === 'dark'
 
-  const primaryBg = 'bg-[#0f3d2e]'
-  const primaryGradient = 'from-[#0f3d2e] via-[#0f3d2e]/70 to-transparent'
-  const badgeBg = 'bg-[#144b38]/50'
-  const badgeBorder = 'border-[#1f6a4e]/40'
-  const infoBg = 'bg-[#144b38]/50'
-  const infoBorder = 'border-[#1f6a4e]/30'
-  const accentText = 'text-[#eaf5ee]'
-  const countdownNum = 'text-[#f5f7f2]'
-  const pulseDot = 'bg-[#9fd8b4]'
-  const textMuted = 'text-[#eaf5ee]/80'
+  const primaryBg = isDark ? 'bg-[#101813]' : 'bg-[#F8F6F0]'
+  const primaryGradient = isDark ? 'from-[#1D2B22] via-[#2F4437]/80 to-transparent' : 'from-[#E6E2D8] via-[#F8F6F0]/80 to-transparent'
+  const badgeBg = isDark ? 'bg-[#1D2B22]/70' : 'bg-[#FFFFFF]/80'
+  const badgeBorder = isDark ? 'border-[#2F4437]' : 'border-[#E6E2D8]'
+  const infoBg = isDark ? 'bg-[#1D2B22]/80' : 'bg-[#FFFFFF]/70'
+  const infoBorder = isDark ? 'border-[#2F4437]' : 'border-[#E6E2D8]'
+  const accentText = isDark ? 'text-[#E6C15A]' : 'text-[#D4A017]'
+  const countdownNum = isDark ? 'text-[#F5F5F5]' : 'text-[#263238]'
+  const pulseDot = isDark ? 'bg-[#66BB6A]' : 'bg-[#2E7D32]'
+  const textMuted = isDark ? 'text-[#F5F5F5]/80' : 'text-[#263238]/75'
 
   useEffect(() => {
     if (!customerId) {
@@ -43,7 +43,7 @@ export function HeroCountdown({ user }) {
 
   if (loading) {
     return (
-      <section className={`relative w-full rounded-3xl overflow-hidden ${primaryBg} text-white shadow-xl p-6 sm:p-10 lg:p-12`}>
+      <section className={`relative w-full overflow-hidden rounded-3xl border ${primaryBg} ${isDark ? 'border-[#2F4437] text-[#F5F5F5]' : 'border-[#E6E2D8] text-[#263238]'} shadow-xl p-6 sm:p-10 lg:p-12`}>
         <p className={`${textMuted} text-lg`}>Loading your upcoming safari...</p>
       </section>
     )
@@ -65,7 +65,7 @@ export function HeroCountdown({ user }) {
   const vehicle = booking.vehicle
 
   return (
-    <section className={`relative w-full rounded-3xl overflow-hidden ${primaryBg} text-white shadow-xl`}>
+    <section className={`relative w-full overflow-hidden rounded-3xl border ${primaryBg} ${isDark ? 'border-[#2F4437] text-[#F5F5F5]' : 'border-[#E6E2D8] text-[#263238]'} shadow-xl`}>
       {/* Background Gradient */}
       <div className="absolute inset-0 w-full h-full">
         <div className={`absolute inset-0 bg-gradient-to-t ${primaryGradient}`}></div>
@@ -79,7 +79,7 @@ export function HeroCountdown({ user }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full ${badgeBg} backdrop-blur-sm ${badgeBorder} text-sm font-medium mb-6`}>
+            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full ${badgeBg} backdrop-blur-sm ${badgeBorder} border text-sm font-medium mb-6`}>
               <span className={`w-2 h-2 rounded-full ${pulseDot} animate-pulse`}></span>
               {daysUntil <= 0 ? 'Today' : 'Upcoming Safari'}
             </div>
@@ -107,10 +107,10 @@ export function HeroCountdown({ user }) {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className={`grid grid-cols-2 gap-4 sm:gap-6 ${infoBg} backdrop-blur-md p-6 rounded-2xl ${infoBorder}`}
+          className={`grid grid-cols-2 gap-4 sm:gap-6 ${infoBg} backdrop-blur-md p-6 rounded-2xl border ${infoBorder}`}
         >
           <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-2 text-white/60 text-sm">
+            <div className={`flex items-center gap-2 text-sm ${isDark ? 'text-[#F5F5F5]/60' : 'text-[#263238]/60'}`}>
               <Calendar className="w-4 h-4" />
               <span>Date</span>
             </div>
@@ -120,7 +120,7 @@ export function HeroCountdown({ user }) {
           </div>
 
           <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-2 text-white/60 text-sm">
+            <div className={`flex items-center gap-2 text-sm ${isDark ? 'text-[#F5F5F5]/60' : 'text-[#263238]/60'}`}>
               <Truck className="w-4 h-4" />
               <span>Vehicle</span>
             </div>
@@ -130,7 +130,7 @@ export function HeroCountdown({ user }) {
           </div>
 
           <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-2 text-white/60 text-sm">
+            <div className={`flex items-center gap-2 text-sm ${isDark ? 'text-[#F5F5F5]/60' : 'text-[#263238]/60'}`}>
               <Compass className="w-4 h-4" />
               <span>Guests</span>
             </div>
@@ -140,7 +140,7 @@ export function HeroCountdown({ user }) {
           </div>
 
           <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-2 text-white/60 text-sm">
+            <div className={`flex items-center gap-2 text-sm ${isDark ? 'text-[#F5F5F5]/60' : 'text-[#263238]/60'}`}>
               <MapPin className="w-4 h-4" />
               <span>Pickup</span>
             </div>

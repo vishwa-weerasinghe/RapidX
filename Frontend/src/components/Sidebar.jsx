@@ -67,11 +67,11 @@ export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
         md:translate-x-0
 
         bg-gradient-to-b
-        from-lime-500
-        via-emerald-600
-        to-green-700
+        from-sacramento-500
+        via-sacramento
+        to-castleton
 
-        dark:from-emerald-950
+        dark:from-sacramento-900
         dark:via-slate-900
         dark:to-black
 
@@ -80,7 +80,7 @@ export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
         shadow-2xl
 
         border-r
-        border-emerald-600
+        border-sacramento
         dark:border-slate-800
 
         transition-all
@@ -153,15 +153,15 @@ export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
                   ${isActive
                     ? `
                       bg-white
-                      text-green-700
+                      text-sacramento
 
                       dark:bg-slate-800
-                      dark:text-green-400
+                      dark:text-castleton-300
 
                       shadow-lg
 
                       border-l-4
-                      border-green-600
+                      border-sacramento
                     `
                     : `
                       text-white
