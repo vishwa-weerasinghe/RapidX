@@ -32,7 +32,7 @@ export default function PackageForm() {
           Description: res.data.Description || "",
           Price_for_adult: res.data.Price_for_adult || "",
           Price_for_child: res.data.Price_for_child || "",
-          Image: res.data.Image || null,
+          Image: res.data.Image || "",
         });
       })
       .catch((err) => console.error(err))
@@ -168,7 +168,7 @@ export default function PackageForm() {
 
           <p className="mt-1 text-xs text-gray-500">
             Upload a new image only if you want to replace the current one.
-            JPG, PNG, JPEG or WEBP. Maximum size: 2 MB.
+            JPG, PNG, JPEG or WEBP. Maximum size: 10 MB.
           </p>
 
           {errors.Image && (
@@ -236,8 +236,8 @@ export default function PackageForm() {
             {saving
               ? "Saving..."
               : isEdit
-              ? "Update Package"
-              : "Create Package"}
+                ? "Update Package"
+                : "Create Package"}
           </button>
 
           <button

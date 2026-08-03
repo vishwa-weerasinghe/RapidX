@@ -19,7 +19,7 @@ class PackageController extends Controller
             'Description'      => 'required|string',
             'Price_for_adult'  => 'required|numeric|min:0',
             'Price_for_child'  => 'required|numeric|min:0',
-            'Image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'Image' => 'nullable|image|mimes:jpeg,png,jpg,webp',
         ]);
         if ($request->hasFile('Image')) {
             $validated['Image'] = $request->file('Image')
@@ -43,7 +43,7 @@ class PackageController extends Controller
             'Description'      => 'sometimes|required|string',
             'Price_for_adult'  => 'sometimes|required|numeric|min:0',
             'Price_for_child'  => 'sometimes|required|numeric|min:0',
-            'Image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'Image' => 'nullable|image|mimes:jpeg,png,jpg,webp',
     
 
         ]);

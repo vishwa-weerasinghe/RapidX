@@ -68,7 +68,7 @@ export default function AdminReviews() {
           );
           setNewReviewIds(unseenIds);
         })
-        .catch(() => {});
+        .catch(() => { });
     }, 5000);
 
     return () => clearInterval(interval);
@@ -177,11 +177,10 @@ export default function AdminReviews() {
             return (
               <div
                 key={review.Review_ID}
-                className={`rounded-xl border bg-white p-4 shadow-sm ${
-                  isNew
+                className={`rounded-xl border bg-white p-4 shadow-sm ${isNew
                     ? "border-indigo-400 ring-1 ring-indigo-200"
                     : "border-gray-200"
-                }`}
+                  }`}
               >
                 <div className="flex items-start justify-between gap-4">
                   <div>

@@ -4,19 +4,23 @@ import { CartCard } from '../../components/user-dashboard/CartCard'
 import { HeroCountdown } from '../../components/user-dashboard/Upcoming-safari'
 
 export default function CustomerDashboard({ user: propUser }) {
-  const [currentUser, setCurrentUser] = useState(propUser);
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      const stored = localStorage.getItem("user");
+      return stored ? JSON.parse(stored) : propUser;
+    } catch {
+      return propUser;
+    }
+  });
 
   useEffect(() => {
-    // If propUser is null (main.jsx evaluated before login), read directly from localStorage
-    if (!propUser) {
-      try {
-        const stored = localStorage.getItem("user");
-        if (stored) {
-          setCurrentUser(JSON.parse(stored));
-        }
-      } catch { /* ignore */ }
-    }
-  }, [propUser]);
+    try {
+      const stored = localStorage.getItem("user");
+      if (stored) {
+        setCurrentUser(JSON.parse(stored));
+      }
+    } catch { /* ignore */ }
+  }, []);
 
   return (
     <div className="min-h-screen bg-safari-bone dark:bg-black text-safari-text dark:text-white transition-colors duration-300">
