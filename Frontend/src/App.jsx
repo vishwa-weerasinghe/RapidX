@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { MapPin, Calendar, Users, Search, LayoutDashboard, Menu, X } from "lucide-react";
+import {
+  MapPin,
+  Calendar,
+  Users,
+  Search,
+  LayoutDashboard,
+  Menu,
+  X,
+} from "lucide-react";
 import ThemeToggle from "./components/ThemeToggle";
 import { useTheme } from "./context/ThemeContext";
 import api from "./axios";
@@ -11,8 +19,7 @@ const tripadvisorReviews = [
     name: "TripAdvisor Traveler",
     date: "Jul 2026",
     title: "Incredible Minneriya Elephant Safari Experience",
-    text:
-      "Seeing so many elephants in one place was absolutely amazing. We watched large herds moving freely across the open fields, while several baby elephants played close to their mothers.",
+    text: "Seeing so many elephants in one place was absolutely amazing. We watched large herds moving freely across the open fields, while several baby elephants played close to their mothers.",
     rate: 5,
     source: "TripAdvisor",
   },
@@ -21,8 +28,7 @@ const tripadvisorReviews = [
     name: "TripAdvisor Traveler",
     date: "Jun 2026",
     title: "Amazing Elephants And Friendly Driver",
-    text:
-      "Our Minneriya Safari was an unforgettable wildlife experience. The highlight of the trip was seeing so many elephants in their natural habitat.",
+    text: "Our Minneriya Safari was an unforgettable wildlife experience. The highlight of the trip was seeing so many elephants in their natural habitat.",
     rate: 5,
     source: "TripAdvisor",
   },
@@ -31,8 +37,7 @@ const tripadvisorReviews = [
     name: "TripAdvisor Traveler",
     date: "Jun 2026",
     title: "Memorable Elephant Safari Adventure",
-    text:
-      "Booking the Minneriya Safari was quick and easy, and everything went smoothly from the start. The safari itself was adventurous and memorable.",
+    text: "Booking the Minneriya Safari was quick and easy, and everything went smoothly from the start. The safari itself was adventurous and memorable.",
     rate: 5,
     source: "TripAdvisor",
   },
@@ -41,8 +46,7 @@ const tripadvisorReviews = [
     name: "TripAdvisor Traveler",
     date: "Jun 2026",
     title: "Unforgettable Elephant Safari Experience",
-    text:
-      "Visiting Minneriya National Park was a fantastic experience, especially because of the incredible number of elephants we were able to see.",
+    text: "Visiting Minneriya National Park was a fantastic experience, especially because of the incredible number of elephants we were able to see.",
     rate: 5,
     source: "TripAdvisor",
   },
@@ -51,8 +55,7 @@ const tripadvisorReviews = [
     name: "TripAdvisor Traveler",
     date: "Jun 2026",
     title: "Amazing Wildlife Experience At Minneriya",
-    text:
-      "I recently visited Minneriya National Park for a safari, and it was an incredible experience. The park was filled with beautiful scenery and an amazing variety of wildlife.",
+    text: "I recently visited Minneriya National Park for a safari, and it was an incredible experience. The park was filled with beautiful scenery and an amazing variety of wildlife.",
     rate: 5,
     source: "TripAdvisor",
   },
@@ -61,8 +64,7 @@ const tripadvisorReviews = [
     name: "TripAdvisor Traveler",
     date: "Jun 2026",
     title: "Memorable Family Safari with Responsible Wildlife Viewing",
-    text:
-      "Our family recently enjoyed a wonderful safari experience in Minneriya, and it exceeded our expectations. The trip felt educational, peaceful, and enjoyable for the whole family.",
+    text: "Our family recently enjoyed a wonderful safari experience in Minneriya, and it exceeded our expectations. The trip felt educational, peaceful, and enjoyable for the whole family.",
     rate: 5,
     source: "TripAdvisor",
   },
@@ -71,8 +73,7 @@ const tripadvisorReviews = [
     name: "TripAdvisor Traveler",
     date: "Jun 2026",
     title: "Amazing Safari Experience for Couples",
-    text:
-      "My partner and I had an unforgettable safari experience in Minneriya. The beautiful scenery, incredible wildlife sightings, and professional guidance made this safari truly memorable.",
+    text: "My partner and I had an unforgettable safari experience in Minneriya. The beautiful scenery, incredible wildlife sightings, and professional guidance made this safari truly memorable.",
     rate: 5,
     source: "TripAdvisor",
   },
@@ -97,7 +98,8 @@ export default function App() {
 
   const dashboardLink = (() => {
     if (!user) return "/login";
-    const role = `${user?.role ?? user?.Role ?? user?.user_type ?? "customer"}`.toLowerCase();
+    const role =
+      `${user?.role ?? user?.Role ?? user?.user_type ?? "customer"}`.toLowerCase();
     return ["admin", "administrator", "superadmin"].includes(role)
       ? "/admin/dashboard"
       : "/user/dashboard";
@@ -151,10 +153,13 @@ export default function App() {
       }
       navigate("/user/dashboard");
     } else {
-      localStorage.setItem("pending_cart", JSON.stringify({
-        Package_ID: pkg.id || pkg.Package_ID,
-        Payment: parseFloat((pkg.price || "0").replace(/[^0-9.]/g, "")) || 0,
-      }));
+      localStorage.setItem(
+        "pending_cart",
+        JSON.stringify({
+          Package_ID: pkg.id || pkg.Package_ID,
+          Payment: parseFloat((pkg.price || "0").replace(/[^0-9.]/g, "")) || 0,
+        }),
+      );
       alert("Please login to add this package to your cart.");
       navigate("/login");
     }
@@ -177,9 +182,10 @@ export default function App() {
 
   const handleWidgetSubmit = (e) => {
     e.preventDefault();
-    const matchedPkg = packages.find((p) =>
-      (p.title || "").toLowerCase().includes(selectedPark.toLowerCase())
-    ) || packages[0];
+    const matchedPkg =
+      packages.find((p) =>
+        (p.title || "").toLowerCase().includes(selectedPark.toLowerCase()),
+      ) || packages[0];
 
     if (matchedPkg?.id) {
       localStorage.setItem(
@@ -188,7 +194,7 @@ export default function App() {
           Booking_Date: bookingDate,
           No_of_adults: adultsCount,
           No_of_child: childrenCount,
-        })
+        }),
       );
       navigate(`/booking/${matchedPkg.id}`);
     } else {
@@ -207,9 +213,7 @@ export default function App() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // --- REFS & DATA ---
-  const heroSlides = [
-    "https://minneriyawildjeepsafari.com/wp-content/uploads/2025/08/WhatsApp-Image-2025-08-20-at-12.11.05-1024x683.jpeg",
-  ];
+  const heroSlides = ["src/assets/homepage.png"];
 
   const safariLocations = [
     {
@@ -302,7 +306,8 @@ export default function App() {
       setIsScrolled(window.scrollY > 100);
       setShowScrollTop(window.scrollY > 300);
 
-      const headerHeight = document.querySelector("header")?.offsetHeight || 120;
+      const headerHeight =
+        document.querySelector("header")?.offsetHeight || 120;
 
       // Active Section Navigation Tracker Spying Logic
       const sections = [
@@ -363,13 +368,17 @@ export default function App() {
     try {
       const response = await api.post("/contact", formData);
       setNotification({
-        text: response.data.message || "Thank you! Your safari booking request inquiry has been sent successfully.",
+        text:
+          response.data.message ||
+          "Thank you! Your safari booking request inquiry has been sent successfully.",
         type: "success",
       });
       setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
     } catch (err) {
       console.error(err);
-      const errMsg = err.response?.data?.message || "Failed to send message. Please try again later.";
+      const errMsg =
+        err.response?.data?.message ||
+        "Failed to send message. Please try again later.";
       setNotification({
         text: errMsg,
         type: "error",
@@ -384,8 +393,17 @@ export default function App() {
     setIsMobileMenuOpen(false);
     const target = document.getElementById(id);
     if (target) {
-      const headerHeight = document.querySelector("header")?.offsetHeight || 120;
-      window.scrollTo({ top: target.offsetTop - headerHeight - 12, behavior: "smooth" });
+      // Calculate accurate position regardless of parent positioning
+      const elementPosition = target.getBoundingClientRect().top + window.scrollY;
+
+      // Use a consistent offset height since the sticky header shrinks upon scrolling
+      // Assuming the sticky header is roughly 80-90px tall when scrolled
+      const headerOffset = 90;
+
+      window.scrollTo({
+        top: elementPosition - headerOffset,
+        behavior: "smooth",
+      });
     }
   };
 
@@ -398,11 +416,13 @@ export default function App() {
     message: "",
   });
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
-  const [showAllTripadvisorReviews, setShowAllTripadvisorReviews] = useState(false);
+  const [showAllTripadvisorReviews, setShowAllTripadvisorReviews] =
+    useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [reviewNotification, setReviewNotification] = useState(null);
 
-  const tripadvisorUrl = "https://www.tripadvisor.com/Attraction_Review-g304133-d15640558-Reviews-Minneriya_Wild_Jeep_Safari-Dambulla_Central_Province.html";
+  const tripadvisorUrl =
+    "https://www.tripadvisor.com/Attraction_Review-g304133-d15640558-Reviews-Minneriya_Wild_Jeep_Safari-Dambulla_Central_Province.html";
 
   const isTripAdvisorReview = (review) => {
     const searchable = [
@@ -463,9 +483,17 @@ export default function App() {
             };
           });
 
-          setReviews([...storedGuestReviews, ...mapped].filter((review) => !isTripAdvisorReview(review)));
+          setReviews(
+            [...storedGuestReviews, ...mapped].filter(
+              (review) => !isTripAdvisorReview(review),
+            ),
+          );
         } else if (storedGuestReviews.length > 0) {
-          setReviews([...storedGuestReviews].filter((review) => !isTripAdvisorReview(review)));
+          setReviews(
+            [...storedGuestReviews].filter(
+              (review) => !isTripAdvisorReview(review),
+            ),
+          );
         } else {
           setReviews([]);
         }
@@ -476,8 +504,12 @@ export default function App() {
   const tripadvisorVisibleReviews = showAllTripadvisorReviews
     ? tripadvisorReviews
     : tripadvisorReviews.slice(0, 6);
-  const systemReviews = reviews.filter((review) => !isTripAdvisorReview(review));
-  const systemVisibleReviews = showAllReviews ? systemReviews : systemReviews.slice(0, 6);
+  const systemReviews = reviews.filter(
+    (review) => !isTripAdvisorReview(review),
+  );
+  const systemVisibleReviews = showAllReviews
+    ? systemReviews
+    : systemReviews.slice(0, 6);
 
   const handleReviewFormChange = (e) => {
     const { name, value } = e.target;
@@ -499,18 +531,21 @@ export default function App() {
     setReviewSubmitting(true);
 
     const name = reviewForm.name.trim() || "Guest User";
-    const initials = name
-      .split(" ")
-      .map((word) => word[0] || "")
-      .join("")
-      .slice(0, 2)
-      .toUpperCase() || "G";
+    const initials =
+      name
+        .split(" ")
+        .map((word) => word[0] || "")
+        .join("")
+        .slice(0, 2)
+        .toUpperCase() || "G";
 
     const newReview = {
       initials,
       name,
       date: "Just now",
-      title: reviewForm.message.trim().split(" ").slice(0, 4).join(" ") + (reviewForm.message.trim().split(" ").length > 4 ? "..." : ""),
+      title:
+        reviewForm.message.trim().split(" ").slice(0, 4).join(" ") +
+        (reviewForm.message.trim().split(" ").length > 4 ? "..." : ""),
       text: reviewForm.message.trim(),
       rate: Number(reviewForm.rating) || 5,
       isGuest: true,
@@ -521,7 +556,10 @@ export default function App() {
       const updatedReviews = [newReview, ...prev];
       try {
         const storedGuestReviews = getStoredGuestReviews();
-        localStorage.setItem("guestReviews", JSON.stringify([newReview, ...storedGuestReviews]));
+        localStorage.setItem(
+          "guestReviews",
+          JSON.stringify([newReview, ...storedGuestReviews]),
+        );
       } catch (err) {
         console.error("Error saving guest review:", err);
       }
@@ -607,11 +645,13 @@ export default function App() {
 
       {/* Synchronized Header & Navbar */}
       <header
-        className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${isScrolled
-          ? "px-3 pt-3 md:px-8"
-          : "px-0 pt-0"
+        className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${isScrolled ? "px-3 pt-3 md:px-8" : "px-0 pt-0"
           }`}
       >
+        {/* Subtle dark gradient overlay for nav readability */}
+        {!isScrolled && (
+          <div className="absolute top-0 left-0 w-full h-40 bg-gradient-to-b from-black/70 to-transparent pointer-events-none -z-10"></div>
+        )}
         <div
           className={`max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between transition-all duration-500 relative ${isScrolled
             ? "bg-[var(--page-bg)]/90 dark:bg-[var(--surface)]/90 backdrop-blur-xl rounded-full shadow-lg border border-[var(--border)]/40 py-2.5"
@@ -620,16 +660,20 @@ export default function App() {
         >
           {/* Logo & Brand Name */}
           <div
-            className="cursor-pointer flex items-center gap-2"
+            className="cursor-pointer flex items-center gap-2 sm:gap-3"
             onClick={() => scrollToSection("home")}
           >
-            <img
-              src="https://minneriyawildjeepsafari.com/wp-content/uploads/2025/08/lgo.jpg"
-              alt="Minneriya Wild Jeep Safari"
-              className="h-10 sm:h-12 md:h-14 w-auto object-contain"
-            />
-            <span className={`text-base sm:text-lg font-bold tracking-wide transition-colors duration-300 ${isScrolled ? "text-sacramento dark:text-white" : "text-white"
-              }`}>
+            <div className="bg-white p-1.5 sm:p-2 rounded-xl shadow-md border border-white/20 flex items-center justify-center transition-transform hover:scale-105 duration-300">
+              <img
+                src="https://minneriyawildjeepsafari.com/wp-content/uploads/2025/08/lgo.jpg"
+                alt="Minneriya Wild Jeep Safari"
+                className="h-7 sm:h-9 md:h-11 w-auto object-contain rounded-md"
+              />
+            </div>
+            <span
+              className={`text-base sm:text-lg md:text-xl font-bold tracking-wide transition-colors duration-300 ${isScrolled ? "text-sacramento dark:text-white" : "text-white drop-shadow-md"
+                }`}
+            >
               Wild Jeep Safari
             </span>
           </div>
@@ -783,47 +827,46 @@ export default function App() {
       {/* --- HERO SECTION --- */}
       <section
         id="home"
-        className="relative h-screen min-h-[650px] flex items-center overflow-hidden pt-16"
+        className="relative min-h-[100svh] sm:h-screen sm:min-h-[650px] flex items-center overflow-hidden pt-16"
       >
-        <div className="absolute top-0 left-0 w-full h-full z-0">
+        <div className="absolute inset-0 z-0 overflow-hidden">
           {heroSlides.map((slide, index) => (
             <div
               key={index}
-              className={`absolute w-full h-full transition-opacity duration-1000 ${index === currentSlide ? "opacity-100" : "opacity-0"}`}
+              className={`absolute inset-0 transition-opacity duration-1000 ${index === currentSlide ? "opacity-100" : "opacity-0"}`}
             >
               <img
                 src={slide}
                 alt="Elephant Gathering Scene"
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover object-[65%_center] sm:object-[center_80%] lg:object-right"
               />
-              <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-sacramento/85 to-castleton/65 z-10"></div>
             </div>
           ))}
         </div>
 
         <div className="max-w-7xl mx-auto px-4 md:px-6 w-full relative z-20">
-          <div className="max-w-2xl text-white">
-            <span className="text-amber-400 font-semibold uppercase tracking-widest text-sm block mb-3">
+          <div className="max-w-2xl text-white ml-0 md:ml-8 lg:ml-12 mt-12 md:mt-0">
+            <span className="text-amber-400 font-semibold uppercase tracking-widest text-sm sm:text-base block mb-3 drop-shadow-md">
               Explore Sri Lanka's Wildlife
             </span>
-            <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold leading-tight mb-4 text-white">
-              Witness the World's Largest Wild Elephant Gathering
+            <h1 className="font-serif text-[2.5rem] leading-[1.1] sm:text-5xl md:text-6xl font-bold mb-6 text-white drop-shadow-lg">
+              Witness Sri Lanka's Legendary Wild Elephant Gathering
             </h1>
-            <p className="text-neutral-200 text-base sm:text-lg mb-8 max-w-xl">
+            <p className="text-gray-100 font-medium tracking-wide text-sm sm:text-base block mb-8 drop-shadow-md max-w-xl leading-relaxed">
               Experience unforgettable close-up encounters with majestic
               elephants in Minneriya and Kaudulla National Parks
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 mb-12">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-12">
               <button
                 onClick={() => handleBookNow()}
-                className="bg-sacramento text-white font-semibold text-center px-8 py-4 rounded-full hover:bg-sacramento-600 shadow-md transition duration-300 transform hover:-translate-y-0.5"
+                className="bg-[#2E7D32] text-white font-bold text-center px-8 py-3.5 rounded-full shadow-md hover:bg-[#1B5E20] hover:shadow-lg transition-all duration-300 transform hover:-translate-y-[2px]"
               >
                 Book Now
               </button>
               <button
                 onClick={() => scrollToSection("packages")}
-                className="bg-transparent border-2 border-white text-white font-semibold text-center px-8 py-4 rounded-full hover:bg-white hover:text-sacramento transition duration-300"
+                className="bg-white/10 backdrop-blur-sm border border-white/50 text-white font-semibold text-center px-10 py-3.5 rounded-full shadow-sm hover:bg-white/20 hover:border-white transition-all duration-300 transform hover:-translate-y-[2px]"
               >
                 Explore Safari Packages
               </button>
@@ -831,26 +874,26 @@ export default function App() {
 
             <div className="grid grid-cols-3 gap-6 pt-6 border-t border-white/20 max-w-md">
               <div>
-                <span className="text-2xl sm:text-3xl font-bold text-amber-400 block">
+                <span className="text-2xl sm:text-3xl font-bold text-white block">
                   2,500+
                 </span>
-                <span className="text-xs sm:text-sm text-neutral-300">
+                <span className="text-s sm:text-sm font-bold text-neutral-300">
                   Happy Travelers
                 </span>
               </div>
               <div>
-                <span className="text-2xl sm:text-3xl font-bold text-amber-400 block">
-                  4.9/5
+                <span className="text-2xl sm:text-3xl font-bold text-white-400 block">
+                  5.0/5.0
                 </span>
-                <span className="text-xs sm:text-sm text-neutral-300">
+                <span className="text-s sm:text-sm font-bold text-neutral-300">
                   TripAdvisor Rating
                 </span>
               </div>
               <div>
-                <span className="text-2xl sm:text-3xl font-bold text-amber-400 block">
+                <span className="text-2xl sm:text-3xl font-bold text-white-400 block">
                   24/7
                 </span>
-                <span className="text-xs sm:text-sm text-neutral-300">
+                <span className="text-s sm:text-sm font-bold text-neutral-300">
                   Available
                 </span>
               </div>
@@ -863,7 +906,6 @@ export default function App() {
       <section id="about" className="py-20 md:py-32 overflow-hidden bg-white">
         <div className="max-w-7xl mx-auto px-4 md:px-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
-
             {/* Image Side with Modern Overlap effect */}
             <div className="relative">
               <div className="absolute -inset-4 bg-gray-50 rounded-[2rem] transform -rotate-3 z-0"></div>
@@ -875,11 +917,28 @@ export default function App() {
                 />
                 <div className="absolute bottom-6 left-6 bg-white/90 backdrop-blur-sm px-6 py-4 rounded-xl shadow-md border border-gray-100 flex items-center gap-4">
                   <div className="w-12 h-12 bg-gray-50 text-castleton rounded-full flex items-center justify-center font-bold text-xl">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                    <svg
+                      className="w-6 h-6"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
                   </div>
                   <div>
-                    <span className="block text-gray-800 font-bold text-lg leading-none">Since 2020</span>
-                    <span className="text-gray-500 text-sm">Trusted Safari</span>
+                    <span className="block text-gray-800 font-bold text-lg leading-none">
+                      Since 2020
+                    </span>
+                    <span className="text-gray-500 text-sm">
+                      Trusted Safari
+                    </span>
                   </div>
                 </div>
               </div>
@@ -893,31 +952,65 @@ export default function App() {
               </div>
 
               <h2 className="font-outfit text-4xl sm:text-5xl font-bold mb-6 text-gray-900 leading-[1.15]">
-                Witness the World's Largest <br /><span className="text-castleton">Elephant Gathering</span>
+                Witness the World's Largest <br />
+                <span className="text-castleton">Elephant Gathering</span>
               </h2>
 
               <p className="text-gray-500 text-lg leading-relaxed mb-10">
-                Experience the world-famous gathering at Minneriya and Kaudulla National Parks. Join our expert-guided jeep safaris for unforgettable, close-up encounters with hundreds of majestic elephants in their natural habitat.
+                Experience the world-famous gathering at Minneriya and Kaudulla
+                National Parks. Join our expert-guided jeep safaris for
+                unforgettable, close-up encounters with hundreds of majestic
+                elephants in their natural habitat.
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-10">
                 <div className="flex flex-col gap-3">
                   <div className="w-12 h-12 rounded-xl bg-gray-50 text-castleton flex items-center justify-center border border-gray-100 shadow-sm">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <svg
+                      className="w-6 h-6"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
                   </div>
-                  <h3 className="font-bold text-gray-800 text-lg">Trusted Guides</h3>
+                  <h3 className="font-bold text-gray-800 text-lg">
+                    Trusted Guides
+                  </h3>
                   <p className="text-gray-500 text-sm leading-relaxed">
-                    Local experts with deep knowledge of wildlife and safe terrains.
+                    Local experts with deep knowledge of wildlife and safe
+                    terrains.
                   </p>
                 </div>
 
                 <div className="flex flex-col gap-3">
                   <div className="w-12 h-12 rounded-xl bg-gray-50 text-castleton flex items-center justify-center border border-gray-100 shadow-sm">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <svg
+                      className="w-6 h-6"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
                   </div>
-                  <h3 className="font-bold text-gray-800 text-lg">Personalized Tours</h3>
+                  <h3 className="font-bold text-gray-800 text-lg">
+                    Personalized Tours
+                  </h3>
                   <p className="text-gray-500 text-sm leading-relaxed">
-                    Tailored experiences, private jeeps, and flexible safari schedules.
+                    Tailored experiences, private jeeps, and flexible safari
+                    schedules.
                   </p>
                 </div>
               </div>
@@ -927,7 +1020,19 @@ export default function App() {
                 className="inline-flex items-center gap-2 bg-castleton text-white font-bold px-8 py-4 rounded-xl hover:bg-opacity-90 shadow-lg shadow-castleton/30 transition-all duration-300 hover:-translate-y-1"
               >
                 More About Us
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 8l4 4m0 0l-4 4m4-4H3"
+                  />
+                </svg>
               </button>
             </div>
           </div>
@@ -952,22 +1057,78 @@ export default function App() {
               {
                 title: "Local Experts",
                 desc: "Deeply rooted in Habarana & Minneriya with intimate knowledge of the best safari routes.",
-                icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>,
+                icon: (
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                    />
+                  </svg>
+                ),
               },
               {
                 title: "Flexible Tours",
                 desc: "Customized safari experiences with the flexibility to adapt to your schedule.",
-                icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>,
+                icon: (
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                ),
               },
               {
                 title: "Safe & Secure",
                 desc: "Transparent pricing and easy, safe payments with absolutely no hidden fees.",
-                icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>,
+                icon: (
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                    />
+                  </svg>
+                ),
               },
               {
                 title: "Expert Drivers",
                 desc: "Fully certified and highly experienced safari drivers dedicated to your safety.",
-                icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" /></svg>,
+                icon: (
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
+                    />
+                  </svg>
+                ),
               },
             ].map((reason, idx) => (
               <div
@@ -977,7 +1138,9 @@ export default function App() {
                 <div className="w-16 h-16 bg-white text-castleton border border-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm group-hover:scale-110 transition-transform duration-300">
                   {reason.icon}
                 </div>
-                <h3 className="text-lg font-bold mb-3 text-gray-900">{reason.title}</h3>
+                <h3 className="text-lg font-bold mb-3 text-gray-900">
+                  {reason.title}
+                </h3>
                 <p className="text-gray-500 text-sm leading-relaxed">
                   {reason.desc}
                 </p>
@@ -1022,17 +1185,43 @@ export default function App() {
                   </div>
                 </div>
                 <div className="p-6 flex-1 flex flex-col">
-                  <h3 className="text-lg font-bold mb-2 text-gray-900">{loc.title}</h3>
+                  <h3 className="text-lg font-bold mb-2 text-gray-900">
+                    {loc.title}
+                  </h3>
                   <p className="text-gray-500 text-sm mb-6 line-clamp-2 flex-1">
                     {loc.desc}
                   </p>
                   <div className="flex gap-4 text-gray-400 text-xs font-semibold border-t pt-4 border-gray-100 uppercase tracking-wide">
                     <span className="flex items-center gap-1.5">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                        />
+                      </svg>
                       Anytime
                     </span>
                     <span className="flex items-center gap-1.5">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                        />
+                      </svg>
                       6 Pax
                     </span>
                   </div>
@@ -1043,7 +1232,7 @@ export default function App() {
         </div>
       </section>
 
-     {/* --- TOUR PACKAGES --- */}
+      {/* --- TOUR PACKAGES --- */}
       <section
         id="packages"
         className="py-20 bg-white border-t border-gray-100"
@@ -1154,7 +1343,10 @@ export default function App() {
       </section>
 
       {/* --- REVIEW SECTION --- */}
-      <section id="reviews" className="py-20 md:py-28 overflow-hidden bg-gray-50 border-t border-gray-100">
+      <section
+        id="reviews"
+        className="py-20 md:py-28 overflow-hidden bg-gray-50 border-t border-gray-100"
+      >
         <div className="max-w-7xl mx-auto px-4 md:px-6">
           <div className="text-center max-w-xl mx-auto mb-16">
             <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white text-castleton text-xs font-bold uppercase tracking-widest mb-6 border border-gray-200 shadow-sm">
@@ -1165,17 +1357,20 @@ export default function App() {
               Their Journey. Their Words.
             </h2>
             <p className="text-sm sm:text-base text-gray-500 mb-6">
-              Explore genuine guest experiences and trusted TripAdvisor reviews from travelers who chose us.
+              Explore genuine guest experiences and trusted TripAdvisor reviews
+              from travelers who chose us.
             </p>
             <img
               src="https://minneriyawildjeepsafari.com/wp-content/uploads/2025/08/TC25-logo.jpg"
               alt="TripAdvisor"
-              className="h-16 mx-auto object-contain"
+              className="h-24 sm:h-32 mx-auto object-contain"
             />
           </div>
 
           {reviewNotification && (
-            <div className={`mx-auto mb-6 max-w-md rounded-xl border px-4 py-3 text-sm ${reviewNotification.type === "error" ? "border-red-500 text-red-600 bg-red-50" : "border-castleton text-castleton bg-castleton-50"}`}>
+            <div
+              className={`mx-auto mb-6 max-w-md rounded-xl border px-4 py-3 text-sm ${reviewNotification.type === "error" ? "border-red-500 text-red-600 bg-red-50" : "border-castleton text-castleton bg-castleton-50"}`}
+            >
               {reviewNotification.text}
             </div>
           )}
@@ -1202,7 +1397,9 @@ export default function App() {
                 {tripadvisorReviews.length > 6 && (
                   <button
                     type="button"
-                    onClick={() => setShowAllTripadvisorReviews((prev) => !prev)}
+                    onClick={() =>
+                      setShowAllTripadvisorReviews((prev) => !prev)
+                    }
                     className="border border-gray-200 bg-white text-gray-700 font-semibold px-6 py-3 rounded-full hover:bg-gray-50 transition duration-300 text-sm"
                   >
                     {showAllTripadvisorReviews ? "Show Less" : "Show More"}
@@ -1212,7 +1409,9 @@ export default function App() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {tripadvisorVisibleReviews.map((rev, index) => renderReviewCard(rev, index))}
+              {tripadvisorVisibleReviews.map((rev, index) =>
+                renderReviewCard(rev, index),
+              )}
             </div>
           </div>
 
@@ -1241,7 +1440,9 @@ export default function App() {
 
             <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] gap-6 lg:items-start">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {systemVisibleReviews.map((rev, index) => renderReviewCard(rev, index))}
+                {systemVisibleReviews.map((rev, index) =>
+                  renderReviewCard(rev, index),
+                )}
               </div>
 
               <form
@@ -1249,15 +1450,21 @@ export default function App() {
                 className="rounded-2xl border border-gray-100 bg-gray-50 p-6 shadow-sm lg:sticky lg:top-24"
               >
                 <div className="mb-7">
-                  <h4 className="font-outfit text-xl font-bold text-gray-900">Write Review</h4>
+                  <h4 className="font-outfit text-xl font-bold text-gray-900">
+                    Write Review
+                  </h4>
                   <p className="text-sm text-gray-500 mt-1">
-                    Tell us about the moments that made your adventure unforgettable. Your experience helps inspire future explorers.
+                    Tell us about the moments that made your adventure
+                    unforgettable. Your experience helps inspire future
+                    explorers.
                   </p>
                 </div>
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">Your name</label>
+                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                      Your name
+                    </label>
                     <input
                       type="text"
                       name="name"
@@ -1269,7 +1476,9 @@ export default function App() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">Your email</label>
+                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                      Your email
+                    </label>
                     <input
                       type="email"
                       name="email"
@@ -1281,7 +1490,9 @@ export default function App() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">Rating</label>
+                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                      Rating
+                    </label>
                     <select
                       name="rating"
                       value={reviewForm.rating}
@@ -1303,7 +1514,9 @@ export default function App() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">Your review</label>
+                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                      Your review
+                    </label>
                     <textarea
                       name="message"
                       value={reviewForm.message}
@@ -1331,7 +1544,10 @@ export default function App() {
       </section>
 
       {/* --- PHOTO GALLERY --- */}
-      <section id="gallery" className="py-20 md:py-28 bg-white border-t border-gray-100">
+      <section
+        id="gallery"
+        className="py-20 md:py-28 bg-white border-t border-gray-100"
+      >
         <div className="max-w-7xl mx-auto px-4 md:px-6">
           <div className="text-center max-w-xl mx-auto mb-16">
             <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-50 text-castleton text-xs font-bold uppercase tracking-widest mb-6 border border-gray-100">
@@ -1357,7 +1573,19 @@ export default function App() {
                 />
                 <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-10 text-castleton">
                   <div className="w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" /></svg>
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"
+                      />
+                    </svg>
                   </div>
                 </div>
               </div>
@@ -1405,7 +1633,7 @@ export default function App() {
           </p>
           <a
             href="mailto:info@minneriyawildjeepsafari.com"
-            className="bg-white text-sacramento font-bold px-6 sm:px-8 py-3.5 sm:py-4 rounded-full hover:bg-sacramento hover:text-white transition duration-300 inline-block shadow-lg text-sm sm:text-base break-all max-w-full"
+            className="bg-[#2E7D32] text-white font-bold text-center px-8 py-3.5 rounded-full shadow-md hover:bg-[#1B5E20] hover:shadow-lg transition-all duration-300 transform hover:-translate-y-[2px]"
           >
             Contact Us: info@minneriyawildjeepsafari.com
           </a>
@@ -1422,7 +1650,6 @@ export default function App() {
 
         <div className="max-w-7xl mx-auto px-4 md:px-6 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-
             {/* Left Column - Contact Info */}
             <div className="space-y-8">
               <div>
@@ -1431,10 +1658,13 @@ export default function App() {
                 </span>
                 <h2 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 text-neutral-900 dark:text-white leading-tight">
                   Let's Plan Your <br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-castleton to-teal-500">Wild Adventure</span>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-castleton to-teal-500">
+                    Wild Adventure
+                  </span>
                 </h2>
                 <p className="text-neutral-600 dark:text-neutral-400 text-lg max-w-md">
-                  Ready to experience the adventure of a lifetime? Our team is here to help you craft the perfect safari itinerary.
+                  Ready to experience the adventure of a lifetime? Our team is
+                  here to help you craft the perfect safari itinerary.
                 </p>
               </div>
 
@@ -1442,40 +1672,102 @@ export default function App() {
                 {/* Contact Card 1 */}
                 <div className="flex items-start gap-5 p-4 rounded-2xl hover:bg-white dark:hover:bg-neutral-800/50 transition duration-300 shadow-sm border border-transparent hover:border-neutral-100 dark:hover:border-neutral-800">
                   <div className="w-12 h-12 rounded-full bg-castleton-50 dark:bg-castleton-900/40 flex items-center justify-center text-castleton dark:text-castleton-300 shrink-0">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                      ></path>
+                    </svg>
                   </div>
                   <div>
-                    <h4 className="font-bold text-sm text-neutral-900 dark:text-white mb-1">Phone</h4>
-                    <a href="tel:+94778902811" className="hover:text-castleton transition block">(+94) 77 890 2811</a>
+                    <h4 className="font-bold text-sm text-neutral-900 dark:text-white mb-1">
+                      Phone
+                    </h4>
+                    <a
+                      href="tel:+94778902811"
+                      className="hover:text-castleton transition block"
+                    >
+                      (+94) 77 890 2811
+                    </a>
                   </div>
                 </div>
 
                 {/* Contact Card 2 */}
                 <div className="flex items-start gap-5 p-4 rounded-2xl hover:bg-white dark:hover:bg-neutral-800/50 transition duration-300 shadow-sm border border-transparent hover:border-neutral-100 dark:hover:border-neutral-800">
                   <div className="w-12 h-12 rounded-full bg-castleton-50 dark:bg-castleton-900/40 flex items-center justify-center text-castleton dark:text-castleton-300 shrink-0">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                      ></path>
+                    </svg>
                   </div>
                   <div>
-                    <h4 className="font-bold text-sm text-neutral-900 dark:text-white mb-1">Email</h4>
-                    <a href="mailto:info@minneriyawildjeepsafari.com" className="hover:text-castleton transition block">info@minneriyawildjeepsafari.com</a>
+                    <h4 className="font-bold text-sm text-neutral-900 dark:text-white mb-1">
+                      Email
+                    </h4>
+                    <a
+                      href="mailto:info@minneriyawildjeepsafari.com"
+                      className="hover:text-castleton transition block"
+                    >
+                      info@minneriyawildjeepsafari.com
+                    </a>
                   </div>
                 </div>
 
                 {/* Contact Card 3 */}
                 <div className="flex items-start gap-5 p-4 rounded-2xl hover:bg-white dark:hover:bg-neutral-800/50 transition duration-300 shadow-sm border border-transparent hover:border-neutral-100 dark:hover:border-neutral-800">
                   <div className="w-12 h-12 rounded-full bg-castleton-50 dark:bg-castleton-900/40 flex items-center justify-center text-castleton dark:text-castleton-300 shrink-0">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                      ></path>
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                      ></path>
+                    </svg>
                   </div>
                   <div>
-                    <h4 className="font-bold text-sm text-neutral-900 dark:text-white mb-1">Location</h4>
-                    <span className="block">423, Kiralagolla, Dambulu Oya, Dambulla</span>
+                    <h4 className="font-bold text-sm text-neutral-900 dark:text-white mb-1">
+                      Location
+                    </h4>
+                    <span className="block">
+                      423, Kiralagolla, Dambulu Oya, Dambulla
+                    </span>
                   </div>
                 </div>
               </div>
 
               {/* Social Network Actions */}
               <div className="pt-6">
-                <h4 className="text-sm font-bold text-neutral-900 dark:text-white mb-4">Follow Our Journey</h4>
+                <h4 className="text-sm font-bold text-neutral-900 dark:text-white mb-4">
+                  Follow Our Journey
+                </h4>
                 <div className="flex gap-4">
                   {[
                     {
@@ -1515,11 +1807,15 @@ export default function App() {
             <div className="relative z-10">
               {/* Form Card */}
               <div className="p-8 sm:p-10 rounded-3xl border border-gray-200 bg-white shadow-xl">
-                <h3 className="text-2xl font-bold mb-6 text-neutral-900 dark:text-white">Send a Message</h3>
+                <h3 className="text-2xl font-bold mb-6 text-neutral-900 dark:text-white">
+                  Send a Message
+                </h3>
                 <form onSubmit={handleFormSubmit} className="space-y-5">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wide ml-1">Name</label>
+                      <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wide ml-1">
+                        Name
+                      </label>
                       <input
                         type="text"
                         name="name"
@@ -1531,7 +1827,9 @@ export default function App() {
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wide ml-1">Email</label>
+                      <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wide ml-1">
+                        Email
+                      </label>
                       <input
                         type="email"
                         name="email"
@@ -1546,7 +1844,9 @@ export default function App() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wide ml-1">Phone</label>
+                      <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wide ml-1">
+                        Phone
+                      </label>
                       <input
                         type="tel"
                         name="phone"
@@ -1557,7 +1857,9 @@ export default function App() {
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wide ml-1">Safari Type</label>
+                      <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wide ml-1">
+                        Safari Type
+                      </label>
                       <div className="relative">
                         <select
                           name="subject"
@@ -1566,21 +1868,41 @@ export default function App() {
                           required
                           className="w-full px-5 py-4 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-castleton/50 transition-all appearance-none cursor-pointer bg-gray-50 border border-gray-200 text-gray-900 focus:bg-white"
                         >
-                          <option value="" disabled className="text-neutral-400">Select Destination...</option>
+                          <option
+                            value=""
+                            disabled
+                            className="text-neutral-400"
+                          >
+                            Select Destination...
+                          </option>
                           <option value="minneriya">Minneriya Safari</option>
                           <option value="kaudulla">Kaudulla Safari</option>
                           <option value="wasgamuwa">Wasgamuwa Safari</option>
                           <option value="hurulu">Hurulu Eco Park</option>
                         </select>
                         <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-castleton">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M19 9l-7 7-7-7"
+                            ></path>
+                          </svg>
                         </div>
                       </div>
                     </div>
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wide ml-1">Message</label>
+                    <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wide ml-1">
+                      Message
+                    </label>
                     <textarea
                       name="message"
                       value={formData.message}
@@ -1599,23 +1921,50 @@ export default function App() {
                   >
                     {isSubmitting ? (
                       <>
-                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        <svg
+                          className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
                         </svg>
                         Sending...
                       </>
                     ) : (
                       <>
                         Send Message
-                        <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        <svg
+                          className="w-4 h-4 ml-1"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M14 5l7 7m0 0l-7 7m7-7H3"
+                          ></path>
+                        </svg>
                       </>
                     )}
                   </button>
                 </form>
               </div>
             </div>
-
           </div>
         </div>
       </section>
@@ -1626,15 +1975,24 @@ export default function App() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
             <div>
               <div className="flex items-center gap-2 mb-6">
-                <div className="w-8 h-8 bg-castleton rounded-lg flex items-center justify-center shadow-sm">
-                  <span className="text-white font-serif font-bold text-lg leading-none">W</span>
+                <div
+                  className="cursor-pointer flex items-center gap-2 sm:gap-3"
+                  onClick={() => scrollToSection("home")}
+                >
+                  <div className="bg-white p-1.5 sm:p-2 rounded-xl shadow-md border border-white/20 flex items-center justify-center transition-transform hover:scale-105 duration-300">
+                    <img
+                      src="https://minneriyawildjeepsafari.com/wp-content/uploads/2025/08/lgo.jpg"
+                      alt="Minneriya Wild Jeep Safari"
+                      className="h-7 sm:h-9 md:h-11 w-auto object-contain rounded-md"
+                    />
+                  </div>
                 </div>
                 <span className="font-outfit font-bold text-xl text-gray-900 tracking-wide">
                   Wild Jeep Safari
                 </span>
               </div>
               <p className="text-gray-500 text-sm leading-relaxed">
-                Minneriyawildjeepsafari is a leading Sri Lanka jeep safari
+                Minneriya wild jeep safari is a leading Sri Lanka jeep safari
                 company offering unforgettable wildlife experiences.
               </p>
             </div>
@@ -1708,12 +2066,28 @@ export default function App() {
 
           <div className="flex flex-col sm:flex-row items-center justify-between pt-8 border-t border-gray-200 text-gray-400 text-sm font-medium">
             <p>
-              &copy; {new Date().getFullYear()} Minneriyawildjeepsafari.com. All Rights Reserved.
+              &copy; {new Date().getFullYear()} Minneriyawildjeepsafari.com. All
+              Rights Reserved.
             </p>
             <div className="flex gap-4 mt-4 sm:mt-0">
-              <a href="https://facebook.com/share/1AmhHo7Cg2/" className="hover:text-castleton transition-colors">Facebook</a>
-              <a href="https://www.instagram.com/minneriyawildjeepsafari" className="hover:text-castleton transition-colors">Instagram</a>
-              <a href="https://www.tripadvisor.com/Attraction_Review-g304133-d15640558-Reviews-Minneriya_Wild_Jeep_Safari-Dambulla_Central_Province.html" className="hover:text-castleton transition-colors">TripAdvisor</a>
+              <a
+                href="https://facebook.com/share/1AmhHo7Cg2/"
+                className="hover:text-castleton transition-colors"
+              >
+                Facebook
+              </a>
+              <a
+                href="https://www.instagram.com/minneriyawildjeepsafari"
+                className="hover:text-castleton transition-colors"
+              >
+                Instagram
+              </a>
+              <a
+                href="https://www.tripadvisor.com/Attraction_Review-g304133-d15640558-Reviews-Minneriya_Wild_Jeep_Safari-Dambulla_Central_Province.html"
+                className="hover:text-castleton transition-colors"
+              >
+                TripAdvisor
+              </a>
             </div>
           </div>
         </div>

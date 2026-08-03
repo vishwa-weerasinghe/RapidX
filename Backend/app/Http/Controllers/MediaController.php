@@ -18,7 +18,7 @@ class MediaController extends Controller
         $validated = $request->validate([
             'title'       => 'required|string|max:100',
             'description' => 'nullable|string',
-            'image'       => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image'       => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:10240',
         ]);
 
         if ($request->hasFile('image')) {
@@ -53,7 +53,7 @@ class MediaController extends Controller
         $validated = $request->validate([
             'title'       => 'sometimes|required|string|max:100',
             'description' => 'nullable|string',
-            'image'       => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image'       => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10240',
         ]);
 
         if ($request->hasFile('image')) {

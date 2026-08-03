@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
+import loginBg from "../../assets/login_register.png";
 
 export default function Register() {
   const [First_Name, setFirstName] = useState("");
@@ -105,7 +106,7 @@ export default function Register() {
     <div
       className="flex min-h-screen items-center justify-center bg-cover bg-center bg-no-repeat px-4 relative"
       style={{
-        backgroundImage: `url('https://minneriyawildjeepsafari.com/wp-content/uploads/2024/05/Udawalawe-National-Park-4.jpg')`,
+        backgroundImage: `url(${loginBg})`,
       }}
     >
       {/* Dark overlay to make the glass card pop */}
