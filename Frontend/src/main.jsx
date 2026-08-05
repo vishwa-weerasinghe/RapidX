@@ -22,8 +22,8 @@ import BookingForm from "./pages/admin/BookingForm.jsx";
 import MyBookings from "./pages/user/MyBookings";
 
 import Appointments from "./pages/admin/appointment.jsx";
-import CustomerBooking from "./pages/user/Booking.jsx";
 import GuestBooking from "./pages/public/booking.jsx";
+import AddToCart from "./pages/user/Addtocart.jsx";
 import Cart from "./pages/user/Cart.jsx";
 
 import Drivers from "./pages/admin/Drivers.jsx";
@@ -59,7 +59,7 @@ createRoot(document.getElementById("root")).render(
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/booking" element={<GuestBooking />} />
-          <Route path="/booking/:id" element={<CustomerBooking />} />
+          <Route path="/addtocart/:id" element={<AddToCart />} />
 
           {/* Customer Routes */}
           <Route element={<CustomerLayout />}>
@@ -70,8 +70,6 @@ createRoot(document.getElementById("root")).render(
             <Route path="/user/dashboard" element={<CustomerDashboard user={user} />} />
             <Route path="/user/packages" element={<CustomerPackages />} />
             <Route path="/user/reviews" element={<Review />} />
-            <Route path="/user/booking" element={<CustomerBooking />} />
-            <Route path="/user/booking/:id" element={<CustomerBooking />} />
             <Route path="/user/bookings" element={<MyBookings />} />
             <Route path="/user/cart" element={<Cart />} />
             <Route path="/user/vehicle" element={<UserVehiclePage />} />

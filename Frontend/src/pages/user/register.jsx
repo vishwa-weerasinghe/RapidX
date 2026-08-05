@@ -63,28 +63,11 @@ export default function Register() {
       if (pendingCartStr) {
         try {
           const pendingCart = JSON.parse(pendingCartStr);
-          const tomorrow = new Date();
-          tomorrow.setDate(tomorrow.getDate() + 1);
-          const dateStr = tomorrow.toISOString().split("T")[0];
-
-          const payload = {
-            Booking_Date: pendingCart.Booking_Date || dateStr,
-            Pickup_Time: pendingCart.Pickup_Time || "06:00",
-            Pickup_Location: pendingCart.Pickup_Location || "Hotel Pickup",
-            No_of_adults: pendingCart.No_of_adults || 1,
-            No_of_child: pendingCart.No_of_child || 0,
-            Package_ID: pendingCart.Package_ID,
-            Payment: pendingCart.Payment || 0,
-            Customer_ID: response.data.user.Customer_ID,
-          };
-
-          await axios.post("http://127.0.0.1:8000/api/cart", payload, {
-            headers: { Authorization: `Bearer ${response.data.token}` },
-          });
           localStorage.removeItem("pending_cart");
-          alert("Safari added to your dashboard cart successfully! 🎉");
-        } catch (cartErr) {
-          console.error("Failed to auto-add pending cart item:", cartErr);
+          navigate(`/addtocart/${pendingCart.Package_ID}`);
+          return;
+        } catch (err) {
+          console.error("Failed to parse pending cart item on register:", err);
         }
       }
 

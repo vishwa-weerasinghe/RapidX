@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import api from "../../axios";
 import { useTheme } from "../../context/ThemeContext";
 import {
@@ -45,6 +45,8 @@ export default function Booking() {
         Country: "",
     });
 
+    const location = useLocation();
+
     // Load packages and set initial selected package
     useEffect(() => {
         fetchPackages();
@@ -55,7 +57,8 @@ export default function Booking() {
             const res = await api.get("/packages");
             setPackagesList(res.data);
 
-            const initialId = id || (res.data[0]?.Package_ID || res.data[0]?.id || "");
+            const statePkgId = location.state?.packageId;
+            const initialId = id || statePkgId || (res.data[0]?.Package_ID || res.data[0]?.id || "");
             setSelectedPackageId(initialId);
 
             const foundPkg = res.data.find(
@@ -177,11 +180,11 @@ export default function Booking() {
             <div className="max-w-4xl mx-auto space-y-6">
                 {/* Navigation Action */}
                 <button
-                    onClick={() => navigate("/")}
+                    onClick={() => navigate(-1)}
                     className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-slate-500 hover:text-sacramento dark:text-slate-400 dark:hover:text-castleton-300 transition-colors"
                 >
                     <ChevronLeft size={16} />
-                    Back to Home
+                    Back
                 </button>
 
                 <div className="flex justify-center">

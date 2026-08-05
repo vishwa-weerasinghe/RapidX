@@ -118,7 +118,7 @@ export default function App() {
 
   const handleBookNow = (pkg) => {
     if (pkg && (pkg.id || pkg.Package_ID)) {
-      navigate(`/booking/${pkg.id || pkg.Package_ID}`);
+      navigate(`/booking`, { state: { packageId: pkg.id || pkg.Package_ID } });
     } else {
       navigate(`/booking`);
     }
@@ -126,38 +126,13 @@ export default function App() {
 
   const handleAddToCart = async (pkg) => {
     if (user && user.Customer_ID) {
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      const dateStr = tomorrow.toISOString().split("T")[0];
-
-      const payload = {
-        Booking_Date: dateStr,
-        Pickup_Time: "06:00",
-        Pickup_Location: "Hotel Pickup",
-        No_of_adults: 1,
-        No_of_child: 0,
-        Package_ID: pkg.id || pkg.Package_ID,
-        Payment: parseFloat((pkg.price || "0").replace(/[^0-9.]/g, "")) || 0,
-        Customer_ID: user.Customer_ID,
-      };
-
-      try {
-        const token = localStorage.getItem("token");
-        await api.post("/cart", payload, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
-        alert("Package added to cart successfully! 🎉");
-      } catch (err) {
-        console.error(err);
-        alert("Failed to add package to cart. Please try again.");
-      }
-      navigate("/user/dashboard");
+      navigate(`/addtocart/${pkg.id || pkg.Package_ID}`);
     } else {
       localStorage.setItem(
         "pending_cart",
         JSON.stringify({
           Package_ID: pkg.id || pkg.Package_ID,
-          Payment: parseFloat((pkg.price || "0").replace(/[^0-9.]/g, "")) || 0,
+          Payment: Number(pkg.price) || 0,
         }),
       );
       alert("Please login to add this package to your cart.");
@@ -1322,14 +1297,14 @@ export default function App() {
                   <div className="flex gap-3 mt-auto">
                     <button
                       onClick={() => handleBookNow(pkg)}
-                      className="flex-1 bg-sacramento text-white py-2.5 rounded-xl font-semibold hover:bg-castleton transition"
+                      className="flex-1 bg-[#2E7D32] text-white font-bold text-center py-2.5 rounded-xl shadow-md hover:bg-[#1B5E20] hover:shadow-lg transition-all duration-300 transform hover:-translate-y-[2px]"
                     >
                       Book Now
                     </button>
 
                     <button
                       onClick={() => handleAddToCart(pkg)}
-                      className="flex-1 border border-sacramento text-sacramento py-2.5 rounded-xl font-semibold hover:bg-sacramento hover:text-white transition"
+                      className="flex-1 border-2 border-sacramento text-sacramento py-2.5 rounded-xl font-semibold hover:bg-sacramento/10 transition-colors"
                     >
                       Add to Cart
                     </button>

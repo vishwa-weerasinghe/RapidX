@@ -34,9 +34,13 @@ export default function Packages() {
     }
   };
 
-  function handleBook(pkg) {
-     navigate(`/user/booking/${pkg.id}`);
-  }
+  const handleBook = (pkg) => {
+    if (pkg && (pkg.id || pkg.Package_ID)) {
+      navigate(`/booking`, { state: { packageId: pkg.id || pkg.Package_ID } });
+    } else {
+      navigate(`/booking`);
+    }
+  };
 
   const filteredPackages = packages.filter((pkg) => {
     const query = search.trim().toLowerCase();
@@ -78,8 +82,8 @@ export default function Packages() {
         </h1>
 
         <p className="text-gray-600 max-w-2xl mx-auto mt-4 text-lg">
-        Discover breathtaking wildlife adventures through carefully curated safari 
-        experiences designed to create unforgettable journeys.
+          Discover breathtaking wildlife adventures through carefully curated safari
+          experiences designed to create unforgettable journeys.
         </p>
 
         <input
