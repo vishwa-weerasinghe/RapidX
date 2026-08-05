@@ -9,7 +9,12 @@ class PackageController extends Controller
 {
     public function index()
     {
-        return response()->json(Package::latest()->get());
+        $packages = Package::withCount('bookings')
+            ->orderByDesc('bookings_count')
+            ->latest()
+            ->get();
+
+        return response()->json($packages);
     }
 
     public function store(Request $request)

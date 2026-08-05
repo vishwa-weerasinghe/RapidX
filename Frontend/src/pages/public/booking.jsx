@@ -155,12 +155,16 @@ export default function Booking() {
         }
 
         try {
-            await api.post("/bookings", payload);
-            alert("Booking placed successfully! 🎉");
+            const response = await api.post("/cart", payload);
+
+            if (!activeCustomer?.Customer_ID && response.data.customer) {
+                localStorage.setItem("guest_customer", JSON.stringify(response.data.customer));
+            }
+            alert("Package added to cart successfully!");
             if (activeCustomer?.Customer_ID) {
-                navigate("/user/bookings");
+                navigate("/user/cart");
             } else {
-                navigate("/");
+                navigate("/cart");
             }
         } catch (err) {
             console.log(err);
@@ -177,7 +181,8 @@ export default function Booking() {
             <div className="max-w-4xl mx-auto space-y-6">
                 {/* Navigation Action */}
                 <button
-                    onClick={() => navigate("/")}
+                    type="button"
+                    onClick={() => window.location.href = "/"}
                     className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-slate-500 hover:text-sacramento dark:text-slate-400 dark:hover:text-castleton-300 transition-colors"
                 >
                     <ChevronLeft size={16} />

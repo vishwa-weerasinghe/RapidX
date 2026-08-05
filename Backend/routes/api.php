@@ -52,6 +52,10 @@ Route::get('/user-upcoming-booking/{customerId}', [BookingController::class, 'up
 // Admin Dashboard Stats
 Route::get('/admin/stats', [DashboardController::class, 'stats']);
 
+
+Route::get('/admin/bookings/unread-count', [BookingController::class, 'unreadCount']);
+Route::post('/admin/bookings/mark-seen', [BookingController::class, 'markAllAsSeen']);
+
 Route::post('/cart/checkout', [CartController::class, 'checkout']);
 Route::get('/cart/{customerId}', [CartController::class, 'index']);
 Route::post('/cart', [CartController::class, 'store']);

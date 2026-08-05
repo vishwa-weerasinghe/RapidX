@@ -16,4 +16,9 @@ class Package extends Model
         'Price_for_child',
         'Image',
     ];
+
+    public function bookings()
+    {
+        return $this->hasMany(\App\Models\Booking::class, 'Package_ID');
+    }
 }
