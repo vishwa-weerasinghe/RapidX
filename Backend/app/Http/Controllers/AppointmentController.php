@@ -9,9 +9,9 @@ use Illuminate\Http\Request;
 
 class AppointmentController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $appointments = Booking::select(
+        $query = Booking::select(
             'bookings.Booking_ID',
             'bookings.Booking_Date',
             'bookings.Pickup_Time',
@@ -33,23 +33,52 @@ class AppointmentController extends Controller
         ->join('customers', 'bookings.Customer_ID', '=', 'customers.Customer_ID')
         ->leftJoin('vehicles', 'bookings.Vehicle_ID', '=', 'vehicles.Vehicle_ID')
         ->leftJoin('drivers', 'vehicles.Driver_ID', '=', 'drivers.Driver_ID')
-        ->leftJoin('packages', 'bookings.Package_ID', '=', 'packages.id')
-        ->where('bookings.Status', 'Confirmed')
-        ->orderBy('bookings.Booking_Date', 'desc')
-        ->orderBy('bookings.Pickup_Time')
-        ->get();
+        ->leftJoin('packages', 'bookings.Package_ID', '=', 'packages.id');
+
+        // Optional monthly filter: ?month=YYYY-MM
+        if ($request->has('month') && $request->month) {
+            $month = $request->month;
+            if (preg_match('/^\d{4}-\d{2}$/', $month)) {
+                $query->whereBetween('bookings.Booking_Date', [
+                    $month . '-01',
+                    $month . '-31',
+                ]);
+            }
+        }
+
+        $appointments = $query
+            ->orderBy('bookings.Booking_Date', 'desc')
+            ->orderBy('bookings.Pickup_Time')
+            ->get();
 
         return response()->json($appointments);
     }
 
-    public function summary()
+    public function summary(Request $request)
     {
-        $totalConfirmed = Booking::where('Status', 'Confirmed')->count();
-        $totalEarnings = Booking::where('Status', 'Confirmed')->sum('Payment');
+        $query = Booking::query();
+
+        if ($request->has('month') && $request->month) {
+            $month = $request->month;
+            if (preg_match('/^\d{4}-\d{2}$/', $month)) {
+                $query->whereBetween('Booking_Date', [
+                    $month . '-01',
+                    $month . '-31',
+                ]);
+            }
+        }
+
+        $totalConfirmed = (clone $query)->where('Status', 'Confirmed')->count();
+        $totalUnconfirmed = (clone $query)->where('Status', '!=', 'Confirmed')->count();
+        $totalEarningsConfirmed = (clone $query)->where('Status', 'Confirmed')->sum('Payment');
+        $totalEarningsUnconfirmed = (clone $query)->where('Status', '!=', 'Confirmed')->sum('Payment');
 
         return response()->json([
             'total_confirmed' => $totalConfirmed,
-            'total_earnings' => $totalEarnings,
+            'total_unconfirmed' => $totalUnconfirmed,
+            'total_earnings' => $totalEarningsConfirmed,
+            'total_earnings_confirmed' => $totalEarningsConfirmed,
+            'total_earnings_unconfirmed' => $totalEarningsUnconfirmed,
         ]);
     }
 

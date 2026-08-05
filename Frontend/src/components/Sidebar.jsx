@@ -11,7 +11,6 @@ import {
   Image,
   Star,
   ShoppingCart,
-  Truck,
   LogOut,
 } from "lucide-react";
 
@@ -35,7 +34,6 @@ const customerLinks = [
   { to: "/user/packages", label: "Packages", icon: Package },
   { to: "/user/bookings", label: "My Bookings", icon: CalendarCheck },
   { to: "/user/cart", label: "Cart", icon: ShoppingCart },
-  { to: "/user/vehicle", label: "My Vehicle", icon: Truck },
   { to: "/user/reviews", label: "Reviews", icon: Star },
 ];
 
@@ -67,9 +65,6 @@ export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
     await api.post("/admin/bookings/mark-seen");
     setUnreadBookings(0);
   };
-
-
-
 
   return (
     <aside
@@ -123,7 +118,7 @@ export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
                 w-20
                 rounded-full
                 object-contain
-                
+
                 border-4
                 border-white
                 shadow-xl
