@@ -154,12 +154,14 @@ export default function Booking() {
 
         {/* Package Info */}
         {pkg && (
-          <div className="mb-6 p-4 bg-castleton-50 rounded-xl">
+          <div className="mb-6 p-4 bg-castleton-50 rounded-xl overflow-hidden">
             <h3 className="text-xl font-semibold">{pkg.Package_Name}</h3>
 
-            <p className="text-gray-600 mt-2">{pkg.Description}</p>
+            <p className="text-sm leading-6 text-gray-600 mt-2 whitespace-pre-line break-words">
+              {pkg.Description}
+            </p>
 
-            <div className="mt-3 flex justify-between">
+            <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:justify-between">
               <span>Adult: Rs {pkg.Price_for_adult}</span>
               <span>Child: Rs {pkg.Price_for_child}</span>
             </div>

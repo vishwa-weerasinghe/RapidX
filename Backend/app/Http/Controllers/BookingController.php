@@ -73,6 +73,7 @@ class BookingController extends Controller
             'Customer_ID' => $customerId,
             'Package_ID' => $request->Package_ID,
             'Vehicle_ID' => $request->Vehicle_ID ?? null,
+            'Admin_Seen' => false,
         ]);
 
         return response()->json([
@@ -148,6 +149,23 @@ class BookingController extends Controller
 
         return response()->json([
             'message' => 'Booking deleted successfully'
+        ]);
+    }
+    public function unreadCount()
+    {
+        return response()->json([
+            'count' => Booking::where('Admin_Seen', false)->count(),
+        ]);
+    }
+
+    public function markAllAsSeen()
+    {
+        Booking::where('Admin_Seen', false)->update([
+            'Admin_Seen' => true,
+        ]);
+
+        return response()->json([
+            'message' => 'Booking notifications cleared',
         ]);
     }
 }
