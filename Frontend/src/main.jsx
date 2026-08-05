@@ -36,7 +36,6 @@ import AdminReviews from "./pages/admin/Reviews.jsx";
 import PackageForm from "./pages/admin/PackageForm.jsx";
 import AdminVehicles from "./pages/admin/VehicleList.jsx";
 import VehicleFormPage from "./pages/admin/VehicleForm.jsx";
-import UserVehiclePage from "./pages/user/Vehicle.jsx";
 
 import { ThemeProvider } from "./context/ThemeContext.jsx";
 
@@ -75,9 +74,6 @@ createRoot(document.getElementById("root")).render(
             <Route path="/user/booking/:id" element={<CustomerBooking />} />
             <Route path="/user/bookings" element={<MyBookings />} />
             <Route path="/user/cart" element={<Cart />} />
-            <Route path="/user/vehicle" element={<UserVehiclePage />} />
-            <Route path="/user/Vehicle" element={<UserVehiclePage />} />
-            <Route path="/user/vehicles" element={<UserVehiclePage />} />
             <Route
               path="/packages"
               element={<Navigate to="/user/packages" replace />}
