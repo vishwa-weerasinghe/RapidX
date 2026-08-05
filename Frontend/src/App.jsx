@@ -126,38 +126,13 @@ export default function App() {
 
   const handleAddToCart = async (pkg) => {
     if (user && user.Customer_ID) {
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      const dateStr = tomorrow.toISOString().split("T")[0];
-
-      const payload = {
-        Booking_Date: dateStr,
-        Pickup_Time: "06:00",
-        Pickup_Location: "Hotel Pickup",
-        No_of_adults: 1,
-        No_of_child: 0,
-        Package_ID: pkg.id || pkg.Package_ID,
-        Payment: parseFloat((pkg.price || "0").replace(/[^0-9.]/g, "")) || 0,
-        Customer_ID: user.Customer_ID,
-      };
-
-      try {
-        const token = localStorage.getItem("token");
-        await api.post("/cart", payload, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
-        alert("Package added to cart successfully! 🎉");
-      } catch (err) {
-        console.error(err);
-        alert("Failed to add package to cart. Please try again.");
-      }
-      navigate("/user/dashboard");
+      navigate(`/addtocart/${pkg.id || pkg.Package_ID}`);
     } else {
       localStorage.setItem(
         "pending_cart",
         JSON.stringify({
           Package_ID: pkg.id || pkg.Package_ID,
-          Payment: parseFloat((pkg.price || "0").replace(/[^0-9.]/g, "")) || 0,
+          Payment: parseFloat(String(pkg.price || "0").replace(/[^0-9.]/g, "")) || 0,
         }),
       );
       alert("Please login to add this package to your cart.");
