@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import api from "../axios";
 
@@ -11,7 +11,6 @@ import {
   Image,
   Star,
   ShoppingCart,
-  Truck,
   LogOut,
 } from "lucide-react";
 
@@ -35,21 +34,37 @@ const customerLinks = [
   { to: "/user/packages", label: "Packages", icon: Package },
   { to: "/user/bookings", label: "My Bookings", icon: CalendarCheck },
   { to: "/user/cart", label: "Cart", icon: ShoppingCart },
-  { to: "/user/vehicle", label: "My Vehicle", icon: Truck },
   { to: "/user/reviews", label: "Reviews", icon: Star },
 ];
 
 export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
-  const links = role === "customer" ? customerLinks : adminLinks;
+  const normalizedRole = role?.toLowerCase();
+  const links = normalizedRole === "customer" ? customerLinks : adminLinks;
 
   const title =
-    role === "customer"
+    normalizedRole === "customer"
       ? "Safari Customer"
       : "Safari Admin";
 
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
+
+  const [unreadBookings, setUnreadBookings] = useState(0);
+
+  useEffect(() => {
+    if (normalizedRole !== "admin") return;
+
+    api.get("/admin/bookings/unread-count")
+      .then((response) => setUnreadBookings(response.data.count))
+      .catch(console.error);
+  }, [normalizedRole]);
+
+
+  const handleBookingsClick = async () => {
+    await api.post("/admin/bookings/mark-seen");
+    setUnreadBookings(0);
+  };
 
   return (
     <aside
@@ -103,7 +118,7 @@ export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
                 w-20
                 rounded-full
                 object-contain
-                
+
                 border-4
                 border-white
                 shadow-xl
@@ -136,6 +151,7 @@ export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
               <NavLink
                 key={link.to}
                 to={link.to}
+                onClick={link.label === "Bookings" ? handleBookingsClick : undefined}
                 className={({ isActive }) =>
                   `
                   flex
@@ -186,6 +202,12 @@ export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
                 <span className="font-medium">
                   {link.label}
                 </span>
+
+                {link.label === "Bookings" && unreadBookings > 0 && (
+                  <span className="ml-auto min-w-5 rounded-full bg-red-500 px-1.5 py-0.5 text-center text-xs font-bold text-white">
+                    {unreadBookings}
+                  </span>
+                )}
 
               </NavLink>
 

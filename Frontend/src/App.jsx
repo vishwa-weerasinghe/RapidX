@@ -126,13 +126,38 @@ export default function App() {
 
   const handleAddToCart = async (pkg) => {
     if (user && user.Customer_ID) {
-      navigate(`/addtocart/${pkg.id || pkg.Package_ID}`);
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const dateStr = tomorrow.toISOString().split("T")[0];
+
+      const payload = {
+        Booking_Date: dateStr,
+        Pickup_Time: "06:00",
+        Pickup_Location: "Hotel Pickup",
+        No_of_adults: 1,
+        No_of_child: 0,
+        Package_ID: pkg.id || pkg.Package_ID,
+        Payment: parseFloat((pkg.price || "0").replace(/[^0-9.]/g, "")) || 0,
+        Customer_ID: user.Customer_ID,
+      };
+
+      try {
+        const token = localStorage.getItem("token");
+        await api.post("/cart", payload, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        alert("Package added to cart successfully! 🎉");
+      } catch (err) {
+        console.error(err);
+        alert("Failed to add package to cart. Please try again.");
+      }
+      navigate("/user/dashboard");
     } else {
       localStorage.setItem(
         "pending_cart",
         JSON.stringify({
           Package_ID: pkg.id || pkg.Package_ID,
-          Payment: Number(pkg.price) || 0,
+          Payment: parseFloat((pkg.price || "0").replace(/[^0-9.]/g, "")) || 0,
         }),
       );
       alert("Please login to add this package to your cart.");
@@ -230,26 +255,24 @@ export default function App() {
           const fallbackImage =
             "https://images.unsplash.com/photo-1549366021-9f761d450615?q=80&w=2012&auto=format&fit=crop";
 
-          const mapped = res.data.map((pkg, idx) => {
-            const nameLower = (pkg.Package_Name || "").toLowerCase();
+          const maxBookings = Math.max(
+            0,
+            ...res.data.map((pkg) => Number(pkg.bookings_count || 0))
+          );
 
-            return {
-              id: pkg.id,
-              title: pkg.Package_Name,
-              desc: pkg.Description,
-              price: Number(pkg.Price_for_adult) || 0,
-              img: pkg.Image
-                ? `${backendUrl}/storage/${pkg.Image}`
-                : fallbackImage,
-              popular:
-                idx === 0 ||
-                nameLower.includes("morning") ||
-                nameLower.includes("popular"),
-              Price_for_adult: pkg.Price_for_adult,
-              Price_for_child: pkg.Price_for_child,
-              Package_Name: pkg.Package_Name,
-            };
-          });
+          const mapped = res.data.map((pkg) => ({
+            id: pkg.id,
+            title: pkg.Package_Name,
+            desc: pkg.Description,
+            price: Number(pkg.Price_for_adult) || 0,
+            img: pkg.Image
+              ? `${backendUrl}/storage/${pkg.Image}`
+              : fallbackImage,
+            popular: Number(pkg.bookings_count || 0) === maxBookings && maxBookings > 0,
+            Price_for_adult: pkg.Price_for_adult,
+            Price_for_child: pkg.Price_for_child,
+            Package_Name: pkg.Package_Name,
+          }));
           setPackages(mapped);
         }
       })
@@ -1247,7 +1270,7 @@ export default function App() {
                   />
 
                   {pkg.popular && (
-                    <span className="absolute top-4 right-4 bg-amber-500 text-white text-xs font-semibold px-3 py-1 rounded-full">
+                    <span className="absolute top-4 right-4 bg-pink-600 text-white text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full border border-pink-500 shadow-md hover:scale-105 transition-all duration-300">
                       Popular
                     </span>
                   )}
@@ -1260,9 +1283,11 @@ export default function App() {
                     {pkg.title}
                   </h3>
 
-                  <p className="text-sm text-gray-500 leading-relaxed mb-4">
-                    {pkg.desc}
-                  </p>
+                  <div className="mb-4 max-h-32 overflow-auto">
+                    <p className="text-sm text-gray-500 leading-relaxed whitespace-pre-line break-words">
+                      {pkg.desc}
+                    </p>
+                  </div>
 
                   {/* Features */}
                   <ul className="space-y-2 text-sm text-gray-600 mb-4">

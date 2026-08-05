@@ -75,6 +75,7 @@ class CartController extends Controller
             'Customer_ID' => $customerId,
             'Package_ID' => $request->Package_ID,
             'Vehicle_ID' => null,
+            'Admin_Seen' => false,
         ]);
 
         // Create cart entry
