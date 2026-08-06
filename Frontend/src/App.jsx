@@ -118,15 +118,26 @@ export default function App() {
 
   const handleBookNow = (pkg) => {
     if (pkg && (pkg.id || pkg.Package_ID)) {
-      navigate(`/booking/${pkg.id || pkg.Package_ID}`);
+      navigate(`/booking`, { state: { packageId: pkg.id || pkg.Package_ID } });
     } else {
       navigate(`/booking`);
     }
   };
 
-  const handleAddToCart = (pkg) => {
-    // A cart entry needs booking and contact details, so collect them before posting.
-    navigate(`/booking/${pkg.id || pkg.Package_ID}`);
+  const handleAddToCart = async (pkg) => {
+    if (user && user.Customer_ID) {
+      navigate(`/addtocart/${pkg.id || pkg.Package_ID}`);
+    } else {
+      localStorage.setItem(
+        "pending_cart",
+        JSON.stringify({
+          Package_ID: pkg.id || pkg.Package_ID,
+          Payment: parseFloat(String(pkg.price || "0").replace(/[^0-9.]/g, "")) || 0,
+        }),
+      );
+      alert("Please login to add this package to your cart.");
+      navigate("/login");
+    }
   };
 
   // --- STATE MANAGEMENT ---
@@ -1234,7 +1245,7 @@ export default function App() {
                   />
 
                   {pkg.popular && (
-                  <span className="absolute top-4 right-4 bg-pink-600 text-white text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full border border-pink-500 shadow-md hover:scale-105 transition-all duration-300">
+                    <span className="absolute top-4 right-4 bg-pink-600 text-white text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full border border-pink-500 shadow-md hover:scale-105 transition-all duration-300">
                       Popular
                     </span>
                   )}
@@ -1286,14 +1297,14 @@ export default function App() {
                   <div className="flex gap-3 mt-auto">
                     <button
                       onClick={() => handleBookNow(pkg)}
-                      className="flex-1 bg-sacramento text-white py-2.5 rounded-xl font-semibold hover:bg-castleton transition"
+                      className="flex-1 bg-[#2E7D32] text-white font-bold text-center py-2.5 rounded-xl shadow-md hover:bg-[#1B5E20] hover:shadow-lg transition-all duration-300 transform hover:-translate-y-[2px]"
                     >
                       Book Now
                     </button>
 
                     <button
                       onClick={() => handleAddToCart(pkg)}
-                      className="flex-1 border border-sacramento text-sacramento py-2.5 rounded-xl font-semibold hover:bg-sacramento hover:text-white transition"
+                      className="flex-1 border-2 border-sacramento text-sacramento py-2.5 rounded-xl font-semibold hover:bg-sacramento/10 transition-colors"
                     >
                       Add to Cart
                     </button>
