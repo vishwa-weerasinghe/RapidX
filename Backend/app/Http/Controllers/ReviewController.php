@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Booking;
 use App\Models\Review;
 use Illuminate\Http\Request;
 
@@ -16,26 +17,44 @@ class ReviewController extends Controller
     {
         $user = $request->user();
 
-        if (!$user) {
-            return response()->json(['message' => 'Please log in to submit a review.'], 401);
-        }
-
-        $customerId = $user->Customer_ID ?? $user->customer_id ?? $user->id;
-
-        if (!$customerId) {
-            return response()->json(['message' => 'Customer profile not found.'], 403);
-        }
-
         $validated = $request->validate([
             'Rate' => ['required', 'integer', 'min:1', 'max:5'],
             'Description' => ['required', 'string', 'max:1000'],
+            'Email' => ['nullable', 'email', 'max:255'],
         ]);
+
+        $customerId = $user->Customer_ID ?? $user->customer_id ?? $user->id ?? null;
+
+        if ($user) {
+            if (!$customerId) {
+                return response()->json(['message' => 'Customer profile not found.'], 403);
+            }
+        } else {
+            $email = trim((string) ($validated['Email'] ?? ''));
+
+            if ($email === '') {
+                return response()->json(['message' => 'Email is required to submit a public review.'], 422);
+            }
+
+            $booking = Booking::with('customer')
+                ->whereHas('customer', function ($query) use ($email) {
+                    $query->where('Email', $email);
+                })
+                ->latest('Booking_ID')
+                ->first();
+
+            if (!$booking || !$booking->customer) {
+                return response()->json(['message' => 'Please use the email from a booked safari to submit a review.'], 422);
+            }
+
+            $customerId = $booking->customer->Customer_ID;
+        }
 
         $validated['Customer_ID'] = $customerId;
 
         $review = Review::create($validated);
 
-        return response()->json($review, 201);
+        return response()->json($review->load('customer'), 201);
     }
 
     public function show(Review $review)

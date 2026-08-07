@@ -8,8 +8,11 @@ export default function AdminReviews() {
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [newReviewIds, setNewReviewIds] = useState(new Set());
+  const [notificationReviewIds, setNotificationReviewIds] = useState(new Set());
   const [showNewOnly, setShowNewOnly] = useState(false);
   const reviewsRef = useRef(reviews);
+
+  const getReviewId = (review) => Number(review?.Review_ID || 0);
 
   const isTripAdvisorReview = (review) => {
     return `${review?.source || review?.Source || ""}`.toLowerCase() === "tripadvisor";
@@ -31,7 +34,7 @@ export default function AdminReviews() {
 
       const storedLastId = parseInt(localStorage.getItem("lastSeenReviewId") || "0", 10);
       const unseenIds = new Set(
-        data.filter((r) => r.Review_ID > storedLastId).map((r) => r.Review_ID)
+        data.filter((r) => getReviewId(r) > storedLastId).map((r) => getReviewId(r))
       );
       setNewReviewIds(unseenIds);
     } catch (err) {
@@ -53,10 +56,10 @@ export default function AdminReviews() {
           const latest = getSystemReviews(res.data || []);
           const currentMaxId =
             reviewsRef.current.length > 0
-              ? Math.max(...reviewsRef.current.map((r) => r.Review_ID))
+              ? Math.max(...reviewsRef.current.map((r) => getReviewId(r)))
               : 0;
           const latestMaxId =
-            latest.length > 0 ? Math.max(...latest.map((r) => r.Review_ID)) : 0;
+            latest.length > 0 ? Math.max(...latest.map((r) => getReviewId(r))) : 0;
 
           if (latestMaxId > currentMaxId) {
             setReviews(latest);
@@ -64,7 +67,7 @@ export default function AdminReviews() {
 
           const storedLastId = parseInt(localStorage.getItem("lastSeenReviewId") || "0", 10);
           const unseenIds = new Set(
-            latest.filter((r) => r.Review_ID > storedLastId).map((r) => r.Review_ID)
+            latest.filter((r) => getReviewId(r) > storedLastId).map((r) => getReviewId(r))
           );
           setNewReviewIds(unseenIds);
         })
@@ -85,7 +88,7 @@ export default function AdminReviews() {
         },
       });
 
-      setReviews((prev) => prev.filter((review) => review.Review_ID !== reviewId));
+      setReviews((prev) => prev.filter((review) => getReviewId(review) !== Number(reviewId)));
       setMessage("Review deleted successfully.");
     } catch (err) {
       setError(err.response?.data?.message || "Unable to delete review.");
@@ -94,14 +97,21 @@ export default function AdminReviews() {
 
   const handleBellClick = () => {
     if (showNewOnly) {
-      // Going back to all reviews - mark all as seen
-      const maxId = reviews.length > 0
-        ? Math.max(...reviews.map((r) => r.Review_ID))
-        : 0;
-      localStorage.setItem("lastSeenReviewId", String(maxId));
-      setNewReviewIds(new Set());
+      setShowNewOnly(false);
+      setNotificationReviewIds(new Set());
+      return;
     }
-    setShowNewOnly((prev) => !prev);
+
+    if (newReviewIds.size === 0) return;
+
+    setNotificationReviewIds(new Set(newReviewIds));
+
+    const maxId = reviews.length > 0
+      ? Math.max(...reviews.map((r) => getReviewId(r)))
+      : 0;
+    localStorage.setItem("lastSeenReviewId", String(maxId));
+    setNewReviewIds(new Set());
+    setShowNewOnly(true);
   };
 
   const filteredReviews = reviews.filter((review) => {
@@ -109,7 +119,7 @@ export default function AdminReviews() {
       ? review.Description.toLowerCase().includes(searchTerm.toLowerCase())
       : true;
     if (!showNewOnly) return matchesSearch;
-    return matchesSearch && newReviewIds.has(review.Review_ID);
+    return matchesSearch && notificationReviewIds.has(getReviewId(review));
   });
 
   return (
@@ -122,6 +132,7 @@ export default function AdminReviews() {
 
         <div className="relative">
           <button
+            type="button"
             onClick={handleBellClick}
             className="relative rounded-full bg-white p-2 shadow-sm ring-1 ring-gray-200 hover:bg-gray-50"
             title={showNewOnly ? "Show all reviews" : "Show new reviews"}
@@ -141,7 +152,7 @@ export default function AdminReviews() {
               />
             </svg>
             {newReviewIds.size > 0 && (
-              <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+              <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-bold text-white">
                 {newReviewIds.size}
               </span>
             )}
@@ -173,10 +184,11 @@ export default function AdminReviews() {
       ) : (
         <div className="space-y-4">
           {filteredReviews.map((review) => {
-            const isNew = newReviewIds.has(review.Review_ID);
+            const reviewId = getReviewId(review);
+            const isNew = newReviewIds.has(reviewId) || notificationReviewIds.has(reviewId);
             return (
               <div
-                key={review.Review_ID}
+                key={reviewId}
                 className={`rounded-xl border bg-white p-4 shadow-sm ${isNew
                     ? "border-indigo-400 ring-1 ring-indigo-200"
                     : "border-gray-200"

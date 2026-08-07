@@ -51,6 +51,7 @@ export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
   const [loading, setLoading] = useState(false);
 
   const [unreadBookings, setUnreadBookings] = useState(0);
+  const [unreadReviews, setUnreadReviews] = useState(0);
 
   useEffect(() => {
     if (normalizedRole !== "admin") return;
@@ -58,6 +59,27 @@ export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
     api.get("/admin/bookings/unread-count")
       .then((response) => setUnreadBookings(response.data.count))
       .catch(console.error);
+  }, [normalizedRole]);
+
+  useEffect(() => {
+    if (normalizedRole !== "admin") return;
+
+    const fetchUnreadReviews = async () => {
+      try {
+        const response = await api.get("/reviews");
+        const reviews = response.data || [];
+        const storedLastId = parseInt(localStorage.getItem("lastSeenReviewId") || "0", 10);
+        const unseenCount = reviews.filter((review) => review.Review_ID > storedLastId).length;
+        setUnreadReviews(unseenCount);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchUnreadReviews();
+    const interval = setInterval(fetchUnreadReviews, 5000);
+
+    return () => clearInterval(interval);
   }, [normalizedRole]);
 
 
@@ -151,7 +173,11 @@ export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
               <NavLink
                 key={link.to}
                 to={link.to}
-                onClick={link.label === "Bookings" ? handleBookingsClick : undefined}
+                onClick={
+                  link.label === "Bookings"
+                    ? handleBookingsClick
+                      : undefined
+                }
                 className={({ isActive }) =>
                   `
                   flex
@@ -206,6 +232,12 @@ export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
                 {link.label === "Bookings" && unreadBookings > 0 && (
                   <span className="ml-auto min-w-5 rounded-full bg-red-500 px-1.5 py-0.5 text-center text-xs font-bold text-white">
                     {unreadBookings}
+                  </span>
+                )}
+
+                {link.label === "Reviews" && normalizedRole === "admin" && unreadReviews > 0 && (
+                  <span className="ml-auto min-w-5 rounded-full bg-red-500 px-1.5 py-0.5 text-center text-xs font-bold text-white">
+                    {unreadReviews}
                   </span>
                 )}
 
