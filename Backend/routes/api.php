@@ -38,6 +38,7 @@ Route::middleware('auth:sanctum')->put('appointments/{booking}/driver', [Appoint
 
 Route::get('reviews', [ReviewController::class, 'index']);
 Route::get('reviews/{review}', [ReviewController::class, 'show']);
+Route::post('reviews', [ReviewController::class, 'store']);
 
 
 
@@ -67,7 +68,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/customer-profile', function (\Illuminate\Http\Request $request) {
         return response()->json(\App\Models\Customer::find($request->user()->Customer_ID));
     });
-    Route::post('reviews', [ReviewController::class, 'store']);
     Route::put('reviews/{review}', [ReviewController::class, 'update']);
     Route::patch('reviews/{review}', [ReviewController::class, 'update']);
     Route::delete('reviews/{review}', [ReviewController::class, 'destroy']);

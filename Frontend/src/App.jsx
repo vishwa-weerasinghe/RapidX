@@ -12,6 +12,7 @@ import {
 import ThemeToggle from "./components/ThemeToggle";
 import { useTheme } from "./context/ThemeContext";
 import api from "./axios";
+import PublicReviewSection from "./pages/public/Review.jsx";
 
 const tripadvisorReviews = [
   {
@@ -381,18 +382,9 @@ export default function App() {
   };
 
   const [reviews, setReviews] = useState([]);
-  const [showReviewForm, setShowReviewForm] = useState(false);
-  const [reviewForm, setReviewForm] = useState({
-    name: "",
-    email: "",
-    rating: 5,
-    message: "",
-  });
-  const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [showAllTripadvisorReviews, setShowAllTripadvisorReviews] =
     useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
-  const [reviewNotification, setReviewNotification] = useState(null);
 
   const tripadvisorUrl =
     "https://www.tripadvisor.com/Attraction_Review-g304133-d15640558-Reviews-Minneriya_Wild_Jeep_Safari-Dambulla_Central_Province.html";
@@ -483,70 +475,6 @@ export default function App() {
   const systemVisibleReviews = showAllReviews
     ? systemReviews
     : systemReviews.slice(0, 6);
-
-  const handleReviewFormChange = (e) => {
-    const { name, value } = e.target;
-    setReviewForm((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleGuestReviewSubmit = (e) => {
-    e.preventDefault();
-
-    if (!reviewForm.message.trim()) {
-      setReviewNotification({
-        text: "Please share a few words about your experience.",
-        type: "error",
-      });
-      setTimeout(() => setReviewNotification(null), 4000);
-      return;
-    }
-
-    setReviewSubmitting(true);
-
-    const name = reviewForm.name.trim() || "Guest User";
-    const initials =
-      name
-        .split(" ")
-        .map((word) => word[0] || "")
-        .join("")
-        .slice(0, 2)
-        .toUpperCase() || "G";
-
-    const newReview = {
-      initials,
-      name,
-      date: "Just now",
-      title:
-        reviewForm.message.trim().split(" ").slice(0, 4).join(" ") +
-        (reviewForm.message.trim().split(" ").length > 4 ? "..." : ""),
-      text: reviewForm.message.trim(),
-      rate: Number(reviewForm.rating) || 5,
-      isGuest: true,
-      source: "Guest",
-    };
-
-    setReviews((prev) => {
-      const updatedReviews = [newReview, ...prev];
-      try {
-        const storedGuestReviews = getStoredGuestReviews();
-        localStorage.setItem(
-          "guestReviews",
-          JSON.stringify([newReview, ...storedGuestReviews]),
-        );
-      } catch (err) {
-        console.error("Error saving guest review:", err);
-      }
-      return updatedReviews;
-    });
-    setReviewForm({ name: "", email: "", rating: 5, message: "" });
-    setShowReviewForm(false);
-    setReviewNotification({
-      text: "Thank you for your review! It has been added to this page.",
-      type: "success",
-    });
-    setTimeout(() => setReviewNotification(null), 4000);
-    setReviewSubmitting(false);
-  };
 
   const renderReviewCard = (rev, index) => (
     <div
@@ -1342,14 +1270,6 @@ export default function App() {
             />
           </div>
 
-          {reviewNotification && (
-            <div
-              className={`mx-auto mb-6 max-w-md rounded-xl border px-4 py-3 text-sm ${reviewNotification.type === "error" ? "border-red-500 text-red-600 bg-red-50" : "border-castleton text-castleton bg-castleton-50"}`}
-            >
-              {reviewNotification.text}
-            </div>
-          )}
-
           <div className="mb-14 rounded-3xl border border-gray-100 bg-white p-6 md:p-8 shadow-sm">
             <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5 mb-8">
               <div>
@@ -1413,107 +1333,10 @@ export default function App() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] gap-6 lg:items-start">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {systemVisibleReviews.map((rev, index) =>
-                  renderReviewCard(rev, index),
-                )}
-              </div>
-
-              <form
-                onSubmit={handleGuestReviewSubmit}
-                className="rounded-2xl border border-gray-100 bg-gray-50 p-6 shadow-sm lg:sticky lg:top-24"
-              >
-                <div className="mb-7">
-                  <h4 className="font-outfit text-xl font-bold text-gray-900">
-                    Write Review
-                  </h4>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Tell us about the moments that made your adventure
-                    unforgettable. Your experience helps inspire future
-                    explorers.
-                  </p>
-                </div>
-
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">
-                      Your name
-                    </label>
-                    <input
-                      type="text"
-                      name="name"
-                      value={reviewForm.name}
-                      onChange={handleReviewFormChange}
-                      placeholder="Enter your name"
-                      className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-castleton"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">
-                      Your email
-                    </label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={reviewForm.email}
-                      onChange={handleReviewFormChange}
-                      placeholder="Enter your email"
-                      className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-castleton"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">
-                      Rating
-                    </label>
-                    <select
-                      name="rating"
-                      value={reviewForm.rating}
-                      onChange={handleReviewFormChange}
-                      className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-castleton"
-                    >
-                      {[
-                        { value: 5, label: "Excellent" },
-                        { value: 4, label: "Very Good" },
-                        { value: 3, label: "Good" },
-                        { value: 2, label: "Fair" },
-                        { value: 1, label: "Poor" },
-                      ].map(({ value, label }) => (
-                        <option key={value} value={value}>
-                          {"⭐".repeat(value)} - {label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">
-                      Your review
-                    </label>
-                    <textarea
-                      name="message"
-                      value={reviewForm.message}
-                      onChange={handleReviewFormChange}
-                      rows="4"
-                      placeholder="Share your safari story"
-                      className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-castleton resize-none"
-                    />
-                  </div>
-                </div>
-
-                <div className="mt-6 flex justify-end">
-                  <button
-                    type="submit"
-                    disabled={reviewSubmitting}
-                    className="bg-sacramento text-white font-semibold px-6 py-3 rounded-full hover:bg-opacity-90 disabled:opacity-70 transition duration-300 w-full"
-                  >
-                    {reviewSubmitting ? "Submitting..." : "Submit Review"}
-                  </button>
-                </div>
-              </form>
-            </div>
+            <PublicReviewSection
+              reviews={systemVisibleReviews}
+              renderReviewCard={renderReviewCard}
+            />
           </div>
         </div>
       </section>
