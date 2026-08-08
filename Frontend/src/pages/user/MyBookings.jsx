@@ -38,7 +38,7 @@ export default function MyBookings() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        Loading...
+        <div className="w-14 h-14 border-4 border-sacramento border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -46,7 +46,7 @@ export default function MyBookings() {
   return (
     <div className="p-8">
 
-      <h1 className="text-3xl font-bold text-green-800 mb-6">
+      <h1 className="text-3xl font-bold text-sacramento mb-6">
         My Bookings
       </h1>
 
@@ -56,76 +56,80 @@ export default function MyBookings() {
         onChange={(event) => setSearch(event.target.value)}
         placeholder="Search by package, date, pickup location, or status..."
         aria-label="Search my bookings"
-        className="w-full max-w-xl mb-6 rounded-xl border border-green-200 px-4 py-3 outline-none focus:ring-2 focus:ring-green-600"
+        className="form-input w-full max-w-xl mb-6"
       />
 
-      <table className="w-full border">
+      <div className="overflow-x-auto rounded-xl card">
+        <table className="w-full">
 
-        <thead className="bg-green-700 text-white">
+          <thead className="bg-sacramento text-white">
 
-          <tr>
-            <th className="p-3">Package</th>
-            <th className="p-3">Date</th>
-            <th className="p-3">Pickup</th>
-            <th className="p-3">Adults</th>
-            <th className="p-3">Children</th>
-            <th className="p-3">Payment</th>
-            <th className="p-3">Status</th>
-          </tr>
-
-        </thead>
-
-        <tbody>
-
-          {filteredBookings.length === 0 && (
             <tr>
-              <td colSpan="7" className="p-6 text-center text-gray-500">
-                {bookings.length === 0
-                  ? "You do not have any bookings yet."
-                  : "No bookings match your search."}
-              </td>
-            </tr>
-          )}
-
-          {filteredBookings.map((booking) => (
-
-            <tr key={booking.Booking_ID} className="border-b">
-
-              <td className="p-3">
-                {booking.package?.Package_Name}
-              </td>
-
-              <td className="p-3">
-                {booking.Booking_Date}
-              </td>
-
-              <td className="p-3">
-                {booking.Pickup_Location}
-              </td>
-
-              <td className="p-3">
-                {booking.No_of_adults}
-              </td>
-
-              <td className="p-3">
-                {booking.No_of_child}
-              </td>
-
-              <td className="p-3">
-                Rs. {booking.Payment}
-              </td>
-
-              <td className="p-3">
-                {booking.Status}
-              </td>
-
+              <th className="p-3 text-left">Package</th>
+              <th className="p-3 text-left">Date</th>
+              <th className="p-3 text-left">Pickup</th>
+              <th className="p-3 text-center">Adults</th>
+              <th className="p-3 text-center">Children</th>
+              <th className="p-3 text-right">Payment</th>
+              <th className="p-3 text-center">Status</th>
             </tr>
 
-          ))}
+          </thead>
 
-        </tbody>
+          <tbody>
 
-      </table>
+            {filteredBookings.length === 0 && (
+              <tr>
+                <td colSpan="7" className="p-6 text-center text-muted">
+                  {bookings.length === 0
+                    ? "You do not have any bookings yet."
+                    : "No bookings match your search."}
+                </td>
+              </tr>
+            )}
+
+            {filteredBookings.map((booking) => (
+
+              <tr key={booking.Booking_ID} className="table-row">
+
+                <td className="p-3 text-charcoal/80 dark:text-white/80">
+                  {booking.package?.Package_Name}
+                </td>
+
+                <td className="p-3 text-charcoal/80 dark:text-white/80">
+                  {booking.Booking_Date}
+                </td>
+
+                <td className="p-3 text-charcoal/80 dark:text-white/80">
+                  {booking.Pickup_Location}
+                </td>
+
+                <td className="p-3 text-center text-charcoal/80 dark:text-white/80">
+                  {booking.No_of_adults}
+                </td>
+
+                <td className="p-3 text-center text-charcoal/80 dark:text-white/80">
+                  {booking.No_of_child}
+                </td>
+
+                <td className="p-3 text-right text-charcoal dark:text-white">
+                  Rs. {booking.Payment}
+                </td>
+
+                <td className="p-3 text-center">
+                  <span className="rounded-full bg-sacramento/10 px-3 py-1 text-sm font-semibold text-sacramento">
+                    {booking.Status}
+                  </span>
+                </td>
+
+              </tr>
+
+            ))}
+
+          </tbody>
+
+        </table>
+      </div>
 
     </div>
   );

@@ -17,7 +17,7 @@ export default function CustomerLayout() {
 
   return (
     <ProtectedRoute role="customer">
-      <div className="flex min-h-screen bg-[#f8f4eb] dark:bg-[#050505] relative">
+      <div className="logged-in flex min-h-screen bg-offwhite dark:bg-bg-dark relative">
         <Sidebar role="customer" isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
         
         {/* Mobile Sidebar Backdrop */}

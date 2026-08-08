@@ -37,23 +37,23 @@ export default function Drivers() {
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold text-gray-800">Drivers</h1>
+        <h1 className="text-2xl font-bold text-charcoal dark:text-white">Drivers</h1>
         <button
           onClick={() => navigate("/admin/drivers/create")}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition"
+          className="btn-primary"
         >
           + Add Driver
         </button>
       </div>
 
       {loading ? (
-        <p className="text-gray-500">Loading...</p>
+        <p className="text-muted">Loading...</p>
       ) : drivers.length === 0 ? (
-        <p className="text-gray-500">No drivers found.</p>
+        <p className="text-muted">No drivers found.</p>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-gray-200">
-          <table className="min-w-full bg-white text-sm">
-            <thead className="bg-gray-50 text-gray-600 uppercase text-xs">
+        <div className="overflow-x-auto rounded-lg border border-border-light dark:border-border-dark">
+          <table className="min-w-full bg-surface text-sm">
+            <thead className="bg-[#29AB87] text-white uppercase text-xs dark:bg-[#29AB87]">
               <tr>
                 <th className="px-4 py-3 text-left">Driver ID</th>
                 <th className="px-4 py-3 text-left">Name</th>
@@ -62,31 +62,31 @@ export default function Drivers() {
                 <th className="px-4 py-3 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-border-light dark:divide-border-dark">
               {drivers.map((driver) => (
-                <tr key={driver.Driver_ID} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 font-medium text-gray-800">
+                <tr key={driver.Driver_ID} className="hover:bg-offwhite-100 dark:hover:bg-surface-2">
+                  <td className="px-4 py-3 font-medium text-charcoal dark:text-white">
                     #{driver.Driver_ID}
                   </td>
-                  <td className="px-4 py-3 text-gray-800 font-medium">
+                  <td className="px-4 py-3 text-charcoal dark:text-white font-medium">
                     {driver.Driver_Name}
                   </td>
-                  <td className="px-4 py-3 text-gray-600 font-mono">
+                  <td className="px-4 py-3 text-muted font-mono">
                     {driver.Phone_Number}
                   </td>
-                  <td className="px-4 py-3 text-gray-600">
+                  <td className="px-4 py-3 text-muted">
                     {driver.Email}
                   </td>
                   <td className="px-4 py-3 text-right space-x-3">
                     <Link
                       to={`/admin/drivers/${driver.Driver_ID}/edit`}
-                      className="text-blue-600 hover:underline font-medium"
+                      className="text-sacramento hover:underline font-medium"
                     >
                       Edit
                     </Link>
                     <button
                       onClick={() => handleDelete(driver.Driver_ID)}
-                      className="text-red-600 hover:underline font-medium"
+                      className="text-red-600 hover:underline font-medium dark:text-red-400"
                     >
                       Delete
                     </button>

@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../../axios";
@@ -83,12 +82,12 @@ export default function PackageForm() {
   };
 
   if (loading) {
-    return <div className="p-6 text-gray-500">Loading...</div>;
+    return <div className="p-6 text-muted">Loading...</div>;
   }
 
   return (
     <div className="p-6 max-w-xl">
-      <h1 className="text-2xl font-semibold text-gray-800 mb-6">
+      <h1 className="text-2xl font-bold text-charcoal dark:text-white mb-6">
         {isEdit ? "Edit Package" : "Add Package"}
       </h1>
 
@@ -96,7 +95,7 @@ export default function PackageForm() {
 
         {/* Package Name */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-charcoal dark:text-white mb-1">
             Package Name
           </label>
 
@@ -105,7 +104,7 @@ export default function PackageForm() {
             name="Package_Name"
             value={form.Package_Name}
             onChange={handleChange}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="form-input"
           />
 
           {errors.Package_Name && (
@@ -117,7 +116,7 @@ export default function PackageForm() {
 
         {/* Description */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-charcoal dark:text-white mb-1">
             Description
           </label>
 
@@ -126,7 +125,7 @@ export default function PackageForm() {
             value={form.Description}
             onChange={handleChange}
             rows={4}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="form-input"
           />
 
           {errors.Description && (
@@ -138,17 +137,17 @@ export default function PackageForm() {
 
         {/* Image Upload */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-charcoal dark:text-white mb-1">
             Package Image
           </label>
 
           {isEdit && typeof form.Image === "string" && (
             <div className="mb-3">
-              <p className="mb-2 text-sm text-gray-600">Current image</p>
+              <p className="mb-2 text-sm text-muted">Current image</p>
               <img
                 src={`http://127.0.0.1:8000/storage/${form.Image}`}
                 alt="Current package"
-                className="h-40 w-full rounded-lg border border-gray-300 object-cover"
+                className="h-40 w-full rounded-lg border border-border-light object-cover dark:border-border-dark"
               />
             </div>
           )}
@@ -163,10 +162,10 @@ export default function PackageForm() {
                 Image: e.target.files[0] || null,
               })
             }
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+            className="form-input"
           />
 
-          <p className="mt-1 text-xs text-gray-500">
+          <p className="mt-1 text-xs text-muted">
             Upload a new image only if you want to replace the current one.
             JPG, PNG, JPEG or WEBP. Maximum size: 10 MB.
           </p>
@@ -182,7 +181,7 @@ export default function PackageForm() {
         <div className="grid grid-cols-2 gap-4">
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-charcoal dark:text-white mb-1">
               Price (Adult)
             </label>
 
@@ -192,7 +191,7 @@ export default function PackageForm() {
               name="Price_for_adult"
               value={form.Price_for_adult}
               onChange={handleChange}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="form-input"
             />
 
             {errors.Price_for_adult && (
@@ -203,7 +202,7 @@ export default function PackageForm() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-charcoal dark:text-white mb-1">
               Price (Child)
             </label>
 
@@ -213,7 +212,7 @@ export default function PackageForm() {
               name="Price_for_child"
               value={form.Price_for_child}
               onChange={handleChange}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="form-input"
             />
 
             {errors.Price_for_child && (
@@ -231,7 +230,7 @@ export default function PackageForm() {
           <button
             type="submit"
             disabled={saving}
-            className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm font-medium transition"
+            className="btn-primary disabled:opacity-50"
           >
             {saving
               ? "Saving..."
@@ -243,7 +242,7 @@ export default function PackageForm() {
           <button
             type="button"
             onClick={() => navigate("/admin/packages")}
-            className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm"
+            className="btn-secondary"
           >
             Cancel
           </button>

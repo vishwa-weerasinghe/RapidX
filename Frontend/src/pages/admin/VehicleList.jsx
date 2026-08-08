@@ -48,11 +48,11 @@ export default function Vehicles() {
   return (
     <div className="p-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-        <h1 className="text-2xl font-semibold text-gray-800">Vehicles</h1>
+        <h1 className="text-2xl font-bold text-charcoal dark:text-white">Vehicles</h1>
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative">
             <svg
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted"
               fill="none"
               stroke="currentColor"
               strokeWidth={2}
@@ -69,12 +69,12 @@ export default function Vehicles() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by number or type..."
-              className="w-full sm:w-64 rounded-lg border border-gray-300 pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="form-input w-full sm:w-64 pl-9"
             />
           </div>
           <button
             onClick={() => navigate("/admin/vehicles/create")}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition"
+            className="btn-primary"
           >
             + Add Vehicle
           </button>
@@ -82,17 +82,17 @@ export default function Vehicles() {
       </div>
 
       {loading ? (
-        <p className="text-gray-500">Loading...</p>
+        <p className="text-muted">Loading...</p>
       ) : vehicles.length === 0 ? (
-        <p className="text-gray-500">No vehicles found.</p>
+        <p className="text-muted">No vehicles found.</p>
       ) : filteredVehicles.length === 0 ? (
-        <p className="text-gray-500">
+        <p className="text-muted">
           No vehicles match your search for "{search.trim()}".
         </p>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-gray-200">
-          <table className="min-w-full bg-white text-sm">
-            <thead className="bg-gray-50 text-gray-600 uppercase text-xs">
+        <div className="overflow-x-auto rounded-lg border border-border-light dark:border-border-dark">
+          <table className="min-w-full bg-surface text-sm">
+           <thead className="bg-[#29AB87] text-white uppercase text-xs dark:bg-[#29AB87]">
               <tr>
                 <th className="px-4 py-3 text-left">Vehicle ID</th>
                 <th className="px-4 py-3 text-left">Vehicle Number</th>
@@ -102,34 +102,34 @@ export default function Vehicles() {
                 <th className="px-4 py-3 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-border-light dark:divide-border-dark">
               {filteredVehicles.map((vehicle) => (
-                <tr key={vehicle.Vehicle_ID} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 font-medium text-gray-800">
+                <tr key={vehicle.Vehicle_ID} className="hover:bg-offwhite-100 dark:hover:bg-surface-2">
+                  <td className="px-4 py-3 font-medium text-charcoal dark:text-white">
                     #{vehicle.Vehicle_ID}
                   </td>
-                  <td className="px-4 py-3 text-gray-800 font-medium">
+                  <td className="px-4 py-3 text-charcoal dark:text-white font-medium">
                     {vehicle.Vehicle_No}
                   </td>
-                  <td className="px-4 py-3 text-gray-600">
+                  <td className="px-4 py-3 text-muted">
                     {vehicle.Vehicle_Type}
                   </td>
-                  <td className="px-4 py-3 text-center text-gray-600">
+                  <td className="px-4 py-3 text-center text-muted">
                     {vehicle.No_of_Seats}
                   </td>
-                  <td className="px-4 py-3 text-gray-600">
+                  <td className="px-4 py-3 text-muted">
                     #{vehicle.Driver_ID}
                   </td>
                   <td className="px-4 py-3 text-right space-x-3">
                     <Link
                       to={`/admin/vehicles/${vehicle.Vehicle_ID}/edit`}
-                      className="text-blue-600 hover:underline font-medium"
+                      className="text-sacramento hover:underline font-medium"
                     >
                       Edit
                     </Link>
                     <button
                       onClick={() => handleDelete(vehicle.Vehicle_ID)}
-                      className="text-red-600 hover:underline font-medium"
+                      className="text-red-600 hover:underline font-medium dark:text-red-400"
                     >
                       Delete
                     </button>
