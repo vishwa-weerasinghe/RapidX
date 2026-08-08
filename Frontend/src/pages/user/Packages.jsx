@@ -53,7 +53,7 @@ export default function Packages() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen bg-[#F4F8F3]">
+      <div className="flex justify-center items-center h-screen bg-offwhite dark:bg-bg-dark">
         <div className="w-14 h-14 border-[5px] border-sacramento border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
@@ -61,14 +61,14 @@ export default function Packages() {
 
   if (error) {
     return (
-      <div className="bg-red-100 text-red-700 rounded-xl p-6 text-center">
+      <div className="bg-red-100 text-red-700 rounded-xl p-6 text-center dark:bg-red-950/30 dark:text-red-400">
         {error}
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-offwhite via-[#f2ebdc] to-[#e4edd8] dark:from-[#050505] dark:via-[#0d0d0d] dark:to-[#111b14] py-12 px-6 text-[#1f2b20] dark:text-[#f5f7f2]">
+    <div className="min-h-screen bg-gradient-to-b from-offwhite via-offwhite-300 to-offwhite-200 dark:from-bg-dark dark:via-surface dark:to-bg-dark py-12 px-6 text-charcoal dark:text-white">
 
       {/* Heading */}
       <div className="text-center mb-14">
@@ -81,7 +81,7 @@ export default function Packages() {
           Wild Safari Packages
         </h1>
 
-        <p className="text-gray-600 max-w-2xl mx-auto mt-4 text-lg">
+        <p className="text-muted max-w-2xl mx-auto mt-4 text-lg">
           Discover breathtaking wildlife adventures through carefully curated safari
           experiences designed to create unforgettable journeys.
         </p>
@@ -92,12 +92,12 @@ export default function Packages() {
           onChange={(event) => setSearch(event.target.value)}
           placeholder="Search safari packages..."
           aria-label="Search safari packages"
-          className="w-full max-w-xl mx-auto mt-8 block rounded-xl border border-[#cfe0c8] dark:border-[#1e3a23] bg-[#fcfaf5] dark:bg-[#0d0d0d] px-4 py-3 text-[#1f2b20] dark:text-[#f5f7f2] outline-none focus:ring-2 focus:ring-sacramento"
+          className="form-input w-full max-w-xl mx-auto mt-8 block"
         />
       </div>
 
       {filteredPackages.length === 0 ? (
-        <div className="text-center text-xl text-gray-500">
+        <div className="text-center text-xl text-muted">
           {packages.length === 0
             ? "No Safari Packages Available"
             : "No safari packages match your search."}
@@ -109,7 +109,7 @@ export default function Packages() {
 
             <div
               key={pkg.id}
-              className="group rounded-3xl overflow-hidden bg-[#fcfaf5]/90 dark:bg-[#0d0d0d]/95 backdrop-blur-md shadow-lg hover:shadow-2xl transition duration-500 hover:-translate-y-3 border border-[#dce8d7] dark:border-[#15311f]"
+              className="group rounded-3xl overflow-hidden card backdrop-blur-md shadow-lg hover:shadow-2xl transition duration-500 hover:-translate-y-3"
             >
 
               {/* Image */}
@@ -142,7 +142,7 @@ export default function Packages() {
 
               <div className="p-6">
 
-                <p className="text-gray-600 leading-relaxed mb-6 line-clamp-4">
+                <p className="text-muted leading-relaxed mb-6 line-clamp-4">
                   {pkg.Description}
                 </p>
 
@@ -190,7 +190,7 @@ export default function Packages() {
 
                 <button
                   onClick={() => handleBook(pkg)}
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-sacramento to-castleton hover:from-sacramento-600 hover:to-castleton-600 text-white font-semibold transition duration-300 flex justify-center items-center gap-2"
+                  className="btn-primary w-full py-3"
                 >
                   Book Safari
                   <ArrowRight size={18} />

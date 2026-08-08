@@ -78,12 +78,12 @@ import api from "../../axios";
     };
   
     return (
-      <div className="min-h-screen bg-[#f8f4eb] px-4 py-10 text-[#1f2b20] transition-colors duration-300 dark:bg-[#050505] dark:text-[#f5f7f2]">
+      <div className="min-h-screen bg-offwhite px-4 py-10 text-charcoal transition-colors duration-300 dark:bg-bg-dark dark:text-white">
         <div className="mx-auto max-w-6xl">
           <div className="grid gap-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
-            <section className="rounded-2xl border border-[#dce8d7] bg-[#fcfaf5] p-8 shadow-2xl dark:border-[#15311f] dark:bg-[#0d0d0d]">
+            <section className="card p-8">
               <h2 className="text-3xl font-bold">Write a Review</h2>
-              <p className="mt-2 text-[#4b5d47] dark:text-[#b3c4b1]">Share your experience with our service.</p>
+              <p className="mt-2 text-muted">Share your experience with our service.</p>
   
               <form onSubmit={handleSubmit} className="mt-6 space-y-5">
                 <div>
@@ -91,7 +91,7 @@ import api from "../../axios";
                   <select
                     value={rate}
                     onChange={(e) => setRate(e.target.value)}
-                    className="w-full rounded-lg border border-[#dce8d7] bg-[#fdfcf8] px-3 py-2 text-[#1f2b20] outline-none focus:ring-2 focus:ring-sacramento dark:border-[#15311f] dark:bg-[#111111] dark:text-[#f5f7f2]"
+                    className="form-input"
                   >
                     <option value="5">⭐⭐⭐⭐⭐ 5 - Excellent</option>
                     <option value="4">⭐⭐⭐⭐ 4 - Very good</option>
@@ -108,41 +108,41 @@ import api from "../../axios";
                     onChange={(e) => setDescription(e.target.value)}
                     rows="5"
                     required
-                    className="w-full rounded-lg border border-[#dce8d7] bg-[#fdfcf8] px-3 py-2 text-[#1f2b20] outline-none focus:ring-2 focus:ring-sacramento dark:border-[#15311f] dark:bg-[#111111] dark:text-[#f5f7f2]"
+                    className="form-input"
                     placeholder="Tell us what you liked or what we can improve..."
                   />
                 </div>
   
-                {message ? <p className="rounded-lg bg-castleton-50 p-3 text-sacramento dark:bg-sacramento-900/40 dark:text-castleton-300">{message}</p> : null}
-                {error ? <p className="rounded-lg bg-red-100 p-3 text-red-700 dark:bg-red-950/40 dark:text-red-400">{error}</p> : null}
+                {message ? <p className="rounded-lg bg-sacramento/10 p-3 text-sacramento">{message}</p> : null}
+                {error ? <p className="rounded-lg bg-red-50 border border-red-200 p-3 text-red-700 dark:bg-red-950/30 dark:border-red-900/30 dark:text-red-400">{error}</p> : null}
   
                 <button
                   type="submit"
                   disabled={loading || !isLoggedIn}
-                  className="w-full rounded-lg bg-sacramento px-4 py-3 font-semibold text-offwhite transition hover:bg-sacramento-600 disabled:opacity-50"
+                  className="btn-primary w-full py-3"
                 >
                   {loading ? "Submitting..." : isLoggedIn ? "Submit Review" : "Log in to review"}
                 </button>
               </form>
             </section>
   
-            <section className="rounded-2xl border border-[#dce8d7] bg-[#fcfaf5] p-8 shadow-2xl dark:border-[#15311f] dark:bg-[#0d0d0d]">
+            <section className="card p-8">
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <h3 className="text-2xl font-bold">Submitted Reviews</h3>
-                  <p className="mt-1 text-[#4b5d47] dark:text-[#b3c4b1]">Your latest reviews appear here.</p>
+                  <p className="mt-1 text-muted">Your latest reviews appear here.</p>
                 </div>
               </div>
   
               <div className="mt-6 space-y-3 overflow-y-auto pr-1 lg:max-h-[calc(100vh-12rem)]">
                 {reviews.length === 0 ? (
-                  <p className="text-[#4b5d47] dark:text-[#b3c4b1]">No reviews yet. Be the first to share your experience.</p>
+                  <p className="text-muted">No reviews yet. Be the first to share your experience.</p>
                 ) : (
                   reviews.map((review) => (
-                    <div key={review.Review_ID} className="rounded-xl border border-[#dce8d7] bg-[#fdfcf8] p-4 dark:border-[#15311f] dark:bg-[#111111]">
+                    <div key={review.Review_ID} className="card p-4">
                       <div className="flex items-start justify-between gap-4">
                         <div>
-                          <p className="font-semibold text-[#1f2b20] dark:text-[#e6ebdf]">
+                          <p className="font-semibold text-charcoal dark:text-white">
                             Rating: {review.Rate} / 5
                           </p>
                           <p className="mt-1 text-amber-400 text-sm leading-none">
@@ -150,13 +150,13 @@ import api from "../../axios";
                             {Array.from({ length: 5 - (review.Rate || 0) }).map(() => "☆").join("")}
                           </p>
                         </div>
-                        <span className="text-sm text-[#4b5d47] dark:text-[#b3c4b1]">
+                        <span className="text-sm text-muted">
                           {review.customer
                             ? `${review.customer.First_Name || ""} ${review.customer.Last_Name || ""}`.trim()
                             : "Guest"}
                         </span>
                       </div>
-                      <p className="mt-2 text-[#1f2b20] dark:text-[#e6ebdf]">{review.Description}</p>
+                      <p className="mt-2 text-charcoal/80 dark:text-white/80">{review.Description}</p>
                     </div>
                   ))
                 )}

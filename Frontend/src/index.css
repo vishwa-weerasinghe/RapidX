@@ -195,3 +195,247 @@ body {
     color: var(--primary) !important;
   }
 }
+
+/* ─── New Theme (scoped to logged-in pages only) ─── */
+.logged-in {
+  --page-bg: #F2EBDD;
+  --page-text: #000000;
+  --surface: #FFFFFF;
+  --surface-2: #F2EBDD;
+  --border: #DCD3C2;
+  --muted: #4A4A4A;
+  --primary: #00755E;
+  --primary-hover: #006854;
+  --gold: #D4A017;
+  --card-bg: #FFFFFF;
+  --card-border: #DCD3C2;
+}
+
+.dark .logged-in {
+  --page-bg: #1A2421;
+  --page-text: #FFFFFF;
+  --surface: #232E2A;
+  --surface-2: #1A2421;
+  --border: #2A3833;
+  --muted: #B0C4BC;
+  --primary: #0B8A6F;
+  --primary-hover: #26A585;
+  --gold: #E6C15A;
+  --card-bg: #232E2A;
+  --card-border: #2A3833;
+}
+
+.logged-in {
+  background-color: var(--page-bg) !important;
+  color: #000000 !important;
+}
+
+.dark .logged-in {
+  background-color: var(--page-bg) !important;
+  color: #FFFFFF !important;
+}
+
+/* ─── Text color overrides for logged-in pages ─── */
+/* Bright mode: black text */
+.logged-in .text-gray-800,
+.logged-in .text-gray-900,
+.logged-in .text-slate-800,
+.logged-in .text-slate-900,
+.logged-in .text-black,
+.logged-in .text-\[\#1f2b20\],
+.logged-in .text-charcoal {
+  color: #000000 !important;
+}
+
+.logged-in .text-gray-500,
+.logged-in .text-gray-600,
+.logged-in .text-gray-700,
+.logged-in .text-slate-500,
+.logged-in .text-slate-600,
+.logged-in .text-slate-700,
+.logged-in .text-\[\#4b5d47\],
+.logged-in .text-muted {
+  color: #4A4A4A !important;
+}
+
+/* Dark mode: white text */
+.dark .logged-in .text-gray-800,
+.dark .logged-in .text-gray-900,
+.dark .logged-in .text-slate-800,
+.dark .logged-in .text-slate-900,
+.dark .logged-in .text-black,
+.dark .logged-in .text-\[\#1f2b20\],
+.dark .logged-in .text-charcoal,
+.dark .logged-in .text-white {
+  color: #FFFFFF !important;
+}
+
+.dark .logged-in .text-gray-500,
+.dark .logged-in .text-gray-600,
+.dark .logged-in .text-gray-700,
+.dark .logged-in .text-slate-500,
+.dark .logged-in .text-slate-600,
+.dark .logged-in .text-slate-700,
+.dark .logged-in .text-\[\#4b5d47\],
+.dark .logged-in .text-muted {
+  color: #B0C4BC !important;
+}
+
+/* ─── Background overrides for logged-in pages ─── */
+.logged-in .bg-white,
+.logged-in .bg-\[\#0d0d0d\],
+.logged-in .bg-\[\#111111\],
+.logged-in .bg-\[\#101813\],
+.logged-in .bg-surface {
+  background-color: var(--surface) !important;
+}
+
+/* Hover overrides - use Sand #F6D7B0 for bright mode */
+.logged-in .hover\:bg-offwhite-100:hover,
+.logged-in .hover\:bg-offwhite-200:hover,
+.logged-in .hover\:bg-gray-50:hover,
+.logged-in .hover\:bg-gray-100:hover,
+.logged-in .hover\:bg-slate-50:hover,
+.logged-in .hover\:bg-slate-100:hover {
+  background-color: #e6e0d7 !important;
+}
+
+.dark .logged-in .hover\:bg-surface-2:hover,
+.dark .logged-in .dark\:hover\:bg-surface-2:hover,
+.dark .logged-in .dark\:hover\:bg-slate-800:hover {
+  background-color: #021a0d !important;
+}
+
+.logged-in .bg-offwhite,
+.logged-in .bg-\[\#f8f4eb\],
+.logged-in .bg-\[\#F4F8F3\],
+.logged-in .bg-\[\#fcfaf5\],
+.logged-in .bg-\[\#050505\],
+.logged-in .bg-bg-light {
+  background-color: var(--page-bg) !important;
+}
+
+.dark .logged-in .dark\:bg-bg-dark,
+.dark .logged-in .dark\:bg-\[\#050505\],
+.dark .logged-in .dark\:bg-\[\#101813\],
+.dark .logged-in .dark\:bg-\[\#0d0d0d\] {
+  background-color: var(--page-bg) !important;
+}
+
+/* Primary color overrides for logged-in pages */
+.logged-in .text-sacramento,
+.logged-in .text-castleton,
+.logged-in .text-emerald-700,
+.logged-in .text-green-700,
+.logged-in .text-green-800,
+.logged-in .text-green-900 {
+  color: var(--primary) !important;
+}
+
+.logged-in .bg-sacramento,
+.logged-in .bg-castleton,
+.logged-in .bg-emerald-700,
+.logged-in .bg-green-700,
+.logged-in .bg-green-800,
+.logged-in .bg-green-900 {
+  background-color: var(--primary) !important;
+}
+
+.logged-in .hover\:bg-sacramento-600:hover,
+.logged-in .hover\:bg-castleton-600:hover {
+  background-color: var(--primary-hover) !important;
+}
+
+.logged-in .from-sacramento,
+.logged-in .to-castleton,
+.logged-in .via-sacramento {
+  --tw-gradient-from: var(--primary) !important;
+  --tw-gradient-to: var(--primary-hover) !important;
+}
+
+/* Border overrides for logged-in pages */
+.logged-in .border-\[\#dce8d7\],
+.logged-in .border-\[\#E6E2D8\],
+.logged-in .border-gray-100,
+.logged-in .border-gray-200,
+.logged-in .border-slate-100,
+.logged-in .border-slate-200 {
+  border-color: var(--border) !important;
+}
+
+.dark .logged-in .dark\:border-\[\#15311f\],
+.dark .logged-in .dark\:border-\[\#2F4437\],
+.dark .logged-in .dark\:border-slate-800 {
+  border-color: var(--border) !important;
+}
+
+/* ─── Consistent Button Styles (used only in logged-in pages) ─── */
+@layer components {
+  /* Primary action button */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 font-semibold text-white shadow-sm transition-all duration-300 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50;
+    background-color: #00755E;
+  }
+  .btn-primary:hover {
+    background-color: #006854;
+  }
+
+  /* Secondary/outline button */
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border bg-transparent px-4 py-2 font-semibold transition-all duration-300 active:scale-95;
+    border-color: #DCD3C2;
+    color: #2D2A26;
+  }
+  .btn-secondary:hover {
+    background-color: #F8F2E7;
+  }
+  .dark .btn-secondary {
+    border-color: #2A3833;
+    color: #ffffff;
+  }
+  .dark .btn-secondary:hover {
+    background-color: #232E2A;
+  }
+
+  /* Danger button */
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 font-semibold text-white shadow-sm transition-all duration-300 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50;
+    background-color: #dc2626;
+  }
+  .btn-danger:hover {
+    background-color: #b91c1c;
+  }
+
+  /* Form input styling */
+  .form-input {
+    @apply w-full rounded-lg border px-3 py-2 text-sm outline-none transition-all;
+    border-color: #DCD3C2;
+    background-color: var(--surface);
+    color: var(--page-text);
+  }
+  .form-input:focus {
+    border-color: #00755E;
+    box-shadow: 0 0 0 2px rgba(0, 117, 94, 0.3);
+  }
+  .dark .form-input {
+    border-color: #2A3833;
+    background-color: var(--surface);
+    color: #ffffff;
+  }
+
+  /* Card styling */
+  .card {
+    @apply rounded-2xl border shadow-sm transition-all duration-300;
+    border-color: var(--border);
+    background-color: var(--surface);
+  }
+
+  /* Table row */
+  .table-row {
+    @apply border-b transition-colors;
+    border-color: var(--border);
+  }
+  .table-row:hover {
+    background-color: var(--surface-2);
+  }
+}

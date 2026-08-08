@@ -126,20 +126,20 @@ export default function AdminReviews() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800">Manage Reviews</h1>
-          <p className="mt-2 text-gray-600">Delete customer reviews from this admin page.</p>
+          <h1 className="text-3xl font-bold text-charcoal dark:text-white">Manage Reviews</h1>
+          <p className="mt-2 text-muted">Delete customer reviews from this admin page.</p>
         </div>
 
         <div className="relative">
           <button
             type="button"
             onClick={handleBellClick}
-            className="relative rounded-full bg-white p-2 shadow-sm ring-1 ring-gray-200 hover:bg-gray-50"
+            className="relative rounded-full card p-2 shadow-sm hover:bg-offwhite-100 dark:hover:bg-surface-2"
             title={showNewOnly ? "Show all reviews" : "Show new reviews"}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6 text-gray-600"
+              className="h-6 w-6 text-muted"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -160,8 +160,8 @@ export default function AdminReviews() {
         </div>
       </div>
 
-      {message ? <p className="rounded-lg bg-castleton-50 p-3 text-sacramento">{message}</p> : null}
-      {error ? <p className="rounded-lg bg-red-100 p-3 text-red-700">{error}</p> : null}
+      {message ? <p className="rounded-lg bg-sacramento/10 p-3 text-sacramento">{message}</p> : null}
+      {error ? <p className="rounded-lg bg-red-50 border border-red-200 p-3 text-red-700 dark:bg-red-950/30 dark:border-red-900/30 dark:text-red-400">{error}</p> : null}
 
       <div className="flex items-center gap-3">
         <div className="flex w-full md:w-1/2">
@@ -170,15 +170,15 @@ export default function AdminReviews() {
             placeholder="Search reviews by keyword..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="flex-1 rounded-l-lg border border-gray-300 px-4 py-2 text-sm focus:border-indigo-500 focus:outline-none"
+            className="form-input flex-1"
           />
         </div>
       </div>
 
       {loading ? (
-        <p className="text-gray-500">Loading reviews...</p>
+        <p className="text-muted">Loading reviews...</p>
       ) : filteredReviews.length === 0 ? (
-        <p className="text-gray-500">
+        <p className="text-muted">
           {showNewOnly ? "No new reviews." : "No reviews found."}
         </p>
       ) : (
@@ -189,31 +189,31 @@ export default function AdminReviews() {
             return (
               <div
                 key={reviewId}
-                className={`rounded-xl border bg-white p-4 shadow-sm ${isNew
-                    ? "border-indigo-400 ring-1 ring-indigo-200"
-                    : "border-gray-200"
+                className={`card p-4 ${isNew
+                    ? "border-sacramento ring-1 ring-sacramento/30"
+                    : ""
                   }`}
               >
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="font-semibold text-gray-800">
+                    <p className="font-semibold text-charcoal dark:text-white">
                       Rating: {review.Rate} / 5
                     </p>
                     <p className="mt-1 text-amber-400 text-sm leading-none">
                       {Array.from({ length: review.Rate || 0 }).map(() => "★").join("")}
                       {Array.from({ length: 5 - (review.Rate || 0) }).map(() => "☆").join("")}
                     </p>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-muted">
                       {review.customer
                         ? `${review.customer.First_Name || ""} ${review.customer.Last_Name || ""}`.trim()
                         : "Guest"}
                     </p>
-                    <p className="mt-3 text-gray-700">{review.Description}</p>
+                    <p className="mt-3 text-charcoal/80 dark:text-white/80">{review.Description}</p>
                   </div>
 
                   <button
                     onClick={() => handleDelete(review.Review_ID)}
-                    className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
+                    className="btn-danger"
                   >
                     Delete
                   </button>
@@ -225,7 +225,7 @@ export default function AdminReviews() {
       )}
 
       {showNewOnly && newReviewIds.size === 0 && !loading && (
-        <p className="mt-2 text-sm text-gray-500">No new reviews to show.</p>
+        <p className="mt-2 text-sm text-muted">No new reviews to show.</p>
       )}
     </div>
   );

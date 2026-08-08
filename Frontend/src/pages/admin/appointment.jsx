@@ -31,7 +31,7 @@ export default function Appointments() {
       });
     } catch (err) {
       console.error(err);
-      setError(err?.response?.data?.message || "Failed to load appointments.");
+      setError("Failed to load appointments.");
     } finally {
       setLoading(false);
     }
@@ -60,17 +60,17 @@ export default function Appointments() {
     <div className="p-6">
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-800">Appointments</h1>
-          <p className="text-sm text-gray-500 mt-1">View customer booking details and assigned driver.</p>
+          <h1 className="text-2xl font-bold text-charcoal dark:text-white">Appointments</h1>
+          <p className="text-sm text-muted mt-1">View customer booking details and assigned driver.</p>
         </div>
 
-        <label className="flex items-center gap-2 text-sm text-gray-600">
+        <label className="flex items-center gap-2 text-sm text-muted">
           <span>Filter by month:</span>
           <input
             type="month"
             value={month}
             onChange={handleMonthChange}
-            className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="form-input max-w-[180px]"
           />
           {month && (
             <button
@@ -79,7 +79,7 @@ export default function Appointments() {
                 setMonth("");
                 fetchData("");
               }}
-              className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50"
+              className="btn-secondary text-sm"
             >
               Clear
             </button>
@@ -90,39 +90,39 @@ export default function Appointments() {
       {/* Summary Cards */}
       {!loading && !error && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-            <p className="text-xs uppercase tracking-wide text-gray-500">Total Confirmed Appointments</p>
-            <p className="mt-1 text-2xl font-bold text-gray-800">{summary.total_confirmed}</p>
+          <div className="card p-4">
+            <p className="text-xs uppercase tracking-wide text-muted">Total Confirmed Appointments</p>
+            <p className="mt-1 text-2xl font-bold text-charcoal dark:text-white">{summary.total_confirmed}</p>
           </div>
-          <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-            <p className="text-xs uppercase tracking-wide text-gray-500">Total Unconfirmed Appointments</p>
-            <p className="mt-1 text-2xl font-bold text-gray-800">{summary.total_unconfirmed}</p>
+          <div className="card p-4">
+            <p className="text-xs uppercase tracking-wide text-muted">Total Unconfirmed Appointments</p>
+            <p className="mt-1 text-2xl font-bold text-charcoal dark:text-white">{summary.total_unconfirmed}</p>
           </div>
-          <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-            <p className="text-xs uppercase tracking-wide text-gray-500">Total Earnings (Confirmed)</p>
-            <p className="mt-1 text-2xl font-bold text-green-600">LKR {Number(summary.total_earnings_confirmed).toLocaleString()}</p>
+          <div className="card p-4">
+            <p className="text-xs uppercase tracking-wide text-muted">Total Earnings (Confirmed)</p>
+            <p className="mt-1 text-2xl font-bold text-sacramento">LKR {Number(summary.total_earnings_confirmed).toLocaleString()}</p>
           </div>
-          <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-            <p className="text-xs uppercase tracking-wide text-gray-500">Total Earnings (Unconfirmed)</p>
-            <p className="mt-1 text-2xl font-bold text-gray-600">LKR {Number(summary.total_earnings_unconfirmed).toLocaleString()}</p>
+          <div className="card p-4">
+            <p className="text-xs uppercase tracking-wide text-muted">Total Earnings (Unconfirmed)</p>
+            <p className="mt-1 text-2xl font-bold text-muted">LKR {Number(summary.total_earnings_unconfirmed).toLocaleString()}</p>
           </div>
         </div>
       )}
 
       {loading ? (
-        <p className="text-gray-500">Loading...</p>
+        <p className="text-muted">Loading...</p>
       ) : error ? (
-        <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-red-700">
+        <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-red-700 dark:bg-red-950/30 dark:border-red-900/30 dark:text-red-400">
           {error}
         </div>
       ) : sorted.length === 0 ? (
-        <p className="text-gray-500">
+        <p className="text-muted">
           {month ? "No appointments found for the selected month." : "No appointments found."}
         </p>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-gray-200">
-          <table className="min-w-full bg-white text-sm">
-            <thead className="bg-gray-50 text-gray-600 uppercase text-xs">
+        <div className="overflow-x-auto rounded-lg border border-border-light dark:border-border-dark">
+          <table className="min-w-full bg-surface text-sm">
+           <thead className="bg-[#29AB87] text-white uppercase text-xs dark:bg-[#29AB87]">
               <tr>
                 <th className="px-4 py-3 text-left">Booking ID</th>
                 <th className="px-4 py-3 text-left">Customer</th>
@@ -132,31 +132,31 @@ export default function Appointments() {
                 <th className="px-4 py-3 text-left">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-border-light dark:divide-border-dark">
               {sorted.map((a) => {
                 const isConfirmed = (a.Status || "").toLowerCase() === "confirmed";
                 return (
-                  <tr key={a.Booking_ID} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 font-mono text-gray-800">#{a.Booking_ID}</td>
+                  <tr key={a.Booking_ID} className="hover:bg-offwhite-100 dark:hover:bg-surface-2">
+                    <td className="px-4 py-3 font-mono text-charcoal dark:text-white">#{a.Booking_ID}</td>
                     <td className="px-4 py-3">
-                      <div className="font-medium text-gray-800">
+                      <div className="font-medium text-charcoal dark:text-white">
                         {a.First_Name} {a.Last_Name}
                       </div>
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-muted">
                         {a.Booking_Date} • {a.Pickup_Time || ""}
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-gray-700">{a.Booking_Date}</td>
-                    <td className="px-4 py-3 text-gray-700">
+                    <td className="px-4 py-3 text-charcoal/80 dark:text-white/80">{a.Booking_Date}</td>
+                    <td className="px-4 py-3 text-charcoal/80 dark:text-white/80">
                       <div className="font-medium">{a.Package_Name || "—"}</div>
                     </td>
-                    <td className="px-4 py-3 font-mono text-gray-800">LKR {Number(a.Payment || 0).toLocaleString()}</td>
+                    <td className="px-4 py-3 font-mono text-charcoal dark:text-white">LKR {Number(a.Payment || 0).toLocaleString()}</td>
                     <td className="px-4 py-3">
                       <span
                         className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${
                           isConfirmed
-                            ? "bg-green-100 text-green-700"
-                            : "bg-yellow-100 text-yellow-700"
+                            ? "bg-sacramento/10 text-sacramento"
+                            : "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400"
                         }`}
                       >
                         {a.Status || "Unconfirmed"}

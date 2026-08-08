@@ -71,15 +71,15 @@ export default function BookingForm() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <div className="w-12 h-12 border-4 border-green-700 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-12 h-12 border-4 border-sacramento border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow mt-6">
+    <div className="max-w-3xl mx-auto card p-6 mt-6">
 
-      <h2 className="text-2xl font-bold text-green-800 mb-6">
+      <h2 className="text-2xl font-bold text-sacramento mb-6">
         Edit Booking
       </h2>
 
@@ -87,37 +87,37 @@ export default function BookingForm() {
 
         {/* Date */}
         <div>
-          <label className="font-semibold">Booking Date</label>
+          <label className="font-semibold text-charcoal dark:text-white">Booking Date</label>
           <input
             type="date"
             name="Booking_Date"
             value={form.Booking_Date}
             onChange={handleChange}
-            className="w-full border p-2 rounded"
+            className="form-input mt-1"
           />
         </div>
 
         {/* Time */}
         <div>
-          <label className="font-semibold">Pickup Time</label>
+          <label className="font-semibold text-charcoal dark:text-white">Pickup Time</label>
           <input
             type="time"
             name="Pickup_Time"
             value={form.Pickup_Time}
             onChange={handleChange}
-            className="w-full border p-2 rounded"
+            className="form-input mt-1"
           />
         </div>
 
         {/* Location */}
         <div>
-          <label className="font-semibold">Pickup Location</label>
+          <label className="font-semibold text-charcoal dark:text-white">Pickup Location</label>
           <input
             type="text"
             name="Pickup_Location"
             value={form.Pickup_Location}
             onChange={handleChange}
-            className="w-full border p-2 rounded"
+            className="form-input mt-1"
           />
         </div>
 
@@ -125,24 +125,24 @@ export default function BookingForm() {
         <div className="grid grid-cols-2 gap-4">
 
           <div>
-            <label className="font-semibold">Adults</label>
+            <label className="font-semibold text-charcoal dark:text-white">Adults</label>
             <input
               type="number"
               name="No_of_adults"
               value={form.No_of_adults}
               onChange={handleChange}
-              className="w-full border p-2 rounded"
+              className="form-input mt-1"
             />
           </div>
 
           <div>
-            <label className="font-semibold">Children</label>
+            <label className="font-semibold text-charcoal dark:text-white">Children</label>
             <input
               type="number"
               name="No_of_child"
               value={form.No_of_child}
               onChange={handleChange}
-              className="w-full border p-2 rounded"
+              className="form-input mt-1"
             />
           </div>
 
@@ -150,24 +150,24 @@ export default function BookingForm() {
 
         {/* Payment */}
         <div>
-          <label className="font-semibold">Payment</label>
+          <label className="font-semibold text-charcoal dark:text-white">Payment</label>
           <input
             type="number"
             name="Payment"
             value={form.Payment}
             onChange={handleChange}
-            className="w-full border p-2 rounded"
+            className="form-input mt-1"
           />
         </div>
 
         {/* Status */}
         <div>
-          <label className="font-semibold">Status</label>
+          <label className="font-semibold text-charcoal dark:text-white">Status</label>
           <select
             name="Status"
             value={form.Status}
             onChange={handleChange}
-            className="w-full border p-2 rounded"
+            className="form-input mt-1"
           >
             <option value="Confirmed">Confirmed</option>
             <option value="Completed">Completed</option>
@@ -178,7 +178,7 @@ export default function BookingForm() {
         {/* Submit */}
         <button
           type="submit"
-          className="w-full bg-green-700 text-white py-2 rounded hover:bg-green-800"
+          className="btn-primary w-full py-2.5"
         >
           Update Booking
         </button>
