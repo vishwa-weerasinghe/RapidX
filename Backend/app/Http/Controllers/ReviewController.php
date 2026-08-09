@@ -29,6 +29,27 @@ class ReviewController extends Controller
             if (!$customerId) {
                 return response()->json(['message' => 'Customer profile not found.'], 403);
             }
+
+            // Resolve customer email from linked customer profile or user record
+            $customer = \App\Models\Customer::find($customerId);
+            $email = trim((string) ($customer?->Email ?? $user->Email ?? $user->email ?? ''));
+
+            if ($email === '') {
+                return response()->json(['message' => 'Email is required to submit a review.'], 422);
+            }
+
+            $booking = Booking::with('customer')
+                ->whereHas('customer', function ($query) use ($email) {
+                    $query->where('Email', $email);
+                })
+                ->latest('Booking_ID')
+                ->first();
+
+            if (!$booking || !$booking->customer) {
+                return response()->json(['message' => 'Sorry you have not booked a safari. you are failed to upload a review'], 422);
+            }
+
+            $customerId = $booking->customer->Customer_ID;
         } else {
             $email = trim((string) ($validated['Email'] ?? ''));
 
