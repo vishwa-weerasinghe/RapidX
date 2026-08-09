@@ -65,6 +65,24 @@ class ReviewControllerTest extends TestCase
         ]);
     }
 
+    protected function createBookingForCustomer(int $customerId): Booking
+    {
+        $package = $this->createPackage();
+
+        return Booking::create([
+            'Booking_Date' => '2026-08-01',
+            'Pickup_Time' => '09:00:00',
+            'Pickup_Location' => 'Dambulla',
+            'No_of_adults' => 2,
+            'No_of_child' => 0,
+            'Payment' => 2000,
+            'Status' => 'Confirmed',
+            'Customer_ID' => $customerId,
+            'Package_ID' => $package->id,
+            'Vehicle_ID' => null,
+        ]);
+    }
+
     public function test_authenticated_user_can_list_reviews(): void
     {
         $customer = $this->createCustomer();
@@ -103,6 +121,7 @@ class ReviewControllerTest extends TestCase
     {
         $customer = $this->createCustomer();
         $user = $this->createUser($customer->getKey());
+        $this->createBookingForCustomer($customer->getKey());
 
         $response = $this->actingAs($user, 'sanctum')
             ->postJson('/api/reviews', [
@@ -121,6 +140,23 @@ class ReviewControllerTest extends TestCase
             'Customer_ID' => $customer->getKey(),
         ]);
         $this->assertDatabaseCount('reviews', 1);
+    }
+
+    public function test_authenticated_user_without_booking_cannot_create_review(): void
+    {
+        $customer = $this->createCustomer();
+        $user = $this->createUser($customer->getKey());
+
+        $response = $this->actingAs($user, 'sanctum')
+            ->postJson('/api/reviews', [
+                'Rate' => 5,
+                'Description' => 'Should not save',
+            ]);
+
+        $response->assertStatus(422)
+            ->assertJson(['message' => 'Sorry you have not booked a safari. you are failed to upload a review']);
+
+        $this->assertDatabaseCount('reviews', 0);
     }
 
     public function test_store_returns_validation_errors_for_missing_required_fields(): void
@@ -227,6 +263,7 @@ class ReviewControllerTest extends TestCase
     {
         $customer = $this->createCustomer();
         $user = $this->createUser($customer->getKey());
+        $this->createBookingForCustomer($customer->getKey());
 
         $description = str_repeat('B', 1000);
 
