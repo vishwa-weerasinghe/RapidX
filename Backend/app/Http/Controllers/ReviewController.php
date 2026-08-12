@@ -85,19 +85,7 @@ class ReviewController extends Controller
 
     public function update(Request $request, Review $review)
     {
-        $validated = $request->validate([
-            'Rate' => ['sometimes', 'required', 'integer', 'min:1', 'max:5'],
-            'Description' => ['sometimes', 'required', 'string', 'max:1000'],
-            'Customer_ID' => ['nullable', 'integer', 'exists:customers,Customer_ID'],
-        ]);
-
-        if (array_key_exists('Customer_ID', $validated) && ($validated['Customer_ID'] === null || $validated['Customer_ID'] === '')) {
-            $validated['Customer_ID'] = $request->user()?->Customer_ID ?? null;
-        }
-
-        $review->update($validated);
-
-        return response()->json($review);
+        return response()->json(['message' => 'Reviews cannot be edited after submission.'], 403);
     }
 
     public function destroy(Request $request, Review $review)
