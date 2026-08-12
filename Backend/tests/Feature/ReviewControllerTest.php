@@ -36,6 +36,17 @@ class ReviewControllerTest extends TestCase
         ]);
     }
 
+    protected function createAdmin(): User
+    {
+        return User::create([
+            'User_Name' => 'Admin User',
+            'Email' => fake()->unique()->safeEmail(),
+            'Password' => bcrypt('Password123'),
+            'role' => 'admin',
+            'Customer_ID' => null,
+        ]);
+    }
+
     protected function createPackage(): Package
     {
         return Package::create([
@@ -281,6 +292,138 @@ class ReviewControllerTest extends TestCase
             'Rate' => 5,
             'Description' => $description,
             'Customer_ID' => $customer->getKey(),
+        ]);
+    }
+
+    public function test_unauthenticated_user_cannot_delete_a_review(): void
+    {
+        $customer = $this->createCustomer();
+        $review = Review::create([
+            'Rate' => 4,
+            'Description' => 'Sample review',
+            'Customer_ID' => $customer->getKey(),
+        ]);
+
+        $response = $this->deleteJson('/api/reviews/' . $review->getKey());
+
+        $response->assertStatus(401);
+        $this->assertDatabaseCount('reviews', 1);
+    }
+
+    public function test_unauthenticated_user_cannot_edit_a_review(): void
+    {
+        $customer = $this->createCustomer();
+        $review = Review::create([
+            'Rate' => 4,
+            'Description' => 'Original review',
+            'Customer_ID' => $customer->getKey(),
+        ]);
+
+        $response = $this->putJson('/api/reviews/' . $review->getKey(), [
+            'Description' => 'Edited review',
+        ]);
+
+        $response->assertStatus(401);
+        $this->assertDatabaseHas('reviews', [
+            'Review_ID' => $review->getKey(),
+            'Description' => 'Original review',
+        ]);
+    }
+
+    public function test_non_admin_user_cannot_delete_a_review(): void
+    {
+        $customer = $this->createCustomer();
+        $user = $this->createUser($customer->getKey());
+        $review = Review::create([
+            'Rate' => 4,
+            'Description' => 'Sample review',
+            'Customer_ID' => $customer->getKey(),
+        ]);
+
+        $response = $this->actingAs($user, 'sanctum')
+            ->deleteJson('/api/reviews/' . $review->getKey());
+
+        $response->assertStatus(403)
+            ->assertJson(['message' => 'Only administrators can delete reviews.']);
+        $this->assertDatabaseCount('reviews', 1);
+    }
+
+    public function test_only_admin_can_delete_a_review(): void
+    {
+        $admin = $this->createAdmin();
+        $customer = $this->createCustomer();
+        $review = Review::create([
+            'Rate' => 5,
+            'Description' => 'To be deleted',
+            'Customer_ID' => $customer->getKey(),
+        ]);
+
+        $response = $this->actingAs($admin, 'sanctum')
+            ->deleteJson('/api/reviews/' . $review->getKey());
+
+        $response->assertStatus(200)
+            ->assertJson(['message' => 'Review deleted successfully']);
+        $this->assertDatabaseCount('reviews', 0);
+    }
+
+    public function test_admin_cannot_write_reviews(): void
+    {
+        $admin = $this->createAdmin();
+
+        $response = $this->actingAs($admin, 'sanctum')
+            ->postJson('/api/reviews', [
+                'Rate' => 5,
+                'Description' => 'Admin attempt',
+            ]);
+
+        $response->assertStatus(403)
+            ->assertJson(['message' => 'Customer profile not found.']);
+        $this->assertDatabaseCount('reviews', 0);
+    }
+
+    public function test_admin_cannot_edit_reviews(): void
+    {
+        $admin = $this->createAdmin();
+        $customer = $this->createCustomer();
+        $review = Review::create([
+            'Rate' => 4,
+            'Description' => 'Original review',
+            'Customer_ID' => $customer->getKey(),
+        ]);
+
+        $response = $this->actingAs($admin, 'sanctum')
+            ->putJson('/api/reviews/' . $review->getKey(), [
+                'Description' => 'Admin edited',
+            ]);
+
+        $response->assertStatus(403);
+        $this->assertDatabaseHas('reviews', [
+            'Review_ID' => $review->getKey(),
+            'Description' => 'Original review',
+        ]);
+    }
+
+    public function test_no_one_can_edit_written_review_after_submission(): void
+    {
+        $customer = $this->createCustomer();
+        $user = $this->createUser($customer->getKey());
+        $review = Review::create([
+            'Rate' => 5,
+            'Description' => 'Original review',
+            'Customer_ID' => $customer->getKey(),
+        ]);
+
+        $response = $this->actingAs($user, 'sanctum')
+            ->putJson('/api/reviews/' . $review->getKey(), [
+                'Rate' => 1,
+                'Description' => 'Edited after submission',
+            ]);
+
+        $response->assertStatus(403);
+        $this->assertDatabaseHas('reviews', [
+            'Review_ID' => $review->getKey(),
+            'Rate' => 5,
+            'Description' => 'Original review',
         ]);
     }
 }
