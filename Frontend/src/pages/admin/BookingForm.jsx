@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../../axios";
+import { pickupTimeOptions } from "../../constants/pickupTimeOptions";
 
 export default function BookingForm() {
   const { id } = useParams();
@@ -9,7 +10,7 @@ export default function BookingForm() {
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({
     Booking_Date: "",
-    Pickup_Time: "",
+    Pickup_Time: "13:00",
     Pickup_Location: "",
     No_of_adults: 1,
     No_of_child: 0,
@@ -29,7 +30,7 @@ export default function BookingForm() {
 
       setForm({
         Booking_Date: data.Booking_Date || "",
-        Pickup_Time: data.Pickup_Time || "",
+        Pickup_Time: data.Pickup_Time || "13:00",
         Pickup_Location: data.Pickup_Location || "",
         No_of_adults: data.No_of_adults || 1,
         No_of_child: data.No_of_child || 0,
@@ -100,13 +101,18 @@ export default function BookingForm() {
         {/* Time */}
         <div>
           <label className="font-semibold text-charcoal dark:text-white">Pickup Time</label>
-          <input
-            type="time"
+          <select
             name="Pickup_Time"
             value={form.Pickup_Time}
             onChange={handleChange}
             className="form-input mt-1"
-          />
+          >
+            {pickupTimeOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Location */}

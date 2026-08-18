@@ -118,16 +118,16 @@ export default function Appointments() {
           </div>
           <div className="card p-4">
             <p className="text-xs uppercase tracking-wide text-muted">Total Earnings (Confirmed)</p>
-            <p className="mt-1 text-2xl font-bold text-sacramento">LKR {Number(summary.total_earnings_confirmed).toLocaleString()}</p>
+            <p className="mt-1 text-2xl font-bold text-sacramento">$ {Number(summary.total_earnings_confirmed).toLocaleString()}</p>
           </div>
           <div className="card p-4">
             <p className="text-xs uppercase tracking-wide text-muted">Total Earnings (Unconfirmed)</p>
-            <p className="mt-1 text-2xl font-bold text-muted">LKR {Number(summary.total_earnings_unconfirmed).toLocaleString()}</p>
+            <p className="mt-1 text-2xl font-bold text-muted">$ {Number(summary.total_earnings_unconfirmed).toLocaleString()}</p>
           </div>
           <div className="card p-4">
             <p className="text-xs uppercase tracking-wide text-muted">Total Earnings</p>
             <p className="mt-1 text-2xl font-bold text-sacramento">
-              LKR {Number(Number(summary.total_earnings_confirmed) + Number(summary.total_earnings_unconfirmed)).toLocaleString()}
+              $ {Number(Number(summary.total_earnings_confirmed) + Number(summary.total_earnings_unconfirmed)).toLocaleString()}
             </p>
           </div>
         </div>
@@ -182,7 +182,7 @@ export default function Appointments() {
                     <td className="px-4 py-3 text-charcoal/80 dark:text-white/80">
                       <div className="font-medium">{a.Package_Name || "—"}</div>
                     </td>
-                    <td className="px-4 py-3 font-mono text-charcoal dark:text-white">LKR {Number(a.Payment || 0).toLocaleString()}</td>
+                    <td className="px-4 py-3 font-mono text-charcoal dark:text-white">$ {Number(a.Payment || 0).toLocaleString()}</td>
                     <td className="px-4 py-3">
                       <span
                         className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${

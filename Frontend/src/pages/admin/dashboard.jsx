@@ -24,9 +24,9 @@ import {
 
 // ─── Helpers ──────────────────────────────────────────────
 const fmtMoney = (n) =>
-  new Intl.NumberFormat("en-LK", {
+  new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency: "LKR",
+    currency: "USD",
     maximumFractionDigits: 0,
   }).format(n ?? 0);
 

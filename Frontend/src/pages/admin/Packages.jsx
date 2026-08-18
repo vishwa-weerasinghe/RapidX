@@ -118,11 +118,11 @@ export default function Packages() {
                   </td>
 
                   <td className="px-4 py-3 text-charcoal/80 dark:text-white/80">
-                    Rs. {Number(pkg.Price_for_adult).toFixed(2)}
+                    $ {Number(pkg.Price_for_adult).toFixed(2)}
                   </td>
 
                   <td className="px-4 py-3 text-charcoal/80 dark:text-white/80">
-                    Rs. {Number(pkg.Price_for_child).toFixed(2)}
+                    $ {Number(pkg.Price_for_child).toFixed(2)}
                   </td>
 
                   <td className="px-4 py-3 text-right space-x-3">
