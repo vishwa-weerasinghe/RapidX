@@ -164,7 +164,7 @@ export function CartCard() {
                   <div className={`flex items-center justify-between border-t pt-3 ${borderLineClass}`}>
                     <span className={`text-xs ${mutedTextClass}`}>Booking Total</span>
                     <span className={`text-[16px] font-bold ${summaryTextClass}`}>
-                      Rs. {Number(booking?.Payment || 0).toLocaleString()}
+                      $ {Number(booking?.Payment || 0).toLocaleString()}
                     </span>
                   </div>
                 </div>
@@ -174,12 +174,12 @@ export function CartCard() {
 
           {/* Cart Summary */}
           <div className={`${summaryClass} mb-4`}>
-            <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between">
               <span className={`text-sm font-semibold ${summaryLabelClass}`}>
                 Cart Total ({cartItems.length} {cartItems.length === 1 ? "item" : "items"})
               </span>
               <span className={`text-xl font-bold ${summaryTextClass}`}>
-                Rs. {getCartTotal().toLocaleString()}
+                $ {getCartTotal().toLocaleString()}
               </span>
             </div>
           </div>

@@ -162,7 +162,7 @@ export default function Packages() {
                     </div>
 
                     <span className="font-bold text-sacramento">
-                      Rs. {pkg.Price_for_adult}
+                      $ {pkg.Price_for_adult}
                     </span>
 
                   </div>
@@ -181,7 +181,7 @@ export default function Packages() {
                     </div>
 
                     <span className="font-bold text-sacramento">
-                      Rs. {pkg.Price_for_child}
+                      $ {pkg.Price_for_child}
                     </span>
 
                   </div>

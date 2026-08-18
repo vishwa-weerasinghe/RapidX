@@ -207,7 +207,7 @@ export default function Cart() {
                           Total Price
                         </span>
                         <span className={`text-lg font-black ${theme === "dark" ? "text-castleton-300" : "text-sacramento"}`}>
-                          Rs. {Number(booking.Payment).toLocaleString()}
+                          $ {Number(booking.Payment).toLocaleString()}
                         </span>
                       </div>
 
@@ -244,7 +244,7 @@ export default function Cart() {
                 <div className={`flex justify-between items-center pt-3 border-t font-bold text-base border-border-light dark:border-border-dark ${theme === "dark" ? "text-white" : "text-charcoal"}`}>
                   <span>Total Amount</span>
                   <span className={`text-xl ${theme === "dark" ? "text-castleton-300" : "text-sacramento"}`}>
-                    Rs. {getCartTotal().toLocaleString()}
+                    $ {getCartTotal().toLocaleString()}
                   </span>
                 </div>
               </div>

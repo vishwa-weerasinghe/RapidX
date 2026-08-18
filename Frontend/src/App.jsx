@@ -1212,13 +1212,12 @@ export default function App() {
 
                   {/* Price */}
                   <div className="flex items-center justify-between border-t border-gray-100 pt-4 mb-4">
-                    <span className="text-sm text-gray-500">
-                      Starting From
-                    </span>
+                    <span className="text-sm text-gray-500">Starting From</span>
 
-                    <span className="text-xl font-bold text-castleton">
-                      LKR {pkg.price.toLocaleString()}
-                    </span>
+                    <div className="text-right">
+                      <div className="text-xl font-bold text-castleton">$ {pkg.price.toLocaleString()}</div>
+                      <div className="text-xs text-gray-500">per adult</div>
+                    </div>
                   </div>
 
                   {/* Buttons */}

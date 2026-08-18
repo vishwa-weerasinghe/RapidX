@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import api from "../../axios";
 import { useNavigate } from "react-router-dom";
+import { pickupTimeOptions } from "../../constants/pickupTimeOptions";
 
 const emptyCreateForm = {
   Booking_Date: "",
-  Pickup_Time: "",
+  Pickup_Time: "13:00",
   Pickup_Location: "",
   No_of_adults: 1,
   No_of_child: 0,
@@ -242,14 +243,19 @@ export default function Bookings() {
                 </div>
                 <div>
                   <label className="mb-1 block text-sm font-semibold text-charcoal dark:text-white">Pickup Time</label>
-                  <input
-                    type="time"
+                  <select
                     name="Pickup_Time"
                     value={createForm.Pickup_Time}
                     onChange={handleCreateInputChange}
                     className="form-input"
                     required
-                  />
+                  >
+                    {pickupTimeOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div className="md:col-span-2">
                   <label className="mb-1 block text-sm font-semibold text-charcoal dark:text-white">Pickup Location</label>
@@ -298,7 +304,7 @@ export default function Bookings() {
                     <option value="">Select a package</option>
                     {packages.map((item) => (
                       <option key={item.Package_ID || item.id} value={item.Package_ID || item.id}>
-                        {item.Package_Name} - Rs. {item.Price_for_adult} (Adult) / Rs. {item.Price_for_child} (Child)
+                        {item.Package_Name} - $ {item.Price_for_adult} (Adult) / $ {item.Price_for_child} (Child)
                       </option>
                     ))}
                   </select>
@@ -399,7 +405,7 @@ export default function Bookings() {
               </div>
 
               <div className="rounded-lg bg-sacramento/10 p-3 text-sm text-sacramento">
-                Estimated payment: Rs. {calculateCreatePayment().toLocaleString()}
+                Estimated payment: $ {calculateCreatePayment().toLocaleString()}
               </div>
 
               <div className="flex justify-end gap-3">
@@ -467,7 +473,7 @@ export default function Bookings() {
                   <td className="px-4 py-3 text-charcoal/80 dark:text-white/80">{booking.Pickup_Location}</td>
                   <td className="px-4 py-3 text-center text-charcoal/80 dark:text-white/80">{booking.No_of_adults}</td>
                   <td className="px-4 py-3 text-center text-charcoal/80 dark:text-white/80">{booking.No_of_child}</td>
-                  <td className="px-4 py-3 text-right text-charcoal dark:text-white">Rs. {booking.Payment}</td>
+                  <td className="px-4 py-3 text-right text-charcoal dark:text-white">$ {booking.Payment}</td>
                   <td className="px-4 py-3 text-center">
                     <span className="rounded-full bg-amber-100 px-3 py-1 text-sm font-semibold text-amber-700 dark:bg-amber-950/40 dark:text-amber-400">
                       {booking.Status}
