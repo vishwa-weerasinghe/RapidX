@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import api from "../../axios";
 import { useNavigate } from "react-router-dom";
+import { pickupTimeOptions } from "../../constants/pickupTimeOptions";
 
 const emptyCreateForm = {
   Booking_Date: "",
-  Pickup_Time: "",
+  Pickup_Time: "13:00",
   Pickup_Location: "",
   No_of_adults: 1,
   No_of_child: 0,
@@ -242,14 +243,19 @@ export default function Bookings() {
                 </div>
                 <div>
                   <label className="mb-1 block text-sm font-semibold text-charcoal dark:text-white">Pickup Time</label>
-                  <input
-                    type="time"
+                  <select
                     name="Pickup_Time"
                     value={createForm.Pickup_Time}
                     onChange={handleCreateInputChange}
                     className="form-input"
                     required
-                  />
+                  >
+                    {pickupTimeOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div className="md:col-span-2">
                   <label className="mb-1 block text-sm font-semibold text-charcoal dark:text-white">Pickup Location</label>

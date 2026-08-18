@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { pickupTimeOptions } from "../../constants/pickupTimeOptions";
 import {
     Calendar,
     Clock,
@@ -30,7 +31,7 @@ export default function Booking() {
 
   const [form, setForm] = useState({
     Booking_Date: "",
-    Pickup_Time: "",
+    Pickup_Time: "13:00",
     Pickup_Location: "",
     No_of_adults: 1,
     No_of_child: 0,
@@ -239,14 +240,19 @@ export default function Booking() {
                     <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
                       Pickup Time
                     </label>
-                    <input
-                      type="time"
+                    <select
                       name="Pickup_Time"
                       value={form.Pickup_Time}
                       onChange={handleChange}
                       className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 px-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all"
                       required
-                    />
+                    >
+                      {pickupTimeOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 
