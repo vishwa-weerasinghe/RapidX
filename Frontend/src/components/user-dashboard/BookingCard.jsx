@@ -137,7 +137,7 @@ export function BookingCard() {
                   </div>
                   <div className="text-right">
                     <span className={`block text-[11px] ${mutedTextClass}`}>Total</span>
-                    <span className={`text-[16px] font-bold ${isDark ? "text-sacramento-300" : "text-sacramento-600"}`}>Rs. {Number(booking.Payment || 0).toLocaleString()}</span>
+                    <span className={`text-[16px] font-bold ${isDark ? "text-sacramento-300" : "text-sacramento-600"}`}>$ {Number(booking.Payment || 0).toLocaleString()}</span>
                   </div>
                 </div>
               </div>

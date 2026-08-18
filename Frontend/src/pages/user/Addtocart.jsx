@@ -439,14 +439,14 @@ export default function Booking() {
                         Total Reservation Cost
                       </p>
                       <p className="text-xl font-black text-slate-900 dark:text-white mt-0.5 tracking-tight">
-                        Rs. {new Intl.NumberFormat().format(getTotal())}
+                        $ {new Intl.NumberFormat().format(getTotal())}
                       </p>
                     </div>
                   </div>
                   <div className="text-right text-[11px] font-bold text-slate-400 dark:text-slate-500">
-                    <p>{form.No_of_adults} Adult(s) × Rs {pkg.Price_for_adult}</p>
+                    <p>{form.No_of_adults} Adult(s) × $ {pkg.Price_for_adult}</p>
                     {form.No_of_child > 0 && (
-                      <p className="mt-0.5">{form.No_of_child} Child(ren) × Rs {pkg.Price_for_child}</p>
+                      <p className="mt-0.5">{form.No_of_child} Child(ren) × $ {pkg.Price_for_child}</p>
                     )}
                   </div>
                 </div>

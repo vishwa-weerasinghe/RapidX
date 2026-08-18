@@ -113,7 +113,7 @@ export default function MyBookings() {
                 </td>
 
                 <td className="p-3 text-right text-charcoal dark:text-white">
-                  Rs. {booking.Payment}
+                  $ {booking.Payment}
                 </td>
 
                 <td className="p-3 text-center">

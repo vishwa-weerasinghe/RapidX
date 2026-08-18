@@ -36,6 +36,7 @@ export default function Booking() {
         Booking_Date: "",
         Pickup_Time: "13:00",
         Pickup_Location: "",
+        Area: "",
         No_of_adults: 1,
         No_of_child: 0,
         First_Name: "",
@@ -125,12 +126,34 @@ export default function Booking() {
         });
     };
 
-    // calculate total price
+    // calculate total price (base without area extra)
     const getTotal = () => {
         if (!pkg) return 0;
         const adultTotal = form.No_of_adults * pkg.Price_for_adult;
         const childTotal = form.No_of_child * pkg.Price_for_child;
         return adultTotal + childTotal;
+    };
+
+    // area extras (amounts added to final payment)
+    const areaExtraMap = {
+        Dambulla: 5,
+        Sigiriya: 15,
+        Habarana: 18,
+        Kandalama: 15,
+    };
+
+    const getAreaExtra = () => {
+        return areaExtraMap[form.Area] || 0;
+    };
+
+    const formatAreaExtra = (n) => {
+        const abs = Math.abs(Number(n || 0));
+        const formatted = abs.toFixed(2);
+        return (n >= 0 ? "+" : "-") + `$${formatted}`;
+    };
+
+    const getFinalTotal = () => {
+        return getTotal() + getAreaExtra();
     };
 
     // submit booking
@@ -141,10 +164,11 @@ export default function Booking() {
             Booking_Date: form.Booking_Date,
             Pickup_Time: form.Pickup_Time,
             Pickup_Location: form.Pickup_Location,
+            Area: form.Area,
             No_of_adults: form.No_of_adults,
             No_of_child: form.No_of_child,
             Package_ID: selectedPackageId,
-            Payment: getTotal(),
+            Payment: getFinalTotal(),
         };
 
         if (activeCustomer?.Customer_ID) {
@@ -223,7 +247,7 @@ export default function Booking() {
                                             <option value="" disabled>-- Select a tour package --</option>
                                             {packagesList.map((p) => (
                                                 <option key={p.Package_ID || p.id} value={p.Package_ID || p.id}>
-                                                    {p.Package_Name} - Rs. {p.Price_for_adult} (Adult) / Rs. {p.Price_for_child} (Child)
+                                                    {p.Package_Name} - $ {p.Price_for_adult} (Adult) / $ {p.Price_for_child} (Child)
                                                 </option>
                                             ))}
                                         </select>
@@ -283,6 +307,24 @@ export default function Booking() {
 
                                 <div className="flex flex-col gap-1.5">
                                     <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                                        Pickup Area
+                                    </label>
+                                    <select
+                                        name="Area"
+                                        value={form.Area}
+                                        onChange={handleChange}
+                                        className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 px-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all"
+                                    >
+                                        <option value="">-- Select area --</option>
+                                        <option value="Dambulla">Dambulla (+ $5.00)</option>
+                                        <option value="Sigiriya">Sigiriya (+ $15.00)</option>
+                                        <option value="Habarana">Habarana (+ $18.00)</option>
+                                        <option value="Kandalama">Kandalama (+ $15.00)</option>
+                                    </select>
+                                </div> 
+
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
                                         Pickup Location / Hotel Name
                                     </label>
                                     <div className="relative flex items-center">
@@ -298,6 +340,8 @@ export default function Booking() {
                                         />
                                     </div>
                                 </div>
+
+                                
                             </div>
 
                             {/* Section 2: Guest Details / Traveler Info */}
@@ -471,17 +515,20 @@ export default function Booking() {
                                             <p className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">
                                                 Total Reservation Cost
                                             </p>
-                                            <p className="text-xl font-black text-slate-900 dark:text-white mt-0.5 tracking-tight">
-                                                Rs. {new Intl.NumberFormat().format(getTotal())}
-                                            </p>
+                                                    <p className="text-xl font-black text-slate-900 dark:text-white mt-0.5 tracking-tight">
+                                                        $ {new Intl.NumberFormat().format(getFinalTotal())}
+                                                    </p>
                                         </div>
                                     </div>
-                                    <div className="text-right text-[11px] font-bold text-slate-400 dark:text-slate-500">
-                                        <p>{form.No_of_adults} Adult(s) × Rs {pkg.Price_for_adult}</p>
-                                        {form.No_of_child > 0 && (
-                                            <p className="mt-0.5">{form.No_of_child} Child(ren) × Rs {pkg.Price_for_child}</p>
-                                        )}
-                                    </div>
+                                            <div className="text-right text-[11px] font-bold text-slate-400 dark:text-slate-500">
+                                                <p>{form.No_of_adults} Adult(s) × $ {pkg.Price_for_adult}</p>
+                                                {form.No_of_child > 0 && (
+                                                    <p className="mt-0.5">{form.No_of_child} Child(ren) × $ {pkg.Price_for_child}</p>
+                                                )}
+                                                {form.Area && (
+                                                    <p className="mt-0.5">{form.Area} surcharge: $ {new Intl.NumberFormat().format(getAreaExtra())}</p>
+                                                )}
+                                            </div>
                                 </div>
                             )}
 

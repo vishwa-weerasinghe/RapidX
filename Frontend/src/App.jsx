@@ -1217,7 +1217,7 @@ export default function App() {
                     </span>
 
                     <span className="text-xl font-bold text-castleton">
-                      LKR {pkg.price.toLocaleString()}
+                      $ {pkg.price.toLocaleString()}
                     </span>
                   </div>
 
