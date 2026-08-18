@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Menu, ShoppingCart, LogOut } from 'lucide-react'
+import { Menu, LogOut } from 'lucide-react'
 import api from '../../axios'
 import { useTheme } from '../../context/ThemeContext'
 import ThemeModeIcon from '../ThemeModeIcon'
@@ -8,35 +8,16 @@ import ThemeModeIcon from '../ThemeModeIcon'
 export function Header({ user }) {
   const navigate = useNavigate()
   const { theme, toggleTheme } = useTheme()
-  const [cartCount, setCartCount] = useState(0)
-  const [newCartCount, setNewCartCount] = useState(0)
+  
   const [loading, setLoading] = useState(false)
 
   const customerName = user?.User_Name || 'Customer'
 
   const customerId = user?.Customer_ID
 
-  useEffect(() => {
-    if (!customerId) return
+  
 
-    api.get(`/cart/${customerId}`)
-      .then((res) => {
-        const total = Array.isArray(res.data) ? res.data.length : 0
-        setCartCount(total)
-        const lastSeen = parseInt(localStorage.getItem("lastSeenCartCount") || "0", 10)
-        setNewCartCount(Math.max(0, total - lastSeen))
-      })
-      .catch(() => {
-        setCartCount(0)
-        setNewCartCount(0)
-      })
-  }, [customerId])
-
-  const handleCartClick = () => {
-    localStorage.setItem("lastSeenCartCount", String(cartCount))
-    setNewCartCount(0)
-    navigate('/user/cart')
-  }
+  
 
   const handleLogout = async () => {
     setLoading(true)
@@ -107,17 +88,7 @@ export function Header({ user }) {
             <ThemeModeIcon className="w-5 h-5" />
           </button>
 
-          <button
-            onClick={handleCartClick}
-            className="relative p-2 text-charcoal hover:text-sacramento dark:text-white dark:hover:text-sacramento-300 transition-colors"
-          >
-            <ShoppingCart className="w-5 h-5" />
-            {newCartCount > 0 && (
-              <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full border-2 border-white bg-sacramento text-[10px] font-bold text-white dark:border-bg-dark dark:bg-sacramento-400">
-                {newCartCount}
-              </span>
-            )}
-          </button>
+          
 
           <div className="mx-1 h-6 w-px bg-border-light dark:bg-border-dark"></div>
 

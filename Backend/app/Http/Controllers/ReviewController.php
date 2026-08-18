@@ -29,6 +29,27 @@ class ReviewController extends Controller
             if (!$customerId) {
                 return response()->json(['message' => 'Customer profile not found.'], 403);
             }
+
+            // Resolve customer email from linked customer profile or user record
+            $customer = \App\Models\Customer::find($customerId);
+            $email = trim((string) ($customer?->Email ?? $user->Email ?? $user->email ?? ''));
+
+            if ($email === '') {
+                return response()->json(['message' => 'Email is required to submit a review.'], 422);
+            }
+
+            $booking = Booking::with('customer')
+                ->whereHas('customer', function ($query) use ($email) {
+                    $query->where('Email', $email);
+                })
+                ->latest('Booking_ID')
+                ->first();
+
+            if (!$booking || !$booking->customer) {
+                return response()->json(['message' => 'Sorry you have not booked a safari. you are failed to upload a review'], 422);
+            }
+
+            $customerId = $booking->customer->Customer_ID;
         } else {
             $email = trim((string) ($validated['Email'] ?? ''));
 
@@ -64,19 +85,7 @@ class ReviewController extends Controller
 
     public function update(Request $request, Review $review)
     {
-        $validated = $request->validate([
-            'Rate' => ['sometimes', 'required', 'integer', 'min:1', 'max:5'],
-            'Description' => ['sometimes', 'required', 'string', 'max:1000'],
-            'Customer_ID' => ['nullable', 'integer', 'exists:customers,Customer_ID'],
-        ]);
-
-        if (array_key_exists('Customer_ID', $validated) && ($validated['Customer_ID'] === null || $validated['Customer_ID'] === '')) {
-            $validated['Customer_ID'] = $request->user()?->Customer_ID ?? null;
-        }
-
-        $review->update($validated);
-
-        return response()->json($review);
+        return response()->json(['message' => 'Reviews cannot be edited after submission.'], 403);
     }
 
     public function destroy(Request $request, Review $review)

@@ -469,9 +469,9 @@ export default function App() {
   const tripadvisorVisibleReviews = showAllTripadvisorReviews
     ? tripadvisorReviews
     : tripadvisorReviews.slice(0, 6);
-  const systemReviews = reviews.filter(
-    (review) => !isTripAdvisorReview(review),
-  );
+  const systemReviews = reviews
+    .filter((review) => !isTripAdvisorReview(review))
+    .sort((a, b) => (b.rate || 0) - (a.rate || 0));
   const systemVisibleReviews = showAllReviews
     ? systemReviews
     : systemReviews.slice(0, 6);

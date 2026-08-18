@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import api from "../../axios";
+import { useTheme } from "../../context/ThemeContext";
 
 export default function Appointments() {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
   const [appointments, setAppointments] = useState([]);
   const [summary, setSummary] = useState({
     total_confirmed: 0,
@@ -9,15 +12,19 @@ export default function Appointments() {
     total_earnings_confirmed: 0,
     total_earnings_unconfirmed: 0,
   });
-  const [month, setMonth] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const fetchData = async (selectedMonth) => {
+  const currentMonth = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+  };
+
+  const fetchData = async () => {
     try {
       setLoading(true);
       setError("");
-      const params = selectedMonth ? { month: selectedMonth } : {};
+      const params = { month: currentMonth() };
       const [appRes, sumRes] = await Promise.all([
         api.get("/appointments", { params }),
         api.get("/appointments/summary", { params }),
@@ -41,61 +48,72 @@ export default function Appointments() {
     fetchData();
   }, []);
 
-  const handleMonthChange = (e) => {
-    const value = e.target.value;
-    setMonth(value);
-    fetchData(value);
+  const sorted = useMemo(() => {
+    return [...appointments]
+      .filter((a) => a.Status === "Confirmed")
+      .sort((a, b) => {
+        const ad = a.Booking_Date || "";
+        const bd = b.Booking_Date || "";
+        if (ad === bd) return (a.Pickup_Time || "").localeCompare(b.Pickup_Time || "");
+        return ad.localeCompare(bd);
+      });
+  }, [appointments]);
+
+  // Deterministic shades for each package name
+  const packageShades = {
+    light: [
+      "#ffffff", // pure white
+      "#faf6f0", // warm off-white
+      "#f2ede3", // light warm beige
+      "#e8efe4", // light sage tint
+      "#dfebdd", // sage green
+      "#d4e6da", // mint sage
+      "#cde6dc", // light teal
+      "#e6ebdf", // olive-tinted white
+      "#d7e5c8", // light olive green
+      "#c8e0d4", // medium sage-teal
+    ],
+    dark: [
+      "#182a1f", // deepest green
+      "#1f3527", // very dark green
+      "#29402f", // dark green
+      "#24423a", // dark teal
+      "#2f4d3b", // forest green
+      "#365844", // medium forest
+      "#2c4a2c", // dark olive
+      "#3d5c47", // sage dark
+      "#46684e", // lighter green
+      "#506b57", // moss
+    ],
   };
 
-  const sorted = useMemo(() => {
-    return [...appointments].sort((a, b) => {
-      const ad = a.Booking_Date || "";
-      const bd = b.Booking_Date || "";
-      if (ad === bd) return (a.Pickup_Time || "").localeCompare(b.Pickup_Time || "");
-      return ad.localeCompare(bd);
-    });
-  }, [appointments]);
+  const getPackageShade = (packageName) => {
+    const name = String(packageName || "").trim().toLowerCase();
+    const shades = packageShades[isDark ? "dark" : "light"];
+    if (!name) return shades[0];
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+      hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+    }
+    return shades[hash % shades.length];
+  };
 
   return (
     <div className="p-6">
-      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-charcoal dark:text-white">Appointments</h1>
-          <p className="text-sm text-muted mt-1">View customer booking details and assigned driver.</p>
-        </div>
-
-        <label className="flex items-center gap-2 text-sm text-muted">
-          <span>Filter by month:</span>
-          <input
-            type="month"
-            value={month}
-            onChange={handleMonthChange}
-            className="form-input max-w-[180px]"
-          />
-          {month && (
-            <button
-              type="button"
-              onClick={() => {
-                setMonth("");
-                fetchData("");
-              }}
-              className="btn-secondary text-sm"
-            >
-              Clear
-            </button>
-          )}
-        </label>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-charcoal dark:text-white">Appointment Summary of This Month</h1>
+        <p className="text-sm text-muted mt-1">View summarised booking details for this month.</p>
       </div>
 
       {/* Summary Cards */}
       {!loading && !error && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
           <div className="card p-4">
             <p className="text-xs uppercase tracking-wide text-muted">Total Confirmed Appointments</p>
             <p className="mt-1 text-2xl font-bold text-charcoal dark:text-white">{summary.total_confirmed}</p>
           </div>
           <div className="card p-4">
-            <p className="text-xs uppercase tracking-wide text-muted">Total Unconfirmed Appointments</p>
+            <p className="text-xs uppercase tracking-wide text-muted">Total Unconfirmed(In cart) Appointments</p>
             <p className="mt-1 text-2xl font-bold text-charcoal dark:text-white">{summary.total_unconfirmed}</p>
           </div>
           <div className="card p-4">
@@ -105,6 +123,12 @@ export default function Appointments() {
           <div className="card p-4">
             <p className="text-xs uppercase tracking-wide text-muted">Total Earnings (Unconfirmed)</p>
             <p className="mt-1 text-2xl font-bold text-muted">LKR {Number(summary.total_earnings_unconfirmed).toLocaleString()}</p>
+          </div>
+          <div className="card p-4">
+            <p className="text-xs uppercase tracking-wide text-muted">Total Earnings</p>
+            <p className="mt-1 text-2xl font-bold text-sacramento">
+              LKR {Number(Number(summary.total_earnings_confirmed) + Number(summary.total_earnings_unconfirmed)).toLocaleString()}
+            </p>
           </div>
         </div>
       )}
@@ -116,9 +140,7 @@ export default function Appointments() {
           {error}
         </div>
       ) : sorted.length === 0 ? (
-        <p className="text-muted">
-          {month ? "No appointments found for the selected month." : "No appointments found."}
-        </p>
+        <p className="text-muted">No confirmed appointments found for this month.</p>
       ) : (
         <div className="overflow-x-auto rounded-lg border border-border-light dark:border-border-dark">
           <table className="min-w-full bg-surface text-sm">
@@ -135,8 +157,18 @@ export default function Appointments() {
             <tbody className="divide-y divide-border-light dark:divide-border-dark">
               {sorted.map((a) => {
                 const isConfirmed = (a.Status || "").toLowerCase() === "confirmed";
+                const baseShade = getPackageShade(a.Package_Name);
                 return (
-                  <tr key={a.Booking_ID} className="hover:bg-offwhite-100 dark:hover:bg-surface-2">
+                  <tr
+                    key={a.Booking_ID}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = isDark ? "#2f4437" : "#ffffff";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = baseShade;
+                    }}
+                    style={{ backgroundColor: baseShade, color: isDark ? "#e5e7eb" : "#1f2937" }}
+                  >
                     <td className="px-4 py-3 font-mono text-charcoal dark:text-white">#{a.Booking_ID}</td>
                     <td className="px-4 py-3">
                       <div className="font-medium text-charcoal dark:text-white">
