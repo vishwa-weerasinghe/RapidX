@@ -183,12 +183,12 @@ export default function Login() {
             )}
           </div>
 
-          <a
-            href="#"
+          <Link
+            to="/forgot-password"
             className="text-xs text-castleton-300 hover:underline text-right block transition"
           >
             Forgot Password?
-          </a>
+          </Link>
 
           {/* Submit Button with matching background gradient and tracking text */}
           <div className="pt-2">
