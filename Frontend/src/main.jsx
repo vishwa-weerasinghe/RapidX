@@ -6,6 +6,8 @@ import "./index.css";
 import App from "./App.jsx";
 import Register from "./pages/user/register.jsx";
 import Login from "./pages/public/login.jsx";
+import ForgotPassword from "./pages/public/ForgotPassword.jsx";
+import ResetPassword from "./pages/public/ResetPassword.jsx";
 import Dashboard from "./pages/dashboard.jsx";
 import Review from "./pages/user/Review.jsx";
 
@@ -57,6 +59,8 @@ createRoot(document.getElementById("root")).render(
           <Route path="/" element={<App />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/password-reset/:token" element={<ResetPassword />} />
           <Route path="/booking" element={<GuestBooking />} />
           <Route path="/addtocart/:id" element={<AddToCart />} />
 
