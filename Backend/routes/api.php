@@ -23,6 +23,11 @@ Route::get('/user', function (Request $request) {
 Route::post('/register', [AuthController::class, 'register']);
 
 Route::post('/login', [AuthController::class, 'login']);    
+Route::post('/forgot-password', [\App\Http\Controllers\PasswordResetController::class, 'sendResetLinkEmail']);
+Route::post('/reset-password', [\App\Http\Controllers\PasswordResetController::class, 'reset']);
+Route::get('/reset-password/{token}', function () {
+    return response()->json(['message' => 'This is a dummy route for generating URLs.']);
+})->name('password.reset');
 
 Route::get('/dashboard', [AuthController::class, 'dashboard'])->middleware('auth:sanctum');
 
