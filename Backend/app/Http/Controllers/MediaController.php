@@ -8,6 +8,12 @@ use Illuminate\Support\Facades\File;
 
 class MediaController extends Controller
 {
+    private function isAdmin($user): bool
+    {
+        $role = $user->role ?? $user->Role ?? $user->user_type ?? null;
+        return in_array(strtolower((string) $role), ['admin', 'administrator', 'superadmin'], true);
+    }
+
     public function index()
     {
         return response()->json(Media::latest()->get());
@@ -15,6 +21,10 @@ class MediaController extends Controller
 
     public function store(Request $request)
     {
+        if (!$this->isAdmin($request->user())) {
+            return response()->json(['message' => 'Only administrators can upload media.'], 403);
+        }
+
         $validated = $request->validate([
             'title'       => 'required|string|max:100',
             'description' => 'nullable|string',
@@ -47,9 +57,10 @@ class MediaController extends Controller
 
     public function update(Request $request, Media $medium)
     {
-        // Workaround for PHP/Laravel not parsing multipart/form-data on PUT/PATCH requests:
-        // We can handle both PUT and POST requests for update, or instruct user to use _method=PUT in POST form data.
-        // To make it fully compatible with React uploads on update, we'll validate.
+        if (!$this->isAdmin($request->user())) {
+            return response()->json(['message' => 'Only administrators can update media.'], 403);
+        }
+
         $validated = $request->validate([
             'title'       => 'sometimes|required|string|max:100',
             'description' => 'nullable|string',
@@ -82,8 +93,12 @@ class MediaController extends Controller
         return response()->json($medium);
     }
 
-    public function destroy(Media $medium)
+    public function destroy(Request $request, Media $medium)
     {
+        if (!$this->isAdmin($request->user())) {
+            return response()->json(['message' => 'Only administrators can delete media.'], 403);
+        }
+
         if ($medium->file_path) {
             $filePath = public_path($medium->file_path);
             if (File::exists($filePath)) {

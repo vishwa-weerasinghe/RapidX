@@ -7,6 +7,12 @@ use Illuminate\Http\Request;
 
 class DriverController extends Controller
 {
+    private function isAdmin($user): bool
+    {
+        $role = $user->role ?? $user->Role ?? $user->user_type ?? null;
+        return in_array(strtolower((string) $role), ['admin', 'administrator', 'superadmin'], true);
+    }
+
     public function index()
     {
         return response()->json(Driver::latest('Driver_ID')->get());
@@ -14,6 +20,10 @@ class DriverController extends Controller
 
     public function store(Request $request)
     {
+        if (!$this->isAdmin($request->user())) {
+            return response()->json(['message' => 'Only administrators can create drivers.'], 403);
+        }
+
         $validated = $request->validate([
             'Driver_Name'  => 'required|string|max:100',
             'Phone_Number' => 'required|string|max:20',
@@ -32,6 +42,10 @@ class DriverController extends Controller
 
     public function update(Request $request, Driver $driver)
     {
+        if (!$this->isAdmin($request->user())) {
+            return response()->json(['message' => 'Only administrators can update drivers.'], 403);
+        }
+
         $validated = $request->validate([
             'Driver_Name'  => 'sometimes|required|string|max:100',
             'Phone_Number' => 'sometimes|required|string|max:20',
@@ -43,8 +57,12 @@ class DriverController extends Controller
         return response()->json($driver);
     }
 
-    public function destroy(Driver $driver)
+    public function destroy(Request $request, Driver $driver)
     {
+        if (!$this->isAdmin($request->user())) {
+            return response()->json(['message' => 'Only administrators can delete drivers.'], 403);
+        }
+
         $driver->delete();
         return response()->json(['message' => 'Driver deleted']);
     }
