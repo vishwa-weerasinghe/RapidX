@@ -34,9 +34,9 @@ Route::get('/dashboard', [AuthController::class, 'dashboard'])->middleware('auth
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
 Route::apiResource('packages', PackageController::class);
-Route::apiResource('drivers', DriverController::class);
 Route::apiResource('vehicles', VehicleController::class);
-Route::apiResource('media', MediaController::class);
+Route::apiResource('drivers', DriverController::class)->only(['index', 'show']);
+Route::apiResource('media', MediaController::class)->only(['index', 'show']);
 Route::get('appointments', [AppointmentController::class, 'index']);
 Route::get('appointments/summary', [AppointmentController::class, 'summary']);
 Route::middleware('auth:sanctum')->put('appointments/{booking}/driver', [AppointmentController::class, 'updateDriver']);
@@ -76,4 +76,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('reviews/{review}', [ReviewController::class, 'update']);
     Route::patch('reviews/{review}', [ReviewController::class, 'update']);
     Route::delete('reviews/{review}', [ReviewController::class, 'destroy']);
+
+    Route::apiResource('drivers', DriverController::class)->only(['store', 'update', 'destroy']);
+    Route::apiResource('media', MediaController::class)->only(['store', 'update', 'destroy']);
 });
