@@ -9,10 +9,13 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
+use Illuminate\Auth\Passwords\CanResetPassword;
+
+class User extends Authenticatable implements CanResetPasswordContract
 {
     /** @use HasFactory<UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, CanResetPassword;
 
     /**
      * The attributes that are mass assignable.
@@ -58,5 +61,10 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
         ];
+    }
+
+    public function getEmailForPasswordReset()
+    {
+        return $this->Email;
     }
 }

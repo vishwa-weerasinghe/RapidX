@@ -12,6 +12,7 @@ import {
 import ThemeToggle from "./components/ThemeToggle";
 import { useTheme } from "./context/ThemeContext";
 import api from "./axios";
+import PublicReviewSection from "./pages/public/Review.jsx";
 
 const tripadvisorReviews = [
   {
@@ -118,15 +119,27 @@ export default function App() {
 
   const handleBookNow = (pkg) => {
     if (pkg && (pkg.id || pkg.Package_ID)) {
-      navigate(`/booking/${pkg.id || pkg.Package_ID}`);
+      navigate(`/booking`, { state: { packageId: pkg.id || pkg.Package_ID } });
     } else {
       navigate(`/booking`);
     }
   };
 
-  const handleAddToCart = (pkg) => {
-    // A cart entry needs booking and contact details, so collect them before posting.
-    navigate(`/booking/${pkg.id || pkg.Package_ID}`);
+  const handleAddToCart = async (pkg) => {
+    if (user && user.Customer_ID) {
+      navigate(`/addtocart/${pkg.id || pkg.Package_ID}`);
+    } else {
+      localStorage.setItem(
+        "pending_cart",
+        JSON.stringify({
+          Package_ID: pkg.id || pkg.Package_ID,
+          Payment:
+            parseFloat(String(pkg.price || "0").replace(/[^0-9.]/g, "")) || 0,
+        }),
+      );
+      alert("Please login to add this package to your cart.");
+      navigate("/login");
+    }
   };
 
   // --- STATE MANAGEMENT ---
@@ -221,7 +234,7 @@ export default function App() {
 
           const maxBookings = Math.max(
             0,
-            ...res.data.map((pkg) => Number(pkg.bookings_count || 0))
+            ...res.data.map((pkg) => Number(pkg.bookings_count || 0)),
           );
 
           const mapped = res.data.map((pkg) => ({
@@ -232,7 +245,9 @@ export default function App() {
             img: pkg.Image
               ? `${backendUrl}/storage/${pkg.Image}`
               : fallbackImage,
-            popular: Number(pkg.bookings_count || 0) === maxBookings && maxBookings > 0,
+            popular:
+              Number(pkg.bookings_count || 0) === maxBookings &&
+              maxBookings > 0,
             Price_for_adult: pkg.Price_for_adult,
             Price_for_child: pkg.Price_for_child,
             Package_Name: pkg.Package_Name,
@@ -356,7 +371,8 @@ export default function App() {
     const target = document.getElementById(id);
     if (target) {
       // Calculate accurate position regardless of parent positioning
-      const elementPosition = target.getBoundingClientRect().top + window.scrollY;
+      const elementPosition =
+        target.getBoundingClientRect().top + window.scrollY;
 
       // Use a consistent offset height since the sticky header shrinks upon scrolling
       // Assuming the sticky header is roughly 80-90px tall when scrolled
@@ -370,18 +386,9 @@ export default function App() {
   };
 
   const [reviews, setReviews] = useState([]);
-  const [showReviewForm, setShowReviewForm] = useState(false);
-  const [reviewForm, setReviewForm] = useState({
-    name: "",
-    email: "",
-    rating: 5,
-    message: "",
-  });
-  const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [showAllTripadvisorReviews, setShowAllTripadvisorReviews] =
     useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
-  const [reviewNotification, setReviewNotification] = useState(null);
 
   const tripadvisorUrl =
     "https://www.tripadvisor.com/Attraction_Review-g304133-d15640558-Reviews-Minneriya_Wild_Jeep_Safari-Dambulla_Central_Province.html";
@@ -466,83 +473,19 @@ export default function App() {
   const tripadvisorVisibleReviews = showAllTripadvisorReviews
     ? tripadvisorReviews
     : tripadvisorReviews.slice(0, 6);
-  const systemReviews = reviews.filter(
-    (review) => !isTripAdvisorReview(review),
-  );
+  const systemReviews = reviews
+    .filter((review) => !isTripAdvisorReview(review))
+    .sort((a, b) => (b.rate || 0) - (a.rate || 0));
   const systemVisibleReviews = showAllReviews
     ? systemReviews
     : systemReviews.slice(0, 6);
-
-  const handleReviewFormChange = (e) => {
-    const { name, value } = e.target;
-    setReviewForm((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleGuestReviewSubmit = (e) => {
-    e.preventDefault();
-
-    if (!reviewForm.message.trim()) {
-      setReviewNotification({
-        text: "Please share a few words about your experience.",
-        type: "error",
-      });
-      setTimeout(() => setReviewNotification(null), 4000);
-      return;
-    }
-
-    setReviewSubmitting(true);
-
-    const name = reviewForm.name.trim() || "Guest User";
-    const initials =
-      name
-        .split(" ")
-        .map((word) => word[0] || "")
-        .join("")
-        .slice(0, 2)
-        .toUpperCase() || "G";
-
-    const newReview = {
-      initials,
-      name,
-      date: "Just now",
-      title:
-        reviewForm.message.trim().split(" ").slice(0, 4).join(" ") +
-        (reviewForm.message.trim().split(" ").length > 4 ? "..." : ""),
-      text: reviewForm.message.trim(),
-      rate: Number(reviewForm.rating) || 5,
-      isGuest: true,
-      source: "Guest",
-    };
-
-    setReviews((prev) => {
-      const updatedReviews = [newReview, ...prev];
-      try {
-        const storedGuestReviews = getStoredGuestReviews();
-        localStorage.setItem(
-          "guestReviews",
-          JSON.stringify([newReview, ...storedGuestReviews]),
-        );
-      } catch (err) {
-        console.error("Error saving guest review:", err);
-      }
-      return updatedReviews;
-    });
-    setReviewForm({ name: "", email: "", rating: 5, message: "" });
-    setShowReviewForm(false);
-    setReviewNotification({
-      text: "Thank you for your review! It has been added to this page.",
-      type: "success",
-    });
-    setTimeout(() => setReviewNotification(null), 4000);
-    setReviewSubmitting(false);
-  };
 
   const renderReviewCard = (rev, index) => (
     <div
       key={`${rev.source || "review"}-${index}`}
       className={`review-card p-6 rounded-2xl shadow-md border hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ${theme === "dark"
-        ? "bg-neutral-900 border-neutral-800"
-        : "bg-white border-neutral-100"
+          ? "bg-neutral-900 border-neutral-800"
+          : "bg-white border-neutral-100"
         }`}
     >
       <div className="flex justify-between items-start mb-4">
@@ -566,10 +509,10 @@ export default function App() {
       </p>
       <span
         className={`font-bold text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider ${rev.isGuest
-          ? "bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-400"
-          : rev.source === "TripAdvisor"
-            ? "bg-blue-50 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300"
-            : "bg-castleton-50 dark:bg-castleton-900/80 text-castleton dark:text-castleton-300"
+            ? "bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-400"
+            : rev.source === "TripAdvisor"
+              ? "bg-blue-50 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300"
+              : "bg-castleton-50 dark:bg-castleton-900/80 text-castleton dark:text-castleton-300"
           }`}
       >
         {rev.source || (rev.isGuest ? "Guest" : "Verified")}
@@ -577,20 +520,19 @@ export default function App() {
     </div>
   );
 
-
   return (
     <div
       className={`font-sans antialiased overflow-x-hidden selection:bg-[var(--primary)] selection:text-white transition-colors duration-200 ${theme === "dark"
-        ? "bg-[#101813] text-[#F5F5F5]"
-        : "bg-[#F8F6F0] text-[#263238]"
+          ? "bg-[#101813] text-[#F5F5F5]"
+          : "bg-[#F8F6F0] text-[#263238]"
         }`}
     >
       {/* Toast Notification Alert Box */}
       {notification && (
         <div
           className={`fixed top-24 right-5 p-5 rounded-xl shadow-2xl z-[9999] border-l-4 ${notification.type === "error" ? "border-red-500" : "border-sacramento"} max-w-sm animate-fade-in-left ${theme === "dark"
-            ? "bg-neutral-900 text-white"
-            : "bg-white text-neutral-800"
+              ? "bg-neutral-900 text-white"
+              : "bg-white text-neutral-800"
             }`}
         >
           <p className="text-sm font-medium">{notification.text}</p>
@@ -616,8 +558,8 @@ export default function App() {
         )}
         <div
           className={`max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between transition-all duration-500 relative ${isScrolled
-            ? "bg-[var(--page-bg)]/90 dark:bg-[var(--surface)]/90 backdrop-blur-xl rounded-full shadow-lg border border-[var(--border)]/40 py-2.5"
-            : "bg-transparent py-5 border-b border-white/10"
+              ? "bg-[var(--page-bg)]/90 dark:bg-[var(--surface)]/90 backdrop-blur-xl rounded-full shadow-lg border border-[var(--border)]/40 py-2.5"
+              : "bg-transparent py-5 border-b border-white/10"
             }`}
         >
           {/* Logo & Brand Name */}
@@ -633,7 +575,9 @@ export default function App() {
               />
             </div>
             <span
-              className={`text-base sm:text-lg md:text-xl font-bold tracking-wide transition-colors duration-300 ${isScrolled ? "text-sacramento dark:text-white" : "text-white drop-shadow-md"
+              className={`text-base sm:text-lg md:text-xl font-bold tracking-wide transition-colors duration-300 ${isScrolled
+                  ? "text-sacramento dark:text-white"
+                  : "text-white drop-shadow-md"
                 }`}
             >
               Wild Jeep Safari
@@ -656,10 +600,10 @@ export default function App() {
                   <button
                     onClick={() => scrollToSection(section)}
                     className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 ${activeSection === section
-                      ? "bg-sacramento text-white shadow shadow-sacramento/25"
-                      : isScrolled
-                        ? "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-slate-800/50"
-                        : "text-white/80 hover:text-white hover:bg-white/10"
+                        ? "bg-sacramento text-white shadow shadow-sacramento/25"
+                        : isScrolled
+                          ? "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-slate-800/50"
+                          : "text-white/80 hover:text-white hover:bg-white/10"
                       }`}
                   >
                     {section}
@@ -676,8 +620,8 @@ export default function App() {
                 <Link
                   to={dashboardLink}
                   className={`flex items-center gap-1.5 text-xs font-bold px-4 py-2 border rounded-full hover:shadow transition-all duration-300 ${isScrolled
-                    ? "text-sacramento border-sacramento/25 hover:bg-sacramento/5 dark:text-white dark:border-neutral-800 dark:hover:bg-neutral-800"
-                    : "text-white border-white/20 hover:bg-white/10"
+                      ? "text-sacramento border-sacramento/25 hover:bg-sacramento/5 dark:text-white dark:border-neutral-800 dark:hover:bg-neutral-800"
+                      : "text-white border-white/20 hover:bg-white/10"
                     }`}
                 >
                   <LayoutDashboard size={14} />
@@ -688,8 +632,8 @@ export default function App() {
                   <Link
                     to="/login"
                     className={`text-xs font-bold px-4 py-2 border rounded-full hover:shadow transition-all duration-300 ${isScrolled
-                      ? "text-slate-700 dark:text-slate-350 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-850"
-                      : "text-white border-white/20 hover:bg-white/10"
+                        ? "text-slate-700 dark:text-slate-350 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-850"
+                        : "text-white border-white/20 hover:bg-white/10"
                       }`}
                   >
                     Log in
@@ -712,10 +656,10 @@ export default function App() {
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className={`md:hidden flex items-center justify-center p-2.5 rounded-full transition-all duration-300 active:scale-95 ${isMobileMenuOpen
-                ? "bg-sacramento text-white shadow-md"
-                : isScrolled
-                  ? "bg-slate-100 dark:bg-neutral-800 text-slate-800 dark:text-white"
-                  : "bg-white/20 text-white backdrop-blur-md"
+                  ? "bg-sacramento text-white shadow-md"
+                  : isScrolled
+                    ? "bg-slate-100 dark:bg-neutral-800 text-slate-800 dark:text-white"
+                    : "bg-white/20 text-white backdrop-blur-md"
                 }`}
               aria-label="Toggle navigation interface"
             >
@@ -740,8 +684,8 @@ export default function App() {
                     key={section}
                     onClick={() => scrollToSection(section)}
                     className={`py-2.5 px-3 rounded-xl text-xs font-bold capitalize tracking-wide transition-all duration-200 text-left ${activeSection === section
-                      ? "bg-sacramento text-white shadow-md shadow-sacramento/30"
-                      : "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-neutral-800"
+                        ? "bg-sacramento text-white shadow-md shadow-sacramento/30"
+                        : "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-neutral-800"
                       }`}
                   >
                     {section}
@@ -981,7 +925,7 @@ export default function App() {
                 onClick={() => scrollToSection("contact")}
                 className="inline-flex items-center gap-2 bg-castleton text-white font-bold px-8 py-4 rounded-xl hover:bg-opacity-90 shadow-lg shadow-castleton/30 transition-all duration-300 hover:-translate-y-1"
               >
-                More About Us
+                Contact Us
                 <svg
                   className="w-5 h-5"
                   fill="none"
@@ -1200,7 +1144,6 @@ export default function App() {
         className="py-20 bg-white border-t border-gray-100"
       >
         <div className="max-w-7xl mx-auto px-4 md:px-6">
-
           {/* Section Header */}
           <div className="text-center max-w-xl mx-auto mb-14">
             <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-50 text-castleton text-xs font-bold uppercase tracking-widest border border-gray-100">
@@ -1234,7 +1177,7 @@ export default function App() {
                   />
 
                   {pkg.popular && (
-                  <span className="absolute top-4 right-4 bg-pink-600 text-white text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full border border-pink-500 shadow-md hover:scale-105 transition-all duration-300">
+                    <span className="absolute top-4 right-4 bg-pink-600 text-white text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full border border-pink-500 shadow-md hover:scale-105 transition-all duration-300">
                       Popular
                     </span>
                   )}
@@ -1242,7 +1185,6 @@ export default function App() {
 
                 {/* Content */}
                 <div className="p-5 flex flex-col flex-grow">
-
                   <h3 className="text-lg font-bold text-gray-900 mb-2">
                     {pkg.title}
                   </h3>
@@ -1273,32 +1215,30 @@ export default function App() {
 
                   {/* Price */}
                   <div className="flex items-center justify-between border-t border-gray-100 pt-4 mb-4">
-                    <span className="text-sm text-gray-500">
-                      Starting From
-                    </span>
+                    <span className="text-sm text-gray-500">Starting From</span>
 
-                    <span className="text-xl font-bold text-castleton">
-                      LKR {pkg.price.toLocaleString()}
-                    </span>
+                    <div className="text-right">
+                      <div className="text-xl font-bold text-castleton">$ {pkg.price.toLocaleString()}</div>
+                      <div className="text-xs text-gray-500">per adult</div>
+                    </div>
                   </div>
 
                   {/* Buttons */}
                   <div className="flex gap-3 mt-auto">
                     <button
                       onClick={() => handleBookNow(pkg)}
-                      className="flex-1 bg-sacramento text-white py-2.5 rounded-xl font-semibold hover:bg-castleton transition"
+                      className="flex-1 bg-[#2E7D32] text-white font-bold text-center py-2.5 rounded-xl shadow-md hover:bg-[#1B5E20] hover:shadow-lg transition-all duration-300 transform hover:-translate-y-[2px]"
                     >
                       Book Now
                     </button>
 
                     <button
                       onClick={() => handleAddToCart(pkg)}
-                      className="flex-1 border border-sacramento text-sacramento py-2.5 rounded-xl font-semibold hover:bg-sacramento hover:text-white transition"
+                      className="flex-1 border-2 border-sacramento text-sacramento py-2.5 rounded-xl font-semibold hover:bg-sacramento/10 transition-colors"
                     >
                       Add to Cart
                     </button>
                   </div>
-
                 </div>
               </div>
             ))}
@@ -1330,14 +1270,6 @@ export default function App() {
               className="h-24 sm:h-32 mx-auto object-contain"
             />
           </div>
-
-          {reviewNotification && (
-            <div
-              className={`mx-auto mb-6 max-w-md rounded-xl border px-4 py-3 text-sm ${reviewNotification.type === "error" ? "border-red-500 text-red-600 bg-red-50" : "border-castleton text-castleton bg-castleton-50"}`}
-            >
-              {reviewNotification.text}
-            </div>
-          )}
 
           <div className="mb-14 rounded-3xl border border-gray-100 bg-white p-6 md:p-8 shadow-sm">
             <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5 mb-8">
@@ -1372,7 +1304,7 @@ export default function App() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-6">
               {tripadvisorVisibleReviews.map((rev, index) =>
                 renderReviewCard(rev, index),
               )}
@@ -1402,107 +1334,10 @@ export default function App() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] gap-6 lg:items-start">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {systemVisibleReviews.map((rev, index) =>
-                  renderReviewCard(rev, index),
-                )}
-              </div>
-
-              <form
-                onSubmit={handleGuestReviewSubmit}
-                className="rounded-2xl border border-gray-100 bg-gray-50 p-6 shadow-sm lg:sticky lg:top-24"
-              >
-                <div className="mb-7">
-                  <h4 className="font-outfit text-xl font-bold text-gray-900">
-                    Write Review
-                  </h4>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Tell us about the moments that made your adventure
-                    unforgettable. Your experience helps inspire future
-                    explorers.
-                  </p>
-                </div>
-
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">
-                      Your name
-                    </label>
-                    <input
-                      type="text"
-                      name="name"
-                      value={reviewForm.name}
-                      onChange={handleReviewFormChange}
-                      placeholder="Enter your name"
-                      className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-castleton"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">
-                      Your email
-                    </label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={reviewForm.email}
-                      onChange={handleReviewFormChange}
-                      placeholder="Enter your email"
-                      className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-castleton"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">
-                      Rating
-                    </label>
-                    <select
-                      name="rating"
-                      value={reviewForm.rating}
-                      onChange={handleReviewFormChange}
-                      className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-castleton"
-                    >
-                      {[
-                        { value: 5, label: "Excellent" },
-                        { value: 4, label: "Very Good" },
-                        { value: 3, label: "Good" },
-                        { value: 2, label: "Fair" },
-                        { value: 1, label: "Poor" },
-                      ].map(({ value, label }) => (
-                        <option key={value} value={value}>
-                          {"⭐".repeat(value)} - {label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">
-                      Your review
-                    </label>
-                    <textarea
-                      name="message"
-                      value={reviewForm.message}
-                      onChange={handleReviewFormChange}
-                      rows="4"
-                      placeholder="Share your safari story"
-                      className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-castleton resize-none"
-                    />
-                  </div>
-                </div>
-
-                <div className="mt-6 flex justify-end">
-                  <button
-                    type="submit"
-                    disabled={reviewSubmitting}
-                    className="bg-sacramento text-white font-semibold px-6 py-3 rounded-full hover:bg-opacity-90 disabled:opacity-70 transition duration-300 w-full"
-                  >
-                    {reviewSubmitting ? "Submitting..." : "Submit Review"}
-                  </button>
-                </div>
-              </form>
-            </div>
+            <PublicReviewSection
+              reviews={systemVisibleReviews}
+              renderReviewCard={renderReviewCard}
+            />
           </div>
         </div>
       </section>
@@ -1595,11 +1430,14 @@ export default function App() {
           <p className="text-neutral-200 text-base sm:text-lg mb-8 max-w-md mx-auto">
             Your Dream Safari Experience Awaits
           </p>
+          <h2 className="font-serif text-2xl sm:text-4xl font-bold mb-4">
+            Contact Us:
+          </h2>
           <a
             href="mailto:info@minneriyawildjeepsafari.com"
             className="bg-[#2E7D32] text-white font-bold text-center px-8 py-3.5 rounded-full shadow-md hover:bg-[#1B5E20] hover:shadow-lg transition-all duration-300 transform hover:-translate-y-[2px]"
           >
-            Contact Us: info@minneriyawildjeepsafari.com
+            info@minneriyawildjeepsafari.com
           </a>
         </div>
       </section>

@@ -23,7 +23,6 @@ export default function VehicleForm() {
   const [existingVehicles, setExistingVehicles] = useState([]);
 
   useEffect(() => {
-    // Fetch drivers for dropdown
     api
       .get("/drivers")
       .then((res) => setDrivers(res.data))
@@ -31,7 +30,6 @@ export default function VehicleForm() {
   }, []);
 
   useEffect(() => {
-    // Fetch existing vehicles for search
     api
       .get("/vehicles")
       .then((res) => setExistingVehicles(res.data || []))
@@ -84,21 +82,21 @@ export default function VehicleForm() {
     );
   });
 
-  if (loading) return <div className="p-6 text-gray-500">Loading...</div>;
+  if (loading) return <div className="p-6 text-muted">Loading...</div>;
 
   return (
     <div className="p-6 max-w-xl">
-      <h1 className="text-2xl font-semibold text-gray-800 mb-6">
+      <h1 className="text-2xl font-bold text-charcoal dark:text-white mb-6">
         {isEdit ? "Edit Vehicle" : "Add Vehicle"}
       </h1>
 
       <div className="mb-6">
-        <label className="block text-sm font-semibold text-gray-700 mb-2">
+        <label className="block text-sm font-semibold text-charcoal dark:text-white mb-2">
           Search Existing Vehicles
         </label>
         <div className="relative">
           <svg
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted"
             fill="none"
             stroke="currentColor"
             strokeWidth={2}
@@ -115,32 +113,32 @@ export default function VehicleForm() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by vehicle number or type..."
-            className="w-full rounded-lg border border-gray-300 pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="form-input pl-9"
           />
         </div>
 
         {search.trim() !== "" && (
-          <div className="mt-3 rounded-lg border border-gray-200 bg-gray-50 max-h-64 overflow-y-auto">
+          <div className="mt-3 rounded-lg border border-border-light bg-surface-2 max-h-64 overflow-y-auto dark:border-border-dark">
             {filteredVehicles.length === 0 ? (
-              <p className="px-4 py-3 text-sm text-gray-500">
+              <p className="px-4 py-3 text-sm text-muted">
                 No existing vehicles match your search.
               </p>
             ) : (
-              <ul className="divide-y divide-gray-200">
+              <ul className="divide-y divide-border-light dark:divide-border-dark">
                 {filteredVehicles.map((vehicle) => (
                   <li
                     key={vehicle.Vehicle_ID}
-                    className="flex items-center justify-between px-4 py-3 hover:bg-gray-100"
+                    className="flex items-center justify-between px-4 py-3 hover:bg-offwhite-100 dark:hover:bg-surface transition"
                   >
                     <div>
-                      <p className="text-sm font-medium text-gray-800">
+                      <p className="text-sm font-medium text-charcoal dark:text-white">
                         {vehicle.Vehicle_No}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-muted">
                         {vehicle.Vehicle_Type} · {vehicle.No_of_Seats} seats
                       </p>
                     </div>
-                    <span className="text-xs text-gray-400">
+                    <span className="text-xs text-muted/70">
                       #{vehicle.Vehicle_ID}
                     </span>
                   </li>
@@ -153,7 +151,7 @@ export default function VehicleForm() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-charcoal dark:text-white mb-1">
             Vehicle Number
           </label>
           <input
@@ -162,7 +160,7 @@ export default function VehicleForm() {
             value={form.Vehicle_No}
             onChange={handleChange}
             placeholder="e.g., ABC-1234"
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="form-input"
           />
           {errors.Vehicle_No && (
             <p className="text-red-500 text-xs mt-1">{errors.Vehicle_No[0]}</p>
@@ -170,7 +168,7 @@ export default function VehicleForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-charcoal dark:text-white mb-1">
             Vehicle Type
           </label>
           <input
@@ -179,7 +177,7 @@ export default function VehicleForm() {
             value={form.Vehicle_Type}
             onChange={handleChange}
             placeholder="e.g., Sedan, SUV, Van"
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="form-input"
           />
           {errors.Vehicle_Type && (
             <p className="text-red-500 text-xs mt-1">{errors.Vehicle_Type[0]}</p>
@@ -187,7 +185,7 @@ export default function VehicleForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-charcoal dark:text-white mb-1">
             Number of Seats
           </label>
           <input
@@ -196,7 +194,7 @@ export default function VehicleForm() {
             value={form.No_of_Seats}
             onChange={handleChange}
             min="1"
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="form-input"
           />
           {errors.No_of_Seats && (
             <p className="text-red-500 text-xs mt-1">{errors.No_of_Seats[0]}</p>
@@ -204,14 +202,14 @@ export default function VehicleForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-charcoal dark:text-white mb-1">
             Driver
           </label>
           <select
             name="Driver_ID"
             value={form.Driver_ID}
             onChange={handleChange}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="form-input"
           >
             <option value="">-- Select a Driver --</option>
             {drivers.map((driver) => (
@@ -229,14 +227,14 @@ export default function VehicleForm() {
           <button
             type="submit"
             disabled={saving}
-            className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm font-medium transition"
+            className="btn-primary disabled:opacity-50"
           >
             {saving ? "Saving..." : isEdit ? "Update Vehicle" : "Create Vehicle"}
           </button>
           <button
             type="button"
             onClick={() => navigate("/admin/vehicles")}
-            className="px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 hover:bg-gray-50"
+            className="btn-secondary"
           >
             Cancel
           </button>
@@ -245,4 +243,3 @@ export default function VehicleForm() {
     </div>
   );
 }
-

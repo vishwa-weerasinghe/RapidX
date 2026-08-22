@@ -48,8 +48,13 @@ class DashboardController extends Controller
             });
 
         // ---- Bookings per month (last 6 months) ----
+        $isSqlite = DB::connection()->getDriverName() === 'sqlite';
+        $monthSelector = $isSqlite 
+            ? "strftime('%Y-%m', Booking_Date)"
+            : "DATE_FORMAT(Booking_Date, '%Y-%m')";
+
         $bookingsPerMonth = Booking::select(
-                DB::raw("DATE_FORMAT(Booking_Date, '%Y-%m') as month"),
+                DB::raw("{$monthSelector} as month"),
                 DB::raw('count(*) as count')
             )
             ->where('Booking_Date', '>=', now()->subMonths(6)->startOfMonth())

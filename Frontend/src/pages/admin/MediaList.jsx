@@ -40,12 +40,12 @@ export default function MediaList() {
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-800">Media Gallery</h1>
-          <p className="text-sm text-gray-500 mt-1">Upload and manage promotional images, safari banners, and gallery photos.</p>
+          <h1 className="text-2xl font-bold text-charcoal dark:text-white">Media Gallery</h1>
+          <p className="text-sm text-muted mt-1">Upload and manage promotional images, safari banners, and gallery photos.</p>
         </div>
         <button
           onClick={() => navigate("/admin/media/create")}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm flex items-center gap-2"
+          className="btn-primary"
         >
           <span>+ Add Media</span>
         </button>
@@ -53,14 +53,14 @@ export default function MediaList() {
 
       {loading ? (
         <div className="flex items-center justify-center py-12">
-          <p className="text-gray-500 animate-pulse">Loading gallery items...</p>
+          <p className="text-muted animate-pulse">Loading gallery items...</p>
         </div>
       ) : media.length === 0 ? (
-        <div className="text-center py-16 border-2 border-dashed border-gray-200 rounded-xl">
-          <p className="text-gray-500 mb-2">No media items found in the gallery.</p>
+        <div className="text-center py-16 border-2 border-dashed border-border-light dark:border-border-dark rounded-xl">
+          <p className="text-muted mb-2">No media items found in the gallery.</p>
           <button
             onClick={() => navigate("/admin/media/create")}
-            className="text-blue-600 hover:text-blue-800 text-sm font-semibold"
+            className="text-sacramento hover:text-sacramento-600 text-sm font-semibold"
           >
             Upload your first image
           </button>
@@ -70,16 +70,16 @@ export default function MediaList() {
           {media.map((item) => (
             <div
               key={item.id}
-              className="group bg-white rounded-xl border border-gray-150 overflow-hidden shadow-sm hover:shadow-md transition duration-300 flex flex-col"
+              className="group card overflow-hidden hover:shadow-md transition duration-300 flex flex-col"
             >
               {/* Image Container with Hover Effect */}
-              <div className="relative aspect-video w-full bg-gray-100 overflow-hidden">
+              <div className="relative aspect-video w-full bg-surface-2 overflow-hidden">
                 <img
                   src={item.file_path}
                   alt={item.title}
                   className="object-cover w-full h-full transform group-hover:scale-105 transition duration-500"
                   onError={(e) => {
-                    e.target.src = "https://images.unsplash.com/photo-1547900596-f2c12fc30227?auto=format&fit=crop&q=80&w=400"; // fallback placeholder
+                    e.target.src = "https://images.unsplash.com/photo-1547900596-f2c12fc30227?auto=format&fit=crop&q=80&w=400";
                   }}
                 />
                 <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition duration-300" />
@@ -88,33 +88,33 @@ export default function MediaList() {
               {/* Text Info */}
               <div className="p-4 flex-1 flex flex-col justify-between">
                 <div>
-                  <h3 className="font-semibold text-gray-800 line-clamp-1 group-hover:text-blue-600 transition">
+                  <h3 className="font-semibold text-charcoal dark:text-white line-clamp-1 group-hover:text-sacramento transition">
                     {item.title}
                   </h3>
                   {item.description ? (
-                    <p className="text-xs text-gray-500 mt-1 line-clamp-2">
+                    <p className="text-xs text-muted mt-1 line-clamp-2">
                       {item.description}
                     </p>
                   ) : (
-                    <p className="text-xs text-gray-400 mt-1 italic">No description provided</p>
+                    <p className="text-xs text-muted/60 mt-1 italic">No description provided</p>
                   )}
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center justify-between border-t border-gray-100 mt-4 pt-3">
-                  <span className="text-[10px] text-gray-450 uppercase tracking-wider font-semibold font-mono">
+                <div className="flex items-center justify-between border-t border-border-light dark:border-border-dark mt-4 pt-3">
+                  <span className="text-[10px] text-muted/70 uppercase tracking-wider font-semibold font-mono">
                     ID: #{item.id}
                   </span>
                   <div className="flex gap-3">
                     <Link
                       to={`/admin/media/${item.id}/edit`}
-                      className="text-xs text-blue-600 hover:text-blue-800 font-semibold"
+                      className="text-xs text-sacramento hover:text-sacramento-600 font-semibold"
                     >
                       Edit
                     </Link>
                     <button
                       onClick={() => handleDelete(item.id)}
-                      className="text-xs text-red-650 hover:text-red-800 font-semibold"
+                      className="text-xs text-red-600 hover:text-red-700 font-semibold dark:text-red-400"
                     >
                       Delete
                     </button>

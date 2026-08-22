@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import api from "../../axios";
 import { useTheme } from "../../context/ThemeContext";
+import { pickupTimeOptions } from "../../constants/pickupTimeOptions";
 import {
     Calendar,
     Clock,
@@ -23,8 +24,8 @@ export default function Booking() {
     const navigate = useNavigate();
     const { theme } = useTheme();
 
-    const user = JSON.parse(localStorage.getItem("user") || "null");
-    const guestCustomer = JSON.parse(localStorage.getItem("guest_customer") || "null");
+    const [user] = useState(() => JSON.parse(localStorage.getItem("user") || "null"));
+    const [guestCustomer] = useState(() => JSON.parse(localStorage.getItem("guest_customer") || "null"));
     const activeCustomer = user || guestCustomer;
 
     const [packagesList, setPackagesList] = useState([]);
@@ -33,8 +34,9 @@ export default function Booking() {
 
     const [form, setForm] = useState({
         Booking_Date: "",
-        Pickup_Time: "",
+        Pickup_Time: "13:00",
         Pickup_Location: "",
+        Area: "",
         No_of_adults: 1,
         No_of_child: 0,
         First_Name: "",
@@ -44,6 +46,11 @@ export default function Booking() {
         NIC: "",
         Country: "",
     });
+
+    const location = useLocation();
+    const bookingId = location.state?.bookingId;
+    const isEditMode = Boolean(bookingId);
+    const [originalForm, setOriginalForm] = useState(null);
 
     // Load packages and set initial selected package
     useEffect(() => {
@@ -55,7 +62,8 @@ export default function Booking() {
             const res = await api.get("/packages");
             setPackagesList(res.data);
 
-            const initialId = id || (res.data[0]?.Package_ID || res.data[0]?.id || "");
+            const statePkgId = location.state?.packageId;
+            const initialId = id || statePkgId || (isEditMode ? "" : (res.data[0]?.Package_ID || res.data[0]?.id || ""));
             setSelectedPackageId(initialId);
 
             const foundPkg = res.data.find(
@@ -71,8 +79,39 @@ export default function Booking() {
         }
     };
 
+    useEffect(() => {
+        if (!bookingId) return;
+
+        api.get(`/bookings/${bookingId}`)
+            .then((res) => {
+                const data = res.data;
+                const bookingForm = {
+                    Booking_Date: data.Booking_Date || "",
+                    Pickup_Time: data.Pickup_Time || "13:00",
+                    Pickup_Location: data.Pickup_Location || "",
+                    Area: data.Area || "",
+                    No_of_adults: data.No_of_adults || 1,
+                    No_of_child: data.No_of_child || 0,
+                    First_Name: data.customer?.First_Name || "",
+                    Last_Name: data.customer?.Last_Name || "",
+                    Email: data.customer?.Email || "",
+                    Phone_No: data.customer?.Phone_No || "",
+                    NIC: data.customer?.NIC || "",
+                    Country: data.customer?.Country || "",
+                };
+
+                setForm(bookingForm);
+                setOriginalForm(bookingForm);
+                setSelectedPackageId(data.Package_ID || data.package?.id || "");
+                setPkg(data.package || null);
+            })
+            .catch((err) => console.error("Error loading booking:", err));
+    }, [bookingId]);
+
     // Load customer profile details if logged in (or guest session exists)
     useEffect(() => {
+        if (isEditMode) return;
+
         if (user) {
             api.get('/customer-profile')
                 .then((res) => {
@@ -121,12 +160,34 @@ export default function Booking() {
         });
     };
 
-    // calculate total price
+    // calculate total price (base without area extra)
     const getTotal = () => {
         if (!pkg) return 0;
         const adultTotal = form.No_of_adults * pkg.Price_for_adult;
         const childTotal = form.No_of_child * pkg.Price_for_child;
         return adultTotal + childTotal;
+    };
+
+    // area extras (amounts added to final payment)
+    const areaExtraMap = {
+        Dambulla: 5,
+        Sigiriya: 15,
+        Habarana: 18,
+        Kandalama: 15,
+    };
+
+    const getAreaExtra = () => {
+        return areaExtraMap[form.Area] || 0;
+    };
+
+    const formatAreaExtra = (n) => {
+        const abs = Math.abs(Number(n || 0));
+        const formatted = abs.toFixed(2);
+        return (n >= 0 ? "+" : "-") + `$${formatted}`;
+    };
+
+    const getFinalTotal = () => {
+        return getTotal() + getAreaExtra();
     };
 
     // submit booking
@@ -137,14 +198,36 @@ export default function Booking() {
             Booking_Date: form.Booking_Date,
             Pickup_Time: form.Pickup_Time,
             Pickup_Location: form.Pickup_Location,
+            Area: form.Area,
             No_of_adults: form.No_of_adults,
             No_of_child: form.No_of_child,
             Package_ID: selectedPackageId,
-            Payment: getTotal(),
+            Payment: getFinalTotal(),
         };
 
-        if (activeCustomer?.Customer_ID) {
-            payload.Customer_ID = activeCustomer.Customer_ID;
+        if (isEditMode) {
+            try {
+                await api.put(`/bookings/${bookingId}`, {
+                    Booking_Date: form.Booking_Date,
+                    Pickup_Time: form.Pickup_Time,
+                    Area: form.Area,
+                    Pickup_Location: form.Pickup_Location,
+                    No_of_adults: form.No_of_adults,
+                    No_of_child: form.No_of_child,
+                    Package_ID: selectedPackageId,
+                    Payment: getFinalTotal(),
+                });
+                alert("Booking updated successfully!");
+                navigate("/admin/bookings");
+            } catch (err) {
+                console.log(err);
+                alert(err.response?.data?.message || "Failed to update booking");
+            }
+            return;
+        }
+
+        if (user?.Customer_ID) {
+            payload.Customer_ID = user.Customer_ID;
         } else {
             payload.First_Name = form.First_Name;
             payload.Last_Name = form.Last_Name;
@@ -155,16 +238,12 @@ export default function Booking() {
         }
 
         try {
-            const response = await api.post("/cart", payload);
-
-            if (!activeCustomer?.Customer_ID && response.data.customer) {
-                localStorage.setItem("guest_customer", JSON.stringify(response.data.customer));
-            }
-            alert("Package added to cart successfully!");
-            if (activeCustomer?.Customer_ID) {
-                navigate("/user/cart");
+            await api.post("/bookings", payload);
+            alert("Booking placed successfully! 🎉");
+            if (user?.Customer_ID) {
+                navigate("/user/bookings");
             } else {
-                navigate("/cart");
+                navigate("/");
             }
         } catch (err) {
             console.log(err);
@@ -176,24 +255,29 @@ export default function Booking() {
         }
     };
 
+    const handleReset = () => {
+        if (originalForm) {
+            setForm({ ...originalForm });
+        }
+    };
+
     return (
         <div className="min-h-screen bg-offwhite dark:bg-[#050505] text-[#1f2b20] dark:text-[#f5f7f2] py-12 px-4 md:px-6 transition-colors duration-300">
             <div className="max-w-4xl mx-auto space-y-6">
                 {/* Navigation Action */}
                 <button
-                    type="button"
-                    onClick={() => window.location.href = "/"}
+                    onClick={() => navigate(-1)}
                     className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-slate-500 hover:text-sacramento dark:text-slate-400 dark:hover:text-castleton-300 transition-colors"
                 >
                     <ChevronLeft size={16} />
-                    Back to Home
+                    Back
                 </button>
 
                 <div className="flex justify-center">
                     <div className="w-full max-w-2xl bg-[#fcfaf5] dark:bg-[#0d0d0d] border border-[#dce8d7] dark:border-[#15311f] rounded-3xl shadow-xl p-6 md:p-8 space-y-8">
                         <div>
                             <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-                                Book Your Adventure
+                                {isEditMode ? "Edit Booking" : "Book Your Adventure"}
                             </h2>
                             <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
                                 Customize your package selection and fill schedule details below.
@@ -224,7 +308,7 @@ export default function Booking() {
                                             <option value="" disabled>-- Select a tour package --</option>
                                             {packagesList.map((p) => (
                                                 <option key={p.Package_ID || p.id} value={p.Package_ID || p.id}>
-                                                    {p.Package_Name} - Rs. {p.Price_for_adult} (Adult) / Rs. {p.Price_for_child} (Child)
+                                                    {p.Package_Name} - $ {p.Price_for_adult} (Adult) / $ {p.Price_for_child} (Child)
                                                 </option>
                                             ))}
                                         </select>
@@ -266,16 +350,40 @@ export default function Booking() {
                                         <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
                                             Pickup Time
                                         </label>
-                                        <input
-                                            type="time"
+                                        <select
                                             name="Pickup_Time"
                                             value={form.Pickup_Time}
                                             onChange={handleChange}
                                             className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 px-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all"
                                             required
-                                        />
+                                        >
+                                            {pickupTimeOptions.map((option) => (
+                                                <option key={option.value} value={option.value}>
+                                                    {option.label}
+                                                </option>
+                                            ))}
+                                        </select>
                                     </div>
                                 </div>
+
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                                        Pickup Area
+                                    </label>
+                                    <select
+                                        name="Area"
+                                        value={form.Area}
+                                        onChange={handleChange}
+                                        className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 px-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all"
+                                        required
+                                    >
+                                        <option value="">-- Select area --</option>
+                                        <option value="Dambulla">Dambulla (+ $5.00)</option>
+                                        <option value="Sigiriya">Sigiriya (+ $15.00)</option>
+                                        <option value="Habarana">Habarana (+ $18.00)</option>
+                                        <option value="Kandalama">Kandalama (+ $15.00)</option>
+                                    </select>
+                                </div> 
 
                                 <div className="flex flex-col gap-1.5">
                                     <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
@@ -294,6 +402,8 @@ export default function Booking() {
                                         />
                                     </div>
                                 </div>
+
+                                
                             </div>
 
                             {/* Section 2: Guest Details / Traveler Info */}
@@ -467,17 +577,20 @@ export default function Booking() {
                                             <p className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">
                                                 Total Reservation Cost
                                             </p>
-                                            <p className="text-xl font-black text-slate-900 dark:text-white mt-0.5 tracking-tight">
-                                                Rs. {new Intl.NumberFormat().format(getTotal())}
-                                            </p>
+                                                    <p className="text-xl font-black text-slate-900 dark:text-white mt-0.5 tracking-tight">
+                                                        $ {new Intl.NumberFormat().format(getFinalTotal())}
+                                                    </p>
                                         </div>
                                     </div>
-                                    <div className="text-right text-[11px] font-bold text-slate-400 dark:text-slate-500">
-                                        <p>{form.No_of_adults} Adult(s) × Rs {pkg.Price_for_adult}</p>
-                                        {form.No_of_child > 0 && (
-                                            <p className="mt-0.5">{form.No_of_child} Child(ren) × Rs {pkg.Price_for_child}</p>
-                                        )}
-                                    </div>
+                                            <div className="text-right text-[11px] font-bold text-slate-400 dark:text-slate-500">
+                                                <p>{form.No_of_adults} Adult(s) × $ {pkg.Price_for_adult}</p>
+                                                {form.No_of_child > 0 && (
+                                                    <p className="mt-0.5">{form.No_of_child} Child(ren) × $ {pkg.Price_for_child}</p>
+                                                )}
+                                                {form.Area && (
+                                                    <p className="mt-0.5">{form.Area} surcharge: $ {new Intl.NumberFormat().format(getAreaExtra())}</p>
+                                                )}
+                                            </div>
                                 </div>
                             )}
 
@@ -487,8 +600,17 @@ export default function Booking() {
                                 className="w-full bg-sacramento hover:bg-sacramento-600 text-white font-extrabold text-sm uppercase py-4 rounded-xl shadow-lg shadow-sacramento/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2 group"
                             >
                                 <ShoppingCart size={16} />
-                                Book Now
+                                {isEditMode ? "Update Booking" : "Book Now"}
                             </button>
+                            {isEditMode && (
+                                <button
+                                    type="button"
+                                    onClick={handleReset}
+                                    className="w-full border border-slate-300 text-slate-600 font-bold text-sm uppercase py-3 rounded-xl hover:bg-slate-50 transition-all dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-900"
+                                >
+                                    Reset Changes
+                                </button>
+                            )}
                         </form>
                     </div>
                 </div>

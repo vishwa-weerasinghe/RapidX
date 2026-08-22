@@ -9,7 +9,7 @@ export default function AdminLayout() {
 
   return (
     <ProtectedRoute role="admin">
-      <div className="flex min-h-screen bg-[#f8f4eb] dark:bg-[#050505] relative">
+      <div className="logged-in flex min-h-screen bg-offwhite dark:bg-bg-dark relative">
         <Sidebar role="Admin" isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
         
         {/* Mobile Sidebar Backdrop */}

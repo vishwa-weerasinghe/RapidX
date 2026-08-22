@@ -43,27 +43,25 @@ export function BookingCard() {
 
   const isDark = theme === "dark";
 
-  const cardClass = isDark
-    ? "rounded-3xl border border-[#2F4437] bg-[#1D2B22] p-6 shadow-sm"
-    : "rounded-3xl border border-[#E6E2D8] bg-[#FFFFFF] p-6 shadow-sm";
+  const cardClass = "card p-6";
   const iconBoxClass = isDark
-    ? "flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#43A047] to-[#66BB6A] text-white"
-    : "flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#2E7D32] to-[#1B5E20] text-white";
+    ? "flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-sacramento-400 to-sacramento-300 text-white"
+    : "flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-sacramento to-sacramento-600 text-white";
   const titleClass = isDark
-    ? "text-xl font-semibold text-[#F5F5F5] font-serif"
-    : "text-xl font-semibold text-[#263238] font-serif";
+    ? "text-xl font-semibold text-white font-serif"
+    : "text-xl font-semibold text-charcoal font-serif";
   const counterClass = isDark
-    ? "flex h-8 w-8 items-center justify-center rounded-full bg-[#2F4437] text-sm font-bold text-[#F5F5F5]"
-    : "flex h-8 w-8 items-center justify-center rounded-full bg-[#E6E2D8] text-sm font-bold text-[#2E7D32]";
-  const mutedTextClass = isDark ? "text-[#C7D0CB]" : "text-[#6B7280]";
-  const fieldTextClass = isDark ? "text-[#F5F5F5]" : "text-[#263238]";
-  const borderLineClass = isDark ? "border-[#2F4437]" : "border-[#E6E2D8]";
+    ? "flex h-8 w-8 items-center justify-center rounded-full bg-border-dark text-sm font-bold text-white"
+    : "flex h-8 w-8 items-center justify-center rounded-full bg-border-light text-sm font-bold text-sacramento";
+  const mutedTextClass = isDark ? "text-gray-400" : "text-muted";
+  const fieldTextClass = isDark ? "text-white" : "text-charcoal";
+  const borderLineClass = isDark ? "border-border-dark" : "border-border-light";
   const confirmedBadgeClass = isDark
-    ? "bg-[#2E7D32] text-[#F5F5F5]"
-    : "bg-[#E8F5E9] text-[#2E7D32]";
+    ? "bg-sacramento text-white"
+    : "bg-sacramento/10 text-sacramento";
   const completedBadgeClass = isDark
-    ? "bg-[#2F4437] text-[#E6C15A]"
-    : "bg-[#FFF6D8] text-[#D4A017]";
+    ? "bg-border-dark text-gold"
+    : "bg-amber-100 text-gold";
 
   if (loading) {
     return (
@@ -73,7 +71,7 @@ export function BookingCard() {
           <h2 className={titleClass}>My Safari Bookings</h2>
         </div>
         <p className={`py-4 text-center text-sm ${mutedTextClass}`}>
-          <span className="mr-2 inline-block h-5 w-5 align-middle rounded-full border-[3px] border-[#2E7D32] border-t-transparent animate-spin dark:border-[#43A047]"></span>
+          <span className="mr-2 inline-block h-5 w-5 align-middle rounded-full border-[3px] border-sacramento border-t-transparent animate-spin"></span>
           Loading your adventures...
         </p>
       </div>
@@ -106,16 +104,16 @@ export function BookingCard() {
         <div className="px-4 py-8 text-center">
           <div className="mb-3 text-5xl">🦁</div>
           <p className={`text-[15px] font-medium ${mutedTextClass}`}>No safari adventures booked yet!</p>
-          <p className={isDark ? "mt-1 text-sm text-[#A3A3A3]" : "mt-1 text-sm text-[#6B7280]"}>Explore our packages and start your journey.</p>
+          <p className={`mt-1 text-sm ${mutedTextClass}`}>Explore our packages and start your journey.</p>
         </div>
       ) : (
         <div className="flex max-h-[500px] flex-col gap-4 overflow-y-auto">
           {bookings.map((booking) => {
             const pkg = booking.package;
             return (
-              <div key={booking.Booking_ID} className={isDark ? "rounded-2xl border border-[#2F4437] bg-[#101813] p-4" : "rounded-2xl border border-[#E6E2D8] bg-[#F8F6F0] p-4"}>
+              <div key={booking.Booking_ID} className={isDark ? "rounded-2xl border border-border-dark bg-surface p-4" : "rounded-2xl border border-border-light bg-surface-2 p-4"}>
                 <div className="mb-3 flex items-start justify-between">
-                  <h4 className={`text-[16px] font-bold ${isDark ? "text-[#F5F5F5]" : "text-[#263238]"}`}>{pkg?.Package_Name || "Unknown Safari"}</h4>
+                  <h4 className={`text-[16px] font-bold ${isDark ? "text-white" : "text-charcoal"}`}>{pkg?.Package_Name || "Unknown Safari"}</h4>
                   <span className={booking.Status === "Completed" ? `ml-2 whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.5px] ${completedBadgeClass}` : `ml-2 whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.5px] ${confirmedBadgeClass}`}>
                     {booking.Status === "Completed" ? "✓ Completed" : "● Confirmed"}
                   </span>
@@ -125,7 +123,7 @@ export function BookingCard() {
                   <DateField Icon={CalendarDays} value={booking.Booking_Date} dark={isDark} />
                   <DateField Icon={Clock} value={booking.Pickup_Time} dark={isDark} />
                   <div className="col-span-2 flex items-center gap-1.5">
-                    <MapPin size={14} className={isDark ? "text-[#43A047]" : "text-[#2E7D32]"} />
+                    <MapPin size={14} className={isDark ? "text-sacramento-300" : "text-sacramento"} />
                     <span className="truncate">{booking.Pickup_Location}</span>
                   </div>
                   <DateField Icon={Users} value={`${booking.No_of_adults} ${booking.No_of_adults === 1 ? "Adult" : "Adults"}`} dark={isDark} />
@@ -134,12 +132,12 @@ export function BookingCard() {
 
                 <div className={`flex items-center justify-between border-t pt-3 ${borderLineClass}`}>
                   <div className={`flex items-center gap-1.5 text-sm ${mutedTextClass}`}>
-                    <Truck size={14} className={isDark ? "text-[#43A047]" : "text-[#2E7D32]"} />
+                    <Truck size={14} className={isDark ? "text-sacramento-300" : "text-sacramento"} />
                     <span>{booking.vehicle ? booking.vehicle.Registration_No || "Assigned" : "Awaiting vehicle"}</span>
                   </div>
                   <div className="text-right">
                     <span className={`block text-[11px] ${mutedTextClass}`}>Total</span>
-                    <span className={`text-[16px] font-bold ${isDark ? "text-[#66BB6A]" : "text-[#1B5E20]"}`}>Rs. {Number(booking.Payment || 0).toLocaleString()}</span>
+                    <span className={`text-[16px] font-bold ${isDark ? "text-sacramento-300" : "text-sacramento-600"}`}>$ {Number(booking.Payment || 0).toLocaleString()}</span>
                   </div>
                 </div>
               </div>
@@ -154,7 +152,7 @@ export function BookingCard() {
 function DateField({ Icon, value, dark }) {
   return (
     <div className="flex items-center gap-1.5">
-      <Icon size={14} className={dark ? "text-[#43A047]" : "text-[#2E7D32]"} />
+      <Icon size={14} className={dark ? "text-sacramento-300" : "text-sacramento"} />
       <span>{value}</span>
     </div>
   );
