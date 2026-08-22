@@ -7,7 +7,7 @@ export default function MediaList() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const backendUrl = api.defaults.baseURL.replace("/api", "");
+  // Use relative file paths served by backend (proxied during dev)
 
   const fetchMedia = async () => {
     try {
@@ -75,7 +75,7 @@ export default function MediaList() {
               {/* Image Container with Hover Effect */}
               <div className="relative aspect-video w-full bg-surface-2 overflow-hidden">
                 <img
-                  src={`${backendUrl}${item.file_path}`}
+                  src={item.file_path}
                   alt={item.title}
                   className="object-cover w-full h-full transform group-hover:scale-105 transition duration-500"
                   onError={(e) => {
