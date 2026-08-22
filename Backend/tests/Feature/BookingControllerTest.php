@@ -142,6 +142,7 @@ class BookingControllerTest extends TestCase
         $response = $this->postJson('/api/bookings', [
             'Booking_Date' => '2026-07-14',
             'Pickup_Time' => '13:00:00',
+            'Area' => 'Habarana',
             'Pickup_Location' => 'Negombo',
             'No_of_adults' => 3,
             'No_of_child' => 2,
@@ -157,7 +158,7 @@ class BookingControllerTest extends TestCase
             'Pickup_Location' => 'Negombo',
             'Customer_ID' => $customer->Customer_ID,
             'Package_ID' => $package->id,
-            'Status' => 'Pending',
+            'Status' => 'pending',
             'Vehicle_ID' => null,
         ]);
     }
@@ -169,6 +170,7 @@ class BookingControllerTest extends TestCase
         $response = $this->postJson('/api/bookings', [
             'Booking_Date' => '2026-07-15',
             'Pickup_Time' => '14:00:00',
+            'Area' => 'Sigiriya',
             'Pickup_Location' => 'Ella',
             'No_of_adults' => 2,
             'No_of_child' => 1,
@@ -192,6 +194,7 @@ class BookingControllerTest extends TestCase
         $this->assertDatabaseHas('bookings', [
             'Pickup_Location' => 'Ella',
             'Package_ID' => $package->id,
+            'Status' => 'Confirmed',
         ]);
     }
 
@@ -200,6 +203,7 @@ class BookingControllerTest extends TestCase
         $response = $this->postJson('/api/bookings', [
             'Booking_Date' => '',
             'Pickup_Time' => '',
+            'Area' => '',
             'Pickup_Location' => '',
             'No_of_adults' => '',
             'No_of_child' => '',
@@ -208,7 +212,7 @@ class BookingControllerTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-            ->assertJsonValidationErrors(['Booking_Date', 'Pickup_Time', 'Pickup_Location', 'No_of_adults', 'No_of_child', 'Customer_ID', 'Package_ID']);
+            ->assertJsonValidationErrors(['Booking_Date', 'Pickup_Time', 'Area', 'Pickup_Location', 'No_of_adults', 'No_of_child', 'Package_ID']);
 
         $this->assertDatabaseCount('bookings', 0);
     }
@@ -218,6 +222,7 @@ class BookingControllerTest extends TestCase
         $response = $this->postJson('/api/bookings', [
             'Booking_Date' => 'not-a-date',
             'Pickup_Time' => '10:00:00',
+            'Area' => 'Dambulla',
             'Pickup_Location' => 'Colombo',
             'No_of_adults' => 'three',
             'No_of_child' => 1,

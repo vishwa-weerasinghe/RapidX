@@ -24,8 +24,8 @@ export default function Booking() {
     const navigate = useNavigate();
     const { theme } = useTheme();
 
-    const user = JSON.parse(localStorage.getItem("user") || "null");
-    const guestCustomer = JSON.parse(localStorage.getItem("guest_customer") || "null");
+    const [user] = useState(() => JSON.parse(localStorage.getItem("user") || "null"));
+    const [guestCustomer] = useState(() => JSON.parse(localStorage.getItem("guest_customer") || "null"));
     const activeCustomer = user || guestCustomer;
 
     const [packagesList, setPackagesList] = useState([]);
@@ -171,8 +171,8 @@ export default function Booking() {
             Payment: getFinalTotal(),
         };
 
-        if (activeCustomer?.Customer_ID) {
-            payload.Customer_ID = activeCustomer.Customer_ID;
+        if (user?.Customer_ID) {
+            payload.Customer_ID = user.Customer_ID;
         } else {
             payload.First_Name = form.First_Name;
             payload.Last_Name = form.Last_Name;
@@ -185,7 +185,7 @@ export default function Booking() {
         try {
             await api.post("/bookings", payload);
             alert("Booking placed successfully! 🎉");
-            if (activeCustomer?.Customer_ID) {
+            if (user?.Customer_ID) {
                 navigate("/user/bookings");
             } else {
                 navigate("/");
@@ -314,6 +314,7 @@ export default function Booking() {
                                         value={form.Area}
                                         onChange={handleChange}
                                         className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 px-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all"
+                                        required
                                     >
                                         <option value="">-- Select area --</option>
                                         <option value="Dambulla">Dambulla (+ $5.00)</option>
