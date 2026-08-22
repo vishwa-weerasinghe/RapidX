@@ -37,10 +37,9 @@ Route::apiResource('packages', PackageController::class);
 Route::apiResource('vehicles', VehicleController::class);
 Route::apiResource('drivers', DriverController::class)->only(['index', 'show']);
 Route::apiResource('media', MediaController::class)->only(['index', 'show']);
-Route::get('appointments', [AppointmentController::class, 'index']);
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('appointments', [AppointmentController::class, 'index']);
     Route::get('appointments/summary', [AppointmentController::class, 'summary']);
-    Route::put('appointments/{booking}/driver', [AppointmentController::class, 'updateDriver']);
 });
 
 Route::get('reviews', [ReviewController::class, 'index']);
