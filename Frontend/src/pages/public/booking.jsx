@@ -48,6 +48,9 @@ export default function Booking() {
     });
 
     const location = useLocation();
+    const bookingId = location.state?.bookingId;
+    const isEditMode = Boolean(bookingId);
+    const [originalForm, setOriginalForm] = useState(null);
 
     // Load packages and set initial selected package
     useEffect(() => {
@@ -60,7 +63,7 @@ export default function Booking() {
             setPackagesList(res.data);
 
             const statePkgId = location.state?.packageId;
-            const initialId = id || statePkgId || (res.data[0]?.Package_ID || res.data[0]?.id || "");
+            const initialId = id || statePkgId || (isEditMode ? "" : (res.data[0]?.Package_ID || res.data[0]?.id || ""));
             setSelectedPackageId(initialId);
 
             const foundPkg = res.data.find(
@@ -76,8 +79,39 @@ export default function Booking() {
         }
     };
 
+    useEffect(() => {
+        if (!bookingId) return;
+
+        api.get(`/bookings/${bookingId}`)
+            .then((res) => {
+                const data = res.data;
+                const bookingForm = {
+                    Booking_Date: data.Booking_Date || "",
+                    Pickup_Time: data.Pickup_Time || "13:00",
+                    Pickup_Location: data.Pickup_Location || "",
+                    Area: data.Area || "",
+                    No_of_adults: data.No_of_adults || 1,
+                    No_of_child: data.No_of_child || 0,
+                    First_Name: data.customer?.First_Name || "",
+                    Last_Name: data.customer?.Last_Name || "",
+                    Email: data.customer?.Email || "",
+                    Phone_No: data.customer?.Phone_No || "",
+                    NIC: data.customer?.NIC || "",
+                    Country: data.customer?.Country || "",
+                };
+
+                setForm(bookingForm);
+                setOriginalForm(bookingForm);
+                setSelectedPackageId(data.Package_ID || data.package?.id || "");
+                setPkg(data.package || null);
+            })
+            .catch((err) => console.error("Error loading booking:", err));
+    }, [bookingId]);
+
     // Load customer profile details if logged in (or guest session exists)
     useEffect(() => {
+        if (isEditMode) return;
+
         if (user) {
             api.get('/customer-profile')
                 .then((res) => {
@@ -171,6 +205,27 @@ export default function Booking() {
             Payment: getFinalTotal(),
         };
 
+        if (isEditMode) {
+            try {
+                await api.put(`/bookings/${bookingId}`, {
+                    Booking_Date: form.Booking_Date,
+                    Pickup_Time: form.Pickup_Time,
+                    Area: form.Area,
+                    Pickup_Location: form.Pickup_Location,
+                    No_of_adults: form.No_of_adults,
+                    No_of_child: form.No_of_child,
+                    Package_ID: selectedPackageId,
+                    Payment: getFinalTotal(),
+                });
+                alert("Booking updated successfully!");
+                navigate("/admin/bookings");
+            } catch (err) {
+                console.log(err);
+                alert(err.response?.data?.message || "Failed to update booking");
+            }
+            return;
+        }
+
         if (user?.Customer_ID) {
             payload.Customer_ID = user.Customer_ID;
         } else {
@@ -200,6 +255,12 @@ export default function Booking() {
         }
     };
 
+    const handleReset = () => {
+        if (originalForm) {
+            setForm({ ...originalForm });
+        }
+    };
+
     return (
         <div className="min-h-screen bg-offwhite dark:bg-[#050505] text-[#1f2b20] dark:text-[#f5f7f2] py-12 px-4 md:px-6 transition-colors duration-300">
             <div className="max-w-4xl mx-auto space-y-6">
@@ -216,7 +277,7 @@ export default function Booking() {
                     <div className="w-full max-w-2xl bg-[#fcfaf5] dark:bg-[#0d0d0d] border border-[#dce8d7] dark:border-[#15311f] rounded-3xl shadow-xl p-6 md:p-8 space-y-8">
                         <div>
                             <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-                                Book Your Adventure
+                                {isEditMode ? "Edit Booking" : "Book Your Adventure"}
                             </h2>
                             <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
                                 Customize your package selection and fill schedule details below.
@@ -539,8 +600,17 @@ export default function Booking() {
                                 className="w-full bg-sacramento hover:bg-sacramento-600 text-white font-extrabold text-sm uppercase py-4 rounded-xl shadow-lg shadow-sacramento/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2 group"
                             >
                                 <ShoppingCart size={16} />
-                                Book Now
+                                {isEditMode ? "Update Booking" : "Book Now"}
                             </button>
+                            {isEditMode && (
+                                <button
+                                    type="button"
+                                    onClick={handleReset}
+                                    className="w-full border border-slate-300 text-slate-600 font-bold text-sm uppercase py-3 rounded-xl hover:bg-slate-50 transition-all dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-900"
+                                >
+                                    Reset Changes
+                                </button>
+                            )}
                         </form>
                     </div>
                 </div>

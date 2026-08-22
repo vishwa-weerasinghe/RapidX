@@ -84,7 +84,9 @@ export default function Bookings() {
   };
 
   const handleEdit = (booking) => {
-    navigate(`/admin/bookings/${booking.Booking_ID}/edit`);
+    navigate("/booking", {
+      state: { bookingId: booking.Booking_ID },
+    });
   };
 
   const handleDelete = async (id) => {
@@ -195,7 +197,7 @@ export default function Bookings() {
         <h1 className="text-3xl font-bold text-sacramento">Booking Management</h1>
         <button
           type="button"
-          onClick={() => setShowCreateModal(true)}
+          onClick={() => navigate("/booking")}
           className="btn-primary"
         >
           + Add Booking
