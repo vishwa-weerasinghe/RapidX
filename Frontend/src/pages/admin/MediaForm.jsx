@@ -12,7 +12,7 @@ export default function MediaForm() {
   const isEdit = Boolean(id);
   const navigate = useNavigate();
 
-  const backendUrl = api.defaults.baseURL.replace("/api", "");
+  // Use relative file paths served by backend (proxied during dev)
 
   const [form, setForm] = useState(initialState);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -33,12 +33,12 @@ export default function MediaForm() {
           description: res.data.description || "",
         });
         if (res.data.file_path) {
-          setExistingImageUrl(`${backendUrl}${res.data.file_path}`);
+          setExistingImageUrl(res.data.file_path);
         }
       })
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
-  }, [id, isEdit, backendUrl]);
+  }, [id, isEdit]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
