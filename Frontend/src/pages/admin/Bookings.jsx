@@ -6,6 +6,7 @@ import { pickupTimeOptions } from "../../constants/pickupTimeOptions";
 const emptyCreateForm = {
   Booking_Date: "",
   Pickup_Time: "13:00",
+  Area: "",
   Pickup_Location: "",
   No_of_adults: 1,
   No_of_child: 0,
@@ -130,6 +131,7 @@ export default function Bookings() {
     const payload = {
       Booking_Date: createForm.Booking_Date,
       Pickup_Time: createForm.Pickup_Time,
+      Area: createForm.Area,
       Pickup_Location: createForm.Pickup_Location,
       No_of_adults: Number(createForm.No_of_adults),
       No_of_child: Number(createForm.No_of_child),
@@ -199,6 +201,9 @@ export default function Bookings() {
           + Add Booking
         </button>
       </div>
+
+
+      
 
       <div className="flex flex-col gap-4 md:flex-row md:items-center mb-6">
         <input
@@ -438,6 +443,7 @@ export default function Bookings() {
               <th className="px-4 py-3 text-left">Package</th>
               <th className="px-4 py-3 text-left">Booking Date</th>
               <th className="px-4 py-3 text-left">Pickup Time</th>
+              <th className="px-4 py-3 text-left">Pickup Area</th>
               <th className="px-4 py-3 text-left">Pickup Location</th>
               <th className="px-4 py-3 text-center">Adults</th>
               <th className="px-4 py-3 text-center">Children</th>
@@ -470,6 +476,7 @@ export default function Bookings() {
                   <td className="px-4 py-3 text-charcoal/80 dark:text-white/80">{booking.package?.Package_Name || "-"}</td>
                   <td className="px-4 py-3 text-charcoal/80 dark:text-white/80">{booking.Booking_Date}</td>
                   <td className="px-4 py-3 text-charcoal/80 dark:text-white/80">{booking.Pickup_Time}</td>
+                  <td className="px-4 py-3 text-charcoal/80 dark:text-white/80">{booking.Area || "—"}</td>
                   <td className="px-4 py-3 text-charcoal/80 dark:text-white/80">{booking.Pickup_Location}</td>
                   <td className="px-4 py-3 text-center text-charcoal/80 dark:text-white/80">{booking.No_of_adults}</td>
                   <td className="px-4 py-3 text-center text-charcoal/80 dark:text-white/80">{booking.No_of_child}</td>

@@ -11,6 +11,7 @@ class Booking extends Model
     protected $fillable = [
         'Booking_Date',
         'Pickup_Time',
+        'Area',
         'Pickup_Location',
         'No_of_adults',
         'No_of_child',
@@ -18,7 +19,8 @@ class Booking extends Model
         'Status',
         'Customer_ID',
         'Package_ID',
-        'Vehicle_ID'
+        'Vehicle_ID',
+        'Admin_Seen'
     ];
 
     // relationships

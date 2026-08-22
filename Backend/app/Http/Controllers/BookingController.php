@@ -39,6 +39,7 @@ class BookingController extends Controller
         $request->validate([
             'Booking_Date' => 'required|date',
             'Pickup_Time' => 'required',
+            'Area' => 'required|string|max:100',
             'Pickup_Location' => 'required|string',
             'No_of_adults' => 'required|integer',
             'No_of_child' => 'required|integer',
@@ -47,6 +48,7 @@ class BookingController extends Controller
         ]);
 
         $customerId = $request->Customer_ID;
+        $isGuestBooking = !$customerId;
 
         if (!$customerId) {
             $customer = \App\Models\Customer::create([
@@ -65,11 +67,12 @@ class BookingController extends Controller
         $booking = Booking::create([
             'Booking_Date' => $request->Booking_Date,
             'Pickup_Time' => $request->Pickup_Time,
+            'Area' => $request->Area,
             'Pickup_Location' => $request->Pickup_Location,
             'No_of_adults' => $request->No_of_adults,
             'No_of_child' => $request->No_of_child,
             'Payment' => $request->Payment ?? 0,
-            'Status' => 'Confirmed',
+            'Status' => $isGuestBooking ? 'Confirmed' : 'pending',
             'Customer_ID' => $customerId,
             'Package_ID' => $request->Package_ID,
             'Vehicle_ID' => $request->Vehicle_ID ?? null,
@@ -105,6 +108,7 @@ class BookingController extends Controller
         $booking->update($request->only([
             'Booking_Date',
             'Pickup_Time',
+            'Area',
             'Pickup_Location',
             'No_of_adults',
             'No_of_child',
@@ -126,7 +130,7 @@ class BookingController extends Controller
     {
         $booking = Booking::with(['package', 'vehicle.driver'])
             ->where('Customer_ID', $customerId)
-            ->where('Status', 'Confirmed')
+            ->where('Status', 'pending')
             ->whereDate('Booking_Date', '>=', now()->toDateString())
             ->orderBy('Booking_Date', 'asc')
             ->orderBy('Pickup_Time', 'asc')
