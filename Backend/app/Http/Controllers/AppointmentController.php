@@ -3,14 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\Booking;
-use App\Models\Driver;
-use App\Models\Vehicle;
 use Illuminate\Http\Request;
 
 class AppointmentController extends Controller
 {
     public function index(Request $request)
     {
+        $user = $request->user();
+
+        if (!$user || !$this->isAdmin($user)) {
+            return response()->json(['message' => 'Only administrators can view appointments.'], 403);
+        }
+
         $query = Booking::select(
             'bookings.Booking_ID',
             'bookings.Booking_Date',
@@ -25,14 +29,9 @@ class AppointmentController extends Controller
             'customers.Phone_No',
             'customers.Email',
             'customers.Customer_Type',
-            'drivers.Driver_ID',
-            'drivers.Driver_Name',
-            'drivers.Phone_Number as Driver_Phone_Number',
             'packages.Package_Name'
         )
         ->join('customers', 'bookings.Customer_ID', '=', 'customers.Customer_ID')
-        ->leftJoin('vehicles', 'bookings.Vehicle_ID', '=', 'vehicles.Vehicle_ID')
-        ->leftJoin('drivers', 'vehicles.Driver_ID', '=', 'drivers.Driver_ID')
         ->leftJoin('packages', 'bookings.Package_ID', '=', 'packages.id');
 
         // Optional monthly filter: ?month=YYYY-MM
@@ -56,6 +55,12 @@ class AppointmentController extends Controller
 
     public function summary(Request $request)
     {
+        $user = $request->user();
+
+        if (!$user || !$this->isAdmin($user)) {
+            return response()->json(['message' => 'Only administrators can view appointments.'], 403);
+        }
+
         $query = Booking::query();
 
         if ($request->has('month') && $request->month) {
@@ -80,35 +85,6 @@ class AppointmentController extends Controller
             'total_earnings_confirmed' => $totalEarningsConfirmed,
             'total_earnings_unconfirmed' => $totalEarningsUnconfirmed,
         ]);
-    }
-
-    public function updateDriver(Request $request, Booking $booking)
-    {
-        $user = $request->user();
-
-        if (!$user || !$this->isAdmin($user)) {
-            return response()->json(['message' => 'Only administrators can change the assigned driver.'], 403);
-        }
-
-        $validated = $request->validate([
-            'Driver_ID' => 'required|integer|exists:drivers,Driver_ID',
-        ]);
-
-        $driver = Driver::find($validated['Driver_ID']);
-
-        if (!$driver) {
-            return response()->json(['message' => 'Driver not found.'], 404);
-        }
-
-        $vehicle = Vehicle::where('Driver_ID', $driver->Driver_ID)->first();
-        if (!$vehicle) {
-            return response()->json(['message' => 'No vehicle is assigned to this driver.'], 422);
-        }
-
-        $booking->Vehicle_ID = $vehicle->Vehicle_ID;
-        $booking->save();
-
-        return response()->json(['message' => 'Driver assignment updated successfully.']);
     }
 
     private function isAdmin($user): bool
