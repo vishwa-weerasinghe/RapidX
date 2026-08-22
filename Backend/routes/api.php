@@ -29,9 +29,9 @@ Route::get('/dashboard', [AuthController::class, 'dashboard'])->middleware('auth
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
 Route::apiResource('packages', PackageController::class);
-Route::apiResource('drivers', DriverController::class);
-Route::apiResource('vehicles', VehicleController::class);
-Route::apiResource('media', MediaController::class);
+Route::apiResource('vehicles', VehicleController::class)->middleware('auth:sanctum');
+Route::apiResource('drivers', DriverController::class)->only(['index', 'show']);
+Route::apiResource('media', MediaController::class)->only(['index', 'show']);
 Route::get('appointments', [AppointmentController::class, 'index']);
 Route::get('appointments/summary', [AppointmentController::class, 'summary']);
 Route::middleware('auth:sanctum')->put('appointments/{booking}/driver', [AppointmentController::class, 'updateDriver']);
@@ -44,6 +44,7 @@ Route::get('reviews/{review}', [ReviewController::class, 'show']);
 Route::get('/bookings', [BookingController::class, 'index']);
 Route::post('/bookings', [BookingController::class, 'store']);
 Route::put('/bookings/{id}', [BookingController::class, 'update']);
+Route::put('/bookings/{id}/vehicle', [BookingController::class, 'assignVehicle'])->middleware('auth:sanctum');
 Route::delete('/bookings/{id}', [BookingController::class, 'destroy']);
 Route::get('/bookings/{id}', [BookingController::class, 'show']);
 Route::get('/user-bookings/{customerId}', [BookingController::class, 'userBookings']);
