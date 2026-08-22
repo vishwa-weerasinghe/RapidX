@@ -101,6 +101,8 @@ class BookingController extends Controller
     {
         $request->validate([
             'Vehicle_ID' => 'nullable|exists:vehicles,Vehicle_ID',
+            'Package_ID' => 'sometimes|required|exists:packages,id',
+            'Area' => 'sometimes|required|string|max:100',
         ]);
 
         $booking = Booking::findOrFail($id);
@@ -114,6 +116,8 @@ class BookingController extends Controller
             'No_of_child',
             'Payment',
             'Status',
+            'Package_ID',
+            'Area',
             'Vehicle_ID'
         ]));
 
