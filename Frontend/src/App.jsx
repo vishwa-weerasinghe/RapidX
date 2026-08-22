@@ -133,7 +133,8 @@ export default function App() {
         "pending_cart",
         JSON.stringify({
           Package_ID: pkg.id || pkg.Package_ID,
-          Payment: parseFloat(String(pkg.price || "0").replace(/[^0-9.]/g, "")) || 0,
+          Payment:
+            parseFloat(String(pkg.price || "0").replace(/[^0-9.]/g, "")) || 0,
         }),
       );
       alert("Please login to add this package to your cart.");
@@ -233,7 +234,7 @@ export default function App() {
 
           const maxBookings = Math.max(
             0,
-            ...res.data.map((pkg) => Number(pkg.bookings_count || 0))
+            ...res.data.map((pkg) => Number(pkg.bookings_count || 0)),
           );
 
           const mapped = res.data.map((pkg) => ({
@@ -244,7 +245,9 @@ export default function App() {
             img: pkg.Image
               ? `${backendUrl}/storage/${pkg.Image}`
               : fallbackImage,
-            popular: Number(pkg.bookings_count || 0) === maxBookings && maxBookings > 0,
+            popular:
+              Number(pkg.bookings_count || 0) === maxBookings &&
+              maxBookings > 0,
             Price_for_adult: pkg.Price_for_adult,
             Price_for_child: pkg.Price_for_child,
             Package_Name: pkg.Package_Name,
@@ -368,7 +371,8 @@ export default function App() {
     const target = document.getElementById(id);
     if (target) {
       // Calculate accurate position regardless of parent positioning
-      const elementPosition = target.getBoundingClientRect().top + window.scrollY;
+      const elementPosition =
+        target.getBoundingClientRect().top + window.scrollY;
 
       // Use a consistent offset height since the sticky header shrinks upon scrolling
       // Assuming the sticky header is roughly 80-90px tall when scrolled
@@ -480,8 +484,8 @@ export default function App() {
     <div
       key={`${rev.source || "review"}-${index}`}
       className={`review-card p-6 rounded-2xl shadow-md border hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ${theme === "dark"
-        ? "bg-neutral-900 border-neutral-800"
-        : "bg-white border-neutral-100"
+          ? "bg-neutral-900 border-neutral-800"
+          : "bg-white border-neutral-100"
         }`}
     >
       <div className="flex justify-between items-start mb-4">
@@ -505,10 +509,10 @@ export default function App() {
       </p>
       <span
         className={`font-bold text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider ${rev.isGuest
-          ? "bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-400"
-          : rev.source === "TripAdvisor"
-            ? "bg-blue-50 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300"
-            : "bg-castleton-50 dark:bg-castleton-900/80 text-castleton dark:text-castleton-300"
+            ? "bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-400"
+            : rev.source === "TripAdvisor"
+              ? "bg-blue-50 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300"
+              : "bg-castleton-50 dark:bg-castleton-900/80 text-castleton dark:text-castleton-300"
           }`}
       >
         {rev.source || (rev.isGuest ? "Guest" : "Verified")}
@@ -516,20 +520,19 @@ export default function App() {
     </div>
   );
 
-
   return (
     <div
       className={`font-sans antialiased overflow-x-hidden selection:bg-[var(--primary)] selection:text-white transition-colors duration-200 ${theme === "dark"
-        ? "bg-[#101813] text-[#F5F5F5]"
-        : "bg-[#F8F6F0] text-[#263238]"
+          ? "bg-[#101813] text-[#F5F5F5]"
+          : "bg-[#F8F6F0] text-[#263238]"
         }`}
     >
       {/* Toast Notification Alert Box */}
       {notification && (
         <div
           className={`fixed top-24 right-5 p-5 rounded-xl shadow-2xl z-[9999] border-l-4 ${notification.type === "error" ? "border-red-500" : "border-sacramento"} max-w-sm animate-fade-in-left ${theme === "dark"
-            ? "bg-neutral-900 text-white"
-            : "bg-white text-neutral-800"
+              ? "bg-neutral-900 text-white"
+              : "bg-white text-neutral-800"
             }`}
         >
           <p className="text-sm font-medium">{notification.text}</p>
@@ -555,8 +558,8 @@ export default function App() {
         )}
         <div
           className={`max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between transition-all duration-500 relative ${isScrolled
-            ? "bg-[var(--page-bg)]/90 dark:bg-[var(--surface)]/90 backdrop-blur-xl rounded-full shadow-lg border border-[var(--border)]/40 py-2.5"
-            : "bg-transparent py-5 border-b border-white/10"
+              ? "bg-[var(--page-bg)]/90 dark:bg-[var(--surface)]/90 backdrop-blur-xl rounded-full shadow-lg border border-[var(--border)]/40 py-2.5"
+              : "bg-transparent py-5 border-b border-white/10"
             }`}
         >
           {/* Logo & Brand Name */}
@@ -572,7 +575,9 @@ export default function App() {
               />
             </div>
             <span
-              className={`text-base sm:text-lg md:text-xl font-bold tracking-wide transition-colors duration-300 ${isScrolled ? "text-sacramento dark:text-white" : "text-white drop-shadow-md"
+              className={`text-base sm:text-lg md:text-xl font-bold tracking-wide transition-colors duration-300 ${isScrolled
+                  ? "text-sacramento dark:text-white"
+                  : "text-white drop-shadow-md"
                 }`}
             >
               Wild Jeep Safari
@@ -595,10 +600,10 @@ export default function App() {
                   <button
                     onClick={() => scrollToSection(section)}
                     className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 ${activeSection === section
-                      ? "bg-sacramento text-white shadow shadow-sacramento/25"
-                      : isScrolled
-                        ? "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-slate-800/50"
-                        : "text-white/80 hover:text-white hover:bg-white/10"
+                        ? "bg-sacramento text-white shadow shadow-sacramento/25"
+                        : isScrolled
+                          ? "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-slate-800/50"
+                          : "text-white/80 hover:text-white hover:bg-white/10"
                       }`}
                   >
                     {section}
@@ -615,8 +620,8 @@ export default function App() {
                 <Link
                   to={dashboardLink}
                   className={`flex items-center gap-1.5 text-xs font-bold px-4 py-2 border rounded-full hover:shadow transition-all duration-300 ${isScrolled
-                    ? "text-sacramento border-sacramento/25 hover:bg-sacramento/5 dark:text-white dark:border-neutral-800 dark:hover:bg-neutral-800"
-                    : "text-white border-white/20 hover:bg-white/10"
+                      ? "text-sacramento border-sacramento/25 hover:bg-sacramento/5 dark:text-white dark:border-neutral-800 dark:hover:bg-neutral-800"
+                      : "text-white border-white/20 hover:bg-white/10"
                     }`}
                 >
                   <LayoutDashboard size={14} />
@@ -627,8 +632,8 @@ export default function App() {
                   <Link
                     to="/login"
                     className={`text-xs font-bold px-4 py-2 border rounded-full hover:shadow transition-all duration-300 ${isScrolled
-                      ? "text-slate-700 dark:text-slate-350 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-850"
-                      : "text-white border-white/20 hover:bg-white/10"
+                        ? "text-slate-700 dark:text-slate-350 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-850"
+                        : "text-white border-white/20 hover:bg-white/10"
                       }`}
                   >
                     Log in
@@ -651,10 +656,10 @@ export default function App() {
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className={`md:hidden flex items-center justify-center p-2.5 rounded-full transition-all duration-300 active:scale-95 ${isMobileMenuOpen
-                ? "bg-sacramento text-white shadow-md"
-                : isScrolled
-                  ? "bg-slate-100 dark:bg-neutral-800 text-slate-800 dark:text-white"
-                  : "bg-white/20 text-white backdrop-blur-md"
+                  ? "bg-sacramento text-white shadow-md"
+                  : isScrolled
+                    ? "bg-slate-100 dark:bg-neutral-800 text-slate-800 dark:text-white"
+                    : "bg-white/20 text-white backdrop-blur-md"
                 }`}
               aria-label="Toggle navigation interface"
             >
@@ -679,8 +684,8 @@ export default function App() {
                     key={section}
                     onClick={() => scrollToSection(section)}
                     className={`py-2.5 px-3 rounded-xl text-xs font-bold capitalize tracking-wide transition-all duration-200 text-left ${activeSection === section
-                      ? "bg-sacramento text-white shadow-md shadow-sacramento/30"
-                      : "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-neutral-800"
+                        ? "bg-sacramento text-white shadow-md shadow-sacramento/30"
+                        : "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-neutral-800"
                       }`}
                   >
                     {section}
@@ -920,7 +925,7 @@ export default function App() {
                 onClick={() => scrollToSection("contact")}
                 className="inline-flex items-center gap-2 bg-castleton text-white font-bold px-8 py-4 rounded-xl hover:bg-opacity-90 shadow-lg shadow-castleton/30 transition-all duration-300 hover:-translate-y-1"
               >
-                More About Us
+                Contact Us
                 <svg
                   className="w-5 h-5"
                   fill="none"
@@ -1139,7 +1144,6 @@ export default function App() {
         className="py-20 bg-white border-t border-gray-100"
       >
         <div className="max-w-7xl mx-auto px-4 md:px-6">
-
           {/* Section Header */}
           <div className="text-center max-w-xl mx-auto mb-14">
             <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-50 text-castleton text-xs font-bold uppercase tracking-widest border border-gray-100">
@@ -1181,7 +1185,6 @@ export default function App() {
 
                 {/* Content */}
                 <div className="p-5 flex flex-col flex-grow">
-
                   <h3 className="text-lg font-bold text-gray-900 mb-2">
                     {pkg.title}
                   </h3>
@@ -1236,7 +1239,6 @@ export default function App() {
                       Add to Cart
                     </button>
                   </div>
-
                 </div>
               </div>
             ))}
@@ -1302,7 +1304,7 @@ export default function App() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-6">
               {tripadvisorVisibleReviews.map((rev, index) =>
                 renderReviewCard(rev, index),
               )}
@@ -1428,11 +1430,14 @@ export default function App() {
           <p className="text-neutral-200 text-base sm:text-lg mb-8 max-w-md mx-auto">
             Your Dream Safari Experience Awaits
           </p>
+          <h2 className="font-serif text-2xl sm:text-4xl font-bold mb-4">
+            Contact Us:
+          </h2>
           <a
             href="mailto:info@minneriyawildjeepsafari.com"
             className="bg-[#2E7D32] text-white font-bold text-center px-8 py-3.5 rounded-full shadow-md hover:bg-[#1B5E20] hover:shadow-lg transition-all duration-300 transform hover:-translate-y-[2px]"
           >
-            Contact Us: info@minneriyawildjeepsafari.com
+            info@minneriyawildjeepsafari.com
           </a>
         </div>
       </section>
