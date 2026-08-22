@@ -15,81 +15,78 @@ class CartControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_checkout_updates_booking_status_to_confirmed(): void
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
+    protected function createPackage(array $overrides = []): Package
     {
-        $package = Package::create([
-            'Package_Name' => 'Morning Safari',
-            'Description' => 'A guided safari.',
+        return Package::create(array_merge([
+            'Package_Name'    => 'Morning Safari',
+            'Description'     => 'A guided safari.',
             'Price_for_adult' => 100.00,
             'Price_for_child' => 50.00,
-        ]);
-
-        $customer = Customer::create([
-            'First_Name' => 'Test',
-            'Last_Name' => 'Customer',
-            'Email' => 'test@example.com',
-            'Phone_No' => '0771234567',
-            'NIC' => '123456789V',
-            'Country' => 'Sri Lanka',
-            'Customer_Type' => 'Guest',
-        ]);
-
-        $booking = Booking::create([
-            'Booking_Date' => '2026-08-01',
-            'Pickup_Time' => '10:00:00',
-            'Pickup_Location' => 'Colombo',
-            'No_of_adults' => 2,
-            'No_of_child' => 1,
-            'Payment' => 100.00,
-            'Status' => 'In Cart',
-            'Customer_ID' => $customer->Customer_ID,
-            'Package_ID' => $package->id,
-            'Vehicle_ID' => null,
-        ]);
-
-        Cart::create([
-            'Customer_ID' => $customer->Customer_ID,
-            'Booking_ID' => $booking->Booking_ID,
-        ]);
-
-        $request = Request::create('/checkout', 'POST', [
-            'Customer_ID' => $customer->Customer_ID,
-        ]);
-
-        $controller = new CartController();
-        $response = $controller->checkout($request);
-
-        $this->assertEquals(200, $response->getStatusCode());
-        $booking->refresh();
-        $this->assertEquals('Confirmed', $booking->Status);
-        $this->assertDatabaseMissing('carts', [
-            'Customer_ID' => $customer->Customer_ID,
-        ]);
+        ], $overrides));
     }
 
-    public function test_guest_can_add_a_package_to_a_cart_without_registering(): void
+    protected function createGuestCustomer(array $overrides = []): Customer
     {
-        $package = Package::create([
-            'Package_Name' => 'Evening Safari',
-            'Description' => 'A guided safari.',
-            'Price_for_adult' => 120.00,
-            'Price_for_child' => 60.00,
+        return Customer::create(array_merge([
+            'First_Name'     => 'Guest',
+            'Last_Name'      => 'Customer',
+            'Email'          => fake()->unique()->safeEmail(),
+            'Phone_No'       => '0771234567',
+            'NIC'            => '123456789V',
+            'Country'        => 'Sri Lanka',
+            'Customer_Type'  => 'Guest',
+        ], $overrides));
+    }
+
+    protected function createBookingInCart(int $customerId, int $packageId, array $overrides = []): Booking
+    {
+        $booking = Booking::create(array_merge([
+            'Booking_Date'    => '2026-08-01',
+            'Pickup_Time'     => '10:00:00',
+            'Pickup_Location' => 'Colombo',
+            'No_of_adults'    => 2,
+            'No_of_child'     => 1,
+            'Payment'         => 100.00,
+            'Status'          => 'In Cart',
+            'Customer_ID'     => $customerId,
+            'Package_ID'      => $packageId,
+            'Vehicle_ID'      => null,
+        ], $overrides));
+
+        Cart::create([
+            'Customer_ID' => $customerId,
+            'Booking_ID'  => $booking->Booking_ID,
         ]);
 
+        return $booking;
+    }
+
+    // -------------------------------------------------------------------------
+    // Store (add to cart)
+    // -------------------------------------------------------------------------
+
+    public function test_guest_can_add_a_package_to_cart_without_registering(): void
+    {
+        $package = $this->createPackage(['Package_Name' => 'Evening Safari']);
+
         $response = $this->postJson('/api/cart', [
-            'Booking_Date' => '2026-08-10',
-            'Pickup_Time' => '06:00',
+            'Booking_Date'    => '2026-08-10',
+            'Pickup_Time'     => '06:00',
             'Pickup_Location' => 'Dambulla',
-            'No_of_adults' => 2,
-            'No_of_child' => 1,
-            'Package_ID' => $package->id,
-            'Payment' => 300.00,
-            'First_Name' => 'Guest',
-            'Last_Name' => 'Customer',
-            'Email' => 'guest@example.com',
-            'Phone_No' => '0771234567',
-            'NIC' => '123456789V',
-            'Country' => 'Sri Lanka',
+            'No_of_adults'    => 2,
+            'No_of_child'     => 1,
+            'Package_ID'      => $package->id,
+            'Payment'         => 300.00,
+            'First_Name'      => 'Guest',
+            'Last_Name'       => 'Customer',
+            'Email'           => 'guest@example.com',
+            'Phone_No'        => '0771234567',
+            'NIC'             => '123456789V',
+            'Country'         => 'Sri Lanka',
         ]);
 
         $response->assertCreated()
@@ -97,13 +94,209 @@ class CartControllerTest extends TestCase
 
         $customerId = $response->json('customer.Customer_ID');
 
+        $this->assertDatabaseHas('customers', [
+            'Customer_ID'    => $customerId,
+            'Email'          => 'guest@example.com',
+            'Customer_Type'  => 'Guest',
+        ]);
         $this->assertDatabaseHas('bookings', [
             'Customer_ID' => $customerId,
-            'Package_ID' => $package->id,
-            'Status' => 'In Cart',
+            'Package_ID'  => $package->id,
+            'Status'      => 'In Cart',
         ]);
         $this->assertDatabaseHas('carts', [
             'Customer_ID' => $customerId,
         ]);
+    }
+
+    public function test_existing_customer_can_add_to_cart_using_customer_id(): void
+    {
+        $package  = $this->createPackage();
+        $customer = $this->createGuestCustomer(['Email' => 'existing@example.com']);
+
+        $response = $this->postJson('/api/cart', [
+            'Customer_ID'     => $customer->Customer_ID,
+            'Booking_Date'    => '2026-09-01',
+            'Pickup_Time'     => '08:00',
+            'Pickup_Location' => 'Sigiriya',
+            'No_of_adults'    => 3,
+            'No_of_child'     => 0,
+            'Package_ID'      => $package->id,
+            'Payment'         => 300.00,
+        ]);
+
+        $response->assertCreated();
+
+        $this->assertDatabaseHas('bookings', [
+            'Customer_ID' => $customer->Customer_ID,
+            'Status'      => 'In Cart',
+        ]);
+        $this->assertDatabaseHas('carts', [
+            'Customer_ID' => $customer->Customer_ID,
+        ]);
+    }
+
+    public function test_store_returns_validation_errors_for_missing_guest_fields(): void
+    {
+        $response = $this->postJson('/api/cart', [
+            'Booking_Date'    => '2026-08-10',
+            'Pickup_Time'     => '06:00',
+            'Pickup_Location' => 'Dambulla',
+            'No_of_adults'    => 2,
+            'No_of_child'     => 0,
+            // Package_ID and guest identity fields are missing
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['Package_ID', 'Payment', 'First_Name', 'Last_Name', 'Email', 'Phone_No', 'NIC', 'Country']);
+
+        $this->assertDatabaseCount('bookings', 0);
+        $this->assertDatabaseCount('carts', 0);
+    }
+
+    public function test_store_returns_validation_error_for_invalid_booking_date(): void
+    {
+        $package = $this->createPackage();
+
+        $response = $this->postJson('/api/cart', [
+            'Booking_Date'    => 'not-a-date',
+            'Pickup_Time'     => '06:00',
+            'Pickup_Location' => 'Dambulla',
+            'No_of_adults'    => 2,
+            'No_of_child'     => 0,
+            'Package_ID'      => $package->id,
+            'Payment'         => 300.00,
+            'First_Name'      => 'Guest',
+            'Last_Name'       => 'User',
+            'Email'           => 'guest@example.com',
+            'Phone_No'        => '0771234567',
+            'NIC'             => '123456789V',
+            'Country'         => 'Sri Lanka',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['Booking_Date']);
+
+        $this->assertDatabaseCount('bookings', 0);
+    }
+
+    // -------------------------------------------------------------------------
+    // Index (view cart)
+    // -------------------------------------------------------------------------
+
+    public function test_customer_can_view_their_cart_items(): void
+    {
+        $package  = $this->createPackage();
+        $customer = $this->createGuestCustomer();
+
+        $this->createBookingInCart($customer->Customer_ID, $package->id);
+
+        $response = $this->getJson('/api/cart/' . $customer->Customer_ID);
+
+        $response->assertStatus(200);
+
+        $data = $response->json();
+        $this->assertNotEmpty($data);
+        $this->assertEquals($customer->Customer_ID, $data[0]['Customer_ID']);
+    }
+
+    public function test_cart_is_empty_for_customer_with_no_items(): void
+    {
+        $customer = $this->createGuestCustomer();
+
+        $response = $this->getJson('/api/cart/' . $customer->Customer_ID);
+
+        $response->assertStatus(200);
+        $this->assertEmpty($response->json());
+    }
+
+    // -------------------------------------------------------------------------
+    // Checkout
+    // -------------------------------------------------------------------------
+
+    public function test_checkout_updates_all_cart_bookings_to_confirmed_and_clears_cart(): void
+    {
+        $package  = $this->createPackage();
+        $customer = $this->createGuestCustomer(['Email' => 'test@example.com']);
+
+        $booking = $this->createBookingInCart($customer->Customer_ID, $package->id);
+
+        $response = $this->postJson('/api/cart/checkout', [
+            'Customer_ID' => $customer->Customer_ID,
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJson(['message' => 'All bookings in cart checked out successfully!']);
+
+        $booking->refresh();
+        $this->assertEquals('Confirmed', $booking->Status);
+
+        $this->assertDatabaseMissing('carts', [
+            'Customer_ID' => $customer->Customer_ID,
+        ]);
+    }
+
+    public function test_checkout_with_empty_cart_returns_bad_request(): void
+    {
+        $customer = $this->createGuestCustomer();
+
+        $response = $this->postJson('/api/cart/checkout', [
+            'Customer_ID' => $customer->Customer_ID,
+        ]);
+
+        $response->assertStatus(400)
+            ->assertJson(['message' => 'Your cart is empty']);
+    }
+
+    public function test_checkout_returns_validation_error_when_customer_id_missing(): void
+    {
+        $response = $this->postJson('/api/cart/checkout', []);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['Customer_ID']);
+    }
+
+    public function test_checkout_confirms_multiple_bookings_in_one_go(): void
+    {
+        $package  = $this->createPackage();
+        $customer = $this->createGuestCustomer();
+
+        $booking1 = $this->createBookingInCart($customer->Customer_ID, $package->id);
+        $booking2 = $this->createBookingInCart($customer->Customer_ID, $package->id);
+
+        $this->postJson('/api/cart/checkout', [
+            'Customer_ID' => $customer->Customer_ID,
+        ])->assertStatus(200);
+
+        $this->assertEquals('Confirmed', $booking1->fresh()->Status);
+        $this->assertEquals('Confirmed', $booking2->fresh()->Status);
+        $this->assertDatabaseCount('carts', 0);
+    }
+
+    // -------------------------------------------------------------------------
+    // Destroy (remove from cart)
+    // -------------------------------------------------------------------------
+
+    public function test_customer_can_remove_an_item_from_the_cart(): void
+    {
+        $package  = $this->createPackage();
+        $customer = $this->createGuestCustomer();
+
+        $booking = $this->createBookingInCart($customer->Customer_ID, $package->id);
+
+        $response = $this->deleteJson('/api/cart/' . $booking->Booking_ID);
+
+        $response->assertStatus(200)
+            ->assertJson(['message' => 'Item removed from cart successfully']);
+
+        $this->assertDatabaseMissing('bookings', ['Booking_ID' => $booking->Booking_ID]);
+        $this->assertDatabaseMissing('carts', ['Booking_ID' => $booking->Booking_ID]);
+    }
+
+    public function test_removing_nonexistent_cart_item_returns_404(): void
+    {
+        $response = $this->deleteJson('/api/cart/99999');
+
+        $response->assertStatus(404);
     }
 }
