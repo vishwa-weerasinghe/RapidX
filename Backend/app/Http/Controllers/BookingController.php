@@ -8,6 +8,13 @@ use Illuminate\Http\Request;
 
 class BookingController extends Controller
 {
+    private function isAdmin($user): bool
+    {
+        $role = $user->role ?? $user->Role ?? $user->user_type ?? null;
+
+        return in_array(strtolower((string) $role), ['admin', 'administrator', 'superadmin'], true);
+    }
+
     // =========================
     // GET ALL BOOKINGS (ADMIN)
     // =========================
@@ -124,6 +131,25 @@ class BookingController extends Controller
         return response()->json([
             'message' => 'Booking updated successfully',
             'booking' => $booking
+        ]);
+    }
+
+    public function assignVehicle(Request $request, $id)
+    {
+        if (!$this->isAdmin($request->user())) {
+            return response()->json(['message' => 'Only administrators can assign vehicles.'], 403);
+        }
+
+        $validated = $request->validate([
+            'Vehicle_ID' => 'required|exists:vehicles,Vehicle_ID',
+        ]);
+
+        $booking = Booking::findOrFail($id);
+        $booking->update(['Vehicle_ID' => $validated['Vehicle_ID']]);
+
+        return response()->json([
+            'message' => 'Vehicle assigned successfully',
+            'booking' => $booking,
         ]);
     }
 
