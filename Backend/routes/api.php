@@ -15,6 +15,7 @@ use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\PayHereController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -95,6 +96,11 @@ Route::get('/cart/{customerId}', [CartController::class, 'index']);
 Route::post('/cart', [CartController::class, 'store']);
 
 Route::delete('/cart/{bookingId}', [CartController::class, 'destroy']);
+
+// PayHere Payment Gateway
+Route::post('/payhere/initiate', [PayHereController::class, 'initiate']);
+Route::post('/payhere/notify', [PayHereController::class, 'notify']);
+Route::get('/payhere/status/{orderId}', [PayHereController::class, 'status']);
 
 Route::post('/contact', [ContactController::class, 'send'])
     ->middleware('throttle:3,1');
