@@ -1,6 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Download } from "lucide-react";
 import api from "../../axios";
 import { useTheme } from "../../context/ThemeContext";
+import { generateMonthlySummaryPdf } from "../../utils/generateMonthlySummaryPdf";
+import PackagePopularityChart from "../../components/admin-dashboard/PackagePopularityChart";
 
 export default function Appointments() {
   const { theme } = useTheme();
@@ -14,6 +17,16 @@ export default function Appointments() {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [newAppointmentIds, setNewAppointmentIds] = useState(new Set());
+  const [notificationAppointmentIds, setNotificationAppointmentIds] = useState(new Set());
+  const [showNewOnly, setShowNewOnly] = useState(false);
+  const appointmentsRef = useRef(appointments);
+
+  const getAppointmentId = (a) => Number(a?.Booking_ID || 0);
+
+  useEffect(() => {
+    appointmentsRef.current = appointments;
+  }, [appointments]);
 
   const currentMonth = () => {
     const d = new Date();
@@ -29,13 +42,20 @@ export default function Appointments() {
         api.get("/appointments", { params }),
         api.get("/appointments/summary", { params }),
       ]);
-      setAppointments(appRes.data || []);
+      const data = appRes.data || [];
+      setAppointments(data);
       setSummary(sumRes.data || {
         total_confirmed: 0,
         total_unconfirmed: 0,
         total_earnings_confirmed: 0,
         total_earnings_unconfirmed: 0,
       });
+
+      const storedLastId = parseInt(localStorage.getItem("lastSeenAppointmentId") || "0", 10);
+      const unseenIds = new Set(
+        data.filter((a) => getAppointmentId(a) > storedLastId).map((a) => getAppointmentId(a))
+      );
+      setNewAppointmentIds(unseenIds);
     } catch (err) {
       console.error(err);
       setError("Failed to load appointments.");
@@ -48,16 +68,68 @@ export default function Appointments() {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      api
+        .get("/appointments", { params: { month: currentMonth() } })
+        .then((res) => {
+          const latest = res.data || [];
+          const currentMaxId =
+            appointmentsRef.current.length > 0
+              ? Math.max(...appointmentsRef.current.map((a) => getAppointmentId(a)))
+              : 0;
+          const latestMaxId =
+            latest.length > 0 ? Math.max(...latest.map((a) => getAppointmentId(a))) : 0;
+
+          if (latestMaxId > currentMaxId) {
+            setAppointments(latest);
+          }
+
+          const storedLastId = parseInt(localStorage.getItem("lastSeenAppointmentId") || "0", 10);
+          const unseenIds = new Set(
+            latest.filter((a) => getAppointmentId(a) > storedLastId).map((a) => getAppointmentId(a))
+          );
+          setNewAppointmentIds(unseenIds);
+        })
+        .catch(() => { });
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleBellClick = () => {
+    if (showNewOnly) {
+      setShowNewOnly(false);
+      setNotificationAppointmentIds(new Set());
+      return;
+    }
+
+    if (newAppointmentIds.size === 0) return;
+
+    setNotificationAppointmentIds(new Set(newAppointmentIds));
+
+    const maxId = appointments.length > 0
+      ? Math.max(...appointments.map((a) => getAppointmentId(a)))
+      : 0;
+    localStorage.setItem("lastSeenAppointmentId", String(maxId));
+    setNewAppointmentIds(new Set());
+    setShowNewOnly(true);
+  };
+
   const sorted = useMemo(() => {
     return [...appointments]
       .filter((a) => a.Status === "Confirmed")
+      .filter((a) => {
+        if (!showNewOnly) return true;
+        return notificationAppointmentIds.has(getAppointmentId(a));
+      })
       .sort((a, b) => {
         const ad = a.Booking_Date || "";
         const bd = b.Booking_Date || "";
         if (ad === bd) return (a.Pickup_Time || "").localeCompare(b.Pickup_Time || "");
         return ad.localeCompare(bd);
       });
-  }, [appointments]);
+  }, [appointments, showNewOnly, notificationAppointmentIds]);
 
   // Deterministic shades for each package name
   const packageShades = {
@@ -100,9 +172,48 @@ export default function Appointments() {
 
   return (
     <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-charcoal dark:text-white">Appointment Summary of This Month</h1>
-        <p className="text-sm text-muted mt-1">View summarised booking details for this month.</p>
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-charcoal dark:text-white">Appointment Summary of This Month</h1>
+          <p className="text-sm text-muted mt-1">View summarised booking details for this month.</p>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <button
+            type="button"
+            onClick={() => generateMonthlySummaryPdf(summary, sorted, currentMonth())}
+            className="rounded-full card p-2 shadow-sm hover:bg-offwhite-100 dark:hover:bg-surface-2"
+            title="Download monthly summary as PDF"
+          >
+            <Download className="h-6 w-6 text-muted" />
+          </button>
+          <button
+            type="button"
+            onClick={handleBellClick}
+            className="relative rounded-full card p-2 shadow-sm hover:bg-offwhite-100 dark:hover:bg-surface-2"
+            title={showNewOnly ? "Show all appointments" : "Show new appointments"}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 text-muted"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+              />
+            </svg>
+            {newAppointmentIds.size > 0 && (
+              <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-bold text-white">
+                {newAppointmentIds.size}
+              </span>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Summary Cards */}
@@ -133,6 +244,8 @@ export default function Appointments() {
         </div>
       )}
 
+      {!loading && !error && <PackagePopularityChart appointments={appointments} isDark={isDark} />}
+
       {loading ? (
         <p className="text-muted">Loading...</p>
       ) : error ? (
@@ -140,7 +253,9 @@ export default function Appointments() {
           {error}
         </div>
       ) : sorted.length === 0 ? (
-        <p className="text-muted">No confirmed appointments found for this month.</p>
+        <p className="text-muted">
+          {showNewOnly ? "No new appointments." : "No confirmed appointments found for this month."}
+        </p>
       ) : (
         <div className="overflow-x-auto rounded-lg border border-border-light dark:border-border-dark">
           <table className="min-w-full bg-surface text-sm">
@@ -158,6 +273,7 @@ export default function Appointments() {
               {sorted.map((a) => {
                 const isConfirmed = (a.Status || "").toLowerCase() === "confirmed";
                 const baseShade = getPackageShade(a.Package_Name);
+                const isNew = newAppointmentIds.has(getAppointmentId(a)) || notificationAppointmentIds.has(getAppointmentId(a));
                 return (
                   <tr
                     key={a.Booking_ID}
@@ -168,6 +284,7 @@ export default function Appointments() {
                       e.currentTarget.style.backgroundColor = baseShade;
                     }}
                     style={{ backgroundColor: baseShade, color: isDark ? "#e5e7eb" : "#1f2937" }}
+                    className={isNew ? "ring-1 ring-sacramento/30" : ""}
                   >
                     <td className="px-4 py-3 font-mono text-charcoal dark:text-white">#{a.Booking_ID}</td>
                     <td className="px-4 py-3">
@@ -200,6 +317,10 @@ export default function Appointments() {
             </tbody>
           </table>
         </div>
+      )}
+
+      {showNewOnly && newAppointmentIds.size === 0 && !loading && (
+        <p className="mt-2 text-sm text-muted">No new appointments to show.</p>
       )}
     </div>
   );
