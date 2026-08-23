@@ -49,9 +49,11 @@ Route::apiResource('drivers', DriverController::class)
 Route::apiResource('media', MediaController::class)
     ->only(['index', 'show']);
 
-Route::get('appointments', [AppointmentController::class, 'index']);
+Route::get('appointments', [AppointmentController::class, 'index'])
+    ->middleware('auth:sanctum');
 
-Route::get('appointments/summary', [AppointmentController::class, 'summary']);
+Route::get('appointments/summary', [AppointmentController::class, 'summary'])
+    ->middleware('auth:sanctum');
 
 Route::middleware('auth:sanctum')->put(
     'appointments/{booking}/driver',
