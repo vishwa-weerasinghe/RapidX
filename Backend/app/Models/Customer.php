@@ -17,4 +17,14 @@ class Customer extends Model
         'NIC',
         'Country',
     ];
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class, 'Customer_ID');
+    }
+
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class, 'Customer_ID');
+    }
 }
