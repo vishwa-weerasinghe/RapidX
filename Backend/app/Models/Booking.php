@@ -20,6 +20,7 @@ class Booking extends Model
         'Customer_ID',
         'Package_ID',
         'Vehicle_ID',
+        'Payment_ID',
         'Admin_Seen'
     ];
 
@@ -38,5 +39,10 @@ class Booking extends Model
     public function vehicle()
     {
         return $this->belongsTo(Vehicle::class, 'Vehicle_ID');
+    }
+
+    public function payment()
+    {
+        return $this->belongsTo(Payment::class, 'Payment_ID');
     }
 }

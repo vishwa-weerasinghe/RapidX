@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import api from "../../axios";
 import { useTheme } from "../../context/ThemeContext";
 import { pickupTimeOptions } from "../../constants/pickupTimeOptions";
+import { startPayHerePayment } from "../../utils/payhere";
 import {
     Calendar,
     Clock,
@@ -238,12 +239,21 @@ export default function Booking() {
         }
 
         try {
-            await api.post("/bookings", payload);
-            alert("Booking placed successfully! 🎉");
-            if (user?.Customer_ID) {
-                navigate("/user/bookings");
-            } else {
-                navigate("/");
+            const res = await api.post("/payhere/initiate", payload);
+            const { payhere_params } = res.data;
+
+            if (payhere_params) {
+                startPayHerePayment(payhere_params, {
+                    onCompleted: (completedOrderId) => {
+                        navigate(`/payment/success?order_id=${completedOrderId}`);
+                    },
+                    onDismissed: () => {
+                        console.log("PayHere payment modal closed by user");
+                    },
+                    onError: (error) => {
+                        alert("PayHere Error: " + error);
+                    },
+                });
             }
         } catch (err) {
             console.log(err);
@@ -600,7 +610,7 @@ export default function Booking() {
                                 className="w-full bg-sacramento hover:bg-sacramento-600 text-white font-extrabold text-sm uppercase py-4 rounded-xl shadow-lg shadow-sacramento/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2 group"
                             >
                                 <ShoppingCart size={16} />
-                                {isEditMode ? "Update Booking" : "Book Now"}
+                                {isEditMode ? "Update Booking" : `Pay with PayHere • $ ${new Intl.NumberFormat().format(getFinalTotal())}`}
                             </button>
                             {isEditMode && (
                                 <button
