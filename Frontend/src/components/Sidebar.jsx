@@ -52,6 +52,7 @@ export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
 
   const [unreadBookings, setUnreadBookings] = useState(0);
   const [unreadReviews, setUnreadReviews] = useState(0);
+  const [unreadAppointments, setUnreadAppointments] = useState(0);
 
   useEffect(() => {
     if (normalizedRole !== "admin") return;
@@ -78,6 +79,32 @@ export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
 
     fetchUnreadReviews();
     const interval = setInterval(fetchUnreadReviews, 5000);
+
+    return () => clearInterval(interval);
+  }, [normalizedRole]);
+
+  useEffect(() => {
+    if (normalizedRole !== "admin") return;
+
+    const currentMonth = () => {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    };
+
+    const fetchUnreadAppointments = async () => {
+      try {
+        const response = await api.get("/appointments", { params: { month: currentMonth() } });
+        const appointments = response.data || [];
+        const storedLastId = parseInt(localStorage.getItem("lastSeenAppointmentId") || "0", 10);
+        const unseenCount = appointments.filter((a) => a.Booking_ID > storedLastId).length;
+        setUnreadAppointments(unseenCount);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchUnreadAppointments();
+    const interval = setInterval(fetchUnreadAppointments, 5000);
 
     return () => clearInterval(interval);
   }, [normalizedRole]);
@@ -176,7 +203,7 @@ export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
                 onClick={
                   link.label === "Bookings"
                     ? handleBookingsClick
-                      : undefined
+                    : undefined
                 }
                 className={({ isActive }) =>
                   `
@@ -238,6 +265,12 @@ export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
                 {link.label === "Reviews" && normalizedRole === "admin" && unreadReviews > 0 && (
                   <span className="ml-auto min-w-5 rounded-full bg-red-500 px-1.5 py-0.5 text-center text-xs font-bold text-white">
                     {unreadReviews}
+                  </span>
+                )}
+
+                {link.label === "Appointments" && normalizedRole === "admin" && unreadAppointments > 0 && (
+                  <span className="ml-auto min-w-5 rounded-full bg-red-500 px-1.5 py-0.5 text-center text-xs font-bold text-white">
+                    {unreadAppointments}
                   </span>
                 )}
 
