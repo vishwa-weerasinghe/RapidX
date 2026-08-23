@@ -56,11 +56,6 @@ Route::get('appointments', [AppointmentController::class, 'index'])
 Route::get('appointments/summary', [AppointmentController::class, 'summary'])
     ->middleware('auth:sanctum');
 
-Route::middleware('auth:sanctum')->put(
-    'appointments/{booking}/driver',
-    [AppointmentController::class, 'updateDriver']
-);
-
 Route::get('reviews', [ReviewController::class, 'index']);
 
 Route::get('reviews/{review}', [ReviewController::class, 'show']);
