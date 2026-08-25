@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import api from "../../axios";
 import { useNavigate } from "react-router-dom";
 import { pickupTimeOptions } from "../../constants/pickupTimeOptions";
@@ -31,12 +31,46 @@ export default function Bookings() {
   const [creating, setCreating] = useState(false);
   const [createForm, setCreateForm] = useState(emptyCreateForm);
   const [selectedPackage, setSelectedPackage] = useState(null);
+  const [newBookingIds, setNewBookingIds] = useState(new Set());
+  const [notificationBookingIds, setNotificationBookingIds] = useState(new Set());
+  const [showNewOnly, setShowNewOnly] = useState(false);
+  const bookingsRef = useRef(bookings);
 
   const navigate = useNavigate();
+
+  const getBookingId = (booking) => Number(booking?.Booking_ID || 0);
+
+  useEffect(() => {
+    bookingsRef.current = bookings;
+  }, [bookings]);
 
   useEffect(() => {
     fetchData();
     fetchPackages();
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      api.get("/bookings").then((response) => {
+        const latest = response.data || [];
+        const currentMaxId = bookingsRef.current.length > 0
+          ? Math.max(...bookingsRef.current.map(getBookingId))
+          : 0;
+        const latestMaxId = latest.length > 0
+          ? Math.max(...latest.map(getBookingId))
+          : 0;
+
+        if (latestMaxId > currentMaxId) setBookings(latest);
+
+        const storedLastId = parseInt(localStorage.getItem("lastSeenBookingId") || "0", 10);
+        setNewBookingIds(new Set(
+          latest.filter((booking) => getBookingId(booking) > storedLastId).map(getBookingId)
+        ));
+      }).catch(() => { });
+
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const fetchData = async () => {
@@ -48,6 +82,12 @@ export default function Bookings() {
 
       setBookings(bookingsResponse.data);
       setVehicles(vehiclesResponse.data);
+      const storedLastId = parseInt(localStorage.getItem("lastSeenBookingId") || "0", 10);
+      setNewBookingIds(new Set(
+        bookingsResponse.data
+          .filter((booking) => getBookingId(booking) > storedLastId)
+          .map(getBookingId)
+      ));
     } catch (err) {
       console.error(err);
       alert("Failed to load bookings.");
@@ -168,11 +208,33 @@ export default function Bookings() {
     }
   };
 
+  const handleBellClick = async () => {
+    if (showNewOnly) {
+      setShowNewOnly(false);
+      setNotificationBookingIds(new Set());
+      return;
+    }
+
+    if (newBookingIds.size === 0) return;
+
+    setNotificationBookingIds(new Set(newBookingIds));
+    const maxId = bookings.length > 0 ? Math.max(...bookings.map(getBookingId)) : 0;
+    localStorage.setItem("lastSeenBookingId", String(maxId));
+    setNewBookingIds(new Set());
+    setShowNewOnly(true);
+
+    try {
+      await api.post("/admin/bookings/mark-seen");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const filteredBookings = bookings.filter((booking) => {
     const query = search.trim().toLowerCase();
     const customerName = `${booking.customer?.First_Name ?? ""} ${booking.customer?.Last_Name ?? ""}`;
 
-    return (
+    const matchesSearch = (
       String(booking.Booking_ID ?? "").toLowerCase().includes(query) ||
       customerName.toLowerCase().includes(query) ||
       booking.package?.Package_Name?.toLowerCase().includes(query) ||
@@ -181,6 +243,9 @@ export default function Bookings() {
       booking.Pickup_Location?.toLowerCase().includes(query) ||
       booking.Status?.toLowerCase().includes(query)
     );
+
+    if (!showNewOnly) return matchesSearch;
+    return matchesSearch && notificationBookingIds.has(getBookingId(booking));
   });
 
   if (loading) {
@@ -195,17 +260,32 @@ export default function Bookings() {
     <div className="p-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
         <h1 className="text-3xl font-bold text-sacramento">Booking Management</h1>
-        <button
-          type="button"
-          onClick={() => navigate("/booking")}
-          className="btn-primary"
-        >
-          + Add Booking
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={handleBellClick}
+            className="relative rounded-full card p-2 shadow-sm hover:bg-offwhite-100 dark:hover:bg-surface-2"
+            title={showNewOnly ? "Show all bookings" : "Show new bookings"}
+            aria-label={showNewOnly ? "Show all bookings" : "Show new bookings"}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+            {newBookingIds.size > 0 && (
+              <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-bold text-white">
+                {newBookingIds.size}
+              </span>
+            )}
+          </button>
+          <button type="button" onClick={() => navigate("/booking")} className="btn-primary">
+            + Add Booking
+          </button>
+        </div>
       </div>
 
-
-      
+      {showNewOnly && newBookingIds.size === 0 && (
+        <p className="mb-6 text-sm text-muted">No new bookings to show.</p>
+      )}
 
       <div className="flex flex-col gap-4 md:flex-row md:items-center mb-6">
         <input

@@ -57,9 +57,19 @@ export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
   useEffect(() => {
     if (normalizedRole !== "admin") return;
 
-    api.get("/admin/bookings/unread-count")
-      .then((response) => setUnreadBookings(response.data.count))
-      .catch(console.error);
+    const fetchUnreadBookings = async () => {
+      try {
+        const response = await api.get("/admin/bookings/unread-count");
+        setUnreadBookings(response.data.count);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchUnreadBookings();
+    const interval = setInterval(fetchUnreadBookings, 5000);
+
+    return () => clearInterval(interval);
   }, [normalizedRole]);
 
   useEffect(() => {
