@@ -79,7 +79,7 @@ class BookingController extends Controller
             'No_of_adults' => $request->No_of_adults,
             'No_of_child' => $request->No_of_child,
             'Payment' => $request->Payment ?? 0,
-            'Status' => $isGuestBooking ? 'Confirmed' : 'pending',
+            'Status' => $isGuestBooking ? 'Confirmed' : 'Pending',
             'Customer_ID' => $customerId,
             'Package_ID' => $request->Package_ID,
             'Vehicle_ID' => $request->Vehicle_ID ?? null,
@@ -160,7 +160,7 @@ class BookingController extends Controller
     {
         $booking = Booking::with(['package', 'vehicle.driver'])
             ->where('Customer_ID', $customerId)
-            ->where('Status', 'pending')
+            ->where('Status', 'Pending')
             ->whereDate('Booking_Date', '>=', now()->toDateString())
             ->orderBy('Booking_Date', 'asc')
             ->orderBy('Pickup_Time', 'asc')

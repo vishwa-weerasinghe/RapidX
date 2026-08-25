@@ -158,7 +158,7 @@ class BookingControllerTest extends TestCase
             'Pickup_Location' => 'Negombo',
             'Customer_ID' => $customer->Customer_ID,
             'Package_ID' => $package->id,
-            'Status' => 'pending',
+            'Status' => 'Pending',
             'Vehicle_ID' => null,
         ]);
     }
