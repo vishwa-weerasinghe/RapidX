@@ -15,71 +15,6 @@ import { useTheme } from "./context/ThemeContext";
 import api from "./axios";
 import PublicReviewSection from "./pages/public/Review.jsx";
 
-const tripadvisorReviews = [
-  {
-    initials: "TA",
-    name: "TripAdvisor Traveler",
-    date: "Jul 2026",
-    title: "Incredible Minneriya Elephant Safari Experience",
-    text: "Seeing so many elephants in one place was absolutely amazing. We watched large herds moving freely across the open fields, while several baby elephants played close to their mothers.",
-    rate: 5,
-    source: "TripAdvisor",
-  },
-  {
-    initials: "TA",
-    name: "TripAdvisor Traveler",
-    date: "Jun 2026",
-    title: "Amazing Elephants And Friendly Driver",
-    text: "Our Minneriya Safari was an unforgettable wildlife experience. The highlight of the trip was seeing so many elephants in their natural habitat.",
-    rate: 5,
-    source: "TripAdvisor",
-  },
-  {
-    initials: "TA",
-    name: "TripAdvisor Traveler",
-    date: "Jun 2026",
-    title: "Memorable Elephant Safari Adventure",
-    text: "Booking the Minneriya Safari was quick and easy, and everything went smoothly from the start. The safari itself was adventurous and memorable.",
-    rate: 5,
-    source: "TripAdvisor",
-  },
-  {
-    initials: "TA",
-    name: "TripAdvisor Traveler",
-    date: "Jun 2026",
-    title: "Unforgettable Elephant Safari Experience",
-    text: "Visiting Minneriya National Park was a fantastic experience, especially because of the incredible number of elephants we were able to see.",
-    rate: 5,
-    source: "TripAdvisor",
-  },
-  {
-    initials: "TA",
-    name: "TripAdvisor Traveler",
-    date: "Jun 2026",
-    title: "Amazing Wildlife Experience At Minneriya",
-    text: "I recently visited Minneriya National Park for a safari, and it was an incredible experience. The park was filled with beautiful scenery and an amazing variety of wildlife.",
-    rate: 5,
-    source: "TripAdvisor",
-  },
-  {
-    initials: "TA",
-    name: "TripAdvisor Traveler",
-    date: "Jun 2026",
-    title: "Memorable Family Safari with Responsible Wildlife Viewing",
-    text: "Our family recently enjoyed a wonderful safari experience in Minneriya, and it exceeded our expectations. The trip felt educational, peaceful, and enjoyable for the whole family.",
-    rate: 5,
-    source: "TripAdvisor",
-  },
-  {
-    initials: "TA",
-    name: "TripAdvisor Traveler",
-    date: "Jun 2026",
-    title: "Amazing Safari Experience for Couples",
-    text: "My partner and I had an unforgettable safari experience in Minneriya. The beautiful scenery, incredible wildlife sightings, and professional guidance made this safari truly memorable.",
-    rate: 5,
-    source: "TripAdvisor",
-  },
-];
 
 export default function App() {
   // --- CONSUME SYSTEM THEME ---
@@ -387,6 +322,7 @@ export default function App() {
   };
 
   const [reviews, setReviews] = useState([]);
+  const [tripadvisorReviews, setTripadvisorReviews] = useState([]);
   const [showAllTripadvisorReviews, setShowAllTripadvisorReviews] =
     useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
@@ -423,14 +359,28 @@ export default function App() {
     }
   };
 
-  useEffect(() => {
+  const fetchReviews = () => {
     const storedGuestReviews = getStoredGuestReviews();
+
+    // Fetch TripAdvisor location reviews from API endpoint (Minneriya Location ID: 15640558)
+    const tripadvisorLocationId = "15640558";
+    api
+      .get(`/locations/${tripadvisorLocationId}/reviews`)
+      .then((res) => {
+        if (res.data && Array.isArray(res.data) && res.data.length > 0) {
+          setTripadvisorReviews(res.data);
+        }
+      })
+      .catch((err) => console.error("Error loading TripAdvisor reviews:", err));
 
     api
       .get("/reviews")
       .then((res) => {
         if (res.data && res.data.length > 0) {
-          const mapped = res.data.map((rev) => {
+          const fetchedTaReviews = [];
+          const fetchedSystemReviews = [];
+
+          res.data.forEach((rev) => {
             const firstName = rev.customer?.First_Name || "";
             const lastName = rev.customer?.Last_Name || "";
             const initials =
@@ -442,19 +392,39 @@ export default function App() {
                 ? words.slice(0, 4).join(" ") + (words.length > 4 ? "..." : "")
                 : "Excellent Safari";
 
-            return {
+            const formatted = {
               initials,
               name,
               date: "Recently",
               title,
               text: rev.Description,
               rate: rev.Rate || 5,
-              source: "Verified",
+              source: rev.Source || rev.source || "Verified",
             };
+
+            if (isTripAdvisorReview(rev) || isTripAdvisorReview(formatted)) {
+              fetchedTaReviews.push({
+                ...formatted,
+                initials: "TA",
+                source: "TripAdvisor",
+              });
+            } else {
+              fetchedSystemReviews.push(formatted);
+            }
           });
 
+          if (fetchedTaReviews.length > 0) {
+            setTripadvisorReviews((prev) => {
+              const existingTexts = new Set(prev.map((r) => r.text));
+              const newItems = fetchedTaReviews.filter(
+                (r) => !existingTexts.has(r.text),
+              );
+              return newItems.length > 0 ? [...newItems, ...prev] : prev;
+            });
+          }
+
           setReviews(
-            [...storedGuestReviews, ...mapped].filter(
+            [...storedGuestReviews, ...fetchedSystemReviews].filter(
               (review) => !isTripAdvisorReview(review),
             ),
           );
@@ -469,6 +439,20 @@ export default function App() {
         }
       })
       .catch((err) => console.error("Error loading reviews:", err));
+  };
+
+  useEffect(() => {
+    fetchReviews();
+
+    const interval = setInterval(fetchReviews, 3000);
+    window.addEventListener("focus", fetchReviews);
+    window.addEventListener("storage", fetchReviews);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("focus", fetchReviews);
+      window.removeEventListener("storage", fetchReviews);
+    };
   }, []);
 
   const tripadvisorVisibleReviews = showAllTripadvisorReviews
@@ -1312,8 +1296,23 @@ export default function App() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-6">
-                {tripadvisorVisibleReviews.map((rev, index) =>
-                  renderReviewCard(rev, index),
+                {tripadvisorVisibleReviews.length > 0 ? (
+                  tripadvisorVisibleReviews.map((rev, index) =>
+                    renderReviewCard(rev, index),
+                  )
+                ) : (
+                  <div className="col-span-full py-8 text-center text-gray-500 text-sm">
+                    Loading online TripAdvisor reviews... You can also{" "}
+                    <a
+                      href={tripadvisorUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-sacramento font-bold underline"
+                    >
+                      explore all verified reviews directly on TripAdvisor
+                    </a>
+                    .
+                  </div>
                 )}
               </div>
             </div>
