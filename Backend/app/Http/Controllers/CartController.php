@@ -10,8 +10,18 @@ use Illuminate\Http\Request;
 class CartController extends Controller
 {
     // Fetch all cart items for a customer
-    public function index($customerId)
+    public function index(Request $request, $customerId)
     {
+        $user = $request->user('sanctum') ?? auth('sanctum')->user();
+        if ($user) {
+            $isAdmin = in_array(strtolower($user->role ?? ''), ['admin', 'administrator', 'superadmin']);
+            if (!$isAdmin && (int) $user->Customer_ID !== (int) $customerId) {
+                return response()->json([
+                    'message' => 'Unauthorized: You cannot view this cart'
+                ], 403);
+            }
+        }
+
         return response()->json(
             Cart::with(['booking.package'])
                 ->where('Customer_ID', $customerId)
@@ -27,6 +37,7 @@ class CartController extends Controller
             'Booking_Date' => 'required|date',
             'Pickup_Time' => 'required',
             'Pickup_Location' => 'required|string',
+            'Area' => 'nullable|string|max:100',
             'No_of_adults' => 'required|integer',
             'No_of_child' => 'required|integer',
             'Package_ID' => 'required',
@@ -68,6 +79,7 @@ class CartController extends Controller
             'Booking_Date' => $request->Booking_Date,
             'Pickup_Time' => $request->Pickup_Time,
             'Pickup_Location' => $request->Pickup_Location,
+            'Area' => $request->Area ?? null,
             'No_of_adults' => $request->No_of_adults,
             'No_of_child' => $request->No_of_child,
             'Payment' => $request->Payment,
@@ -93,10 +105,50 @@ class CartController extends Controller
     }
 
     // Remove item from cart
-    public function destroy($bookingId)
+    public function destroy(Request $request, $bookingId)
     {
-        $booking = Booking::findOrFail($bookingId);
-        // By deleting the booking, the cart table entry deletes automatically due to onDelete('cascade')
+        // 1. Verify that the cart entry exists for this booking ID
+        $cart = Cart::where('Booking_ID', $bookingId)->first();
+
+        if (!$cart) {
+            return response()->json([
+                'message' => 'Cart item not found'
+            ], 404);
+        }
+
+        // 2. Verify that the booking exists and is currently in 'In Cart' status
+        $booking = Booking::find($bookingId);
+
+        if (!$booking || $booking->Status !== 'In Cart') {
+            return response()->json([
+                'message' => 'Only pending cart bookings can be removed from cart'
+            ], 400);
+        }
+
+        // 3. Ownership check
+        $user = $request->user('sanctum') ?? auth('sanctum')->user();
+        if ($user) {
+            $isAdmin = in_array(strtolower($user->role ?? ''), ['admin', 'administrator', 'superadmin']);
+            if (!$isAdmin && (int) $user->Customer_ID !== (int) $cart->Customer_ID) {
+                return response()->json([
+                    'message' => 'Unauthorized: You do not own this cart item'
+                ], 403);
+            }
+        } else {
+            // Check request parameter / query / header for guest ownership verification if provided
+            $reqCustomerId = $request->input('Customer_ID')
+                ?? $request->query('Customer_ID')
+                ?? $request->header('X-Customer-ID');
+
+            if ($reqCustomerId && (int) $reqCustomerId !== (int) $cart->Customer_ID) {
+                return response()->json([
+                    'message' => 'Unauthorized: You do not own this cart item'
+                ], 403);
+            }
+        }
+
+        // Safe removal: delete cart record first, then the associated 'In Cart' booking
+        $cart->delete();
         $booking->delete();
 
         return response()->json([
@@ -112,6 +164,16 @@ class CartController extends Controller
         ]);
 
         $customerId = $request->Customer_ID;
+
+        $user = $request->user('sanctum') ?? auth('sanctum')->user();
+        if ($user) {
+            $isAdmin = in_array(strtolower($user->role ?? ''), ['admin', 'administrator', 'superadmin']);
+            if (!$isAdmin && (int) $user->Customer_ID !== (int) $customerId) {
+                return response()->json([
+                    'message' => 'Unauthorized: You cannot checkout another customer\'s cart'
+                ], 403);
+            }
+        }
 
         // Get all cart entries
         $cartEntries = Cart::where('Customer_ID', $customerId)->get();

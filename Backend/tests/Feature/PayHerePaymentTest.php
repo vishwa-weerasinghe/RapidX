@@ -386,4 +386,59 @@ class PayHerePaymentTest extends TestCase
             ->assertJsonPath('amount', '150.00')
             ->assertJsonCount(1, 'bookings');
     }
+
+    // -------------------------------------------------------------------------
+    // Payment Client Confirm Test
+    // -------------------------------------------------------------------------
+
+    public function test_confirm_endpoint_updates_payment_and_bookings_and_clears_cart(): void
+    {
+        $customer = $this->createCustomer();
+        $package  = $this->createPackage();
+
+        $payment = Payment::create([
+            'order_id'       => 'SAFARI_CART_TEST_CONFIRM',
+            'Customer_ID'    => $customer->Customer_ID,
+            'amount'         => 300.00,
+            'currency'       => 'USD',
+            'status'         => 'Pending',
+        ]);
+
+        $booking = Booking::create([
+            'Booking_Date'    => '2026-09-01',
+            'Pickup_Time'     => '06:00',
+            'Pickup_Location' => 'Sigiriya',
+            'No_of_adults'    => 2,
+            'No_of_child'     => 0,
+            'Payment'         => 300.00,
+            'Status'          => 'Pending',
+            'Customer_ID'     => $customer->Customer_ID,
+            'Package_ID'      => $package->id,
+            'Payment_ID'      => $payment->Payment_ID,
+            'Admin_Seen'      => false,
+        ]);
+
+        Cart::create([
+            'Customer_ID' => $customer->Customer_ID,
+            'Booking_ID'  => $booking->Booking_ID,
+        ]);
+
+        $response = $this->postJson('/api/payhere/confirm', [
+            'order_id' => 'SAFARI_CART_TEST_CONFIRM',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('status', 'Success');
+
+        $payment->refresh();
+        $this->assertEquals('Success', $payment->status);
+
+        $booking->refresh();
+        $this->assertEquals('Confirmed', $booking->Status);
+
+        $this->assertDatabaseMissing('carts', [
+            'Customer_ID' => $customer->Customer_ID,
+        ]);
+    }
 }

@@ -28,21 +28,16 @@ class PasswordResetController extends Controller
     public function reset(Request $request)
     {
         $request->validate([
-            'token' => 'required',
+            'token' => 'required|string',
             'Email' => 'required|email',
             'Password' => 'required|string|min:8|confirmed',
         ]);
 
-        // The broker uses these fields to find the user and check the token.
-        // We map 'Password_confirmation' to 'password_confirmation' for the broker if needed,
-        // but since we validate above, we can just pass the array.
-        // Also note Laravel's broker expects the password field to be 'password' by default 
-        // to validate against the token. Let's see if we need to map it.
         $credentials = [
             'Email' => $request->Email,
             'password' => $request->Password,
-            'password_confirmation' => $request->Password_confirmation ?? $request->Password_confirmation,
-            'token' => $request->token
+            'password_confirmation' => $request->input('Password_confirmation', $request->input('password_confirmation')),
+            'token' => $request->token,
         ];
 
         $status = Password::broker()->reset(

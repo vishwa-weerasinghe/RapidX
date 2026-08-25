@@ -56,7 +56,9 @@ export default function Cart() {
     }
 
     try {
-      await api.delete(`/cart/${bookingId}`);
+      await api.delete(`/cart/${bookingId}`, {
+        params: { Customer_ID: activeCustomer.Customer_ID },
+      });
       setCartItems(cartItems.filter((item) => item.Booking_ID !== bookingId));
     } catch (err) {
       console.error(err);

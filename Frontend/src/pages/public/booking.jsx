@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import SEO from "../../components/SEO";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import api from "../../axios";
 import { useTheme } from "../../context/ThemeContext";
@@ -272,6 +273,12 @@ export default function Booking() {
     };
 
     return (
+        <>
+          <SEO
+            title="Book Your Sri Lanka Jeep Safari | Minneriya, Kaudulla & Wasgamuwa"
+            description="Instantly book a jeep safari in Minneriya, Kaudulla or Wasgamuwa National Park. Choose your package, date, and number of guests. Best rates guaranteed."
+            canonical="https://www.minneriyawildjeepsafari.com/booking"
+          />
         <div className="min-h-screen bg-offwhite dark:bg-[#050505] text-[#1f2b20] dark:text-[#f5f7f2] py-12 px-4 md:px-6 transition-colors duration-300">
             <div className="max-w-4xl mx-auto space-y-6">
                 {/* Navigation Action */}
@@ -626,5 +633,6 @@ export default function Booking() {
                 </div>
             </div>
         </div>
+        </>
     );
 }

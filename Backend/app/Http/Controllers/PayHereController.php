@@ -269,18 +269,77 @@ class PayHereController extends Controller
                     'raw_response'   => $request->all(),
                 ]);
             } else {
-                // Status Code < 0 = Failed / Canceled / Chargebacked
+                // Status Code < 0 = Failed / Canceled / Declined
                 $payment->update([
                     'status'         => $statusCode === -1 ? 'Canceled' : 'Failed',
                     'status_code'    => $statusCode,
-                    'status_message' => $request->status_message ?? 'Payment Failed or Canceled',
+                    'status_message' => $request->status_message ?? 'Payment Failed or Declined',
                     'raw_response'   => $request->all(),
                 ]);
+
+                // Revert pending booking status back to 'In Cart' (for cart items) or 'Cancelled' so they are not confirmed
+                Booking::where('Payment_ID', $payment->Payment_ID)
+                    ->where('Status', '!=', 'Confirmed')
+                    ->update([
+                        'Status' => $statusCode === -1 ? 'In Cart' : 'Failed',
+                    ]);
 
                 Log::warning('Payment failed for order: ' . $payment->order_id . ' with status code: ' . $statusCode);
             }
 
             return response()->json(['status' => 'OK'], 200);
+        });
+    }
+
+    /**
+     * Confirm a payment after successful client SDK checkout or return.
+     * Marks Payment as Success, all associated Bookings as Confirmed, and clears the Customer's Cart.
+     */
+    public function confirm(Request $request)
+    {
+        $request->validate([
+            'order_id' => 'required|string',
+        ]);
+
+        $orderId = $request->order_id;
+        $payment = Payment::with(['bookings.package', 'customer'])
+            ->where('order_id', $orderId)
+            ->firstOrFail();
+
+        // Ownership check for authenticated users
+        $user = $request->user('sanctum') ?? auth('sanctum')->user();
+        if ($user) {
+            $isAdmin = in_array(strtolower($user->role ?? ''), ['admin', 'administrator', 'superadmin']);
+            if (!$isAdmin && (int) $user->Customer_ID !== (int) $payment->Customer_ID) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+        }
+
+        return DB::transaction(function () use ($payment) {
+            if ($payment->status !== 'Success') {
+                $payment->update([
+                    'status'         => 'Success',
+                    'status_message' => 'Payment Completed & Confirmed',
+                ]);
+
+                // Update all bookings linked to this payment to 'Confirmed'
+                Booking::where('Payment_ID', $payment->Payment_ID)->update([
+                    'Status' => 'Confirmed',
+                ]);
+
+                // Clear customer's cart items
+                if ($payment->Customer_ID) {
+                    Cart::where('Customer_ID', $payment->Customer_ID)->delete();
+                }
+            }
+
+            return response()->json([
+                'success'  => true,
+                'message'  => 'Payment confirmed and bookings updated successfully',
+                'order_id' => $payment->order_id,
+                'status'   => 'Success',
+                'payment'  => $payment->fresh(['bookings.package', 'customer']),
+            ]);
         });
     }
 
