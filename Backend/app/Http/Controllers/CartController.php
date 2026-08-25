@@ -116,10 +116,10 @@ class CartController extends Controller
             ], 404);
         }
 
-        // 2. Verify that the booking exists and is currently in 'In Cart' status
+        // 2. Verify that the booking exists and is currently in 'In Cart' or 'Pending' status
         $booking = Booking::find($bookingId);
 
-        if (!$booking || $booking->Status !== 'In Cart') {
+        if (!$booking || !in_array($booking->Status, ['In Cart', 'Pending'])) {
             return response()->json([
                 'message' => 'Only pending cart bookings can be removed from cart'
             ], 400);

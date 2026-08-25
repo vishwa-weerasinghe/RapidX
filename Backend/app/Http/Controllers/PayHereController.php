@@ -184,7 +184,7 @@ class PayHereController extends Controller
             // Link all bookings to this Payment_ID
             Booking::whereIn('Booking_ID', $bookings->pluck('Booking_ID'))->update([
                 'Payment_ID' => $payment->Payment_ID,
-                'Status'     => 'Pending',
+                'Status'     => 'In Cart',
             ]);
 
             $payHereParams = $this->payHereService->prepareCheckoutPayload(
