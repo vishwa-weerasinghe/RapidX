@@ -96,6 +96,7 @@ Route::delete('/cart/{bookingId}', [CartController::class, 'destroy']);
 
 // PayHere Payment Gateway
 Route::post('/payhere/initiate', [PayHereController::class, 'initiate']);
+Route::post('/payhere/confirm', [PayHereController::class, 'confirm']);
 Route::post('/payhere/notify', [PayHereController::class, 'notify']);
 Route::get('/payhere/status/{orderId}', [PayHereController::class, 'status']);
 

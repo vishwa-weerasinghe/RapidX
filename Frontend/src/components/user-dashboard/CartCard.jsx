@@ -41,7 +41,9 @@ export function CartCard() {
   const handleRemove = async (bookingId) => {
     if (!confirm("Are you sure you want to remove this item from your cart?")) return;
     try {
-      await api.delete(`/cart/${bookingId}`);
+      await api.delete(`/cart/${bookingId}`, {
+        params: { Customer_ID: customerId },
+      });
       setCartItems((prev) => prev.filter((item) => item.Booking_ID !== bookingId));
     } catch (err) {
       console.error(err);

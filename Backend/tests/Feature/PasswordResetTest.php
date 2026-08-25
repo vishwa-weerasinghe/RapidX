@@ -92,4 +92,30 @@ class PasswordResetTest extends TestCase
         $response->assertStatus(400)
                  ->assertJsonFragment(['message' => 'Invalid token or email.']);
     }
+
+    public function test_reset_password_fails_validation_when_confirmation_does_not_match()
+    {
+        $response = $this->postJson('/api/reset-password', [
+            'token' => 'some-token',
+            'Email' => 'user@example.com',
+            'Password' => 'newpassword123',
+            'Password_confirmation' => 'mismatchedpassword',
+        ]);
+
+        $response->assertStatus(422)
+                 ->assertJsonValidationErrors(['Password']);
+    }
+
+    public function test_reset_password_fails_validation_when_password_too_short()
+    {
+        $response = $this->postJson('/api/reset-password', [
+            'token' => 'some-token',
+            'Email' => 'user@example.com',
+            'Password' => 'short',
+            'Password_confirmation' => 'short',
+        ]);
+
+        $response->assertStatus(422)
+                 ->assertJsonValidationErrors(['Password']);
+    }
 }
