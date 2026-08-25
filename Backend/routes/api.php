@@ -58,6 +58,9 @@ Route::get('appointments/summary', [AppointmentController::class, 'summary'])
 
 Route::get('reviews', [ReviewController::class, 'index']);
 
+Route::get('/locations/{locationId}/reviews', [ReviewController::class, 'tripadvisorReviews']);
+Route::get('/tripadvisor-reviews', [ReviewController::class, 'tripadvisorReviews']);
+
 Route::get('reviews/{review}', [ReviewController::class, 'show']);
 
 Route::post('reviews', [ReviewController::class, 'store']);
