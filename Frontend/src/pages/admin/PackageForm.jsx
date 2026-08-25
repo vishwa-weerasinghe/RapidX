@@ -147,7 +147,7 @@ export default function PackageForm() {
               <img
                 src={`http://127.0.0.1:8000/storage/${form.Image}`}
                 alt="Current package"
-                className="h-40 w-full rounded-lg border border-border-light object-cover dark:border-border-dark"
+                className="h-56 w-full rounded-lg border border-border-light bg-gray-50 object-contain object-left dark:border-border-dark dark:bg-slate-900"
               />
             </div>
           )}
