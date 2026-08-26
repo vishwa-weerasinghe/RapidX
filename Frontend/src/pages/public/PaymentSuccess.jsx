@@ -51,7 +51,7 @@ export default function PaymentSuccess() {
     const isDark = theme === "dark";
     const isSuccess = payment?.status === "Success";
     const isPending = payment?.status === "Pending";
-    const isFailed = payment?.status === "Failed" || payment?.status === "Canceled";
+    const isFailed = payment?.status === "Failed" || payment?.status === "Cancelled";
 
     return (
         <div className={`min-h-screen py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center transition-colors duration-300 ${

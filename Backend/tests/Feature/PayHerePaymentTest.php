@@ -346,6 +346,62 @@ class PayHerePaymentTest extends TestCase
         $this->assertEquals('Failed', $payment->status);
     }
 
+    public function test_ipn_webhook_with_cancelled_status_updates_payment_status_to_cancelled(): void
+    {
+        $customer = $this->createCustomer();
+        $package  = $this->createPackage();
+
+        $payment = Payment::create([
+            'order_id'       => 'ORD_TEST_CANCEL_100',
+            'Customer_ID'    => $customer->Customer_ID,
+            'amount'         => 120.00,
+            'currency'       => 'USD',
+            'status'         => 'Pending',
+        ]);
+
+        $booking = Booking::create([
+            'Booking_Date'    => '2026-09-01',
+            'Pickup_Time'     => '06:00:00',
+            'Pickup_Location' => 'Sigiriya Hotel',
+            'Area'            => 'Sigiriya',
+            'No_of_adults'    => 2,
+            'No_of_child'     => 0,
+            'Payment'         => 120.00,
+            'Status'          => 'In Cart',
+            'Customer_ID'     => $customer->Customer_ID,
+            'Package_ID'      => $package->id,
+            'Payment_ID'      => $payment->Payment_ID,
+            'Admin_Seen'      => false,
+        ]);
+
+        $merchantId = config('payhere.merchant_id', '1211149');
+        $merchantSecret = config('payhere.merchant_secret', '4MjIyMzE0NTgxNDQyNjY5Njg4MTg4MDgzODczODAyMTIyMzE0NTg=');
+        $validSig = strtoupper(
+            md5($merchantId . $payment->order_id . '120.00' . 'USD' . '-1' . strtoupper(md5($merchantSecret)))
+        );
+
+        $response = $this->postJson('/api/payhere/notify', [
+            'merchant_id'      => $merchantId,
+            'order_id'         => $payment->order_id,
+            'payhere_amount'   => '120.00',
+            'payhere_currency' => 'USD',
+            'status_code'      => -1, // -1 = Cancelled
+            'status_message'   => 'Cancelled by user',
+            'md5sig'           => $validSig,
+        ]);
+
+        $response->assertStatus(200);
+
+        $payment->refresh();
+        $this->assertEquals('Cancelled', $payment->status);
+
+        // Pending bookings tied to a cancelled payment must not stay pending/confirmed
+        $booking->refresh();
+        $this->assertEquals('In Cart', $booking->Status);
+    }
+
+
+
     // -------------------------------------------------------------------------
     // Payment Status Polling Test
     // -------------------------------------------------------------------------
