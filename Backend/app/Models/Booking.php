@@ -41,6 +41,15 @@ class Booking extends Model
         return $this->belongsTo(Vehicle::class, 'Vehicle_ID');
     }
 
+    /**
+     * All vehicles assigned to this booking (a booking can require more
+     * than one vehicle depending on the number of passengers).
+     */
+    public function vehicles()
+    {
+        return $this->belongsToMany(Vehicle::class, 'booking_vehicles', 'Booking_ID', 'Vehicle_ID');
+    }
+
     public function payment()
     {
         return $this->belongsTo(Payment::class, 'Payment_ID');
