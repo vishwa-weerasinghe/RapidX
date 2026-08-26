@@ -803,7 +803,7 @@ export default function Bookings() {
                       Edit
                     </button>
                     <button onClick={() => handleDelete(booking.Booking_ID)} className="ml-3 text-red-600 hover:underline dark:text-red-400">
-                      Delete
+                      Cancel
                     </button>
                   </td>
                 </tr>

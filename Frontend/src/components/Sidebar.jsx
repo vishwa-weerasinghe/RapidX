@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import api from "../axios";
 
 import {
@@ -37,18 +37,9 @@ const customerLinks = [
   { to: "/user/reviews", label: "Reviews", icon: Star },
 ];
 
-export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
+export default function Sidebar({ role = "admin", isOpen }) {
   const normalizedRole = role?.toLowerCase();
   const links = normalizedRole === "customer" ? customerLinks : adminLinks;
-
-  const title =
-    normalizedRole === "customer"
-      ? "Safari Customer"
-      : "Safari Admin";
-
-  const navigate = useNavigate();
-
-  const [loading, setLoading] = useState(false);
 
   const [unreadBookings, setUnreadBookings] = useState(0);
   const [unreadReviews, setUnreadReviews] = useState(0);
@@ -119,11 +110,6 @@ export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
     return () => clearInterval(interval);
   }, [normalizedRole]);
 
-
-  const handleBookingsClick = async () => {
-    await api.post("/admin/bookings/mark-seen");
-    setUnreadBookings(0);
-  };
 
   return (
     <aside
@@ -210,11 +196,6 @@ export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
               <NavLink
                 key={link.to}
                 to={link.to}
-                onClick={
-                  link.label === "Bookings"
-                    ? handleBookingsClick
-                    : undefined
-                }
                 className={({ isActive }) =>
                   `
                   flex

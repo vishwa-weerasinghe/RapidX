@@ -329,8 +329,16 @@ class BookingControllerTest extends TestCase
     public function test_customer_cancellation_notifies_admin(): void
     {
         $booking = $this->createBooking();
+        $customerUser = User::create([
+            'User_Name' => 'Test Customer',
+            'Email' => fake()->unique()->safeEmail(),
+            'Password' => bcrypt('Password123'),
+            'role' => 'user',
+            'Customer_ID' => $booking->Customer_ID,
+        ]);
 
-        $this->patchJson('/api/user/bookings/' . $booking->Booking_ID . '/cancel')
+        $this->actingAs($customerUser, 'sanctum')
+            ->patchJson('/api/user/bookings/' . $booking->Booking_ID . '/cancel')
             ->assertStatus(200)
             ->assertJsonPath('booking.Status', 'Cancelled');
 
@@ -361,8 +369,13 @@ class BookingControllerTest extends TestCase
             'Admin_Seen' => false,
             'Admin_Message' => 'Customer cancelled this booking.',
         ]);
+        $seenBooking = $this->createBooking();
+        $seenBooking->update([
+            'Admin_Seen' => true,
+            'Admin_Message' => 'An older booking notification.',
+        ]);
 
-        $this->actingAs($admin, 'sanctum')
+        $response = $this->actingAs($admin, 'sanctum')
             ->getJson('/api/admin/bookings/notifications')
             ->assertStatus(200)
             ->assertJsonFragment([
@@ -374,5 +387,9 @@ class BookingControllerTest extends TestCase
                 'Status' => 'Cancelled',
                 'Admin_Message' => 'Customer cancelled this booking.',
             ]);
+
+        $response->assertJsonMissing([
+            'Booking_ID' => $seenBooking->Booking_ID,
+        ]);
     }
 }

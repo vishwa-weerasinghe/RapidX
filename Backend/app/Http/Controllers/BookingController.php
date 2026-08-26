@@ -340,6 +340,7 @@ class BookingController extends Controller
 
         return response()->json(
             Booking::with(['customer', 'package'])
+                ->where('Admin_Seen', false)
                 ->whereNotNull('Admin_Message')
                 ->latest('Booking_ID')
                 ->get()
