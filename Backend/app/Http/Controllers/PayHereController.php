@@ -270,9 +270,9 @@ class PayHereController extends Controller
                     'raw_response'   => $request->all(),
                 ]);
             } else {
-                // Status Code < 0 = Failed / Canceled / Declined
+                // Status Code < 0 = Failed / Cancelled / Declined
                 $payment->update([
-                    'status'         => $statusCode === -1 ? 'Canceled' : 'Failed',
+                    'status'         => $statusCode === -1 ? 'Cancelled' : 'Failed',
                     'status_code'    => $statusCode,
                     'status_message' => $request->status_message ?? 'Payment Failed or Declined',
                     'raw_response'   => $request->all(),

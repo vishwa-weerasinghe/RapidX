@@ -232,9 +232,13 @@ class BookingController extends Controller
     public function assignVehicle(Request $request, $id)
     {
         // Delegate the legacy single-vehicle endpoint to the multi-assign logic.
-        $request->merge([
-            'Vehicle_IDs' => array_values(array_filter([(int) $request->input('Vehicle_ID')])),
+        // Validate the scalar field the client actually sent first, so validation
+        // errors are reported under 'Vehicle_ID' instead of 'Vehicle_IDs.0'.
+        $validated = $request->validate([
+            'Vehicle_ID' => 'required|integer|exists:vehicles,Vehicle_ID',
         ]);
+
+        $request->merge(['Vehicle_IDs' => [(int) $validated['Vehicle_ID']]]);
 
         return $this->assignVehicles($request, $id);
     }
