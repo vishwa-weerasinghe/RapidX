@@ -126,7 +126,7 @@ export default function AdminReviews() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-charcoal dark:text-white">Manage Reviews</h1>
+          <h1 className="text-3xl md:text-4xl font-black text-[#29AB87] dark:text-white tracking-tight">Manage Reviews</h1>
           <p className="mt-2 text-muted">Delete customer reviews from this admin page.</p>
         </div>
 

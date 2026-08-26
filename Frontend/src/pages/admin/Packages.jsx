@@ -51,7 +51,7 @@ export default function Packages() {
 
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-charcoal dark:text-white">
+        <h1 className="text-3xl md:text-4xl font-black text-[#29AB87] dark:text-white tracking-tight">
           Packages
         </h1>
 

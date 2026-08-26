@@ -198,6 +198,37 @@ class BookingControllerTest extends TestCase
         ]);
     }
 
+    public function test_admin_created_booking_has_an_admin_placement_notification(): void
+    {
+        $admin = User::create([
+            'User_Name' => 'Admin User',
+            'Email' => fake()->unique()->safeEmail(),
+            'Password' => bcrypt('Password123'),
+            'role' => 'admin',
+        ]);
+        $customer = $this->createCustomer();
+        $package = $this->createPackage();
+
+        $this->actingAs($admin, 'sanctum')
+            ->postJson('/api/bookings', [
+                'Booking_Date' => '2026-07-16',
+                'Pickup_Time' => '13:00:00',
+                'Area' => 'Habarana',
+                'Pickup_Location' => 'Negombo',
+                'No_of_adults' => 2,
+                'No_of_child' => 0,
+                'Customer_ID' => $customer->Customer_ID,
+                'Package_ID' => $package->id,
+                'Created_By_Admin' => true,
+            ])
+            ->assertStatus(200);
+
+        $this->assertDatabaseHas('bookings', [
+            'Customer_ID' => $customer->Customer_ID,
+            'Admin_Message' => 'New booking successfully placed by you.',
+        ]);
+    }
+
     public function test_store_returns_validation_errors_for_missing_required_fields(): void
     {
         $response = $this->postJson('/api/bookings', [

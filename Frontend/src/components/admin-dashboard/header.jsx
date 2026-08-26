@@ -78,11 +78,7 @@ export function Header({ user, toggleSidebar }) {
                     >
                         <ThemeModeIcon className="w-5 h-5" />
                     </button>
-                    {/* Notifications */}
-                    <button className="p-2 text-muted hover:text-sacramento dark:text-gray-400 dark:hover:text-sacramento-300 transition-colors rounded-lg hover:bg-sacramento/10 dark:hover:bg-surface-2 relative">
-                        <Bell className="w-5 h-5" />
-                        <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-bg-dark"></span>
-                    </button>
+                    
                     <div className="h-6 w-px bg-border-light dark:bg-border-dark mx-1 hidden sm:block"></div>
                     {/* Admin Profile Dropdown */}
                     <div className="relative">
