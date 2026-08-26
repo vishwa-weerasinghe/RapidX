@@ -150,9 +150,9 @@ class BookingController extends Controller
     //   - 3-7 days before the tour date: 50% refund
     //   - Less than 3 days before the tour date (or no-show): no refund
     // =========================
-    public function cancel($id)
+    public function cancel(Request $request, $id)
     {
-        $booking = Booking::findOrFail($id);
+        $booking = Booking::with('payment')->findOrFail($id);
 
         if (strtolower((string) $booking->Status) === 'cancelled') {
             return response()->json([
@@ -160,23 +160,20 @@ class BookingController extends Controller
             ], 422);
         }
 
-        $today = now()->startOfDay();
-        $tourDate = \Carbon\Carbon::parse($booking->Booking_Date)->startOfDay();
-        $daysBeforeTour = (int) round($today->diffInDays($tourDate, false));
+        // Ownership check
+        $user = $request->user('sanctum') ?? auth('sanctum')->user();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated. Only registered users can cancel bookings.'], 401);
+        }
 
-        if ($daysBeforeTour > 7) {
-            $refundPercentage = 100;
-        } elseif ($daysBeforeTour >= 3) {
-            $refundPercentage = 50;
-        } else {
-            $refundPercentage = 0;
+        if (!$this->isAdmin($user) && (int) $user->Customer_ID !== (int) $booking->Customer_ID) {
+            return response()->json(['message' => 'Unauthorized. You can only cancel your own bookings.'], 403);
         }
 
         // Trigger the real PayHere refund, mirroring the admin-delete path.
-        // Must run BEFORE the status is set to 'Cancelled' because
-        // processRefund() only refunds paid bookings still in 'Confirmed'
-        // state (it no-ops for unpaid/pending bookings).
-        $this->processRefund($booking);
+        // It accurately calculates the tiered percentage based on dates,
+        // checks if the booking was actually paid, and processes the refund.
+        $refundPercentage = $this->processRefund($booking);
 
         $booking->update([
             'Status' => 'Cancelled',
@@ -276,17 +273,20 @@ class BookingController extends Controller
     {
         $refundPercentage = 0;
         
+        $bookingDate = \Carbon\Carbon::parse($booking->Booking_Date)->startOfDay();
+        $today = \Carbon\Carbon::now()->startOfDay();
+        
+        // Calculate days difference correctly ignoring time of day
+        $daysDifference = (int) round($today->diffInDays($bookingDate, false));
+
+        if ($daysDifference > 7) {
+            $refundPercentage = 100;
+        } elseif ($daysDifference >= 3 && $daysDifference <= 7) {
+            $refundPercentage = 50;
+        }
+
+        // Only actually refund money via PayHere if it was confirmed and paid
         if ($booking->Status === 'Confirmed' && $booking->payment && $booking->payment->payhere_payment_id) {
-            $bookingDate = \Carbon\Carbon::parse($booking->Booking_Date);
-            $now = \Carbon\Carbon::now();
-            $daysDifference = $now->diffInDays($bookingDate, false);
-
-            if ($daysDifference > 7) {
-                $refundPercentage = 100;
-            } elseif ($daysDifference >= 3 && $daysDifference <= 7) {
-                $refundPercentage = 50;
-            }
-
             if ($refundPercentage > 0 && $booking->Payment > 0) {
                 $refundAmount = ($booking->Payment * $refundPercentage) / 100;
                 
@@ -307,7 +307,7 @@ class BookingController extends Controller
 
     public function destroy($id)
     {
-        $booking = Booking::findOrFail($id);
+        $booking = Booking::with('payment')->findOrFail($id);
 
         // Authentication and admin check (from shanika)
         $user = request()->user('sanctum') ?? auth('sanctum')->user();
@@ -319,6 +319,8 @@ class BookingController extends Controller
             return response()->json(['message' => 'Only administrators can delete bookings.'], 403);
         }
 
+        $refundPercentage = $this->processRefund($booking);
+
         $booking->update([
             'Status' => 'Cancelled',
             'Customer_Seen' => false,
@@ -328,6 +330,7 @@ class BookingController extends Controller
         return response()->json([
             'message' => 'Booking cancelled successfully',
             'booking' => $booking,
+            'refund_percentage' => $refundPercentage
         ]);
     }
 
