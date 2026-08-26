@@ -88,6 +88,7 @@ class CartController extends Controller
             'Package_ID' => $request->Package_ID,
             'Vehicle_ID' => null,
             'Admin_Seen' => false,
+            'Admin_Message' => 'A new booking has been placed by a customer.',
         ]);
 
         // Create cart entry

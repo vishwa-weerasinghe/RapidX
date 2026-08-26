@@ -114,6 +114,7 @@ class PayHereController extends Controller
                 'Vehicle_ID'      => null,
                 'Payment_ID'      => $payment->Payment_ID,
                 'Admin_Seen'      => false,
+                'Admin_Message'  => 'A new booking has been placed by a customer.',
             ]);
 
             $payHereParams = $this->payHereService->prepareCheckoutPayload(

@@ -8,6 +8,11 @@ class Booking extends Model
 {
     protected $primaryKey = 'Booking_ID';
 
+    protected $casts = [
+        'Admin_Seen' => 'boolean',
+        'Customer_Seen' => 'boolean',
+    ];
+
     protected $fillable = [
         'Booking_Date',
         'Pickup_Time',
@@ -21,7 +26,10 @@ class Booking extends Model
         'Package_ID',
         'Vehicle_ID',
         'Payment_ID',
-        'Admin_Seen'
+        'Admin_Seen',
+        'Admin_Message',
+        'Customer_Seen',
+        'Customer_Message'
     ];
 
     // relationships

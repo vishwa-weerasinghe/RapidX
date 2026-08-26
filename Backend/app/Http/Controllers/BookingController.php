@@ -84,6 +84,7 @@ class BookingController extends Controller
             'Package_ID' => $request->Package_ID,
             'Vehicle_ID' => $request->Vehicle_ID ?? null,
             'Admin_Seen' => false,
+            'Admin_Message' => 'A new booking has been placed by a customer.',
         ]);
 
         return response()->json([
@@ -171,7 +172,11 @@ class BookingController extends Controller
             $refundPercentage = 0;
         }
 
-        $booking->update(['Status' => 'Cancelled']);
+        $booking->update([
+            'Status' => 'Cancelled',
+            'Admin_Seen' => false,
+            'Admin_Message' => 'Customer cancelled this booking.',
+        ]);
 
         return response()->json([
             'message' => 'Booking cancelled successfully',
@@ -292,56 +297,54 @@ class BookingController extends Controller
 
     public function destroy($id)
     {
-        $booking = Booking::with('payment')->findOrFail($id);
-        
-        // Process automated refund if eligible
-        $this->processRefund($booking);
+        $booking = Booking::findOrFail($id);
 
-        $booking->delete();
-
-        return response()->json([
-            'message' => 'Booking deleted successfully and applicable refunds processed'
-        ]);
-    }
-
-    // =========================
-    // CANCEL BOOKING (USER)
-    // =========================
-    public function cancel(Request $request, $id)
-    {
-        $booking = Booking::with('payment')->findOrFail($id);
-        
-        // Ownership check
-        $user = $request->user('sanctum') ?? auth('sanctum')->user();
+        // Authentication and admin check (from shanika)
+        $user = request()->user('sanctum') ?? auth('sanctum')->user();
         if (!$user) {
-            return response()->json(['message' => 'Only registered users can cancel bookings.'], 401);
+            return response()->json(['message' => 'Unauthenticated.'], 401);
         }
 
-        if (!$this->isAdmin($user) && (int) $user->Customer_ID !== (int) $booking->Customer_ID) {
-            return response()->json(['message' => 'Unauthorized. You can only cancel your own bookings.'], 403);
+        if (!$this->isAdmin($user)) {
+            return response()->json(['message' => 'Only administrators can delete bookings.'], 403);
         }
-
-        if ($booking->Status === 'Canceled') {
-            return response()->json(['message' => 'Booking is already cancelled'], 400);
-        }
-
-        $refundPercentage = $this->processRefund($booking);
 
         $booking->update([
-            'Status' => 'Canceled'
+            'Status' => 'Cancelled',
+            'Customer_Seen' => false,
+            'Customer_Message' => 'Your booking was cancelled by an administrator.',
         ]);
 
         return response()->json([
             'message' => 'Booking cancelled successfully',
-            'refund_percentage' => $refundPercentage,
-            'booking' => $booking
+            'booking' => $booking,
         ]);
     }
+
     public function unreadCount()
     {
         return response()->json([
             'count' => Booking::where('Admin_Seen', false)->count(),
         ]);
+    }
+
+    public function adminNotifications(Request $request)
+    {
+        if (!$request->user()) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+
+        if (!$this->isAdmin($request->user())) {
+            return response()->json(['message' => 'Only administrators can view booking notifications.'], 403);
+        }
+
+        return response()->json(
+            Booking::with(['customer', 'package'])
+                ->where('Admin_Seen', false)
+                ->whereNotNull('Admin_Message')
+                ->latest('Booking_ID')
+                ->get()
+        );
     }
 
     public function markAllAsSeen()
@@ -353,5 +356,48 @@ class BookingController extends Controller
         return response()->json([
             'message' => 'Booking notifications cleared',
         ]);
+    }
+
+    public function customerUnreadCount(Request $request, $customerId)
+    {
+        if ((int) $request->user()->Customer_ID !== (int) $customerId) {
+            return response()->json(['message' => 'Forbidden.'], 403);
+        }
+
+        return response()->json([
+            'count' => Booking::where('Customer_ID', $customerId)
+                ->where('Customer_Seen', false)
+                ->whereNotNull('Customer_Message')
+                ->count(),
+        ]);
+    }
+
+    public function customerNotifications(Request $request, $customerId)
+    {
+        if ((int) $request->user()->Customer_ID !== (int) $customerId) {
+            return response()->json(['message' => 'Forbidden.'], 403);
+        }
+
+        return response()->json(
+            Booking::with('package')
+                ->where('Customer_ID', $customerId)
+                ->whereNotNull('Customer_Message')
+                ->latest('Booking_ID')
+                ->get(['Booking_ID', 'Package_ID', 'Booking_Date', 'Status', 'Customer_Message', 'Customer_Seen'])
+        );
+    }
+
+    public function markCustomerNotificationsAsSeen(Request $request, $customerId)
+    {
+        if ((int) $request->user()->Customer_ID !== (int) $customerId) {
+            return response()->json(['message' => 'Forbidden.'], 403);
+        }
+
+        Booking::where('Customer_ID', $customerId)
+            ->where('Customer_Seen', false)
+            ->whereNotNull('Customer_Message')
+            ->update(['Customer_Seen' => true]);
+
+        return response()->json(['message' => 'Booking notifications cleared']);
     }
 }

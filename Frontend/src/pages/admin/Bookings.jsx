@@ -44,6 +44,9 @@ const getAssignedVehicles = (booking) => {
   return booking?.vehicle ? [booking.vehicle] : [];
 };
 
+const isUnseenAdminBooking = (booking) =>
+  booking?.Admin_Seen === false || booking?.Admin_Seen === 0 || booking?.Admin_Seen === "0";
+
 export default function Bookings() {
   const [bookings, setBookings] = useState([]);
   const [vehicles, setVehicles] = useState([]);
@@ -57,6 +60,7 @@ export default function Bookings() {
   const [newBookingIds, setNewBookingIds] = useState(new Set());
   const [notificationBookingIds, setNotificationBookingIds] = useState(new Set());
   const [showNewOnly, setShowNewOnly] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
   const [assignmentModal, setAssignmentModal] = useState(null);
   const [savingAssignment, setSavingAssignment] = useState(false);
   const bookingsRef = useRef(bookings);
@@ -78,18 +82,9 @@ export default function Bookings() {
     const interval = setInterval(() => {
       api.get("/bookings").then((response) => {
         const latest = response.data || [];
-        const currentMaxId = bookingsRef.current.length > 0
-          ? Math.max(...bookingsRef.current.map(getBookingId))
-          : 0;
-        const latestMaxId = latest.length > 0
-          ? Math.max(...latest.map(getBookingId))
-          : 0;
-
-        if (latestMaxId > currentMaxId) setBookings(latest);
-
-        const storedLastId = parseInt(localStorage.getItem("lastSeenBookingId") || "0", 10);
+        setBookings(latest);
         setNewBookingIds(new Set(
-          latest.filter((booking) => getBookingId(booking) > storedLastId).map(getBookingId)
+          latest.filter(isUnseenAdminBooking).map(getBookingId)
         ));
       }).catch(() => { });
 
@@ -107,10 +102,9 @@ export default function Bookings() {
 
       setBookings(bookingsResponse.data);
       setVehicles(vehiclesResponse.data);
-      const storedLastId = parseInt(localStorage.getItem("lastSeenBookingId") || "0", 10);
       setNewBookingIds(new Set(
         bookingsResponse.data
-          .filter((booking) => getBookingId(booking) > storedLastId)
+          .filter(isUnseenAdminBooking)
           .map(getBookingId)
       ));
     } catch (err) {
@@ -192,15 +186,15 @@ export default function Bookings() {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this booking?")) return;
+    if (!window.confirm("Are you sure you want to cancel this booking?")) return;
 
     try {
       await api.delete(`/bookings/${id}`);
-      alert("Booking deleted successfully.");
+      alert("Booking cancelled successfully.");
       fetchData();
     } catch (err) {
       console.error(err);
-      alert("Failed to delete booking.");
+      alert(err.response?.data?.message || "Failed to cancel booking.");
     }
   };
 
@@ -271,24 +265,25 @@ export default function Bookings() {
   };
 
   const handleBellClick = async () => {
-    if (showNewOnly) {
-      setShowNewOnly(false);
-      setNotificationBookingIds(new Set());
+    if (showNotifications) {
+      setShowNotifications(false);
       return;
     }
 
-    if (newBookingIds.size === 0) return;
-
-    setNotificationBookingIds(new Set(newBookingIds));
-    const maxId = bookings.length > 0 ? Math.max(...bookings.map(getBookingId)) : 0;
-    localStorage.setItem("lastSeenBookingId", String(maxId));
-    setNewBookingIds(new Set());
-    setShowNewOnly(true);
-
     try {
+      const response = await api.get("/admin/bookings/notifications");
+      const notifications = response.data || [];
+      setBookings((current) => {
+        const notificationById = new Map(notifications.map((booking) => [getBookingId(booking), booking]));
+        return current.map((booking) => notificationById.get(getBookingId(booking)) || booking);
+      });
+      setNotificationBookingIds(new Set(notifications.map(getBookingId)));
+      setNewBookingIds(new Set());
+      setShowNotifications(true);
       await api.post("/admin/bookings/mark-seen");
     } catch (err) {
       console.error(err);
+      setShowNotifications(true);
     }
   };
 
@@ -327,8 +322,8 @@ export default function Bookings() {
             type="button"
             onClick={handleBellClick}
             className="relative rounded-full card p-2 shadow-sm hover:bg-offwhite-100 dark:hover:bg-surface-2"
-            title={showNewOnly ? "Show all bookings" : "Show new bookings"}
-            aria-label={showNewOnly ? "Show all bookings" : "Show new bookings"}
+            title="Booking notifications"
+            aria-label="Booking notifications"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -339,6 +334,48 @@ export default function Bookings() {
               </span>
             )}
           </button>
+          {showNotifications && (
+            <div className="absolute right-28 top-20 z-50 w-96 max-w-[calc(100vw-2rem)] rounded-xl border border-border-light bg-white p-3 shadow-xl dark:border-border-dark dark:bg-bg-dark">
+              <div className="mb-2 flex items-center justify-between">
+                <h2 className="text-sm font-bold text-charcoal dark:text-white">Booking notifications</h2>
+                <button
+                  type="button"
+                  onClick={() => setShowNotifications(false)}
+                  className="rounded-md px-2 py-1 text-lg leading-none text-muted hover:bg-offwhite-100 dark:hover:bg-surface-2"
+                  aria-label="Close booking notifications"
+                  title="Close"
+                >
+                  x
+                </button>
+              </div>
+              {notificationBookingIds.size === 0 ? (
+                <p className="py-3 text-sm text-muted">No new booking notifications.</p>
+              ) : (
+                <div className="max-h-72 space-y-2 overflow-y-auto">
+                  {bookings
+                    .filter((booking) => notificationBookingIds.has(getBookingId(booking)))
+                    .map((booking) => (
+                      <button
+                        type="button"
+                        key={booking.Booking_ID}
+                        onClick={() => setShowNotifications(false)}
+                        className="w-full rounded-lg border border-border-light p-3 text-left hover:bg-offwhite-100 dark:border-border-dark dark:hover:bg-surface-2"
+                      >
+                        <p className="text-xs font-bold text-sacramento">
+                          {booking.package?.Package_Name || "Safari package"} - {booking.Status}
+                        </p>
+                        <p className="mt-1 text-sm text-charcoal dark:text-white">
+                          {booking.Admin_Message || "A new booking has been received."}
+                        </p>
+                        <p className="mt-1 text-xs text-muted">
+                          Safari date: {booking.Booking_Date}
+                        </p>
+                      </button>
+                    ))}
+                </div>
+              )}
+            </div>
+          )}
           <button type="button" onClick={() => navigate("/booking")} className="btn-primary">
             + Add Booking
           </button>
@@ -766,7 +803,7 @@ export default function Bookings() {
                       Edit
                     </button>
                     <button onClick={() => handleDelete(booking.Booking_ID)} className="ml-3 text-red-600 hover:underline dark:text-red-400">
-                      Delete
+                      Cancel
                     </button>
                   </td>
                 </tr>

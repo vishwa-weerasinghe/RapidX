@@ -139,7 +139,10 @@ export default function MyBookings() {
                 </td>
 
                 <td className="p-3 text-center">
-                  <span className="rounded-full bg-sacramento/10 px-3 py-1 text-sm font-semibold text-sacramento">
+                  <span className={`rounded-full px-3 py-1 text-sm font-semibold ${isCancelled
+                    ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300"
+                    : "bg-sacramento/10 text-sacramento"
+                    }`}>
                     {booking.Status}
                   </span>
                 </td>
@@ -162,7 +165,7 @@ export default function MyBookings() {
                       disabled={isCancelled || cancellingId === booking.Booking_ID}
                       className="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      {cancellingId === booking.Booking_ID ? "Cancelling..." : "Delete"}
+                      {cancellingId === booking.Booking_ID ? "Cancelling..." : "Cancel"}
                     </button>
                   </div>
                 </td>

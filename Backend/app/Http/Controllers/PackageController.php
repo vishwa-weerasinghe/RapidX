@@ -7,6 +7,13 @@ use Illuminate\Support\Facades\Storage;
 
 class PackageController extends Controller
 {
+    private function isAdmin($user): bool
+    {
+        $role = $user?->role ?? $user?->Role ?? $user?->user_type ?? null;
+
+        return in_array(strtolower((string) $role), ['admin', 'administrator', 'superadmin'], true);
+    }
+
     public function index()
     {
         $packages = Package::withCount('bookings')
@@ -19,6 +26,14 @@ class PackageController extends Controller
 
     public function store(Request $request)
     {
+        if (!$request->user()) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+
+        if (!$this->isAdmin($request->user())) {
+            return response()->json(['message' => 'Only administrators can create packages.'], 403);
+        }
+
         $validated = $request->validate([
             'Package_Name'     => 'required|string|max:100',
             'Description'      => 'required|string',
@@ -43,6 +58,14 @@ class PackageController extends Controller
 
     public function update(Request $request, Package $package)
     {
+        if (!$request->user()) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+
+        if (!$this->isAdmin($request->user())) {
+            return response()->json(['message' => 'Only administrators can update packages.'], 403);
+        }
+
         $validated = $request->validate([
             'Package_Name'     => 'sometimes|required|string|max:100',
             'Description'      => 'sometimes|required|string',
@@ -68,6 +91,14 @@ class PackageController extends Controller
 
     public function destroy(Package $package)
     {
+        if (!request()->user()) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+
+        if (!$this->isAdmin(request()->user())) {
+            return response()->json(['message' => 'Only administrators can delete packages.'], 403);
+        }
+
         $package->delete();
         return response()->json(['message' => 'Package deleted']);
     }

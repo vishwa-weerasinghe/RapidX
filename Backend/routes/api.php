@@ -39,7 +39,12 @@ Route::get('/dashboard', [AuthController::class, 'dashboard'])
 Route::post('/logout', [AuthController::class, 'logout'])
     ->middleware('auth:sanctum');
 
-Route::apiResource('packages', PackageController::class);
+Route::apiResource('packages', PackageController::class)
+    ->only(['index', 'show']);
+
+Route::apiResource('packages', PackageController::class)
+    ->only(['store', 'update', 'destroy'])
+    ->middleware('auth:sanctum');
 
 Route::apiResource('vehicles', VehicleController::class)
     ->middleware('auth:sanctum');
@@ -77,7 +82,8 @@ Route::put('/bookings/{id}/vehicle', [BookingController::class, 'assignVehicle']
     Route::put('/bookings/{id}/vehicles', [BookingController::class, 'assignVehicles'])
         ->middleware('auth:sanctum');
 
-Route::delete('/bookings/{id}', [BookingController::class, 'destroy']);
+Route::delete('/bookings/{id}', [BookingController::class, 'destroy'])
+    ->middleware('auth:sanctum');
 
 Route::get('/bookings/{id}', [BookingController::class, 'show']);
 
@@ -93,7 +99,19 @@ Route::get('/admin/stats', [DashboardController::class, 'stats']);
 
 Route::get('/admin/bookings/unread-count', [BookingController::class, 'unreadCount']);
 
+Route::get('/admin/bookings/notifications', [BookingController::class, 'adminNotifications'])
+    ->middleware('auth:sanctum');
+
 Route::post('/admin/bookings/mark-seen', [BookingController::class, 'markAllAsSeen']);
+
+Route::get('/customer/{customerId}/booking-notifications/unread-count', [BookingController::class, 'customerUnreadCount'])
+    ->middleware('auth:sanctum');
+
+Route::get('/customer/{customerId}/booking-notifications', [BookingController::class, 'customerNotifications'])
+    ->middleware('auth:sanctum');
+
+Route::post('/customer/{customerId}/booking-notifications/mark-seen', [BookingController::class, 'markCustomerNotificationsAsSeen'])
+    ->middleware('auth:sanctum');
 
 Route::post('/cart/checkout', [CartController::class, 'checkout']);
 
