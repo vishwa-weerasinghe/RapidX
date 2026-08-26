@@ -11,6 +11,8 @@ use App\Services\PayHereService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\BookingConfirmationMail;
 
 class PayHereController extends Controller
 {
@@ -261,6 +263,8 @@ class PayHereController extends Controller
                 Cart::where('Customer_ID', $payment->Customer_ID)->delete();
 
                 Log::info('Payment & Bookings confirmed for order: ' . $payment->order_id);
+                
+                $this->sendConfirmationEmails($payment);
             } elseif ($statusCode === 0) {
                 // Status Code 0 = Pending
                 $payment->update([
@@ -332,6 +336,8 @@ class PayHereController extends Controller
                 if ($payment->Customer_ID) {
                     Cart::where('Customer_ID', $payment->Customer_ID)->delete();
                 }
+                
+                $this->sendConfirmationEmails($payment);
             }
 
             return response()->json([
@@ -367,5 +373,28 @@ class PayHereController extends Controller
             ] : null,
             'bookings'           => $payment->bookings,
         ]);
+    }
+
+    /**
+     * Send confirmation emails to the customer and the admin.
+     */
+    private function sendConfirmationEmails(Payment $payment)
+    {
+        try {
+            $payment->loadMissing(['customer', 'bookings.package']);
+
+            // Send to Customer
+            if ($payment->customer && $payment->customer->Email) {
+                Mail::to($payment->customer->Email)->send(new BookingConfirmationMail($payment, false));
+            }
+
+            // Send to Admin
+            $adminEmail = env('ADMIN_EMAIL');
+            if ($adminEmail) {
+                Mail::to($adminEmail)->send(new BookingConfirmationMail($payment, true));
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to send booking confirmation emails for order ' . $payment->order_id . ': ' . $e->getMessage());
+        }
     }
 }
