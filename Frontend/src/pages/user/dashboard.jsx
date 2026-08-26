@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { BookingCard } from "../../components/user-dashboard/BookingCard";
 import { CartCard } from '../../components/user-dashboard/CartCard'
+import { CancellationMessage } from '../../components/user-dashboard/Cancellation_Message'
 import { HeroCountdown } from '../../components/user-dashboard/Upcoming-safari'
 
 export default function CustomerDashboard({ user: propUser }) {
@@ -37,6 +38,7 @@ export default function CustomerDashboard({ user: propUser }) {
         <div className="grid lg:grid-cols-2 gap-8 mt-8">
           <BookingCard user={currentUser} />
           <CartCard user={currentUser} />
+          <CancellationMessage user={currentUser} />
         </div>
       </main>
     </div>

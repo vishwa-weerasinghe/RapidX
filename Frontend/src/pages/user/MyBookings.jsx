@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../../axios";
 
 export default function MyBookings() {
   const user = JSON.parse(localStorage.getItem("user"));
+  const navigate = useNavigate();
 
   const [bookings, setBookings] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [cancellingId, setCancellingId] = useState(null);
 
   useEffect(() => {
     fetchBookings();
@@ -21,6 +24,22 @@ export default function MyBookings() {
       alert("Failed to load bookings.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Cancel a booking straight from the table (same flow as cancellation.jsx).
+  const handleCancelBooking = async (bookingId) => {
+    if (!window.confirm("Are you sure you want to cancel this booking?")) return;
+
+    setCancellingId(bookingId);
+    try {
+      const response = await api.patch(`/user/bookings/${bookingId}/cancel`);
+      alert(`Booking cancelled. Applicable refund: ${response.data.refund_percentage}%.`);
+      fetchBookings();
+    } catch (error) {
+      alert(error.response?.data?.message || "Failed to cancel booking.");
+    } finally {
+      setCancellingId(null);
     }
   };
 
@@ -72,6 +91,7 @@ export default function MyBookings() {
               <th className="p-3 text-center">Children</th>
               <th className="p-3 text-right">Payment</th>
               <th className="p-3 text-center">Status</th>
+              <th className="p-3 text-center">Action</th>
             </tr>
 
           </thead>
@@ -80,7 +100,7 @@ export default function MyBookings() {
 
             {filteredBookings.length === 0 && (
               <tr>
-                <td colSpan="7" className="p-6 text-center text-muted">
+                <td colSpan="8" className="p-6 text-center text-muted">
                   {bookings.length === 0
                     ? "You do not have any bookings yet."
                     : "No bookings match your search."}
@@ -88,8 +108,10 @@ export default function MyBookings() {
               </tr>
             )}
 
-            {filteredBookings.map((booking) => (
+            {filteredBookings.map((booking) => {
+              const isCancelled = booking.Status?.toLowerCase() === "cancelled";
 
+              return (
               <tr key={booking.Booking_ID} className="table-row">
 
                 <td className="p-3 text-charcoal/80 dark:text-white/80">
@@ -122,9 +144,32 @@ export default function MyBookings() {
                   </span>
                 </td>
 
-              </tr>
+                <td className="p-3 text-center">
+                  <div className="flex items-center justify-center gap-2">
+                    <button
+                      type="button"
+                      title="Reschedule this booking"
+                      onClick={() => navigate(`/user/bookings/${booking.Booking_ID}/edit`)}
+                      disabled={isCancelled}
+                      className="rounded-lg bg-sacramento px-3 py-1.5 text-sm font-semibold text-white hover:bg-sacramento/90 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      title="Cancel this booking"
+                      onClick={() => handleCancelBooking(booking.Booking_ID)}
+                      disabled={isCancelled || cancellingId === booking.Booking_ID}
+                      className="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {cancellingId === booking.Booking_ID ? "Cancelling..." : "Delete"}
+                    </button>
+                  </div>
+                </td>
 
-            ))}
+              </tr>
+              );
+            })}
 
           </tbody>
 
