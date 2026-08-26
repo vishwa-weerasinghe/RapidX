@@ -172,6 +172,12 @@ class BookingController extends Controller
             $refundPercentage = 0;
         }
 
+        // Trigger the real PayHere refund, mirroring the admin-delete path.
+        // Must run BEFORE the status is set to 'Cancelled' because
+        // processRefund() only refunds paid bookings still in 'Confirmed'
+        // state (it no-ops for unpaid/pending bookings).
+        $this->processRefund($booking);
+
         $booking->update([
             'Status' => 'Cancelled',
             'Admin_Seen' => false,
