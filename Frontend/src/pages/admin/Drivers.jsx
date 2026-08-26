@@ -43,9 +43,9 @@ export default function Drivers() {
 
   return (
     <div className="p-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-        <h1 className="text-2xl font-bold text-charcoal dark:text-white">Drivers</h1>
-        <div className="flex flex-col sm:flex-row gap-3">
+      <div className="mb-6">
+        <h1 className="text-3xl md:text-4xl font-black text-[#29AB87] dark:text-white tracking-tight">Drivers</h1>
+        <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="relative">
             <svg
               className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted"
@@ -68,10 +68,7 @@ export default function Drivers() {
               className="form-input w-full sm:w-64 pl-9"
             />
           </div>
-          <button
-            onClick={() => navigate("/admin/drivers/create")}
-            className="btn-primary"
-          >
+          <button onClick={() => navigate("/admin/drivers/create")} className="btn-primary">
             + Add Driver
           </button>
         </div>

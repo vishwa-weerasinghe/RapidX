@@ -207,6 +207,11 @@ export default function Booking() {
             Payment: getFinalTotal(),
         };
 
+        const role = String(user?.role || user?.Role || "").toLowerCase();
+        if (["admin", "administrator", "superadmin"].includes(role)) {
+            payload.Created_By_Admin = true;
+        }
+
         if (isEditMode) {
             try {
                 await api.put(`/bookings/${bookingId}`, {

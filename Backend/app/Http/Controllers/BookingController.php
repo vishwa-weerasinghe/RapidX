@@ -57,6 +57,10 @@ class BookingController extends Controller
         $user = request()->user('sanctum') ?? auth('sanctum')->user();
         $customerId = $user ? $request->Customer_ID : null;
         $isGuestBooking = !$customerId;
+        // The public booking endpoint is intentionally usable without a login,
+        // so also accept the explicit flag sent by the admin booking screen.
+        $createdByAdmin = $this->isAdmin($request->user('sanctum') ?? $request->user())
+            || $request->boolean('Created_By_Admin');
 
         if (!$customerId) {
             $customer = \App\Models\Customer::create([
@@ -85,7 +89,9 @@ class BookingController extends Controller
             'Package_ID' => $request->Package_ID,
             'Vehicle_ID' => $request->Vehicle_ID ?? null,
             'Admin_Seen' => false,
-            'Admin_Message' => 'A new booking has been placed by a customer.',
+            'Admin_Message' => $createdByAdmin
+                ? 'New booking successfully placed by you.'
+                : 'A new booking has been placed by a customer.',
         ]);
 
         return response()->json([

@@ -236,6 +236,7 @@ export default function Bookings() {
       Package_ID: createForm.Package_ID,
       Payment: calculateCreatePayment(),
       Status: createForm.Status,
+      Created_By_Admin: true,
     };
 
     if (createForm.Customer_ID) {
@@ -316,7 +317,9 @@ export default function Bookings() {
   return (
     <div className="p-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
-        <h1 className="text-3xl font-bold text-sacramento">Booking Management</h1>
+       <h1 className="text-3xl md:text-4xl font-black text-[#29AB87] dark:text-white tracking-tight">
+          Booking Management
+      </h1>
         <div className="flex items-center gap-3">
           <button
             type="button"

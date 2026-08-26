@@ -40,7 +40,7 @@ export default function MediaList() {
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-charcoal dark:text-white">Media Gallery</h1>
+          <h1 className="text-3xl md:text-4xl font-black text-[#29AB87] dark:text-white tracking-tight">Media Gallery</h1>
           <p className="text-sm text-muted mt-1">Upload and manage promotional images, safari banners, and gallery photos.</p>
         </div>
         <button

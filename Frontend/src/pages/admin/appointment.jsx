@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Download } from "lucide-react";
 import api from "../../axios";
 import { useTheme } from "../../context/ThemeContext";
@@ -29,12 +29,12 @@ export default function Appointments() {
     appointmentsRef.current = appointments;
   }, [appointments]);
 
-  const currentMonth = () => {
+  const currentMonth = useCallback(() => {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-  };
+  }, []);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
@@ -63,11 +63,11 @@ export default function Appointments() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentMonth]);
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [fetchData]);
 
   // ---------- Annual Booking Report ----------
   const [reportYear, setReportYear] = useState(String(new Date().getFullYear()));
@@ -126,7 +126,7 @@ export default function Appointments() {
     }, 5000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [currentMonth]);
 
   const handleBellClick = () => {
     if (showNewOnly) {
@@ -202,10 +202,10 @@ export default function Appointments() {
   };
 
   return (
-    <div className="p-6">
-      <div className="mb-6 flex items-center justify-between">
+    <div className="flex flex-col p-6">
+      <div className="order-1 mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-charcoal dark:text-white">Appointment Summary of This Month</h1>
+          <h1 className="text-2xl font-bold text-charcoal dark:text-white">Appointment of current month</h1>
           <p className="text-sm text-muted mt-1">View summarised booking details for this month.</p>
         </div>
 
@@ -213,10 +213,11 @@ export default function Appointments() {
           <button
             type="button"
             onClick={() => generateMonthlySummaryPdf(summary, sorted, currentMonth())}
-            className="rounded-full card p-2 shadow-sm hover:bg-offwhite-100 dark:hover:bg-surface-2"
+            className="inline-flex items-center gap-2 rounded-full card px-3 py-2 text-sm font-semibold shadow-sm hover:bg-offwhite-100 dark:hover:bg-surface-2"
             title="Download monthly summary as PDF"
           >
-            <Download className="h-6 w-6 text-muted" />
+            <Download className="h-4 w-4 text-muted" />
+            Monthly PDF
           </button>
           <button
             type="button"
@@ -247,9 +248,15 @@ export default function Appointments() {
         </div>
       </div>
 
-      {/* Summary Cards */}
       {!loading && !error && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+        <div className="order-2">
+          <PackagePopularityChart appointments={appointments} isDark={isDark} />
+        </div>
+      )}
+
+      {/* Monthly Summary */}
+      {!loading && !error && (
+        <div className="order-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
           <div className="card p-4">
             <p className="text-xs uppercase tracking-wide text-muted">Total Confirmed Appointments</p>
             <p className="mt-1 text-2xl font-bold text-charcoal dark:text-white">{summary.total_confirmed}</p>
@@ -275,14 +282,12 @@ export default function Appointments() {
         </div>
       )}
 
-      {!loading && !error && <PackagePopularityChart appointments={appointments} isDark={isDark} />}
-
       {/* ---------- Annual Booking Report ---------- */}
       {!loading && !error && (
-        <div className="card p-4 mb-6">
+        <div className="order-5 card p-4 mb-6">
           <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
             <div>
-              <h2 className="text-lg font-bold text-charcoal dark:text-white">Annual Booking Report</h2>
+              <h2 className="text-lg font-bold text-charcoal dark:text-white">Annual report</h2>
               <p className="text-sm text-muted mt-0.5">Month-by-month overview of every booking in the year.</p>
             </div>
 
@@ -356,17 +361,17 @@ export default function Appointments() {
       )}
 
       {loading ? (
-        <p className="text-muted">Loading...</p>
+        <p className="order-4 text-muted">Loading...</p>
       ) : error ? (
-        <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-red-700 dark:bg-red-950/30 dark:border-red-900/30 dark:text-red-400">
+        <div className="order-4 rounded-lg bg-red-50 border border-red-200 p-3 text-red-700 dark:bg-red-950/30 dark:border-red-900/30 dark:text-red-400">
           {error}
         </div>
       ) : sorted.length === 0 ? (
-        <p className="text-muted">
+        <p className="order-4 text-muted">
           {showNewOnly ? "No new appointments." : "No confirmed appointments found for this month."}
         </p>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-border-light dark:border-border-dark">
+        <div className="order-4 mb-6 overflow-x-auto rounded-lg border border-border-light dark:border-border-dark">
           <table className="min-w-full bg-surface text-sm">
            <thead className="bg-[#29AB87] text-white uppercase text-xs dark:bg-[#29AB87]">
               <tr>
@@ -429,7 +434,7 @@ export default function Appointments() {
       )}
 
       {showNewOnly && newAppointmentIds.size === 0 && !loading && (
-        <p className="mt-2 text-sm text-muted">No new appointments to show.</p>
+        <p className="order-4 mt-2 text-sm text-muted">No new appointments to show.</p>
       )}
     </div>
   );
