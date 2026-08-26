@@ -80,6 +80,9 @@ Route::get('/bookings/{id}', [BookingController::class, 'show']);
 
 Route::get('/user-bookings/{customerId}', [BookingController::class, 'userBookings']);
 
+Route::patch('/user/bookings/{id}/cancel', [BookingController::class, 'cancel'])
+    ->middleware('auth:sanctum');
+
 Route::get('/user-upcoming-booking/{customerId}', [BookingController::class, 'upcomingBooking']);
 
 // Admin Dashboard Stats
