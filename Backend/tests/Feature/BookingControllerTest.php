@@ -324,6 +324,11 @@ class BookingControllerTest extends TestCase
             'Booking_ID' => $booking->Booking_ID,
             'Customer_Seen' => true,
         ]);
+
+        $this->actingAs($user, 'sanctum')
+            ->getJson('/api/customer/' . $customer->Customer_ID . '/booking-notifications')
+            ->assertStatus(200)
+            ->assertExactJson([]);
     }
 
     public function test_customer_cancellation_notifies_admin(): void

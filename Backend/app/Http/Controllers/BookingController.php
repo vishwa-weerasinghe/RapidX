@@ -391,6 +391,7 @@ class BookingController extends Controller
         return response()->json(
             Booking::with('package')
                 ->where('Customer_ID', $customerId)
+                ->where('Customer_Seen', false)
                 ->whereNotNull('Customer_Message')
                 ->latest('Booking_ID')
                 ->get(['Booking_ID', 'Package_ID', 'Booking_Date', 'Status', 'Customer_Message', 'Customer_Seen'])
