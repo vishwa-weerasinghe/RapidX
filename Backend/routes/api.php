@@ -73,22 +73,25 @@ Route::get('reviews/{review}', [ReviewController::class, 'show']);
 
 Route::post('reviews', [ReviewController::class, 'store']);
 
-Route::get('/bookings', [BookingController::class, 'index']);
+Route::get('/bookings', [BookingController::class, 'index'])
+    ->middleware('auth:sanctum');
 
 Route::post('/bookings', [BookingController::class, 'store']);
 
-Route::put('/bookings/{id}', [BookingController::class, 'update']);
+Route::put('/bookings/{id}', [BookingController::class, 'update'])
+    ->middleware('auth:sanctum');
 
 Route::put('/bookings/{id}/vehicle', [BookingController::class, 'assignVehicle'])
     ->middleware('auth:sanctum');
 
-    Route::put('/bookings/{id}/vehicles', [BookingController::class, 'assignVehicles'])
-        ->middleware('auth:sanctum');
+Route::put('/bookings/{id}/vehicles', [BookingController::class, 'assignVehicles'])
+    ->middleware('auth:sanctum');
 
 Route::delete('/bookings/{id}', [BookingController::class, 'destroy'])
     ->middleware('auth:sanctum');
 
-Route::get('/bookings/{id}', [BookingController::class, 'show']);
+Route::get('/bookings/{id}', [BookingController::class, 'show'])
+    ->middleware('auth:sanctum');
 
 Route::get('/user-bookings/{customerId}', [BookingController::class, 'userBookings']);
 

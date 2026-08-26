@@ -189,8 +189,8 @@ export default function Bookings() {
     if (!window.confirm("Are you sure you want to cancel this booking?")) return;
 
     try {
-      await api.delete(`/bookings/${id}`);
-      alert("Booking cancelled successfully.");
+      const response = await api.delete(`/bookings/${id}`);
+      alert(`Booking cancelled successfully. Applicable refund: ${response.data.refund_percentage}%`);
       fetchData();
     } catch (err) {
       console.error(err);
