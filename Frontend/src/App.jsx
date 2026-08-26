@@ -1157,7 +1157,7 @@ export default function App() {
               {packages.map((pkg, idx) => (
                 <div
                   key={idx}
-                  className="w-full sm:w-[calc(50%-1rem)] lg:w-[280px] bg-white rounded-3xl overflow-hidden border border-gray-200 shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col"
+                  className="w-full sm:w-[calc(50%-1rem)] lg:w-[260px] bg-white rounded-3xl overflow-hidden border border-gray-200 shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col"
                 >
                   {/* Image */}
                   <div className="relative h-56 overflow-hidden bg-gray-50">

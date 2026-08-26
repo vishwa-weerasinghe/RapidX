@@ -19,6 +19,13 @@ export default function PackageForm() {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState(false);
+  const [imagePreview, setImagePreview] = useState("");
+
+  useEffect(() => {
+    return () => {
+      if (imagePreview) URL.revokeObjectURL(imagePreview);
+    };
+  }, [imagePreview]);
 
   useEffect(() => {
     if (!isEdit) return;
@@ -152,21 +159,33 @@ export default function PackageForm() {
             </div>
           )}
 
+          {imagePreview && (
+            <div className="mb-3">
+              <p className="mb-2 text-sm text-muted">Selected image preview</p>
+              <img
+                src={imagePreview}
+                alt="Selected package preview"
+                className="h-56 w-full rounded-lg border border-border-light bg-gray-50 object-contain object-left dark:border-border-dark dark:bg-slate-900"
+              />
+            </div>
+          )}
+
           <input
             type="file"
             name="Image"
             accept="image/jpeg,image/png,image/jpg,image/webp"
-            onChange={(e) =>
-              setForm({
-                ...form,
-                Image: e.target.files[0] || null,
-              })
-            }
+            onChange={(e) => {
+              const file = e.target.files[0] || null;
+              setForm({ ...form, Image: file });
+              setImagePreview(file ? URL.createObjectURL(file) : "");
+            }}
             className="form-input"
           />
 
           <p className="mt-1 text-xs text-muted">
-            Upload a new image only if you want to replace the current one.
+            {isEdit
+              ? "Upload a new image only if you want to replace the current one."
+              : "Upload an image for this package."}
             JPG, PNG, JPEG or WEBP. Maximum size: 10 MB.
           </p>
 
