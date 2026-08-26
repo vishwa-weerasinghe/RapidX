@@ -142,6 +142,45 @@ class BookingController extends Controller
     }
 
     // =========================
+    // CANCEL BOOKING (CUSTOMER SELF-SERVICE)
+    // Applies the refund policy shown on the customer cancellation page
+    // (Frontend/src/pages/user/cancellation.jsx):
+    //   - More than 7 days before the tour date: 100% refund
+    //   - 3-7 days before the tour date: 50% refund
+    //   - Less than 3 days before the tour date (or no-show): no refund
+    // =========================
+    public function cancel($id)
+    {
+        $booking = Booking::findOrFail($id);
+
+        if (strtolower((string) $booking->Status) === 'cancelled') {
+            return response()->json([
+                'message' => 'This booking is already cancelled.',
+            ], 422);
+        }
+
+        $today = now()->startOfDay();
+        $tourDate = \Carbon\Carbon::parse($booking->Booking_Date)->startOfDay();
+        $daysBeforeTour = (int) round($today->diffInDays($tourDate, false));
+
+        if ($daysBeforeTour > 7) {
+            $refundPercentage = 100;
+        } elseif ($daysBeforeTour >= 3) {
+            $refundPercentage = 50;
+        } else {
+            $refundPercentage = 0;
+        }
+
+        $booking->update(['Status' => 'Cancelled']);
+
+        return response()->json([
+            'message' => 'Booking cancelled successfully',
+            'booking' => $booking,
+            'refund_percentage' => $refundPercentage,
+        ]);
+    }
+
+    // =========================
     // ASSIGN VEHICLE(S) (ADMIN)
     // Supports assigning multiple vehicles to one booking. The number of
     // vehicles required is derived from the passenger count (max 6 passengers
