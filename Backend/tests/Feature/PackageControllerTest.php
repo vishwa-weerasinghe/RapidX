@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Models\Package;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class PackageControllerTest extends TestCase
@@ -20,6 +22,16 @@ class PackageControllerTest extends TestCase
         ]);
     }
 
+    protected function adminUser(): User
+    {
+        return User::create([
+            'User_Name' => 'Admin User',
+            'Email' => fake()->unique()->safeEmail(),
+            'Password' => bcrypt('Password123'),
+            'role' => 'admin',
+        ]);
+    }
+
     public function test_authenticated_user_can_list_packages(): void
     {
         Package::create([
@@ -29,7 +41,7 @@ class PackageControllerTest extends TestCase
             'Price_for_child' => 90.00,
         ]);
 
-        $response = $this->actingAs($this->authenticatedUser(), 'sanctum')
+        $response = $this->actingAs($this->adminUser(), 'sanctum')
             ->getJson('/api/packages');
 
         $response->assertStatus(200)
@@ -41,7 +53,7 @@ class PackageControllerTest extends TestCase
 
     public function test_authenticated_user_can_create_a_package_and_persist_it(): void
     {
-        $response = $this->actingAs($this->authenticatedUser(), 'sanctum')
+        $response = $this->actingAs($this->adminUser(), 'sanctum')
             ->postJson('/api/packages', [
                 'Package_Name' => 'Family Package',
                 'Description' => 'Great for family trips',
@@ -61,9 +73,35 @@ class PackageControllerTest extends TestCase
         ]);
     }
 
+    public function test_admin_can_create_a_package_with_an_image(): void
+    {
+        Storage::fake('public');
+
+        $response = $this->actingAs($this->adminUser(), 'sanctum')
+            ->post('/api/packages', [
+                'Package_Name' => 'Image Package',
+                'Description' => 'Package with an uploaded image',
+                'Price_for_adult' => 175.00,
+                'Price_for_child' => 95.00,
+                'Image' => UploadedFile::fake()->create('safari.jpg', 100, 'image/jpeg'),
+            ]);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('Package_Name', 'Image Package');
+
+        $imagePath = $response->json('Image');
+
+        $this->assertNotEmpty($imagePath);
+        Storage::disk('public')->assertExists($imagePath);
+        $this->assertDatabaseHas('packages', [
+            'Package_Name' => 'Image Package',
+            'Image' => $imagePath,
+        ]);
+    }
+
     public function test_store_returns_validation_errors_for_missing_required_fields(): void
     {
-        $response = $this->actingAs($this->authenticatedUser(), 'sanctum')
+        $response = $this->actingAs($this->adminUser(), 'sanctum')
             ->postJson('/api/packages', [
                 'Package_Name' => '',
                 'Description' => '',
@@ -79,7 +117,7 @@ class PackageControllerTest extends TestCase
 
     public function test_store_returns_validation_errors_for_invalid_input(): void
     {
-        $response = $this->actingAs($this->authenticatedUser(), 'sanctum')
+        $response = $this->actingAs($this->adminUser(), 'sanctum')
             ->postJson('/api/packages', [
                 'Package_Name' => str_repeat('A', 101),
                 'Description' => 'Valid description',
@@ -93,7 +131,7 @@ class PackageControllerTest extends TestCase
         $this->assertDatabaseCount('packages', 0);
     }
 
-    public function test_unauthenticated_user_can_access_package_endpoints(): void
+    public function test_guest_cannot_write_packages_but_can_read_them(): void
     {
         $package = Package::create([
             'Package_Name' => 'Protected Package',
@@ -108,12 +146,45 @@ class PackageControllerTest extends TestCase
             'Description' => 'Should fail',
             'Price_for_adult' => 80.00,
             'Price_for_child' => 40.00,
-        ])->assertStatus(201);
+        ])->assertStatus(401);
         $this->getJson('/api/packages/' . $package->id)->assertStatus(200);
         $this->putJson('/api/packages/' . $package->id, [
             'Package_Name' => 'Updated Package',
-        ])->assertStatus(200);
-        $this->deleteJson('/api/packages/' . $package->id)->assertStatus(200);
+        ])->assertStatus(401);
+        $this->deleteJson('/api/packages/' . $package->id)->assertStatus(401);
+
+        $this->assertDatabaseHas('packages', ['id' => $package->id]);
+    }
+
+    public function test_regular_user_cannot_create_update_or_delete_packages(): void
+    {
+        $package = Package::create([
+            'Package_Name' => 'Protected Package',
+            'Description' => 'Should remain unchanged',
+            'Price_for_adult' => 100.00,
+            'Price_for_child' => 60.00,
+        ]);
+        $user = $this->authenticatedUser();
+
+        $this->actingAs($user, 'sanctum')->postJson('/api/packages', [
+            'Package_Name' => 'New Package',
+            'Description' => 'Should fail',
+            'Price_for_adult' => 80.00,
+            'Price_for_child' => 40.00,
+        ])->assertStatus(403);
+
+        $this->actingAs($user, 'sanctum')->putJson('/api/packages/' . $package->id, [
+            'Package_Name' => 'Updated Package',
+        ])->assertStatus(403);
+
+        $this->actingAs($user, 'sanctum')
+            ->deleteJson('/api/packages/' . $package->id)
+            ->assertStatus(403);
+
+        $this->assertDatabaseHas('packages', [
+            'id' => $package->id,
+            'Package_Name' => 'Protected Package',
+        ]);
     }
 
     public function test_authenticated_user_can_update_a_package_and_persist_changes(): void
@@ -125,7 +196,7 @@ class PackageControllerTest extends TestCase
             'Price_for_child' => 80.00,
         ]);
 
-        $response = $this->actingAs($this->authenticatedUser(), 'sanctum')
+        $response = $this->actingAs($this->adminUser(), 'sanctum')
             ->putJson('/api/packages/' . $package->id, [
                 'Package_Name' => 'Updated Package',
                 'Price_for_adult' => 140.00,
@@ -153,7 +224,7 @@ class PackageControllerTest extends TestCase
             'Price_for_child' => 50.00,
         ]);
 
-        $response = $this->actingAs($this->authenticatedUser(), 'sanctum')
+        $response = $this->actingAs($this->adminUser(), 'sanctum')
             ->deleteJson('/api/packages/' . $package->id);
 
         $response->assertStatus(200)

@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Menu, LogOut } from 'lucide-react'
+import { Bell, Menu, LogOut } from 'lucide-react'
 import api from '../../axios'
 import { useTheme } from '../../context/ThemeContext'
 import ThemeModeIcon from '../ThemeModeIcon'
@@ -10,10 +10,42 @@ export function Header({ user }) {
   const { theme, toggleTheme } = useTheme()
   
   const [loading, setLoading] = useState(false)
+  const [unreadBookings, setUnreadBookings] = useState(0)
+  const [bookingNotifications, setBookingNotifications] = useState([])
+  const [showBookingNotifications, setShowBookingNotifications] = useState(false)
 
   const customerName = user?.User_Name || 'Customer'
 
   const customerId = user?.Customer_ID
+
+  const fetchUnreadBookings = async () => {
+    if (!customerId) return
+
+    try {
+      const response = await api.get(`/customer/${customerId}/booking-notifications/unread-count`)
+      setUnreadBookings(response.data.count || 0)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  useEffect(() => {
+    fetchUnreadBookings()
+    const interval = setInterval(fetchUnreadBookings, 5000)
+    return () => clearInterval(interval)
+  }, [customerId])
+
+  const handleBookingNotifications = async () => {
+    try {
+      const response = await api.get(`/customer/${customerId}/booking-notifications`)
+      setBookingNotifications(response.data || [])
+      setShowBookingNotifications((current) => !current)
+      await api.post(`/customer/${customerId}/booking-notifications/mark-seen`)
+      setUnreadBookings(0)
+    } catch (err) {
+      console.error(err)
+    }
+  }
 
   
 
@@ -91,6 +123,62 @@ export function Header({ user }) {
           
 
           <div className="mx-1 h-6 w-px bg-border-light dark:bg-border-dark"></div>
+
+          <div className="relative">
+            <button
+              type="button"
+              onClick={handleBookingNotifications}
+              className="relative rounded-full p-2 text-sacramento hover:bg-border-light dark:text-white dark:hover:bg-border-dark"
+              title="Booking notifications"
+              aria-label="Booking notifications"
+            >
+              <Bell className="w-5 h-5" />
+              {unreadBookings > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-xs font-bold text-white">
+                  {unreadBookings}
+                </span>
+              )}
+            </button>
+
+            {showBookingNotifications && (
+              <div className="absolute right-0 top-12 z-50 w-80 max-w-[calc(100vw-2rem)] rounded-xl border border-border-light bg-white p-3 shadow-xl dark:border-border-dark dark:bg-bg-dark">
+                <div className="mb-2 flex items-center justify-between">
+                  <h2 className="text-sm font-bold text-charcoal dark:text-white">Notifications</h2>
+                  <button
+                    type="button"
+                    onClick={() => navigate('/user/bookings')}
+                    className="text-xs font-semibold text-sacramento hover:underline"
+                  >
+                    View bookings
+                  </button>
+                </div>
+                {bookingNotifications.length === 0 ? (
+                  <p className="py-3 text-sm text-muted">No booking notifications.</p>
+                ) : (
+                  <div className="max-h-64 space-y-2 overflow-y-auto">
+                    {bookingNotifications.map((notification) => (
+                      <button
+                        type="button"
+                        key={notification.Booking_ID}
+                        onClick={() => navigate('/user/bookings')}
+                        className="w-full rounded-lg border border-border-light p-3 text-left hover:bg-offwhite-100 dark:border-border-dark dark:hover:bg-surface-2"
+                      >
+                        <p className="text-xs font-bold text-red-600 dark:text-red-400">
+                          {notification.package?.Package_Name || 'Safari package'} - {notification.Status}
+                        </p>
+                        <p className="mt-1 text-sm text-charcoal dark:text-white">
+                          {notification.Customer_Message}
+                        </p>
+                        <p className="mt-1 text-xs text-muted">
+                          Safari date: {notification.Booking_Date}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
           <button
             onClick={handleLogout}
