@@ -54,7 +54,8 @@ class BookingController extends Controller
             'Package_ID' => 'required',
         ]);
 
-        $customerId = $request->Customer_ID;
+        $user = request()->user('sanctum') ?? auth('sanctum')->user();
+        $customerId = $user ? $request->Customer_ID : null;
         $isGuestBooking = !$customerId;
 
         if (!$customerId) {

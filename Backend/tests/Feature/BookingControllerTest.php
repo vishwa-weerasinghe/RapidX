@@ -87,8 +87,14 @@ class BookingControllerTest extends TestCase
             'Customer_ID' => $customer->Customer_ID,
             'Package_ID' => $package->id,
         ]);
+        $admin = User::create([
+            'User_Name' => 'Admin User',
+            'Email' => fake()->unique()->safeEmail(),
+            'Password' => bcrypt('Password123'),
+            'role' => 'admin',
+        ]);
 
-        $response = $this->getJson('/api/bookings');
+        $response = $this->actingAs($admin, 'sanctum')->getJson('/api/bookings');
 
         $response->assertStatus(200)
             ->assertJsonCount(1)
@@ -137,9 +143,16 @@ class BookingControllerTest extends TestCase
     public function test_booking_can_be_created_and_persisted_in_database(): void
     {
         $customer = $this->createCustomer();
+        $user = User::create([
+            'User_Name' => 'Test User',
+            'Email' => $customer->Email,
+            'Password' => bcrypt('Password123'),
+            'role' => 'user',
+            'Customer_ID' => $customer->Customer_ID,
+        ]);
         $package = $this->createPackage();
 
-        $response = $this->postJson('/api/bookings', [
+        $response = $this->actingAs($user, 'sanctum')->postJson('/api/bookings', [
             'Booking_Date' => '2026-07-14',
             'Pickup_Time' => '13:00:00',
             'Area' => 'Habarana',
@@ -239,8 +252,14 @@ class BookingControllerTest extends TestCase
     public function test_show_returns_a_single_booking(): void
     {
         $booking = $this->createBooking();
+        $admin = User::create([
+            'User_Name' => 'Admin User',
+            'Email' => fake()->unique()->safeEmail(),
+            'Password' => bcrypt('Password123'),
+            'role' => 'admin',
+        ]);
 
-        $response = $this->getJson('/api/bookings/' . $booking->Booking_ID);
+        $response = $this->actingAs($admin, 'sanctum')->getJson('/api/bookings/' . $booking->Booking_ID);
 
         $response->assertStatus(200)
             ->assertJsonPath('Booking_ID', $booking->Booking_ID)
@@ -250,8 +269,14 @@ class BookingControllerTest extends TestCase
     public function test_update_booking_changes_existing_values_and_persists_them(): void
     {
         $booking = $this->createBooking();
+        $admin = User::create([
+            'User_Name' => 'Admin User',
+            'Email' => fake()->unique()->safeEmail(),
+            'Password' => bcrypt('Password123'),
+            'role' => 'admin',
+        ]);
 
-        $response = $this->putJson('/api/bookings/' . $booking->Booking_ID, [
+        $response = $this->actingAs($admin, 'sanctum')->putJson('/api/bookings/' . $booking->Booking_ID, [
             'Pickup_Location' => 'Matara',
             'Payment' => 2500,
             'Status' => 'Confirmed',

@@ -361,7 +361,10 @@ class PayHereController extends Controller
             'payment_method'     => $payment->payment_method,
             'payhere_payment_id' => $payment->payhere_payment_id,
             'created_at'         => $payment->created_at,
-            'customer'           => $payment->customer,
+            'customer'           => $payment->customer ? [
+                'First_Name' => $payment->customer->First_Name,
+                'Last_Name'  => $payment->customer->Last_Name,
+            ] : null,
             'bookings'           => $payment->bookings,
         ]);
     }
