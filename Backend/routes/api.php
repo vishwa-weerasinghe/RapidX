@@ -83,12 +83,8 @@ Route::get('/bookings/{id}', [BookingController::class, 'show']);
 
 Route::get('/user-bookings/{customerId}', [BookingController::class, 'userBookings']);
 
-// Customer self-service: view, reschedule and cancel their own booking
-Route::get('/user/bookings/{id}', [BookingController::class, 'show']);
-
-Route::put('/user/bookings/{id}', [BookingController::class, 'update']);
-
-Route::patch('/user/bookings/{id}/cancel', [BookingController::class, 'cancel']);
+Route::patch('/user/bookings/{id}/cancel', [BookingController::class, 'cancel'])
+    ->middleware('auth:sanctum');
 
 Route::get('/user-upcoming-booking/{customerId}', [BookingController::class, 'upcomingBooking']);
 
