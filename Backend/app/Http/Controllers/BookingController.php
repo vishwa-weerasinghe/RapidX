@@ -297,7 +297,7 @@ class BookingController extends Controller
 
     public function destroy($id)
     {
-        $booking = Booking::with('payment')->findOrFail($id);
+        $booking = Booking::findOrFail($id);
 
         // Authentication and admin check (from shanika)
         $user = request()->user('sanctum') ?? auth('sanctum')->user();
@@ -309,51 +309,18 @@ class BookingController extends Controller
             return response()->json(['message' => 'Only administrators can delete bookings.'], 403);
         }
 
-        // Process automated refund if eligible and then remove the booking (from main)
-        $this->processRefund($booking);
-
-        $booking->delete();
-
-        return response()->json([
-            'message' => 'Booking deleted successfully and applicable refunds processed'
-        ]);
-    }
-
-    // =========================
-    // CANCEL BOOKING (USER)
-    // =========================
-    public function cancel(Request $request, $id)
-    {
-        $booking = Booking::with('payment')->findOrFail($id);
-        
-        // Ownership check
-        $user = $request->user('sanctum') ?? auth('sanctum')->user();
-        if (!$user) {
-            return response()->json(['message' => 'Only registered users can cancel bookings.'], 401);
-        }
-
-        if (!$this->isAdmin($user) && (int) $user->Customer_ID !== (int) $booking->Customer_ID) {
-            return response()->json(['message' => 'Unauthorized. You can only cancel your own bookings.'], 403);
-        }
-
-        if ($booking->Status === 'Canceled') {
-            return response()->json(['message' => 'Booking is already cancelled'], 400);
-        }
-
-        $refundPercentage = $this->processRefund($booking);
-
         $booking->update([
-            'Status' => 'Canceled'
+            'Status' => 'Cancelled',
+            'Customer_Seen' => false,
+            'Customer_Message' => 'Your booking was cancelled by an administrator.',
         ]);
 
         return response()->json([
             'message' => 'Booking cancelled successfully',
-            'refund_percentage' => $refundPercentage,
-            'booking' => $booking
+            'booking' => $booking,
         ]);
     }
-        ]);
-    }
+
     public function unreadCount()
     {
         return response()->json([
