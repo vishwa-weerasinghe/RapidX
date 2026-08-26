@@ -1,0 +1,149 @@
+import React, { useEffect, useState } from "react";
+import { Ban, CalendarDays, Clock, MapPin } from "lucide-react";
+import api from "../../axios";
+import { useTheme } from "../../context/ThemeContext";
+
+// Refund policy from the customer cancellation page (Frontend/src/pages/user/cancellation.jsx):
+// more than 7 days before the tour date: 100%, 3-7 days: 50%, less than 3 days: no refund.
+function getRefundPercentage(bookingDate) {
+  if (!bookingDate) return 0;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const tourDate = new Date(bookingDate);
+  if (Number.isNaN(tourDate.getTime())) return 0;
+  tourDate.setHours(0, 0, 0, 0);
+  const daysBeforeTour = Math.round((tourDate - today) / (1000 * 60 * 60 * 24));
+  if (daysBeforeTour > 7) return 100;
+  if (daysBeforeTour >= 3) return 50;
+  return 0;
+}
+
+export function CancellationMessage() {
+  // Same customer lookup as BookingCard/CartCard, done lazily on mount.
+  const [customerId] = useState(() => {
+    try {
+      const userStr = localStorage.getItem("user");
+      const guestStr = localStorage.getItem("guest_customer");
+      const activeCustomer = JSON.parse(userStr) || JSON.parse(guestStr) || null;
+      return activeCustomer?.Customer_ID || null;
+    } catch {
+      return null;
+    }
+  });
+  const [cancelledBookings, setCancelledBookings] = useState([]);
+  const [loaded, setLoaded] = useState(false);
+  const { theme } = useTheme();
+
+  useEffect(() => {
+    if (!customerId) return undefined;
+
+    let isSubscribed = true;
+    api.get(`/user-bookings/${customerId}`)
+      .then((res) => {
+        if (!isSubscribed) return;
+        setCancelledBookings(
+          res.data.filter((b) => b.Status === "Cancelled")
+        );
+        setLoaded(true);
+      })
+      .catch((err) => {
+        console.error("Cancelled bookings fetch error:", err);
+        if (isSubscribed) setLoaded(true);
+      });
+
+    return () => {
+      isSubscribed = false;
+    };
+  }, [customerId]);
+
+  const isDark = theme === "dark";
+
+  const cardClass = "card p-6";
+  const iconBoxClass = isDark
+    ? "flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-sacramento-400 to-sacramento-300 text-white"
+    : "flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-sacramento to-sacramento-600 text-white";
+  const titleClass = isDark
+    ? "text-xl font-semibold text-white font-serif"
+    : "text-xl font-semibold text-charcoal font-serif";
+  const counterClass = isDark
+    ? "flex h-8 w-8 items-center justify-center rounded-full bg-border-dark text-sm font-bold text-white"
+    : "flex h-8 w-8 items-center justify-center rounded-full bg-border-light text-sm font-bold text-sacramento";
+  const mutedTextClass = isDark ? "text-gray-400" : "text-muted";
+  const fieldTextClass = isDark ? "text-white" : "text-charcoal";
+  const borderLineClass = isDark ? "border-border-dark" : "border-border-light";
+  const itemClass = isDark
+    ? "rounded-2xl border border-border-dark bg-surface p-4"
+    : "rounded-2xl border border-border-light bg-surface-2 p-4";
+  const cancelledBadgeClass = isDark
+    ? "bg-red-500/10 text-red-400"
+    : "bg-red-100 text-red-600";
+  const highlightTextClass = isDark ? "text-sacramento-300" : "text-sacramento-600";
+
+  // Hide the whole card while loading and when there are no cancelled bookings.
+  if (!loaded || cancelledBookings.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className={cardClass}>
+      <div className="mb-5 flex items-center gap-2.5">
+        <div className={iconBoxClass}><Ban size={18} /></div>
+        <h2 className={titleClass}>Booking Cancellation</h2>
+        <div className={counterClass}>{cancelledBookings.length}</div>
+      </div>
+
+      <div className="flex max-h-[500px] flex-col gap-4 overflow-y-auto">
+        {cancelledBookings.map((booking) => {
+          const pkg = booking.package;
+          const refundPercentage = getRefundPercentage(booking.Booking_Date);
+          const refundAmount = (Number(booking.Payment || 0) * refundPercentage) / 100;
+
+          return (
+            <div key={booking.Booking_ID} className={itemClass}>
+              <div className="mb-3 flex items-start justify-between">
+                <h4 className={`text-[16px] font-bold ${isDark ? "text-white" : "text-charcoal"}`}>{pkg?.Package_Name || "Unknown Safari"}</h4>
+                <span className={`ml-2 whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.5px] ${cancelledBadgeClass}`}>
+                  ✕ Cancelled
+                </span>
+              </div>
+
+              <div className={`mb-3 grid grid-cols-2 gap-2 text-sm ${fieldTextClass}`}>
+                <div className="flex items-center gap-1.5">
+                  <CalendarDays size={14} className={isDark ? "text-sacramento-300" : "text-sacramento"} />
+                  <span>{booking.Booking_Date}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Clock size={14} className={isDark ? "text-sacramento-300" : "text-sacramento"} />
+                  <span>{booking.Pickup_Time}</span>
+                </div>
+                <div className="col-span-2 flex items-center gap-1.5">
+                  <MapPin size={14} className={isDark ? "text-sacramento-300" : "text-sacramento"} />
+                  <span className="truncate">{booking.Pickup_Location}</span>
+                </div>
+              </div>
+
+              <p className={`mb-3 text-sm leading-6 ${mutedTextClass}`}>
+                Your safari booking has been cancelled. An applicable refund of{" "}
+                <span className={`font-semibold ${highlightTextClass}`}>{refundPercentage}%</span>{" "}
+                will be issued to your original payment method within 7–14 business days.
+              </p>
+
+              <div className={`flex items-center justify-between border-t pt-3 ${borderLineClass}`}>
+                <div className={`flex items-center gap-1.5 text-sm ${mutedTextClass}`}>
+                  <Ban size={14} className={isDark ? "text-sacramento-300" : "text-sacramento"} />
+                  <span>Booking #{booking.Booking_ID}</span>
+                </div>
+                <div className="text-right">
+                  <span className={`block text-[11px] ${mutedTextClass}`}>Refund Amount</span>
+                  <span className={`text-[16px] font-bold ${highlightTextClass}`}>$ {refundAmount.toLocaleString()}</span>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+

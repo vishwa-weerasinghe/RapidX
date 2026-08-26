@@ -21,7 +21,7 @@ class BookingController extends Controller
     public function index()
     {
         return response()->json(
-            Booking::with(['customer', 'package', 'vehicle.driver'])->latest()->get()
+            Booking::with(['customer', 'package', 'vehicle.driver', 'vehicles.driver'])->latest()->get()
         );
     }
 
@@ -31,7 +31,7 @@ class BookingController extends Controller
     public function userBookings($customerId)
     {
         return response()->json(
-            Booking::with(['package', 'vehicle'])
+            Booking::with(['package', 'vehicle.driver', 'vehicles.driver'])
                 ->where('Customer_ID', $customerId)
                 ->latest()
                 ->get()
@@ -79,7 +79,7 @@ class BookingController extends Controller
             'No_of_adults' => $request->No_of_adults,
             'No_of_child' => $request->No_of_child,
             'Payment' => $request->Payment ?? 0,
-            'Status' => $isGuestBooking ? 'Confirmed' : 'pending',
+            'Status' => $isGuestBooking ? 'Confirmed' : 'Pending',
             'Customer_ID' => $customerId,
             'Package_ID' => $request->Package_ID,
             'Vehicle_ID' => $request->Vehicle_ID ?? null,
@@ -97,7 +97,7 @@ class BookingController extends Controller
     // =========================
     public function show($id)
     {
-        return Booking::with(['customer','package','vehicle'])
+        return Booking::with(['customer', 'package', 'vehicle.driver', 'vehicles.driver'])
             ->findOrFail($id);
     }
 
@@ -128,29 +128,110 @@ class BookingController extends Controller
             'Vehicle_ID'
         ]));
 
+        // Keep the multi-vehicle pivot in sync whenever the single Vehicle_ID
+        // column is changed through this generic endpoint.
+        if ($request->has('Vehicle_ID')) {
+            $singleVehicleId = $request->input('Vehicle_ID');
+            $booking->vehicles()->sync($singleVehicleId ? [$singleVehicleId] : []);
+        }
+
         return response()->json([
             'message' => 'Booking updated successfully',
             'booking' => $booking
         ]);
     }
 
-    public function assignVehicle(Request $request, $id)
+    // =========================
+    // CANCEL BOOKING (CUSTOMER SELF-SERVICE)
+    // Applies the refund policy shown on the customer cancellation page
+    // (Frontend/src/pages/user/cancellation.jsx):
+    //   - More than 7 days before the tour date: 100% refund
+    //   - 3-7 days before the tour date: 50% refund
+    //   - Less than 3 days before the tour date (or no-show): no refund
+    // =========================
+    public function cancel($id)
+    {
+        $booking = Booking::findOrFail($id);
+
+        if (strtolower((string) $booking->Status) === 'cancelled') {
+            return response()->json([
+                'message' => 'This booking is already cancelled.',
+            ], 422);
+        }
+
+        $today = now()->startOfDay();
+        $tourDate = \Carbon\Carbon::parse($booking->Booking_Date)->startOfDay();
+        $daysBeforeTour = (int) round($today->diffInDays($tourDate, false));
+
+        if ($daysBeforeTour > 7) {
+            $refundPercentage = 100;
+        } elseif ($daysBeforeTour >= 3) {
+            $refundPercentage = 50;
+        } else {
+            $refundPercentage = 0;
+        }
+
+        $booking->update(['Status' => 'Cancelled']);
+
+        return response()->json([
+            'message' => 'Booking cancelled successfully',
+            'booking' => $booking,
+            'refund_percentage' => $refundPercentage,
+        ]);
+    }
+
+    // =========================
+    // ASSIGN VEHICLE(S) (ADMIN)
+    // Supports assigning multiple vehicles to one booking. The number of
+    // vehicles required is derived from the passenger count (max 6 passengers
+    // per vehicle) on the frontend and double-checked here.
+    // =========================
+    public function assignVehicles(Request $request, $id)
     {
         if (!$this->isAdmin($request->user())) {
             return response()->json(['message' => 'Only administrators can assign vehicles.'], 403);
         }
 
         $validated = $request->validate([
-            'Vehicle_ID' => 'required|exists:vehicles,Vehicle_ID',
+            'Vehicle_IDs'    => 'required|array|min:1',
+            'Vehicle_IDs.*'  => 'integer|distinct|exists:vehicles,Vehicle_ID',
+            'Required_Count' => 'nullable|integer|min:1',
         ]);
 
         $booking = Booking::findOrFail($id);
-        $booking->update(['Vehicle_ID' => $validated['Vehicle_ID']]);
+
+        $vehicleIds = array_values(array_map('intval', $validated['Vehicle_IDs']));
+        $requiredCount = max(
+            1,
+            (int) ($validated['Required_Count'] ?? ceil(($booking->No_of_adults + $booking->No_of_child) / 6))
+        );
+
+        if (count($vehicleIds) < $requiredCount) {
+            return response()->json([
+                'message' => "This booking needs at least {$requiredCount} vehicle(s) for its passengers.",
+            ], 422);
+        }
+
+        $booking->vehicles()->sync($vehicleIds);
+
+        // Keep the legacy single-vehicle column pointing at the first vehicle
+        // so screens still relying on booking.vehicle keep working.
+        $booking->update(['Vehicle_ID' => $vehicleIds[0]]);
 
         return response()->json([
-            'message' => 'Vehicle assigned successfully',
-            'booking' => $booking,
+            'message' => count($vehicleIds) . ' vehicle(s) assigned successfully',
+            'booking' => $booking->load(['customer', 'package', 'vehicle.driver', 'vehicles.driver']),
         ]);
+    }
+
+    public function assignVehicle(Request $request, $id)
+    {
+        // Delegate the legacy single-vehicle endpoint to the multi-assign logic.
+        $request->merge([
+            'Vehicle_IDs' => array_values(array_filter([(int) $request->input('Vehicle_ID')])),
+        ]);
+
+        return $this->assignVehicles($request, $id);
     }
 
     // =========================
@@ -158,9 +239,9 @@ class BookingController extends Controller
     // =========================
     public function upcomingBooking($customerId)
     {
-        $booking = Booking::with(['package', 'vehicle.driver'])
+        $booking = Booking::with(['package', 'vehicle.driver', 'vehicles.driver'])
             ->where('Customer_ID', $customerId)
-            ->where('Status', 'pending')
+            ->where('Status', 'Pending')
             ->whereDate('Booking_Date', '>=', now()->toDateString())
             ->orderBy('Booking_Date', 'asc')
             ->orderBy('Pickup_Time', 'asc')

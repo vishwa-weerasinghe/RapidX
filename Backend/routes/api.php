@@ -74,6 +74,9 @@ Route::put('/bookings/{id}', [BookingController::class, 'update']);
 Route::put('/bookings/{id}/vehicle', [BookingController::class, 'assignVehicle'])
     ->middleware('auth:sanctum');
 
+    Route::put('/bookings/{id}/vehicles', [BookingController::class, 'assignVehicles'])
+        ->middleware('auth:sanctum');
+
 Route::delete('/bookings/{id}', [BookingController::class, 'destroy']);
 
 Route::get('/bookings/{id}', [BookingController::class, 'show']);

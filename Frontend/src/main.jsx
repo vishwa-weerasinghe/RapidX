@@ -22,6 +22,7 @@ import CustomerPackages from "./pages/user/Packages.jsx";
 import Bookings from "./pages/admin/Bookings.jsx";
 import BookingForm from "./pages/admin/BookingForm.jsx";
 import MyBookings from "./pages/user/MyBookings";
+import Cancellation from "./pages/user/cancellation.jsx";
 
 import Appointments from "./pages/admin/appointment.jsx";
 import GuestBooking from "./pages/public/booking.jsx";
@@ -78,6 +79,7 @@ createRoot(document.getElementById("root")).render(
             <Route path="/user/packages" element={<CustomerPackages />} />
             <Route path="/user/reviews" element={<Review />} />
             <Route path="/user/bookings" element={<MyBookings />} />
+            <Route path="/user/bookings/:id/edit" element={<Cancellation />} />
             <Route path="/user/cart" element={<Cart />} />
             <Route
               path="/packages"

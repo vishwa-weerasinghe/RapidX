@@ -949,7 +949,7 @@ export default function App() {
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-8">
               {[
                 {
                   title: "Local Experts",
@@ -1153,18 +1153,18 @@ export default function App() {
             </div>
 
             {/* Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-8">
+            <div className="flex flex-wrap justify-center gap-8">
               {packages.map((pkg, idx) => (
                 <div
                   key={idx}
-                  className="bg-white rounded-3xl overflow-hidden border border-gray-200 shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col"
+                  className="w-full sm:w-[calc(50%-1rem)] lg:w-[260px] bg-white rounded-3xl overflow-hidden border border-gray-200 shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col"
                 >
                   {/* Image */}
-                  <div className="relative h-48 overflow-hidden">
+                  <div className="relative h-56 overflow-hidden bg-gray-50">
                     <img
                       src={pkg.img}
                       alt={pkg.title}
-                      className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                      className="w-full h-full object-cover object-center transition-transform duration-500 hover:scale-105"
                     />
 
                     {pkg.popular && (
