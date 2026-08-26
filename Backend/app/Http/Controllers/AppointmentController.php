@@ -87,6 +87,74 @@ class AppointmentController extends Controller
         ]);
     }
 
+    /**
+     * Annual booking report grouped by month for a given year (?year=YYYY).
+     * Rows = months (Jan..Dec always present), columns = total confirmed /
+     * in cart / pending / cancelled bookings plus earnings from confirmed
+     * bookings. Also returns year totals for the entire-year view.
+     */
+    public function annualReport(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user || !$this->isAdmin($user)) {
+            return response()->json(['message' => 'Only administrators can view appointments.'], 403);
+        }
+
+        $year = now()->format('Y');
+        if ($request->has('year') && preg_match('/^\d{4}$/', (string) $request->year)) {
+            $year = $request->year;
+        }
+
+        $byMonth = Booking::query()
+            ->selectRaw("DATE_FORMAT(Booking_Date, '%Y-%m') as month")
+            ->selectRaw("SUM(CASE WHEN Status = 'Confirmed' THEN 1 ELSE 0 END) as total_confirmed")
+            ->selectRaw("SUM(CASE WHEN Status = 'In Cart' THEN 1 ELSE 0 END) as total_in_cart")
+            ->selectRaw("SUM(CASE WHEN Status = 'Pending' THEN 1 ELSE 0 END) as total_pending")
+            ->selectRaw("SUM(CASE WHEN Status = 'Cancelled' THEN 1 ELSE 0 END) as total_cancelled")
+            ->selectRaw("SUM(CASE WHEN Status = 'Confirmed' THEN Payment ELSE 0 END) as earnings_confirmed")
+            ->whereYear('Booking_Date', $year)
+            ->groupBy('month')
+            ->get()
+            ->keyBy('month');
+
+        $totals = [
+            'total_confirmed'    => 0,
+            'total_in_cart'      => 0,
+            'total_pending'      => 0,
+            'total_cancelled'    => 0,
+            'earnings_confirmed' => 0,
+        ];
+
+        $rows = [];
+        for ($m = 1; $m <= 12; $m++) {
+            $key = $year . '-' . str_pad((string) $m, 2, '0', STR_PAD_LEFT);
+            $row = $byMonth->get($key);
+
+            $item = [
+                'month'              => $key,
+                'label'              => \Carbon\Carbon::createFromDate((int) $year, $m, 1)->format('F'),
+                'total_confirmed'    => (int) ($row->total_confirmed ?? 0),
+                'total_in_cart'      => (int) ($row->total_in_cart ?? 0),
+                'total_pending'      => (int) ($row->total_pending ?? 0),
+                'total_cancelled'    => (int) ($row->total_cancelled ?? 0),
+                'earnings_confirmed' => (float) ($row->earnings_confirmed ?? 0),
+            ];
+
+            foreach ($totals as $k => $v) {
+                $totals[$k] = round($v + $item[$k], 2);
+            }
+
+            $rows[] = $item;
+        }
+
+        return response()->json([
+            'year'   => $year,
+            'rows'   => $rows,
+            'totals' => $totals,
+        ]);
+    }
+
     private function isAdmin($user): bool
     {
         $role = $user->role ?? $user->Role ?? $user->user_type ?? null;

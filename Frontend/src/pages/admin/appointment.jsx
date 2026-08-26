@@ -3,6 +3,7 @@ import { Download } from "lucide-react";
 import api from "../../axios";
 import { useTheme } from "../../context/ThemeContext";
 import { generateMonthlySummaryPdf } from "../../utils/generateMonthlySummaryPdf";
+import { generateAnnualReportPdf } from "../../utils/generateAnnualReportPdf";
 import PackagePopularityChart from "../../components/admin-dashboard/PackagePopularityChart";
 
 export default function Appointments() {
@@ -67,6 +68,36 @@ export default function Appointments() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  // ---------- Annual Booking Report ----------
+  const [reportYear, setReportYear] = useState(String(new Date().getFullYear()));
+  const [annualReport, setAnnualReport] = useState(null);
+  const [reportLoading, setReportLoading] = useState(true);
+
+  const yearOptions = useMemo(() => {
+    const now = new Date().getFullYear();
+    return Array.from({ length: 6 }, (_, i) => String(now - i));
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    setReportLoading(true);
+    api
+      .get("/appointments/annual-report", { params: { year: reportYear } })
+      .then((res) => {
+        if (!cancelled) setAnnualReport(res.data || null);
+      })
+      .catch((err) => {
+        console.error(err);
+        if (!cancelled) setAnnualReport(null);
+      })
+      .finally(() => {
+        if (!cancelled) setReportLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [reportYear]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -245,6 +276,84 @@ export default function Appointments() {
       )}
 
       {!loading && !error && <PackagePopularityChart appointments={appointments} isDark={isDark} />}
+
+      {/* ---------- Annual Booking Report ---------- */}
+      {!loading && !error && (
+        <div className="card p-4 mb-6">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div>
+              <h2 className="text-lg font-bold text-charcoal dark:text-white">Annual Booking Report</h2>
+              <p className="text-sm text-muted mt-0.5">Month-by-month overview of every booking in the year.</p>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <select
+                value={reportYear}
+                onChange={(e) => setReportYear(e.target.value)}
+                className="form-input py-1.5 text-sm"
+                title="Select report year"
+              >
+                {yearOptions.map((y) => (
+                  <option key={y} value={y}>{y}</option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={() => annualReport && generateAnnualReportPdf(annualReport)}
+                disabled={!annualReport}
+                className="inline-flex items-center gap-2 rounded-full card px-3 py-2 text-sm font-semibold shadow-sm hover:bg-offwhite-100 dark:hover:bg-surface-2 disabled:opacity-50"
+                title="Download annual report as PDF"
+              >
+                <Download className="h-4 w-4 text-muted" />
+                Annual PDF
+              </button>
+            </div>
+          </div>
+
+          {reportLoading ? (
+            <p className="text-sm text-muted">Loading annual report...</p>
+          ) : !annualReport ? (
+            <p className="text-sm text-muted">Failed to load the annual report.</p>
+          ) : (
+            <div className="overflow-x-auto rounded-lg border border-border-light dark:border-border-dark">
+              <table className="min-w-full bg-surface text-sm">
+                <thead className="bg-[#29AB87] text-white uppercase text-xs dark:bg-[#29AB87]">
+                  <tr>
+                    <th className="px-4 py-3 text-left">Month</th>
+                    <th className="px-4 py-3 text-center">Total Confirmed Bookings</th>
+                    <th className="px-4 py-3 text-center">Total In Cart Bookings</th>
+                    <th className="px-4 py-3 text-center">Total Pending Bookings</th>
+                    <th className="px-4 py-3 text-center">Total Cancelled Bookings</th>
+                    <th className="px-4 py-3 text-right">Earnings from Confirmed Bookings</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border-light dark:divide-border-dark">
+                  {annualReport.rows.map((r) => (
+                    <tr key={r.month} className="hover:bg-offwhite-100 dark:hover:bg-surface-2">
+                      <td className="px-4 py-2 font-medium text-charcoal dark:text-white">{r.label}</td>
+                      <td className="px-4 py-2 text-center text-charcoal/80 dark:text-white/80">{r.total_confirmed}</td>
+                      <td className="px-4 py-2 text-center text-charcoal/80 dark:text-white/80">{r.total_in_cart}</td>
+                      <td className="px-4 py-2 text-center text-charcoal/80 dark:text-white/80">{r.total_pending}</td>
+                      <td className="px-4 py-2 text-center text-charcoal/80 dark:text-white/80">{r.total_cancelled}</td>
+                      <td className="px-4 py-2 text-right font-mono text-sacramento">$ {Number(r.earnings_confirmed).toLocaleString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot className="bg-offwhite-100 dark:bg-surface-2 font-bold">
+                  <tr>
+                    <td className="px-4 py-3 text-charcoal dark:text-white">Entire Year ({annualReport.year})</td>
+                    <td className="px-4 py-3 text-center text-charcoal dark:text-white">{annualReport.totals.total_confirmed}</td>
+                    <td className="px-4 py-3 text-center text-charcoal dark:text-white">{annualReport.totals.total_in_cart}</td>
+                    <td className="px-4 py-3 text-center text-charcoal dark:text-white">{annualReport.totals.total_pending}</td>
+                    <td className="px-4 py-3 text-center text-charcoal dark:text-white">{annualReport.totals.total_cancelled}</td>
+                    <td className="px-4 py-3 text-right font-mono text-sacramento">$ {Number(annualReport.totals.earnings_confirmed).toLocaleString()}</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
 
       {loading ? (
         <p className="text-muted">Loading...</p>

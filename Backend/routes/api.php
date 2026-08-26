@@ -61,6 +61,9 @@ Route::get('appointments', [AppointmentController::class, 'index'])
 Route::get('appointments/summary', [AppointmentController::class, 'summary'])
     ->middleware('auth:sanctum');
 
+Route::get('appointments/annual-report', [AppointmentController::class, 'annualReport'])
+    ->middleware('auth:sanctum');
+
 Route::get('reviews', [ReviewController::class, 'index']);
 
 Route::get('/locations/{locationId}/reviews', [ReviewController::class, 'tripadvisorReviews']);
