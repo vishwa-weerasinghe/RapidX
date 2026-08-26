@@ -15,6 +15,10 @@ return [
 
     'merchant_secret' => env('PAYHERE_MERCHANT_SECRET', '4MjIyMzE0NTgxNDQyNjY5Njg4MTg4MDgzODczODAyMTIyMzE0NTg='), // Default Sandbox Secret
 
+    'app_id' => env('PAYHERE_APP_ID', ''),
+
+    'app_secret' => env('PAYHERE_APP_SECRET', ''),
+
     'mode' => env('PAYHERE_MODE', 'sandbox'), // 'sandbox' or 'live'
 
     'currency' => env('PAYHERE_CURRENCY', 'USD'),

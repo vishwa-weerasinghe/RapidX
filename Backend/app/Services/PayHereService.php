@@ -6,6 +6,8 @@ class PayHereService
 {
     protected string $merchantId;
     protected string $merchantSecret;
+    protected string $appId;
+    protected string $appSecret;
     protected string $currency;
     protected string $mode;
     protected string $returnUrl;
@@ -16,11 +18,74 @@ class PayHereService
     {
         $this->merchantId = (string) config('payhere.merchant_id', '1211149');
         $this->merchantSecret = (string) config('payhere.merchant_secret', '');
+        $this->appId = (string) config('payhere.app_id', '');
+        $this->appSecret = (string) config('payhere.app_secret', '');
         $this->currency = (string) config('payhere.currency', 'USD');
         $this->mode = (string) config('payhere.mode', 'sandbox');
         $this->returnUrl = (string) config('payhere.return_url', '');
         $this->cancelUrl = (string) config('payhere.cancel_url', '');
         $this->notifyUrl = (string) config('payhere.notify_url', '');
+    }
+
+    /**
+     * Get the base URL for the PayHere Merchant API
+     */
+    protected function getMerchantApiBaseUrl(): string
+    {
+        return $this->mode === 'sandbox'
+            ? 'https://sandbox.payhere.lk/merchant/v1'
+            : 'https://www.payhere.lk/merchant/v1';
+    }
+
+    /**
+     * Generate an Access Token using App ID and App Secret
+     */
+    public function getAccessToken(): ?string
+    {
+        if (empty($this->appId) || empty($this->appSecret)) {
+            \Illuminate\Support\Facades\Log::error('PayHere App ID or App Secret is not configured.');
+            return null;
+        }
+
+        $authCode = base64_encode("{$this->appId}:{$this->appSecret}");
+        
+        $response = \Illuminate\Support\Facades\Http::withHeaders([
+            'Authorization' => "Basic {$authCode}",
+        ])->asForm()->post($this->getMerchantApiBaseUrl() . '/oauth/token', [
+            'grant_type' => 'client_credentials'
+        ]);
+
+        if ($response->successful()) {
+            return $response->json('access_token');
+        }
+
+        \Illuminate\Support\Facades\Log::error('Failed to get PayHere Access Token: ' . $response->body());
+        return null;
+    }
+
+    /**
+     * Process a refund via PayHere Refund API
+     */
+    public function refund(string $paymentId, float|int|string $amount, string $description = 'Booking Cancellation'): bool
+    {
+        $accessToken = $this->getAccessToken();
+        if (!$accessToken) {
+            return false;
+        }
+
+        $response = \Illuminate\Support\Facades\Http::withToken($accessToken)
+            ->post($this->getMerchantApiBaseUrl() . '/payment/refund', [
+                'payment_id' => $paymentId,
+                'description' => $description,
+                'amount' => number_format((float) $amount, 2, '.', '')
+            ]);
+
+        if ($response->successful() && $response->json('status') === 1) {
+            return true;
+        }
+
+        \Illuminate\Support\Facades\Log::error('PayHere Refund Failed for Payment ID ' . $paymentId . ': ' . $response->body());
+        return false;
     }
 
     /**

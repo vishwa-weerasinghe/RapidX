@@ -262,26 +262,96 @@ class BookingController extends Controller
     // =========================
     // DELETE BOOKING (ADMIN)
     // =========================
+    private function processRefund(Booking $booking)
+    {
+        $refundPercentage = 0;
+        
+        if ($booking->Status === 'Confirmed' && $booking->payment && $booking->payment->payhere_payment_id) {
+            $bookingDate = \Carbon\Carbon::parse($booking->Booking_Date);
+            $now = \Carbon\Carbon::now();
+            $daysDifference = $now->diffInDays($bookingDate, false);
+
+            if ($daysDifference > 7) {
+                $refundPercentage = 100;
+            } elseif ($daysDifference >= 3 && $daysDifference <= 7) {
+                $refundPercentage = 50;
+            }
+
+            if ($refundPercentage > 0 && $booking->Payment > 0) {
+                $refundAmount = ($booking->Payment * $refundPercentage) / 100;
+                
+                $payHereService = app(\App\Services\PayHereService::class);
+                $description = "Automated Refund: {$refundPercentage}% (Cancelled {$daysDifference} days before tour)";
+                
+                try {
+                    $payHereService->refund($booking->payment->payhere_payment_id, $refundAmount, $description);
+                    \Illuminate\Support\Facades\Log::info("Refunded {$refundAmount} for Booking ID {$booking->Booking_ID}");
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error("Failed to process refund for Booking ID {$booking->Booking_ID}: " . $e->getMessage());
+                }
+            }
+        }
+        
+        return $refundPercentage;
+    }
+
     public function destroy($id)
     {
-        $booking = Booking::findOrFail($id);
+        $booking = Booking::with('payment')->findOrFail($id);
 
-        if (!request()->user()) {
+        // Authentication and admin check (from shanika)
+        $user = request()->user('sanctum') ?? auth('sanctum')->user();
+        if (!$user) {
             return response()->json(['message' => 'Unauthenticated.'], 401);
         }
 
-        if (!$this->isAdmin(request()->user())) {
+        if (!$this->isAdmin($user)) {
             return response()->json(['message' => 'Only administrators can delete bookings.'], 403);
         }
 
+        // Process automated refund if eligible and then remove the booking (from main)
+        $this->processRefund($booking);
+
+        $booking->delete();
+
+        return response()->json([
+            'message' => 'Booking deleted successfully and applicable refunds processed'
+        ]);
+    }
+
+    // =========================
+    // CANCEL BOOKING (USER)
+    // =========================
+    public function cancel(Request $request, $id)
+    {
+        $booking = Booking::with('payment')->findOrFail($id);
+        
+        // Ownership check
+        $user = $request->user('sanctum') ?? auth('sanctum')->user();
+        if (!$user) {
+            return response()->json(['message' => 'Only registered users can cancel bookings.'], 401);
+        }
+
+        if (!$this->isAdmin($user) && (int) $user->Customer_ID !== (int) $booking->Customer_ID) {
+            return response()->json(['message' => 'Unauthorized. You can only cancel your own bookings.'], 403);
+        }
+
+        if ($booking->Status === 'Canceled') {
+            return response()->json(['message' => 'Booking is already cancelled'], 400);
+        }
+
+        $refundPercentage = $this->processRefund($booking);
+
         $booking->update([
-            'Status' => 'Cancelled',
-            'Customer_Seen' => false,
-            'Customer_Message' => 'Your booking was cancelled by an administrator.',
+            'Status' => 'Canceled'
         ]);
 
         return response()->json([
-            'message' => 'Booking cancelled successfully'
+            'message' => 'Booking cancelled successfully',
+            'refund_percentage' => $refundPercentage,
+            'booking' => $booking
+        ]);
+    }
         ]);
     }
     public function unreadCount()
