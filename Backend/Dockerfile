@@ -34,4 +34,5 @@ RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
 # Expose port and start php artisan serve
 # Render provides the PORT environment variable
-CMD php artisan serve --host=0.0.0.0 --port=$PORT
+
+CMD php artisan migrate --force && php artisan db:seed --class=AdminSeeder --force && php artisan serve --host=0.0.0.0 --port=$PORT
