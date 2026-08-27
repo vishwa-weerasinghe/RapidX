@@ -17,6 +17,11 @@ import PublicReviewSection from "./pages/public/Review.jsx";
 import homepageImg from "./assets/homepage.png";
 import logoImg from "./assets/logo.jpg";
 import awordImg from "./assets/TA-Aword.jpg";
+import aboutUsImg from "./assets/aboutus.png";
+import minneriyaImg from "./assets/minneriya.png";
+import kaudullaImg from "./assets/kaudulla.png";
+import wasgamuwaImg from "./assets/wasgamuwa.png";
+import huruluImg from "./assets/hurulu.png";
 
 
 export default function App() {
@@ -136,25 +141,25 @@ export default function App() {
       id: "minneriya",
       title: "Minneriya National Park",
       desc: "Famous for the world's largest wild elephant gathering during the dry season.",
-      img: "https://minneriyawildjeepsafari.com/wp-content/uploads/2025/08/WhatsApp-Image-2025-08-20-at-12.11.05-1024x683.jpeg",
+      img: { minneriyaImg },
     },
     {
       id: "kaudulla",
       title: "Kaudulla National Park",
       desc: "Spectacular elephant herds and diverse wildlife in pristine natural habitat.",
-      img: "https://minneriyawildjeepsafari.com/wp-content/uploads/2024/05/cb-1.jpg",
+      img: { kaudullaImg },
     },
     {
       id: "wasgamuwa",
       title: "Wasgamuwa National Park",
       desc: "Hidden gem offering intimate wildlife encounters in untouched wilderness.",
-      img: "https://minneriyawildjeepsafari.com/wp-content/uploads/2024/05/WhatsApp-Image-2025-08-20-at-12.11.13-1.jpeg",
+      img: { wasgamuwaImg },
     },
     {
       id: "hurulu",
       title: "Hurulu Eco Park",
       desc: "Eco-friendly park with diverse ecosystems and abundant wildlife.",
-      img: "https://minneriyawildjeepsafari.com/wp-content/uploads/2024/05/Udawalawe-National-Park-4.jpg",
+      img: { huruluImg },
     },
   ];
 
@@ -566,7 +571,7 @@ export default function App() {
                 <img
                   src={logoImg}
                   alt="Minneriya Wild Jeep Safari"
-                  className="h-7 sm:h-9 md:h-11 w-auto object-contain rounded-md"
+                  className="h-10 sm:h-12 md:h-16 w-auto object-contain rounded-md"
                 />
               </div>
               <span
@@ -812,7 +817,7 @@ export default function App() {
                 <div className="absolute -inset-4 bg-gray-50 rounded-[2rem] transform -rotate-3 z-0"></div>
                 <div className="relative z-10 rounded-2xl overflow-hidden shadow-lg border border-gray-100">
                   <img
-                    src="https://minneriyawildjeepsafari.com/wp-content/uploads/2025/08/WhatsApp-Image-2025-08-20-at-12.11.05-1024x683.jpeg"
+                    src={aboutUsImg}
                     alt="Elephant Gathering"
                     className="w-full h-[400px] lg:h-[550px] object-cover hover:scale-105 transition-transform duration-700"
                   />
@@ -1793,9 +1798,9 @@ export default function App() {
                   >
                     <div className="bg-white p-1.5 sm:p-2 rounded-xl shadow-md border border-white/20 flex items-center justify-center transition-transform hover:scale-105 duration-300">
                       <img
-                        src="https://minneriyawildjeepsafari.com/wp-content/uploads/2025/08/lgo.jpg"
+                        src={logoImg}
                         alt="Minneriya Wild Jeep Safari"
-                        className="h-7 sm:h-9 md:h-11 w-auto object-contain rounded-md"
+                        className="h-10 sm:h-12 md:h-16 w-auto object-contain rounded-md"
                       />
                     </div>
                   </div>
