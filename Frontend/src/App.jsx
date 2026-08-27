@@ -164,7 +164,7 @@ export default function App() {
       .get("/packages")
       .then((res) => {
         if (res.data && res.data.length > 0) {
-          const backendUrl = "http://127.0.0.1:8000";
+          const backendUrl = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : "http://127.0.0.1:8000";
           const fallbackImage =
             "https://images.unsplash.com/photo-1549366021-9f761d450615?q=80&w=2012&auto=format&fit=crop";
 
@@ -199,9 +199,10 @@ export default function App() {
       .then((res) => {
         if (res.data && res.data.length > 0) {
           const mapped = res.data.map((item) => {
+            const baseUrl = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : "http://127.0.0.1:8000";
             const src = item.file_path.startsWith("http")
               ? item.file_path
-              : `http://127.0.0.1:8000${item.file_path}`;
+              : `${baseUrl}${item.file_path}`;
             return {
               src: src,
               alt: item.title || "Safari Photo",

@@ -152,7 +152,7 @@ export default function PackageForm() {
             <div className="mb-3">
               <p className="mb-2 text-sm text-muted">Current image</p>
               <img
-                src={`http://127.0.0.1:8000/storage/${form.Image}`}
+                src={`${import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://127.0.0.1:8000'}/storage/${form.Image}`}
                 alt="Current package"
                 className="h-56 w-full rounded-lg border border-border-light bg-gray-50 object-contain object-left dark:border-border-dark dark:bg-slate-900"
               />
