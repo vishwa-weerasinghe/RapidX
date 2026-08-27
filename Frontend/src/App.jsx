@@ -141,25 +141,25 @@ export default function App() {
       id: "minneriya",
       title: "Minneriya National Park",
       desc: "Famous for the world's largest wild elephant gathering during the dry season.",
-      img: { minneriyaImg },
+      img: minneriyaImg,
     },
     {
       id: "kaudulla",
       title: "Kaudulla National Park",
       desc: "Spectacular elephant herds and diverse wildlife in pristine natural habitat.",
-      img: { kaudullaImg },
+      img: kaudullaImg,
     },
     {
       id: "wasgamuwa",
       title: "Wasgamuwa National Park",
       desc: "Hidden gem offering intimate wildlife encounters in untouched wilderness.",
-      img: { wasgamuwaImg },
+      img: wasgamuwaImg,
     },
     {
       id: "hurulu",
       title: "Hurulu Eco Park",
       desc: "Eco-friendly park with diverse ecosystems and abundant wildlife.",
-      img: { huruluImg },
+      img: huruluImg,
     },
   ];
 
