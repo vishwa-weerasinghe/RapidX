@@ -323,7 +323,7 @@ export default function Booking() {
                                             required
                                         >
                                             <option value="" disabled>-- Select a tour package --</option>
-                                            {packagesList.map((p) => (
+                                            {Array.isArray(packagesList) && packagesList.map((p) => (
                                                 <option key={p.Package_ID || p.id} value={p.Package_ID || p.id}>
                                                     {p.Package_Name} - $ {p.Price_for_adult} (Adult) / $ {p.Price_for_child} (Child)
                                                 </option>
