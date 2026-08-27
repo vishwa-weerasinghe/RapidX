@@ -18,10 +18,10 @@ import homepageImg from "./assets/homepage.png";
 import logoImg from "./assets/logo.jpg";
 import awordImg from "./assets/TA-Aword.jpg";
 import aboutUsImg from "./assets/aboutus.png";
-import minneriyaImg from "./assets/minneriya.png";
-import kaudullaImg from "./assets/kaudulla.png";
-import wasgamuwaImg from "./assets/wasgamuwa.png";
-import huruluImg from "./assets/hurulu.png";
+import minneriyaImg from "./assets/minneriya.jpg";
+import kaudullaImg from "./assets/kaudulla.jpg";
+import wasgamuwaImg from "./assets/wasgamuwa.jpg";
+import huruluImg from "./assets/hurulu.jpg";
 
 
 export default function App() {
