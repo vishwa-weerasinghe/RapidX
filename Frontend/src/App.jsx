@@ -17,7 +17,7 @@ import PublicReviewSection from "./pages/public/Review.jsx";
 import homepageImg from "./assets/homepage.png";
 import logoImg from "./assets/logo.jpg";
 import awordImg from "./assets/TA-Aword.jpg";
-import aboutUsImg from "./assets/aboutus.png";
+import aboutUsImg from "./assets/aboutUs.png";
 import minneriyaImg from "./assets/minneriya.jpg";
 import kaudullaImg from "./assets/kaudulla.jpg";
 import wasgamuwaImg from "./assets/wasgamuwa.jpg";
