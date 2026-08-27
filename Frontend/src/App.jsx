@@ -15,6 +15,8 @@ import { useTheme } from "./context/ThemeContext";
 import api from "./axios";
 import PublicReviewSection from "./pages/public/Review.jsx";
 import homepageImg from "./assets/homepage.png";
+import logoImg from "./assets/logo.jpg";
+import awordImg from "./assets/TA-Aword.jpg";
 
 
 export default function App() {
@@ -562,7 +564,7 @@ export default function App() {
             >
               <div className="bg-white p-1.5 sm:p-2 rounded-xl shadow-md border border-white/20 flex items-center justify-center transition-transform hover:scale-105 duration-300">
                 <img
-                  src="https://minneriyawildjeepsafari.com/wp-content/uploads/2025/08/lgo.jpg"
+                  src={logoImg}
                   alt="Minneriya Wild Jeep Safari"
                   className="h-7 sm:h-9 md:h-11 w-auto object-contain rounded-md"
                 />
@@ -1258,7 +1260,7 @@ export default function App() {
                 from travelers who chose us.
               </p>
               <img
-                src="https://minneriyawildjeepsafari.com/wp-content/uploads/2025/08/TC25-logo.jpg"
+                src={awordImg}
                 alt="TripAdvisor"
                 className="h-24 sm:h-32 mx-auto object-contain"
               />
