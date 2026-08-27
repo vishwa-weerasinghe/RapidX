@@ -14,6 +14,7 @@ import ThemeToggle from "./components/ThemeToggle";
 import { useTheme } from "./context/ThemeContext";
 import api from "./axios";
 import PublicReviewSection from "./pages/public/Review.jsx";
+import homepageImg from "./assets/homepage.png";
 
 
 export default function App() {
@@ -126,7 +127,7 @@ export default function App() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // --- REFS & DATA ---
-  const heroSlides = ["src/assets/homepage.png"];
+  const heroSlides = [homepageImg];
 
   const safariLocations = [
     {
