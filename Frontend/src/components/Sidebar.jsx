@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import api from "../axios";
 
 import {
@@ -12,6 +12,7 @@ import {
   Star,
   ShoppingCart,
   LogOut,
+  ArrowLeft,
 } from "lucide-react";
 
 const adminLinks = [
@@ -37,9 +38,10 @@ const customerLinks = [
   { to: "/user/reviews", label: "Reviews", icon: Star },
 ];
 
-export default function Sidebar({ role = "admin", isOpen }) {
+export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
   const normalizedRole = role?.toLowerCase();
   const links = normalizedRole === "customer" ? customerLinks : adminLinks;
+  const navigate = useNavigate();
 
   const [unreadBookings, setUnreadBookings] = useState(0);
   const [unreadReviews, setUnreadReviews] = useState(0);
@@ -115,11 +117,13 @@ export default function Sidebar({ role = "admin", isOpen }) {
     <aside
       className={`
         fixed md:sticky
-        top-0 left-0
+        top-16 md:top-0
+        left-0
         z-50
         w-72
-        h-screen
+        h-[calc(100dvh-4rem)] md:h-screen
         overflow-y-auto
+        overscroll-contain
         flex
         flex-col
         justify-between
@@ -149,9 +153,23 @@ export default function Sidebar({ role = "admin", isOpen }) {
     >
       {/* HEADER */}
 
-      <div>
+      <div className="min-h-full">
 
-        <div className="p-6 border-b border-white/20">
+        <div className="relative p-6 border-b border-white/20">
+
+          <button
+            onClick={() => {
+              navigate(-1);
+              if (typeof setIsOpen === "function") {
+                setIsOpen(false);
+              }
+            }}
+            className="absolute left-4 top-4 md:hidden p-2 rounded-lg text-white/90 hover:bg-white/15 transition-colors"
+            title="Go back"
+            aria-label="Go back"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
 
           <div className="flex flex-col items-center">
 
