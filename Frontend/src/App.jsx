@@ -564,20 +564,20 @@ export default function App() {
           >
             {/* Logo & Brand Name */}
             <div
-              className="cursor-pointer flex items-center gap-2 sm:gap-3"
+              className="cursor-pointer flex items-center gap-3 sm:gap-4 group"
               onClick={() => scrollToSection("home")}
             >
-              <div className="bg-white p-1.5 sm:p-2 rounded-xl shadow-md border border-white/20 flex items-center justify-center transition-transform hover:scale-105 duration-300">
+              <div className="relative flex items-center justify-center transition-all duration-500 group-hover:scale-105 group-hover:shadow-[0_8px_30px_-4px_rgba(46,125,50,0.3)] rounded-full">
                 <img
                   src={logoImg}
                   alt="Minneriya Wild Jeep Safari"
-                  className="h-10 sm:h-12 md:h-16 w-auto object-contain rounded-md"
+                  className="h-14 sm:h-16 md:h-20 w-auto object-contain rounded-full"
                 />
               </div>
               <span
-                className={`text-base sm:text-lg md:text-xl font-bold tracking-wide transition-colors duration-300 ${isScrolled
-                  ? "text-sacramento dark:text-white"
-                  : "text-white drop-shadow-md"
+                className={`text-lg sm:text-xl md:text-2xl font-black tracking-tighter transition-all duration-500 ${isScrolled
+                  ? "bg-clip-text text-transparent bg-gradient-to-r from-sacramento to-castleton dark:from-white dark:to-gray-400"
+                  : "text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)]"
                   }`}
               >
                 Wild Jeep Safari
@@ -1796,11 +1796,11 @@ export default function App() {
                     className="cursor-pointer flex items-center gap-2 sm:gap-3"
                     onClick={() => scrollToSection("home")}
                   >
-                    <div className="bg-white p-1.5 sm:p-2 rounded-xl shadow-md border border-white/20 flex items-center justify-center transition-transform hover:scale-105 duration-300">
+                    <div className="relative flex items-center justify-center transition-all duration-500 group-hover:scale-105 group-hover:shadow-[0_8px_30px_-4px_rgba(46,125,50,0.3)] rounded-full">
                       <img
                         src={logoImg}
                         alt="Minneriya Wild Jeep Safari"
-                        className="h-10 sm:h-12 md:h-16 w-auto object-contain rounded-md"
+                        className="h-14 sm:h-16 md:h-20 w-auto object-contain rounded-full"
                       />
                     </div>
                   </div>
