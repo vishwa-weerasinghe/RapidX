@@ -58,7 +58,7 @@ export function CancellationMessage() {
 
   const isDark = theme === "dark";
 
-  const cardClass = "card p-6";
+  const cardClass = "card p-4 sm:p-6";
   const iconBoxClass = isDark
     ? "flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-sacramento-400 to-sacramento-300 text-white"
     : "flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-sacramento to-sacramento-600 text-white";
@@ -72,8 +72,8 @@ export function CancellationMessage() {
   const fieldTextClass = isDark ? "text-white" : "text-charcoal";
   const borderLineClass = isDark ? "border-border-dark" : "border-border-light";
   const itemClass = isDark
-    ? "rounded-2xl border border-border-dark bg-surface p-4"
-    : "rounded-2xl border border-border-light bg-surface-2 p-4";
+    ? "rounded-2xl border border-border-dark bg-surface p-3 sm:p-4"
+    : "rounded-2xl border border-border-light bg-surface-2 p-3 sm:p-4";
   const cancelledBadgeClass = isDark
     ? "bg-red-500/10 text-red-400"
     : "bg-red-100 text-red-600";
@@ -92,7 +92,7 @@ export function CancellationMessage() {
         <div className={counterClass}>{cancelledBookings.length}</div>
       </div>
 
-      <div className="flex max-h-[500px] flex-col gap-4 overflow-y-auto">
+      <div className="flex max-h-[400px] sm:max-h-[500px] flex-col gap-4 overflow-y-auto">
         {cancelledBookings.map((booking) => {
           const pkg = booking.package;
           const refundPercentage = getRefundPercentage(booking.Booking_Date);
@@ -107,7 +107,7 @@ export function CancellationMessage() {
                 </span>
               </div>
 
-              <div className={`mb-3 grid grid-cols-2 gap-2 text-sm ${fieldTextClass}`}>
+              <div className={`mb-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm ${fieldTextClass}`}>
                 <div className="flex items-center gap-1.5">
                   <CalendarDays size={14} className={isDark ? "text-sacramento-300" : "text-sacramento"} />
                   <span>{booking.Booking_Date}</span>

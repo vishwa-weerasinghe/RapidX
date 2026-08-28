@@ -71,7 +71,7 @@ export function HeroCountdown({ user }) {
         <div className={`absolute inset-0 bg-gradient-to-t ${primaryGradient}`}></div>
       </div>
 
-      <div className="relative z-10 p-6 sm:p-10 lg:p-12 flex flex-col md:flex-row md:items-end justify-between gap-8">
+      <div className="relative z-10 p-6 sm:p-10 lg:p-12 flex flex-col md:flex-row md:items-end justify-between gap-6 md:gap-8">
         {/* Left: Destination & Countdown */}
         <div className="flex-1">
           <motion.div
@@ -107,7 +107,7 @@ export function HeroCountdown({ user }) {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className={`grid grid-cols-2 gap-4 sm:gap-6 ${infoBg} backdrop-blur-md p-6 rounded-2xl border ${infoBorder}`}
+          className={`grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 ${infoBg} backdrop-blur-md p-4 sm:p-6 rounded-2xl border ${infoBorder}`}
         >
           <div className="flex flex-col gap-1">
             <div className={`flex items-center gap-2 text-sm ${isDark ? 'text-white/60' : 'text-charcoal/60'}`}>
