@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import api from "../axios";
+import logoImg from "../assets/logo.jpg";
 
 import {
   LayoutDashboard,
@@ -173,21 +174,13 @@ export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
 
           <div className="flex flex-col items-center">
 
-            <img
-              src="https://minneriyawildjeepsafari.com/wp-content/uploads/2025/08/lgo.jpg"
-              alt="Wild Safari"
-              className="
-                h-20
-                w-20
-                rounded-full
-                object-contain
-
-                border-4
-                border-white
-                shadow-xl
-                bg-white
-              "
-            />
+            <div className="relative flex items-center justify-center transition-all duration-500 group-hover:scale-105 group-hover:shadow-[0_8px_30px_-4px_rgba(46,125,50,0.3)] rounded-full">
+              <img
+                src={logoImg}
+                alt="Minneriya Wild Jeep Safari"
+                className="h-14 sm:h-16 md:h-20 w-auto object-contain rounded-full"
+              />
+            </div>
 
             <h2 className="mt-4 text-2xl font-bold tracking-wide">
               Wild Safari
