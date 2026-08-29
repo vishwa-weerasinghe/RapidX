@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Mockery;
 use Tests\TestCase;
 
 class PackageControllerTest extends TestCase
@@ -75,7 +76,8 @@ class PackageControllerTest extends TestCase
 
     public function test_admin_can_create_a_package_with_an_image(): void
     {
-        Storage::fake('public');
+        $secureUrl = 'https://res.cloudinary.com/demo/package-images/safari.jpg';
+        $this->mockCloudinaryUpload($secureUrl);
 
         $response = $this->actingAs($this->adminUser(), 'sanctum')
             ->post('/api/packages', [
@@ -87,15 +89,12 @@ class PackageControllerTest extends TestCase
             ]);
 
         $response->assertStatus(201)
-            ->assertJsonPath('Package_Name', 'Image Package');
+            ->assertJsonPath('Package_Name', 'Image Package')
+            ->assertJsonPath('Image', $secureUrl);
 
-        $imagePath = $response->json('Image');
-
-        $this->assertNotEmpty($imagePath);
-        Storage::disk('public')->assertExists($imagePath);
         $this->assertDatabaseHas('packages', [
             'Package_Name' => 'Image Package',
-            'Image' => $imagePath,
+            'Image' => $secureUrl,
         ]);
     }
 
@@ -254,5 +253,28 @@ class PackageControllerTest extends TestCase
 
         Storage::disk('public')->assertMissing($imagePath);
         $this->assertDatabaseMissing('packages', ['id' => $package->id]);
+    }
+
+    /**
+     * Swap the Cloudinary SDK singleton with a mock so tests never hit the
+     * real (external) Cloudinary API or require a CLOUDINARY_URL credential.
+     */
+    private function mockCloudinaryUpload(string $secureUrl): void
+    {
+        $this->mock(
+            \Cloudinary\Cloudinary::class,
+            function ($mock) use ($secureUrl) {
+                $uploadApi = Mockery::mock(\Cloudinary\Api\Upload\UploadApi::class);
+                $uploadApi->shouldReceive('upload')->andReturn(new \Cloudinary\Api\ApiResponse([
+                    'secure_url' => $secureUrl,
+                    'public_id'  => 'package-images/safari',
+                ], []));
+                $uploadApi->shouldReceive('destroy')->andReturn(new \Cloudinary\Api\ApiResponse([
+                    'result' => 'ok',
+                ], []));
+
+                $mock->shouldReceive('uploadApi')->andReturn($uploadApi);
+            }
+        );
     }
 }
