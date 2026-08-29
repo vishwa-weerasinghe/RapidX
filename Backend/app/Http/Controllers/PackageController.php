@@ -42,8 +42,14 @@ class PackageController extends Controller
             'Image' => 'nullable|image|mimes:jpeg,png,jpg,webp',
         ]);
         if ($request->hasFile('Image')) {
-            $validated['Image'] = $request->file('Image')
-                ->store('package-images', 'public');
+            try {
+                $result = cloudinary()->uploadApi()->upload($request->file('Image')->getRealPath(), [
+                    'folder' => 'package-images',
+                ]);
+                $validated['Image'] = $result['secure_url'];
+            } catch (\Exception $e) {
+                return response()->json(['message' => 'Failed to upload image to Cloudinary: ' . $e->getMessage()], 500);
+            }
         }
 
         $package = Package::create($validated);
@@ -77,11 +83,17 @@ class PackageController extends Controller
         ]);
         if ($request->hasFile('Image')) {
             if ($package->Image) {
-                Storage::disk('public')->delete($package->Image);
+                $this->deleteImageFile($package->Image);
             }
 
-            $validated['Image'] = $request->file('Image')
-                ->store('package-images', 'public');
+            try {
+                $result = cloudinary()->uploadApi()->upload($request->file('Image')->getRealPath(), [
+                    'folder' => 'package-images',
+                ]);
+                $validated['Image'] = $result['secure_url'];
+            } catch (\Exception $e) {
+                return response()->json(['message' => 'Failed to upload image to Cloudinary: ' . $e->getMessage()], 500);
+            }
         }
 
         $package->update($validated);
@@ -100,10 +112,41 @@ class PackageController extends Controller
         }
 
         if ($package->Image) {
-            Storage::disk('public')->delete($package->Image);
+            $this->deleteImageFile($package->Image);
         }
 
         $package->delete();
         return response()->json(['message' => 'Package deleted']);
+    }
+
+    private function deleteImageFile($imagePath)
+    {
+        if (str_contains($imagePath, 'cloudinary.com')) {
+            // extract public_id
+            $parts = explode('/upload/', $imagePath);
+            if (count($parts) > 1) {
+                $path = $parts[1]; // e.g. v123/package-images/file.jpg
+                // remove version
+                $path = preg_replace('/^v\d+\//', '', $path);
+
+                $dir = pathinfo($path, PATHINFO_DIRNAME);
+                $filename = pathinfo($path, PATHINFO_FILENAME);
+
+                $publicId = ($dir === '.') ? $filename : $dir . '/' . $filename;
+
+                if (str_starts_with($publicId, './')) {
+                    $publicId = substr($publicId, 2);
+                }
+
+                try {
+                    cloudinary()->uploadApi()->destroy($publicId);
+                } catch (\Exception $e) {
+                    // Ignore failure to delete from Cloudinary
+                }
+            }
+        } else {
+            // Legacy local file
+            Storage::disk('public')->delete($imagePath);
+        }
     }
 }
