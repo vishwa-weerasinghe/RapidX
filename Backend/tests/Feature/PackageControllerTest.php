@@ -232,4 +232,27 @@ class PackageControllerTest extends TestCase
 
         $this->assertDatabaseMissing('packages', ['id' => $package->id]);
     }
+
+    public function test_deleting_a_package_removes_its_image(): void
+    {
+        Storage::fake('public');
+        $imagePath = UploadedFile::fake()->create('safari.jpg', 100, 'image/jpeg')
+            ->store('package-images', 'public');
+
+        $package = Package::create([
+            'Package_Name' => 'Package With Image',
+            'Description' => 'Its image should be removed too.',
+            'Price_for_adult' => 90.00,
+            'Price_for_child' => 50.00,
+            'Image' => $imagePath,
+        ]);
+
+        $this->actingAs($this->adminUser(), 'sanctum')
+            ->deleteJson('/api/packages/' . $package->id)
+            ->assertStatus(200)
+            ->assertJson(['message' => 'Package deleted']);
+
+        Storage::disk('public')->assertMissing($imagePath);
+        $this->assertDatabaseMissing('packages', ['id' => $package->id]);
+    }
 }

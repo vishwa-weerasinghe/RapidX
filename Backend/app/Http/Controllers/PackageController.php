@@ -99,6 +99,10 @@ class PackageController extends Controller
             return response()->json(['message' => 'Only administrators can delete packages.'], 403);
         }
 
+        if ($package->Image) {
+            Storage::disk('public')->delete($package->Image);
+        }
+
         $package->delete();
         return response()->json(['message' => 'Package deleted']);
     }
