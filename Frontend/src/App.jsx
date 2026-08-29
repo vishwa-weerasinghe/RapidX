@@ -187,7 +187,9 @@ export default function App() {
             desc: pkg.Description,
             price: Number(pkg.Price_for_adult) || 0,
             img: pkg.Image
-              ? `${backendUrl}/storage/${pkg.Image}`
+              ? pkg.Image.startsWith("http")
+                ? pkg.Image
+                : `${backendUrl}/storage/${pkg.Image}`
               : fallbackImage,
             popular:
               Number(pkg.bookings_count || 0) === maxBookings &&
