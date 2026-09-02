@@ -33,16 +33,15 @@ class MediaController extends Controller
 
         if ($request->hasFile('image')) {
             $file = $request->file('image');
-            $fileName = time() . '_' . preg_replace('/\s+/', '_', $file->getClientOriginalName());
             
-            // Ensure uploads directory exists
-            $uploadPath = public_path('uploads');
-            if (!File::exists($uploadPath)) {
-                File::makeDirectory($uploadPath, 0755, true);
+            try {
+                $result = cloudinary()->uploadApi()->upload($file->getRealPath(), [
+                    'folder' => 'uploads',
+                ]);
+                $validated['file_path'] = $result['secure_url'];
+            } catch (\Exception $e) {
+                return response()->json(['message' => 'Failed to upload image to Cloudinary: ' . $e->getMessage()], 500);
             }
-
-            $file->move($uploadPath, $fileName);
-            $validated['file_path'] = '/uploads/' . $fileName;
         }
 
         $media = Media::create($validated);
@@ -70,22 +69,19 @@ class MediaController extends Controller
         if ($request->hasFile('image')) {
             // Delete old file
             if ($medium->file_path) {
-                $oldFilePath = public_path($medium->file_path);
-                if (File::exists($oldFilePath)) {
-                    File::delete($oldFilePath);
-                }
+                $this->deleteMediaFile($medium->file_path);
             }
 
             $file = $request->file('image');
-            $fileName = time() . '_' . preg_replace('/\s+/', '_', $file->getClientOriginalName());
             
-            $uploadPath = public_path('uploads');
-            if (!File::exists($uploadPath)) {
-                File::makeDirectory($uploadPath, 0755, true);
+            try {
+                $result = cloudinary()->uploadApi()->upload($file->getRealPath(), [
+                    'folder' => 'uploads',
+                ]);
+                $validated['file_path'] = $result['secure_url'];
+            } catch (\Exception $e) {
+                return response()->json(['message' => 'Failed to upload image to Cloudinary: ' . $e->getMessage()], 500);
             }
-
-            $file->move($uploadPath, $fileName);
-            $validated['file_path'] = '/uploads/' . $fileName;
         }
 
         $medium->update($validated);
@@ -100,14 +96,45 @@ class MediaController extends Controller
         }
 
         if ($medium->file_path) {
-            $filePath = public_path($medium->file_path);
-            if (File::exists($filePath)) {
-                File::delete($filePath);
-            }
+            $this->deleteMediaFile($medium->file_path);
         }
 
         $medium->delete();
 
         return response()->json(['message' => 'Media deleted successfully']);
+    }
+
+    private function deleteMediaFile($filePath)
+    {
+        if (str_contains($filePath, 'cloudinary.com')) {
+            // extract public_id
+            $parts = explode('/upload/', $filePath);
+            if (count($parts) > 1) {
+                $path = $parts[1]; // e.g. v123/folder/file.jpg
+                // remove version
+                $path = preg_replace('/^v\d+\//', '', $path);
+                
+                $dir = pathinfo($path, PATHINFO_DIRNAME);
+                $filename = pathinfo($path, PATHINFO_FILENAME);
+                
+                $publicId = ($dir === '.') ? $filename : $dir . '/' . $filename;
+                
+                if (str_starts_with($publicId, './')) {
+                    $publicId = substr($publicId, 2);
+                }
+                
+                try {
+                    cloudinary()->uploadApi()->destroy($publicId);
+                } catch (\Exception $e) {
+                    // Ignore failure to delete from Cloudinary
+                }
+            }
+        } else {
+            // Local file
+            $localPath = public_path($filePath);
+            if (File::exists($localPath)) {
+                File::delete($localPath);
+            }
+        }
     }
 }

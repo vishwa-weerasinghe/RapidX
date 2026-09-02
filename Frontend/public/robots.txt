@@ -1,0 +1,21 @@
+# robots.txt — Minneriya Wild Jeep Safari
+# https://www.minneriyawildjeepsafari.com
+
+User-agent: *
+Allow: /
+Allow: /booking
+Allow: /login
+Allow: /register
+
+# Block private / admin areas
+Disallow: /admin/
+Disallow: /api/
+Disallow: /user/dashboard
+Disallow: /user/bookings
+Disallow: /user/cart
+Disallow: /payment/
+Disallow: /password-reset/
+Disallow: /forgot-password
+
+# Sitemap location
+Sitemap: https://www.minneriyawildjeepsafari.com/sitemap.xml

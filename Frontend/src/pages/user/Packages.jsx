@@ -119,7 +119,9 @@ export default function Packages() {
                 <img
                   src={
                     pkg.Image
-                      ? `http://127.0.0.1:8000/storage/${pkg.Image}`
+                      ? pkg.Image.startsWith("http")
+                        ? pkg.Image
+                        : `${import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://127.0.0.1:8000'}/storage/${pkg.Image}`
                       : "https://images.unsplash.com/photo-1549366021-9f761d450615?q=80&w=2012&auto=format&fit=crop"
                   }
                   alt={pkg.Package_Name}

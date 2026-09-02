@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import api from "../../axios";
 import { useTheme } from "../../context/ThemeContext";
+import { startPayHerePayment } from "../../utils/payhere";
 
 export default function Cart() {
   const navigate = useNavigate();
@@ -55,7 +56,9 @@ export default function Cart() {
     }
 
     try {
-      await api.delete(`/cart/${bookingId}`);
+      await api.delete(`/cart/${bookingId}`, {
+        params: { Customer_ID: activeCustomer.Customer_ID },
+      });
       setCartItems(cartItems.filter((item) => item.Booking_ID !== bookingId));
     } catch (err) {
       console.error(err);
@@ -66,21 +69,32 @@ export default function Cart() {
   const handleCheckout = async () => {
     try {
       setCheckingOut(true);
-      await api.post("/cart/checkout", {
+      const res = await api.post("/payhere/initiate", {
+        checkout_type: "cart",
         Customer_ID: activeCustomer.Customer_ID,
       });
-      alert("Checkout Successful! 🎉 Your bookings are now confirmed.");
-      if (user) {
-        navigate("/user/dashboard");
-      } else {
-        navigate("/");
+
+      const { payhere_params } = res.data;
+
+      if (payhere_params) {
+        startPayHerePayment(payhere_params, {
+          onCompleted: (completedOrderId) => {
+            navigate(`/payment/success?order_id=${completedOrderId}`);
+          },
+          onDismissed: () => {
+            setCheckingOut(false);
+          },
+          onError: (error) => {
+            setCheckingOut(false);
+            alert("Payment Error: " + error);
+          },
+        });
       }
     } catch (err) {
       console.error(err);
       alert(
-        err.response?.data?.message || "Checkout failed. Please try again.",
+        err.response?.data?.message || "Checkout failed. Please try again."
       );
-    } finally {
       setCheckingOut(false);
     }
   };

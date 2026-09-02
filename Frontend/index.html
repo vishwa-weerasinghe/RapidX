@@ -1,23 +1,188 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
-    <script>
-      (function () {
-        const saved = localStorage.getItem('theme');
-        const prefersDark = window.matchMedia(
-          '(prefers-color-scheme: dark)'
-        ).matches;
-        const theme = saved || (prefersDark ? 'dark' : 'light');
-        document.documentElement.classList.add(theme);
-      })();
-    </script>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ═══════════════════════════════════════════════
+       PRIMARY SEO META TAGS
+  ════════════════════════════════════════════════ -->
+  <title>Online Safari Booking Sri Lanka | Minneriya, Kaudulla &amp; Wasgamuwa Jeep Tours</title>
+  <meta name="description"
+    content="Book trusted Sri Lanka jeep safaris online. Experience the famous Minneriya Elephant Gathering, Kaudulla &amp; Wasgamuwa with experienced local drivers. Instant booking &amp; best rates." />
+  <meta name="keywords"
+    content="Minneriya safari booking, Sri Lanka jeep safari, Minneriya elephant gathering, Kaudulla national park safari, Wasgamuwa safari, elephant safari Sri Lanka, safari jeep hire Minneriya, online safari booking Sri Lanka" />
+  <meta name="robots" content="index, follow" />
+  <meta name="author" content="Minneriya Wild Jeep Safari" />
+  <link rel="canonical" href="https://www.minneriyawildjeepsafari.com" />
+
+  <!-- ═══════════════════════════════════════════════
+       FAVICON
+  ════════════════════════════════════════════════ -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+  <!-- ═══════════════════════════════════════════════
+       OPEN GRAPH (Facebook, WhatsApp, LinkedIn)
+  ════════════════════════════════════════════════ -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Minneriya Wild Jeep Safari" />
+  <meta property="og:title"
+    content="Online Safari Booking Sri Lanka | Minneriya, Kaudulla &amp; Wasgamuwa Jeep Tours" />
+  <meta property="og:description"
+    content="Book trusted Sri Lanka jeep safaris online. Experience the famous Minneriya Elephant Gathering, Kaudulla &amp; Wasgamuwa with experienced local drivers. Instant booking &amp; best rates." />
+  <meta property="og:url" content="https://www.minneriyawildjeepsafari.com" />
+  <meta property="og:image" content="https://www.minneriyawildjeepsafari.com/og-safari.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt"
+    content="Wild elephant herd gathering at Minneriya reservoir during sunset, with safari jeep in the background" />
+  <meta property="og:locale" content="en_US" />
+
+  <!-- ═══════════════════════════════════════════════
+       TWITTER / X CARDS
+  ════════════════════════════════════════════════ -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Online Safari Booking Sri Lanka | Minneriya Wild Jeep Safari" />
+  <meta name="twitter:description"
+    content="Book trusted Sri Lanka jeep safaris online. Minneriya Elephant Gathering, Kaudulla &amp; Wasgamuwa with experienced local drivers. Instant booking &amp; best rates." />
+  <meta name="twitter:image" content="https://www.minneriyawildjeepsafari.com/og-safari.jpg" />
+  <meta name="twitter:image:alt" content="Wild elephant herd at Minneriya National Park, Sri Lanka" />
+
+  <!-- ═══════════════════════════════════════════════
+       GOOGLE FONTS
+  ════════════════════════════════════════════════ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- ═══════════════════════════════════════════════
+       THEME INIT (prevents flash of unstyled content)
+  ════════════════════════════════════════════════ -->
+  <script>
+    (function () {
+      const saved = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = saved || (prefersDark ? 'dark' : 'light');
+      document.documentElement.classList.add(theme);
+    })();
+  </script>
+
+  <!-- ═══════════════════════════════════════════════
+       STRUCTURED DATA — JSON-LD SCHEMA.ORG
+  ════════════════════════════════════════════════ -->
+  <script type="application/ld+json">
+  [
+    {
+      "@context": "https://schema.org",
+      "@type": "TravelAgency",
+      "@id": "https://www.minneriyawildjeepsafari.com/#business",
+      "name": "Minneriya Wild Jeep Safari",
+      "alternateName": "Minneriya Wild Jeep Safari Sri Lanka",
+      "url": "https://www.minneriyawildjeepsafari.com",
+      "logo": "https://www.minneriyawildjeepsafari.com/favicon.svg",
+      "image": "https://www.minneriyawildjeepsafari.com/og-safari.jpg",
+      "description": "Professional jeep safari tours in Minneriya, Kaudulla and Wasgamuwa National Parks. Experience the famous Sri Lanka Elephant Gathering with experienced local drivers.",
+      "telephone": "+94-778902811",
+      "priceRange": "$$",
+      "currenciesAccepted": "USD",
+      "paymentAccepted": "Cash, Credit/Debit Card, Online Payment",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Habarana",
+        "addressLocality": "Habarana",
+        "addressRegion": "North Central Province",
+        "addressCountry": "LK"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 8.0003,
+        "longitude": 80.7137
+      },
+      "areaServed": [
+        "Minneriya National Park",
+        "Kaudulla National Park",
+        "Wasgamuwa National Park",
+        "Sri Lanka"
+      ],
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+          "opens": "06:00",
+          "closes": "18:00"
+        }
+      ],
+      "sameAs": [
+        "https://facebook.com/share/1AmhHo7Cg2/",
+        "https://www.instagram.com/minneriyawildjeepsafari",
+        "https://www.tripadvisor.com/Attraction_Review-g304133-d15640558-Reviews-Minneriya_Wild_Jeep_Safari-Dambulla_Central_Province.html"
+      ],
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "bestRating": "5",
+        "worstRating": "1",
+        "ratingCount": "150"
+      }
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "@id": "https://www.minneriyawildjeepsafari.com/#website",
+      "url": "https://www.minneriyawildjeepsafari.com",
+      "name": "Minneriya Wild Jeep Safari",
+      "description": "Book Sri Lanka jeep safaris online — Minneriya, Kaudulla & Wasgamuwa National Parks",
+      "inLanguage": "en",
+      "publisher": {
+        "@id": "https://www.minneriyawildjeepsafari.com/#business"
+      }
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "When is the best time to visit Minneriya for the elephant gathering?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The best time to witness the famous Minneriya Elephant Gathering is from July to October, during the dry season when hundreds of elephants gather around the reservoir. The peak gathering typically occurs in August and September."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How much does a Minneriya jeep safari cost?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Our Minneriya jeep safari packages start from $40 per adult and $20 per child (under 12). Prices include the jeep hire, experienced local driver/guide, and national park entrance fees. Book online for the best rates."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How many national parks can I visit on a safari with you?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "We operate jeep safari tours to three national parks: Minneriya National Park (famous for the Elephant Gathering), Kaudulla National Park, and Wasgamuwa National Park. We offer individual park tours or combined packages."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I book a safari online in advance?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes! You can book your Sri Lanka jeep safari instantly through our online booking system. Simply select your preferred national park, date, and number of passengers. We accept secure online payments and you will receive instant booking confirmation."
+          }
+        }
+      ]
+    }
+  ]
+  </script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
 </html>

@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import "./index.css";
 
 import App from "./App.jsx";
+import Blog from "./pages/public/Blog.jsx";
 import Register from "./pages/user/register.jsx";
 import Login from "./pages/public/login.jsx";
 import ForgotPassword from "./pages/public/ForgotPassword.jsx";
@@ -22,10 +23,13 @@ import CustomerPackages from "./pages/user/Packages.jsx";
 import Bookings from "./pages/admin/Bookings.jsx";
 import BookingForm from "./pages/admin/BookingForm.jsx";
 import MyBookings from "./pages/user/MyBookings";
+import Cancellation from "./pages/user/cancellation.jsx";
 
 import Appointments from "./pages/admin/appointment.jsx";
 import GuestBooking from "./pages/public/booking.jsx";
 import PolicyPage from "./pages/public/PolicyPage.jsx";
+import PaymentSuccess from "./pages/public/PaymentSuccess.jsx";
+import PaymentCancel from "./pages/public/PaymentCancel.jsx";
 import AddToCart from "./pages/user/Addtocart.jsx";
 import Cart from "./pages/user/Cart.jsx";
 
@@ -58,6 +62,7 @@ createRoot(document.getElementById("root")).render(
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<App />} />
+          <Route path="/blog" element={<Blog />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -67,6 +72,8 @@ createRoot(document.getElementById("root")).render(
           <Route path="/privacy-policy" element={<PolicyPage />} />
           <Route path="/terms-and-conditions" element={<PolicyPage />} />
           <Route path="/return-refund-policy" element={<PolicyPage />} />
+          <Route path="/payment/success" element={<PaymentSuccess />} />
+          <Route path="/payment/cancel" element={<PaymentCancel />} />
           <Route path="/addtocart/:id" element={<AddToCart />} />
 
           {/* Customer Routes */}
@@ -79,6 +86,7 @@ createRoot(document.getElementById("root")).render(
             <Route path="/user/packages" element={<CustomerPackages />} />
             <Route path="/user/reviews" element={<Review />} />
             <Route path="/user/bookings" element={<MyBookings />} />
+            <Route path="/user/bookings/:id/edit" element={<Cancellation />} />
             <Route path="/user/cart" element={<Cart />} />
             <Route
               path="/packages"

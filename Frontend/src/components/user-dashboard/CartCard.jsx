@@ -41,7 +41,9 @@ export function CartCard() {
   const handleRemove = async (bookingId) => {
     if (!confirm("Are you sure you want to remove this item from your cart?")) return;
     try {
-      await api.delete(`/cart/${bookingId}`);
+      await api.delete(`/cart/${bookingId}`, {
+        params: { Customer_ID: customerId },
+      });
       setCartItems((prev) => prev.filter((item) => item.Booking_ID !== bookingId));
     } catch (err) {
       console.error(err);
@@ -54,7 +56,7 @@ export function CartCard() {
   };
 
   const isDark = theme === "dark";
-  const cardClass = "card p-6";
+  const cardClass = "card p-4 sm:p-6";
   const iconBoxClass = isDark
     ? "flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-sacramento-400 to-sacramento-300 text-white"
     : "flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-sacramento to-sacramento-600 text-white";
@@ -111,7 +113,7 @@ export function CartCard() {
       </div>
 
       {cartItems.length === 0 ? (
-        <div className="px-4 py-8 text-center">
+        <div className="px-4 py-6 sm:py-8 text-center">
           <div className="mb-3 text-5xl">🛒</div>
           <p className={`text-[15px] font-medium ${mutedTextClass}`}>Your cart is empty</p>
           <p className={`mt-1 text-sm ${mutedTextClass}`}>Add some safari adventures to get started!</p>
@@ -124,7 +126,7 @@ export function CartCard() {
               const pkg = booking?.package;
 
               return (
-                <div key={item.Cart_ID} className={isDark ? "rounded-2xl border border-border-dark bg-surface p-4" : "rounded-2xl border border-border-light bg-surface-2 p-4"}>
+                <div key={item.Cart_ID} className={isDark ? "rounded-2xl border border-border-dark bg-surface p-3 sm:p-4" : "rounded-2xl border border-border-light bg-surface-2 p-3 sm:p-4"}>
                   <div className="mb-3 flex items-start justify-between">
                     <h4 className={`text-[16px] font-bold ${isDark ? "text-white" : "text-charcoal"}`}>
                       {pkg?.Package_Name || "Unknown Safari"}
@@ -138,7 +140,7 @@ export function CartCard() {
                     </button>
                   </div>
 
-                  <div className={`mb-3 grid grid-cols-2 gap-2 text-sm ${fieldTextClass}`}>
+                  <div className={`mb-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm ${fieldTextClass}`}>
                     <div className="flex items-center gap-1.5">
                       <CalendarDays size={14} className={isDark ? "text-sacramento-300" : "text-sacramento"} />
                       <span>{booking?.Booking_Date}</span>

@@ -293,10 +293,116 @@ class CartControllerTest extends TestCase
         $this->assertDatabaseMissing('carts', ['Booking_ID' => $booking->Booking_ID]);
     }
 
-    public function test_removing_nonexistent_cart_item_returns_404(): void
+    public function test_cannot_delete_non_cart_booking_via_cart_endpoint(): void
     {
-        $response = $this->deleteJson('/api/cart/99999');
+        $package  = $this->createPackage();
+        $customer = $this->createGuestCustomer();
 
-        $response->assertStatus(404);
+        // Create standard confirmed booking (not in cart)
+        $booking = Booking::create([
+            'Booking_Date'    => '2026-08-01',
+            'Pickup_Time'     => '10:00:00',
+            'Pickup_Location' => 'Colombo',
+            'No_of_adults'    => 2,
+            'No_of_child'     => 1,
+            'Payment'         => 100.00,
+            'Status'          => 'Confirmed',
+            'Customer_ID'     => $customer->Customer_ID,
+            'Package_ID'      => $package->id,
+            'Vehicle_ID'      => null,
+        ]);
+
+        $response = $this->deleteJson('/api/cart/' . $booking->Booking_ID);
+
+        $response->assertStatus(404)
+            ->assertJson(['message' => 'Cart item not found']);
+
+        // Assert booking was not deleted
+        $this->assertDatabaseHas('bookings', ['Booking_ID' => $booking->Booking_ID]);
+    }
+
+    public function test_cannot_delete_booking_whose_status_is_not_in_cart(): void
+    {
+        $package  = $this->createPackage();
+        $customer = $this->createGuestCustomer();
+
+        $booking = $this->createBookingInCart($customer->Customer_ID, $package->id, [
+            'Status' => 'Confirmed',
+        ]);
+
+        $response = $this->deleteJson('/api/cart/' . $booking->Booking_ID);
+
+        $response->assertStatus(400)
+            ->assertJson(['message' => 'Only pending cart bookings can be removed from cart']);
+
+        $this->assertDatabaseHas('bookings', ['Booking_ID' => $booking->Booking_ID]);
+    }
+
+    public function test_authenticated_user_cannot_delete_another_customers_cart_item(): void
+    {
+        $package   = $this->createPackage();
+        $customer1 = $this->createGuestCustomer(['Email' => 'owner@example.com']);
+        $customer2 = $this->createGuestCustomer(['Email' => 'attacker@example.com']);
+
+        $user2 = \App\Models\User::create([
+            'User_Name'   => 'Attacker User',
+            'Email'       => 'attacker@example.com',
+            'Password'    => bcrypt('Password123'),
+            'role'        => 'user',
+            'Customer_ID' => $customer2->Customer_ID,
+        ]);
+
+        $booking1 = $this->createBookingInCart($customer1->Customer_ID, $package->id);
+
+        $response = $this->actingAs($user2, 'sanctum')
+            ->deleteJson('/api/cart/' . $booking1->Booking_ID);
+
+        $response->assertStatus(403)
+            ->assertJson(['message' => 'Unauthorized: You do not own this cart item']);
+
+        $this->assertDatabaseHas('bookings', ['Booking_ID' => $booking1->Booking_ID]);
+        $this->assertDatabaseHas('carts', ['Booking_ID' => $booking1->Booking_ID]);
+    }
+
+    public function test_guest_request_with_mismatched_customer_id_cannot_delete_cart_item(): void
+    {
+        $package   = $this->createPackage();
+        $customer1 = $this->createGuestCustomer(['Email' => 'owner@example.com']);
+        $customer2 = $this->createGuestCustomer(['Email' => 'attacker@example.com']);
+
+        $booking1 = $this->createBookingInCart($customer1->Customer_ID, $package->id);
+
+        $response = $this->deleteJson('/api/cart/' . $booking1->Booking_ID . '?Customer_ID=' . $customer2->Customer_ID);
+
+        $response->assertStatus(403)
+            ->assertJson(['message' => 'Unauthorized: You do not own this cart item']);
+
+        $this->assertDatabaseHas('bookings', ['Booking_ID' => $booking1->Booking_ID]);
+        $this->assertDatabaseHas('carts', ['Booking_ID' => $booking1->Booking_ID]);
+    }
+
+    public function test_authenticated_user_can_delete_their_own_cart_item(): void
+    {
+        $package  = $this->createPackage();
+        $customer = $this->createGuestCustomer(['Email' => 'owner@example.com']);
+
+        $user = \App\Models\User::create([
+            'User_Name'   => 'Owner User',
+            'Email'       => 'owner@example.com',
+            'Password'    => bcrypt('Password123'),
+            'role'        => 'user',
+            'Customer_ID' => $customer->Customer_ID,
+        ]);
+
+        $booking = $this->createBookingInCart($customer->Customer_ID, $package->id);
+
+        $response = $this->actingAs($user, 'sanctum')
+            ->deleteJson('/api/cart/' . $booking->Booking_ID);
+
+        $response->assertStatus(200)
+            ->assertJson(['message' => 'Item removed from cart successfully']);
+
+        $this->assertDatabaseMissing('bookings', ['Booking_ID' => $booking->Booking_ID]);
+        $this->assertDatabaseMissing('carts', ['Booking_ID' => $booking->Booking_ID]);
     }
 }

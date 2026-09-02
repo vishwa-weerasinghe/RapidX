@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import api from "../axios";
+import logoImg from "../assets/logo.jpg";
 
 import {
   LayoutDashboard,
@@ -12,6 +13,7 @@ import {
   Star,
   ShoppingCart,
   LogOut,
+  ArrowLeft,
 } from "lucide-react";
 
 const adminLinks = [
@@ -40,25 +42,28 @@ const customerLinks = [
 export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
   const normalizedRole = role?.toLowerCase();
   const links = normalizedRole === "customer" ? customerLinks : adminLinks;
-
-  const title =
-    normalizedRole === "customer"
-      ? "Safari Customer"
-      : "Safari Admin";
-
   const navigate = useNavigate();
-
-  const [loading, setLoading] = useState(false);
 
   const [unreadBookings, setUnreadBookings] = useState(0);
   const [unreadReviews, setUnreadReviews] = useState(0);
+  const [unreadAppointments, setUnreadAppointments] = useState(0);
 
   useEffect(() => {
     if (normalizedRole !== "admin") return;
 
-    api.get("/admin/bookings/unread-count")
-      .then((response) => setUnreadBookings(response.data.count))
-      .catch(console.error);
+    const fetchUnreadBookings = async () => {
+      try {
+        const response = await api.get("/admin/bookings/unread-count");
+        setUnreadBookings(response.data.count);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchUnreadBookings();
+    const interval = setInterval(fetchUnreadBookings, 5000);
+
+    return () => clearInterval(interval);
   }, [normalizedRole]);
 
   useEffect(() => {
@@ -82,21 +87,44 @@ export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
     return () => clearInterval(interval);
   }, [normalizedRole]);
 
+  useEffect(() => {
+    if (normalizedRole !== "admin") return;
 
-  const handleBookingsClick = async () => {
-    await api.post("/admin/bookings/mark-seen");
-    setUnreadBookings(0);
-  };
+    const currentMonth = () => {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    };
+
+    const fetchUnreadAppointments = async () => {
+      try {
+        const response = await api.get("/appointments", { params: { month: currentMonth() } });
+        const appointments = response.data || [];
+        const storedLastId = parseInt(localStorage.getItem("lastSeenAppointmentId") || "0", 10);
+        const unseenCount = appointments.filter((a) => a.Booking_ID > storedLastId).length;
+        setUnreadAppointments(unseenCount);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchUnreadAppointments();
+    const interval = setInterval(fetchUnreadAppointments, 5000);
+
+    return () => clearInterval(interval);
+  }, [normalizedRole]);
+
 
   return (
     <aside
       className={`
         fixed md:sticky
-        top-0 left-0
+        top-16 md:top-0
+        left-0
         z-50
         w-72
-        h-screen
+        h-[calc(100dvh-4rem)] md:h-screen
         overflow-y-auto
+        overscroll-contain
         flex
         flex-col
         justify-between
@@ -126,27 +154,33 @@ export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
     >
       {/* HEADER */}
 
-      <div>
+      <div className="min-h-full">
 
-        <div className="p-6 border-b border-white/20">
+        <div className="relative p-6 border-b border-white/20">
+
+          <button
+            onClick={() => {
+              navigate(-1);
+              if (typeof setIsOpen === "function") {
+                setIsOpen(false);
+              }
+            }}
+            className="absolute left-4 top-4 md:hidden p-2 rounded-lg text-white/90 hover:bg-white/15 transition-colors"
+            title="Go back"
+            aria-label="Go back"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
 
           <div className="flex flex-col items-center">
 
-            <img
-              src="https://minneriyawildjeepsafari.com/wp-content/uploads/2025/08/lgo.jpg"
-              alt="Wild Safari"
-              className="
-                h-20
-                w-20
-                rounded-full
-                object-contain
-
-                border-4
-                border-white
-                shadow-xl
-                bg-white
-              "
-            />
+            <div className="relative flex items-center justify-center transition-all duration-500 group-hover:scale-105 group-hover:shadow-[0_8px_30px_-4px_rgba(46,125,50,0.3)] rounded-full">
+              <img
+                src={logoImg}
+                alt="Minneriya Wild Jeep Safari"
+                className="h-14 sm:h-16 md:h-20 w-auto object-contain rounded-full"
+              />
+            </div>
 
             <h2 className="mt-4 text-2xl font-bold tracking-wide">
               Wild Safari
@@ -173,11 +207,6 @@ export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
               <NavLink
                 key={link.to}
                 to={link.to}
-                onClick={
-                  link.label === "Bookings"
-                    ? handleBookingsClick
-                      : undefined
-                }
                 className={({ isActive }) =>
                   `
                   flex
@@ -238,6 +267,12 @@ export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
                 {link.label === "Reviews" && normalizedRole === "admin" && unreadReviews > 0 && (
                   <span className="ml-auto min-w-5 rounded-full bg-red-500 px-1.5 py-0.5 text-center text-xs font-bold text-white">
                     {unreadReviews}
+                  </span>
+                )}
+
+                {link.label === "Appointments" && normalizedRole === "admin" && unreadAppointments > 0 && (
+                  <span className="ml-auto min-w-5 rounded-full bg-red-500 px-1.5 py-0.5 text-center text-xs font-bold text-white">
+                    {unreadAppointments}
                   </span>
                 )}
 

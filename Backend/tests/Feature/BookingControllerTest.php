@@ -87,8 +87,14 @@ class BookingControllerTest extends TestCase
             'Customer_ID' => $customer->Customer_ID,
             'Package_ID' => $package->id,
         ]);
+        $admin = User::create([
+            'User_Name' => 'Admin User',
+            'Email' => fake()->unique()->safeEmail(),
+            'Password' => bcrypt('Password123'),
+            'role' => 'admin',
+        ]);
 
-        $response = $this->getJson('/api/bookings');
+        $response = $this->actingAs($admin, 'sanctum')->getJson('/api/bookings');
 
         $response->assertStatus(200)
             ->assertJsonCount(1)
@@ -137,9 +143,16 @@ class BookingControllerTest extends TestCase
     public function test_booking_can_be_created_and_persisted_in_database(): void
     {
         $customer = $this->createCustomer();
+        $user = User::create([
+            'User_Name' => 'Test User',
+            'Email' => $customer->Email,
+            'Password' => bcrypt('Password123'),
+            'role' => 'user',
+            'Customer_ID' => $customer->Customer_ID,
+        ]);
         $package = $this->createPackage();
 
-        $response = $this->postJson('/api/bookings', [
+        $response = $this->actingAs($user, 'sanctum')->postJson('/api/bookings', [
             'Booking_Date' => '2026-07-14',
             'Pickup_Time' => '13:00:00',
             'Area' => 'Habarana',
@@ -158,7 +171,7 @@ class BookingControllerTest extends TestCase
             'Pickup_Location' => 'Negombo',
             'Customer_ID' => $customer->Customer_ID,
             'Package_ID' => $package->id,
-            'Status' => 'pending',
+            'Status' => 'Pending',
             'Vehicle_ID' => null,
         ]);
     }
@@ -195,6 +208,37 @@ class BookingControllerTest extends TestCase
             'Pickup_Location' => 'Ella',
             'Package_ID' => $package->id,
             'Status' => 'Confirmed',
+        ]);
+    }
+
+    public function test_admin_created_booking_has_an_admin_placement_notification(): void
+    {
+        $admin = User::create([
+            'User_Name' => 'Admin User',
+            'Email' => fake()->unique()->safeEmail(),
+            'Password' => bcrypt('Password123'),
+            'role' => 'admin',
+        ]);
+        $customer = $this->createCustomer();
+        $package = $this->createPackage();
+
+        $this->actingAs($admin, 'sanctum')
+            ->postJson('/api/bookings', [
+                'Booking_Date' => '2026-07-16',
+                'Pickup_Time' => '13:00:00',
+                'Area' => 'Habarana',
+                'Pickup_Location' => 'Negombo',
+                'No_of_adults' => 2,
+                'No_of_child' => 0,
+                'Customer_ID' => $customer->Customer_ID,
+                'Package_ID' => $package->id,
+                'Created_By_Admin' => true,
+            ])
+            ->assertStatus(200);
+
+        $this->assertDatabaseHas('bookings', [
+            'Customer_ID' => $customer->Customer_ID,
+            'Admin_Message' => 'New booking successfully placed by you.',
         ]);
     }
 
@@ -239,8 +283,14 @@ class BookingControllerTest extends TestCase
     public function test_show_returns_a_single_booking(): void
     {
         $booking = $this->createBooking();
+        $admin = User::create([
+            'User_Name' => 'Admin User',
+            'Email' => fake()->unique()->safeEmail(),
+            'Password' => bcrypt('Password123'),
+            'role' => 'admin',
+        ]);
 
-        $response = $this->getJson('/api/bookings/' . $booking->Booking_ID);
+        $response = $this->actingAs($admin, 'sanctum')->getJson('/api/bookings/' . $booking->Booking_ID);
 
         $response->assertStatus(200)
             ->assertJsonPath('Booking_ID', $booking->Booking_ID)
@@ -250,8 +300,14 @@ class BookingControllerTest extends TestCase
     public function test_update_booking_changes_existing_values_and_persists_them(): void
     {
         $booking = $this->createBooking();
+        $admin = User::create([
+            'User_Name' => 'Admin User',
+            'Email' => fake()->unique()->safeEmail(),
+            'Password' => bcrypt('Password123'),
+            'role' => 'admin',
+        ]);
 
-        $response = $this->putJson('/api/bookings/' . $booking->Booking_ID, [
+        $response = $this->actingAs($admin, 'sanctum')->putJson('/api/bookings/' . $booking->Booking_ID, [
             'Pickup_Location' => 'Matara',
             'Payment' => 2500,
             'Status' => 'Confirmed',
@@ -271,13 +327,130 @@ class BookingControllerTest extends TestCase
 
     public function test_destroy_deletes_the_booking_from_the_database(): void
     {
+        $admin = User::create([
+            'User_Name' => 'Admin User',
+            'Email' => fake()->unique()->safeEmail(),
+            'Password' => bcrypt('Password123'),
+            'role' => 'admin',
+        ]);
         $booking = $this->createBooking();
 
-        $response = $this->deleteJson('/api/bookings/' . $booking->Booking_ID);
+        $response = $this->actingAs($admin, 'sanctum')
+            ->deleteJson('/api/bookings/' . $booking->Booking_ID);
 
         $response->assertStatus(200)
-            ->assertJson(['message' => 'Booking deleted successfully']);
+            ->assertJson(['message' => 'Booking cancelled successfully']);
 
-        $this->assertDatabaseMissing('bookings', ['Booking_ID' => $booking->Booking_ID]);
+        $this->assertDatabaseHas('bookings', [
+            'Booking_ID' => $booking->Booking_ID,
+            'Status' => 'Cancelled',
+            'Customer_Seen' => false,
+            'Customer_Message' => 'Your booking was cancelled by an administrator.',
+        ]);
+    }
+
+    public function test_customer_can_view_and_clear_booking_notifications(): void
+    {
+        $customer = $this->createCustomer();
+        $booking = $this->createBooking($customer->Customer_ID);
+        $booking->update([
+            'Status' => 'Cancelled',
+            'Customer_Seen' => false,
+            'Customer_Message' => 'Your booking was cancelled by an administrator.',
+        ]);
+        $user = User::create([
+            'User_Name' => 'Customer User',
+            'Email' => fake()->unique()->safeEmail(),
+            'Password' => bcrypt('Password123'),
+            'role' => 'user',
+            'Customer_ID' => $customer->Customer_ID,
+        ]);
+
+        $this->actingAs($user, 'sanctum')
+            ->getJson('/api/customer/' . $customer->Customer_ID . '/booking-notifications')
+            ->assertStatus(200)
+            ->assertJsonPath('0.Booking_ID', $booking->Booking_ID)
+            ->assertJsonPath('0.Status', 'Cancelled');
+
+        $this->actingAs($user, 'sanctum')
+            ->postJson('/api/customer/' . $customer->Customer_ID . '/booking-notifications/mark-seen')
+            ->assertStatus(200);
+
+        $this->assertDatabaseHas('bookings', [
+            'Booking_ID' => $booking->Booking_ID,
+            'Customer_Seen' => true,
+        ]);
+
+        $this->actingAs($user, 'sanctum')
+            ->getJson('/api/customer/' . $customer->Customer_ID . '/booking-notifications')
+            ->assertStatus(200)
+            ->assertExactJson([]);
+    }
+
+    public function test_customer_cancellation_notifies_admin(): void
+    {
+        $booking = $this->createBooking();
+        $customerUser = User::create([
+            'User_Name' => 'Test Customer',
+            'Email' => fake()->unique()->safeEmail(),
+            'Password' => bcrypt('Password123'),
+            'role' => 'user',
+            'Customer_ID' => $booking->Customer_ID,
+        ]);
+
+        $this->actingAs($customerUser, 'sanctum')
+            ->patchJson('/api/user/bookings/' . $booking->Booking_ID . '/cancel')
+            ->assertStatus(200)
+            ->assertJsonPath('booking.Status', 'Cancelled');
+
+        $this->assertDatabaseHas('bookings', [
+            'Booking_ID' => $booking->Booking_ID,
+            'Status' => 'Cancelled',
+            'Admin_Seen' => false,
+            'Admin_Message' => 'Customer cancelled this booking.',
+        ]);
+    }
+
+    public function test_admin_notifications_include_new_and_customer_cancelled_bookings(): void
+    {
+        $admin = User::create([
+            'User_Name' => 'Admin User',
+            'Email' => fake()->unique()->safeEmail(),
+            'Password' => bcrypt('Password123'),
+            'role' => 'admin',
+        ]);
+        $newBooking = $this->createBooking();
+        $newBooking->update([
+            'Admin_Seen' => false,
+            'Admin_Message' => 'A new booking has been placed by a customer.',
+        ]);
+        $cancelledBooking = $this->createBooking();
+        $cancelledBooking->update([
+            'Status' => 'Cancelled',
+            'Admin_Seen' => false,
+            'Admin_Message' => 'Customer cancelled this booking.',
+        ]);
+        $seenBooking = $this->createBooking();
+        $seenBooking->update([
+            'Admin_Seen' => true,
+            'Admin_Message' => 'An older booking notification.',
+        ]);
+
+        $response = $this->actingAs($admin, 'sanctum')
+            ->getJson('/api/admin/bookings/notifications')
+            ->assertStatus(200)
+            ->assertJsonFragment([
+                'Booking_ID' => $newBooking->Booking_ID,
+                'Admin_Message' => 'A new booking has been placed by a customer.',
+            ])
+            ->assertJsonFragment([
+                'Booking_ID' => $cancelledBooking->Booking_ID,
+                'Status' => 'Cancelled',
+                'Admin_Message' => 'Customer cancelled this booking.',
+            ]);
+
+        $response->assertJsonMissing([
+            'Booking_ID' => $seenBooking->Booking_ID,
+        ]);
     }
 }

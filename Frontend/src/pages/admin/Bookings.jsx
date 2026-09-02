@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import api from "../../axios";
 import { useNavigate } from "react-router-dom";
 import { pickupTimeOptions } from "../../constants/pickupTimeOptions";
@@ -21,6 +21,32 @@ const emptyCreateForm = {
   Status: "Confirmed",
 };
 
+// ── Multi-vehicle assignment helpers ────────────────────────────────────────
+// One vehicle covers up to 6 passengers:
+//   <= 6 passengers  → 1 vehicle
+//   > 6 & <= 12      → 2 vehicles
+//   > 12 & <= 18     → 3 vehicles ... and so on.
+const PASSENGERS_PER_VEHICLE = 6;
+
+const getPassengerTotal = (booking) =>
+  Number(booking?.No_of_adults || 0) + Number(booking?.No_of_child || 0);
+
+const calculateRequiredVehicles = (booking) => {
+  const passengers = getPassengerTotal(booking);
+  if (passengers <= 0) return 1;
+  return Math.ceil(passengers / PASSENGERS_PER_VEHICLE);
+};
+
+const getAssignedVehicles = (booking) => {
+  const list = Array.isArray(booking?.vehicles) ? booking.vehicles.filter(Boolean) : [];
+  if (list.length > 0) return list;
+  // Fall back to the legacy single-vehicle column for older bookings.
+  return booking?.vehicle ? [booking.vehicle] : [];
+};
+
+const isUnseenAdminBooking = (booking) =>
+  booking?.Admin_Seen === false || booking?.Admin_Seen === 0 || booking?.Admin_Seen === "0";
+
 export default function Bookings() {
   const [bookings, setBookings] = useState([]);
   const [vehicles, setVehicles] = useState([]);
@@ -31,12 +57,40 @@ export default function Bookings() {
   const [creating, setCreating] = useState(false);
   const [createForm, setCreateForm] = useState(emptyCreateForm);
   const [selectedPackage, setSelectedPackage] = useState(null);
+  const [newBookingIds, setNewBookingIds] = useState(new Set());
+  const [notificationBookingIds, setNotificationBookingIds] = useState(new Set());
+  const [showNewOnly, setShowNewOnly] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [assignmentModal, setAssignmentModal] = useState(null);
+  const [savingAssignment, setSavingAssignment] = useState(false);
+  const bookingsRef = useRef(bookings);
 
   const navigate = useNavigate();
+
+  const getBookingId = (booking) => Number(booking?.Booking_ID || 0);
+
+  useEffect(() => {
+    bookingsRef.current = bookings;
+  }, [bookings]);
 
   useEffect(() => {
     fetchData();
     fetchPackages();
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      api.get("/bookings").then((response) => {
+        const latest = response.data || [];
+        setBookings(latest);
+        setNewBookingIds(new Set(
+          latest.filter(isUnseenAdminBooking).map(getBookingId)
+        ));
+      }).catch(() => { });
+
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const fetchData = async () => {
@@ -48,6 +102,11 @@ export default function Bookings() {
 
       setBookings(bookingsResponse.data);
       setVehicles(vehiclesResponse.data);
+      setNewBookingIds(new Set(
+        bookingsResponse.data
+          .filter(isUnseenAdminBooking)
+          .map(getBookingId)
+      ));
     } catch (err) {
       console.error(err);
       alert("Failed to load bookings.");
@@ -70,16 +129,53 @@ export default function Bookings() {
     }
   };
 
-  const handleVehicleChange = async (bookingId, vehicleId) => {
+  const openAssignModal = (booking) => {
+    const required = calculateRequiredVehicles(booking);
+    const alreadyAssigned = getAssignedVehicles(booking).map((vehicle) => String(vehicle.Vehicle_ID));
+
+    setAssignmentModal({
+      booking,
+      selections: Array.from({ length: required }, (_, index) => alreadyAssigned[index] ?? ""),
+    });
+  };
+
+  const handleAssignmentSlotChange = (slotIndex, value) => {
+    setAssignmentModal((prev) => {
+      const selections = [...prev.selections];
+      selections[slotIndex] = value;
+      return { ...prev, selections };
+    });
+  };
+
+  const handleSaveAssignment = async () => {
+    const { booking, selections } = assignmentModal;
+    const required = selections.length;
+    const chosen = selections.filter(Boolean);
+
+    if (chosen.length < required) {
+      alert(`This booking needs ${required} vehicle(s). Please select all ${required}.`);
+      return;
+    }
+
+    if (new Set(chosen).size !== chosen.length) {
+      alert("The same vehicle is selected more than once. Please pick different vehicles.");
+      return;
+    }
+
     try {
-      await api.put(`/bookings/${bookingId}`, {
-        Vehicle_ID: vehicleId || null,
+      setSavingAssignment(true);
+      await api.put(`/bookings/${booking.Booking_ID}/vehicles`, {
+        Vehicle_IDs: chosen.map(Number),
+        Required_Count: required,
       });
 
+      setAssignmentModal(null);
       await fetchData();
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || "Failed to update vehicle assignment.");
+      alert(err.response?.data?.message || "Failed to assign vehicles.");
+    } finally {
+      setSavingAssignment(false);
     }
   };
 
@@ -90,15 +186,15 @@ export default function Bookings() {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this booking?")) return;
+    if (!window.confirm("Are you sure you want to cancel this booking?")) return;
 
     try {
-      await api.delete(`/bookings/${id}`);
-      alert("Booking deleted successfully.");
+      const response = await api.delete(`/bookings/${id}`);
+      alert(`Booking cancelled successfully. Applicable refund: ${response.data.refund_percentage}%`);
       fetchData();
     } catch (err) {
       console.error(err);
-      alert("Failed to delete booking.");
+      alert(err.response?.data?.message || "Failed to cancel booking.");
     }
   };
 
@@ -140,6 +236,7 @@ export default function Bookings() {
       Package_ID: createForm.Package_ID,
       Payment: calculateCreatePayment(),
       Status: createForm.Status,
+      Created_By_Admin: true,
     };
 
     if (createForm.Customer_ID) {
@@ -168,11 +265,34 @@ export default function Bookings() {
     }
   };
 
+  const handleBellClick = async () => {
+    if (showNotifications) {
+      setShowNotifications(false);
+      return;
+    }
+
+    try {
+      const response = await api.get("/admin/bookings/notifications");
+      const notifications = response.data || [];
+      setBookings((current) => {
+        const notificationById = new Map(notifications.map((booking) => [getBookingId(booking), booking]));
+        return current.map((booking) => notificationById.get(getBookingId(booking)) || booking);
+      });
+      setNotificationBookingIds(new Set(notifications.map(getBookingId)));
+      setNewBookingIds(new Set());
+      setShowNotifications(true);
+      await api.post("/admin/bookings/mark-seen");
+    } catch (err) {
+      console.error(err);
+      setShowNotifications(true);
+    }
+  };
+
   const filteredBookings = bookings.filter((booking) => {
     const query = search.trim().toLowerCase();
     const customerName = `${booking.customer?.First_Name ?? ""} ${booking.customer?.Last_Name ?? ""}`;
 
-    return (
+    const matchesSearch = (
       String(booking.Booking_ID ?? "").toLowerCase().includes(query) ||
       customerName.toLowerCase().includes(query) ||
       booking.package?.Package_Name?.toLowerCase().includes(query) ||
@@ -181,6 +301,9 @@ export default function Bookings() {
       booking.Pickup_Location?.toLowerCase().includes(query) ||
       booking.Status?.toLowerCase().includes(query)
     );
+
+    if (!showNewOnly) return matchesSearch;
+    return matchesSearch && notificationBookingIds.has(getBookingId(booking));
   });
 
   if (loading) {
@@ -194,18 +317,77 @@ export default function Bookings() {
   return (
     <div className="p-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
-        <h1 className="text-3xl font-bold text-sacramento">Booking Management</h1>
-        <button
-          type="button"
-          onClick={() => navigate("/booking")}
-          className="btn-primary"
-        >
-          + Add Booking
-        </button>
+       <h1 className="text-3xl md:text-4xl font-black text-[#29AB87] dark:text-white tracking-tight">
+          Booking Management
+      </h1>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={handleBellClick}
+            className="relative rounded-full card p-2 shadow-sm hover:bg-offwhite-100 dark:hover:bg-surface-2"
+            title="Booking notifications"
+            aria-label="Booking notifications"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+            {newBookingIds.size > 0 && (
+              <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-bold text-white">
+                {newBookingIds.size}
+              </span>
+            )}
+          </button>
+          {showNotifications && (
+            <div className="absolute right-28 top-20 z-50 w-96 max-w-[calc(100vw-2rem)] rounded-xl border border-border-light bg-white p-3 shadow-xl dark:border-border-dark dark:bg-bg-dark">
+              <div className="mb-2 flex items-center justify-between">
+                <h2 className="text-sm font-bold text-charcoal dark:text-white">Booking notifications</h2>
+                <button
+                  type="button"
+                  onClick={() => setShowNotifications(false)}
+                  className="rounded-md px-2 py-1 text-lg leading-none text-muted hover:bg-offwhite-100 dark:hover:bg-surface-2"
+                  aria-label="Close booking notifications"
+                  title="Close"
+                >
+                  x
+                </button>
+              </div>
+              {notificationBookingIds.size === 0 ? (
+                <p className="py-3 text-sm text-muted">No new booking notifications.</p>
+              ) : (
+                <div className="max-h-72 space-y-2 overflow-y-auto">
+                  {bookings
+                    .filter((booking) => notificationBookingIds.has(getBookingId(booking)))
+                    .map((booking) => (
+                      <button
+                        type="button"
+                        key={booking.Booking_ID}
+                        onClick={() => setShowNotifications(false)}
+                        className="w-full rounded-lg border border-border-light p-3 text-left hover:bg-offwhite-100 dark:border-border-dark dark:hover:bg-surface-2"
+                      >
+                        <p className="text-xs font-bold text-sacramento">
+                          {booking.package?.Package_Name || "Safari package"} - {booking.Status}
+                        </p>
+                        <p className="mt-1 text-sm text-charcoal dark:text-white">
+                          {booking.Admin_Message || "A new booking has been received."}
+                        </p>
+                        <p className="mt-1 text-xs text-muted">
+                          Safari date: {booking.Booking_Date}
+                        </p>
+                      </button>
+                    ))}
+                </div>
+              )}
+            </div>
+          )}
+          <button type="button" onClick={() => navigate("/booking")} className="btn-primary">
+            + Add Booking
+          </button>
+        </div>
       </div>
 
-
-      
+      {showNewOnly && newBookingIds.size === 0 && (
+        <p className="mb-6 text-sm text-muted">No new bookings to show.</p>
+      )}
 
       <div className="flex flex-col gap-4 md:flex-row md:items-center mb-6">
         <input
@@ -217,6 +399,85 @@ export default function Bookings() {
           className="form-input w-full max-w-xl"
         />
       </div>
+
+      {assignmentModal && (() => {
+        const modalBooking = assignmentModal.booking;
+        const selections = assignmentModal.selections;
+        const required = selections.length;
+        const allSlotsFilled = selections.every(Boolean);
+
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div className="w-full max-w-lg rounded-xl card p-6 shadow-xl max-h-[90vh] overflow-y-auto">
+              <h2 className="text-xl font-bold text-charcoal dark:text-white">Assign Vehicles</h2>
+              <p className="text-sm text-muted mb-4">
+                Booking #{modalBooking.Booking_ID} ·{" "}
+                {modalBooking.customer
+                  ? `${modalBooking.customer.First_Name} ${modalBooking.customer.Last_Name}`
+                  : "Guest"}
+              </p>
+
+              <div className="rounded-lg bg-sacramento/10 p-3 text-sm text-sacramento mb-4">
+                Passengers: <strong>{getPassengerTotal(modalBooking)}</strong> ({modalBooking.No_of_adults} adults +{" "}
+                {modalBooking.No_of_child} children) →{" "}
+                <strong>
+                  {required} vehicle{required > 1 ? "s" : ""} required
+                </strong>{" "}
+                (max {PASSENGERS_PER_VEHICLE} passengers per vehicle)
+              </div>
+
+              <div className="space-y-3">
+                {selections.map((selectedValue, slotIndex) => {
+                  const takenElsewhere = new Set(
+                    selections.filter((value, otherIndex) => otherIndex !== slotIndex && value)
+                  );
+
+                  return (
+                    <div key={slotIndex}>
+                      <label className="mb-1 block text-sm font-semibold text-charcoal dark:text-white">
+                        Vehicle {slotIndex + 1} of {required}
+                      </label>
+                      <select
+                        value={selectedValue}
+                        onChange={(event) => handleAssignmentSlotChange(slotIndex, event.target.value)}
+                        className="form-input"
+                        aria-label={`Vehicle ${slotIndex + 1} of ${required} for booking ${modalBooking.Booking_ID}`}
+                      >
+                        <option value="">Select a vehicle…</option>
+                        {vehicles.map((vehicle) => (
+                          <option
+                            key={vehicle.Vehicle_ID}
+                            value={vehicle.Vehicle_ID}
+                            disabled={takenElsewhere.has(String(vehicle.Vehicle_ID))}
+                          >
+                            {vehicle.Vehicle_No} ({vehicle.Vehicle_Type}, {vehicle.No_of_Seats} seats)
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="mt-6 flex justify-end gap-3">
+                <button type="button" onClick={() => setAssignmentModal(null)} className="btn-secondary">
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveAssignment}
+                  disabled={!allSlotsFilled || savingAssignment}
+                  className="btn-primary disabled:opacity-60"
+                >
+                  {savingAssignment
+                    ? "Saving..."
+                    : `Assign ${required} Vehicle${required > 1 ? "s" : ""}`}
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -489,27 +750,63 @@ export default function Bookings() {
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <select
-                      value={booking.Vehicle_ID ?? ""}
-                      onChange={(event) => handleVehicleChange(booking.Booking_ID, event.target.value)}
-                      className="form-input min-w-40"
-                      aria-label={`Vehicle for booking ${booking.Booking_ID}`}
-                    >
-                      <option value="">Not assigned</option>
-                      {vehicles.map((vehicle) => (
-                        <option key={vehicle.Vehicle_ID} value={vehicle.Vehicle_ID}>
-                          {vehicle.Vehicle_No} ({vehicle.Vehicle_Type})
-                        </option>
-                      ))}
-                    </select>
+                    {(() => {
+                      const assigned = getAssignedVehicles(booking);
+                      const required = calculateRequiredVehicles(booking);
+                      const fullyAssigned = assigned.length >= required;
+
+                      return (
+                        <div className="min-w-[11rem] space-y-2">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            {assigned.length === 0 ? (
+                              <span className="text-sm text-muted">Not assigned</span>
+                            ) : (
+                              assigned.map((vehicle) => (
+                                <span
+                                  key={vehicle.Vehicle_ID}
+                                  className="rounded-full bg-sacramento/10 px-2 py-0.5 text-xs font-semibold text-sacramento dark:bg-sacramento/20 dark:text-sacramento-300"
+                                >
+                                  {vehicle.Vehicle_No}
+                                </span>
+                              ))
+                            )}
+                            <span
+                              className={`text-xs font-bold ${
+                                fullyAssigned
+                                  ? "text-emerald-600 dark:text-emerald-400"
+                                  : "text-amber-600 dark:text-amber-400"
+                              }`}
+                            >
+                              {assigned.length}/{required}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => openAssignModal(booking)}
+                            className="text-sm font-medium text-sacramento hover:underline"
+                            aria-label={`Assign vehicles for booking ${booking.Booking_ID}`}
+                          >
+                            Assign vehicles
+                          </button>
+                        </div>
+                      );
+                    })()}
                   </td>
-                  <td className="px-4 py-3 text-charcoal/80 dark:text-white/80">{booking.vehicle?.driver?.Driver_Name || "—"}</td>
+                  <td className="px-4 py-3 text-charcoal/80 dark:text-white/80">
+                    {(() => {
+                      const driverNames = getAssignedVehicles(booking)
+                        .map((vehicle) => vehicle?.driver?.Driver_Name)
+                        .filter(Boolean);
+
+                      return driverNames.length > 0 ? driverNames.join(", ") : "—";
+                    })()}
+                  </td>
                   <td className="px-4 py-3 text-center">
                     <button onClick={() => handleEdit(booking)} className="text-sacramento hover:underline">
                       Edit
                     </button>
                     <button onClick={() => handleDelete(booking.Booking_ID)} className="ml-3 text-red-600 hover:underline dark:text-red-400">
-                      Delete
+                      Cancel
                     </button>
                   </td>
                 </tr>

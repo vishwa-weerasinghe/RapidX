@@ -21,7 +21,7 @@ class BookingController extends Controller
     public function index()
     {
         return response()->json(
-            Booking::with(['customer', 'package', 'vehicle.driver'])->latest()->get()
+            Booking::with(['customer', 'package', 'vehicle.driver', 'vehicles.driver'])->latest()->get()
         );
     }
 
@@ -31,7 +31,7 @@ class BookingController extends Controller
     public function userBookings($customerId)
     {
         return response()->json(
-            Booking::with(['package', 'vehicle'])
+            Booking::with(['package', 'vehicle.driver', 'vehicles.driver'])
                 ->where('Customer_ID', $customerId)
                 ->latest()
                 ->get()
@@ -54,8 +54,13 @@ class BookingController extends Controller
             'Package_ID' => 'required',
         ]);
 
-        $customerId = $request->Customer_ID;
+        $user = request()->user('sanctum') ?? auth('sanctum')->user();
+        $customerId = $user ? $request->Customer_ID : null;
         $isGuestBooking = !$customerId;
+        // The public booking endpoint is intentionally usable without a login,
+        // so also accept the explicit flag sent by the admin booking screen.
+        $createdByAdmin = $this->isAdmin($request->user('sanctum') ?? $request->user())
+            || $request->boolean('Created_By_Admin');
 
         if (!$customerId) {
             $customer = \App\Models\Customer::create([
@@ -79,11 +84,14 @@ class BookingController extends Controller
             'No_of_adults' => $request->No_of_adults,
             'No_of_child' => $request->No_of_child,
             'Payment' => $request->Payment ?? 0,
-            'Status' => $isGuestBooking ? 'Confirmed' : 'pending',
+            'Status' => $isGuestBooking ? 'Confirmed' : 'Pending',
             'Customer_ID' => $customerId,
             'Package_ID' => $request->Package_ID,
             'Vehicle_ID' => $request->Vehicle_ID ?? null,
             'Admin_Seen' => false,
+            'Admin_Message' => $createdByAdmin
+                ? 'New booking successfully placed by you.'
+                : 'A new booking has been placed by a customer.',
         ]);
 
         return response()->json([
@@ -97,7 +105,7 @@ class BookingController extends Controller
     // =========================
     public function show($id)
     {
-        return Booking::with(['customer','package','vehicle'])
+        return Booking::with(['customer', 'package', 'vehicle.driver', 'vehicles.driver'])
             ->findOrFail($id);
     }
 
@@ -128,29 +136,121 @@ class BookingController extends Controller
             'Vehicle_ID'
         ]));
 
+        // Keep the multi-vehicle pivot in sync whenever the single Vehicle_ID
+        // column is changed through this generic endpoint.
+        if ($request->has('Vehicle_ID')) {
+            $singleVehicleId = $request->input('Vehicle_ID');
+            $booking->vehicles()->sync($singleVehicleId ? [$singleVehicleId] : []);
+        }
+
         return response()->json([
             'message' => 'Booking updated successfully',
             'booking' => $booking
         ]);
     }
 
-    public function assignVehicle(Request $request, $id)
+    // =========================
+    // CANCEL BOOKING (CUSTOMER SELF-SERVICE)
+    // Applies the refund policy shown on the customer cancellation page
+    // (Frontend/src/pages/user/cancellation.jsx):
+    //   - More than 7 days before the tour date: 100% refund
+    //   - 3-7 days before the tour date: 50% refund
+    //   - Less than 3 days before the tour date (or no-show): no refund
+    // =========================
+    public function cancel(Request $request, $id)
+    {
+        $booking = Booking::with('payment')->findOrFail($id);
+
+        if (strtolower((string) $booking->Status) === 'cancelled') {
+            return response()->json([
+                'message' => 'This booking is already cancelled.',
+            ], 422);
+        }
+
+        // Ownership check
+        $user = $request->user('sanctum') ?? auth('sanctum')->user();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated. Only registered users can cancel bookings.'], 401);
+        }
+
+        if (!$this->isAdmin($user) && (int) $user->Customer_ID !== (int) $booking->Customer_ID) {
+            return response()->json(['message' => 'Unauthorized. You can only cancel your own bookings.'], 403);
+        }
+
+        // Trigger the real PayHere refund, mirroring the admin-delete path.
+        // It accurately calculates the tiered percentage based on dates,
+        // checks if the booking was actually paid, and processes the refund.
+        $refundPercentage = $this->processRefund($booking);
+
+        $booking->update([
+            'Status' => 'Cancelled',
+            'Admin_Seen' => false,
+            'Admin_Message' => 'Customer cancelled this booking.',
+        ]);
+
+        return response()->json([
+            'message' => 'Booking cancelled successfully',
+            'booking' => $booking,
+            'refund_percentage' => $refundPercentage,
+        ]);
+    }
+
+    // =========================
+    // ASSIGN VEHICLE(S) (ADMIN)
+    // Supports assigning multiple vehicles to one booking. The number of
+    // vehicles required is derived from the passenger count (max 6 passengers
+    // per vehicle) on the frontend and double-checked here.
+    // =========================
+    public function assignVehicles(Request $request, $id)
     {
         if (!$this->isAdmin($request->user())) {
             return response()->json(['message' => 'Only administrators can assign vehicles.'], 403);
         }
 
         $validated = $request->validate([
-            'Vehicle_ID' => 'required|exists:vehicles,Vehicle_ID',
+            'Vehicle_IDs'    => 'required|array|min:1',
+            'Vehicle_IDs.*'  => 'integer|distinct|exists:vehicles,Vehicle_ID',
+            'Required_Count' => 'nullable|integer|min:1',
         ]);
 
         $booking = Booking::findOrFail($id);
-        $booking->update(['Vehicle_ID' => $validated['Vehicle_ID']]);
+
+        $vehicleIds = array_values(array_map('intval', $validated['Vehicle_IDs']));
+        $requiredCount = max(
+            1,
+            (int) ($validated['Required_Count'] ?? ceil(($booking->No_of_adults + $booking->No_of_child) / 6))
+        );
+
+        if (count($vehicleIds) < $requiredCount) {
+            return response()->json([
+                'message' => "This booking needs at least {$requiredCount} vehicle(s) for its passengers.",
+            ], 422);
+        }
+
+        $booking->vehicles()->sync($vehicleIds);
+
+        // Keep the legacy single-vehicle column pointing at the first vehicle
+        // so screens still relying on booking.vehicle keep working.
+        $booking->update(['Vehicle_ID' => $vehicleIds[0]]);
 
         return response()->json([
-            'message' => 'Vehicle assigned successfully',
-            'booking' => $booking,
+            'message' => count($vehicleIds) . ' vehicle(s) assigned successfully',
+            'booking' => $booking->load(['customer', 'package', 'vehicle.driver', 'vehicles.driver']),
         ]);
+    }
+
+    public function assignVehicle(Request $request, $id)
+    {
+        // Delegate the legacy single-vehicle endpoint to the multi-assign logic.
+        // Validate the scalar field the client actually sent first, so validation
+        // errors are reported under 'Vehicle_ID' instead of 'Vehicle_IDs.0'.
+        $validated = $request->validate([
+            'Vehicle_ID' => 'required|integer|exists:vehicles,Vehicle_ID',
+        ]);
+
+        $request->merge(['Vehicle_IDs' => [(int) $validated['Vehicle_ID']]]);
+
+        return $this->assignVehicles($request, $id);
     }
 
     // =========================
@@ -158,9 +258,9 @@ class BookingController extends Controller
     // =========================
     public function upcomingBooking($customerId)
     {
-        $booking = Booking::with(['package', 'vehicle.driver'])
+        $booking = Booking::with(['package', 'vehicle.driver', 'vehicles.driver'])
             ->where('Customer_ID', $customerId)
-            ->where('Status', 'pending')
+            ->where('Status', 'Pending')
             ->whereDate('Booking_Date', '>=', now()->toDateString())
             ->orderBy('Booking_Date', 'asc')
             ->orderBy('Pickup_Time', 'asc')
@@ -176,20 +276,95 @@ class BookingController extends Controller
     // =========================
     // DELETE BOOKING (ADMIN)
     // =========================
+    private function processRefund(Booking $booking)
+    {
+        $refundPercentage = 0;
+        
+        $bookingDate = \Carbon\Carbon::parse($booking->Booking_Date)->startOfDay();
+        $today = \Carbon\Carbon::now()->startOfDay();
+        
+        // Calculate days difference correctly ignoring time of day
+        $daysDifference = (int) round($today->diffInDays($bookingDate, false));
+
+        if ($daysDifference > 7) {
+            $refundPercentage = 100;
+        } elseif ($daysDifference >= 3 && $daysDifference <= 7) {
+            $refundPercentage = 50;
+        }
+
+        // Only actually refund money via PayHere if it was confirmed and paid
+        if ($booking->Status === 'Confirmed' && $booking->payment && $booking->payment->payhere_payment_id) {
+            if ($refundPercentage > 0 && $booking->Payment > 0) {
+                $refundAmount = ($booking->Payment * $refundPercentage) / 100;
+                
+                $payHereService = app(\App\Services\PayHereService::class);
+                $description = "Automated Refund: {$refundPercentage}% (Cancelled {$daysDifference} days before tour)";
+                
+                try {
+                    $payHereService->refund($booking->payment->payhere_payment_id, $refundAmount, $description);
+                    \Illuminate\Support\Facades\Log::info("Refunded {$refundAmount} for Booking ID {$booking->Booking_ID}");
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error("Failed to process refund for Booking ID {$booking->Booking_ID}: " . $e->getMessage());
+                }
+            }
+        }
+        
+        return $refundPercentage;
+    }
+
     public function destroy($id)
     {
-        $booking = Booking::findOrFail($id);
-        $booking->delete();
+        $booking = Booking::with('payment')->findOrFail($id);
+
+        // Authentication and admin check (from shanika)
+        $user = request()->user('sanctum') ?? auth('sanctum')->user();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+
+        if (!$this->isAdmin($user)) {
+            return response()->json(['message' => 'Only administrators can delete bookings.'], 403);
+        }
+
+        $refundPercentage = $this->processRefund($booking);
+
+        $booking->update([
+            'Status' => 'Cancelled',
+            'Customer_Seen' => false,
+            'Customer_Message' => 'Your booking was cancelled by an administrator.',
+        ]);
 
         return response()->json([
-            'message' => 'Booking deleted successfully'
+            'message' => 'Booking cancelled successfully',
+            'booking' => $booking,
+            'refund_percentage' => $refundPercentage
         ]);
     }
+
     public function unreadCount()
     {
         return response()->json([
             'count' => Booking::where('Admin_Seen', false)->count(),
         ]);
+    }
+
+    public function adminNotifications(Request $request)
+    {
+        if (!$request->user()) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+
+        if (!$this->isAdmin($request->user())) {
+            return response()->json(['message' => 'Only administrators can view booking notifications.'], 403);
+        }
+
+        return response()->json(
+            Booking::with(['customer', 'package'])
+                ->where('Admin_Seen', false)
+                ->whereNotNull('Admin_Message')
+                ->latest('Booking_ID')
+                ->get()
+        );
     }
 
     public function markAllAsSeen()
@@ -201,5 +376,49 @@ class BookingController extends Controller
         return response()->json([
             'message' => 'Booking notifications cleared',
         ]);
+    }
+
+    public function customerUnreadCount(Request $request, $customerId)
+    {
+        if ((int) $request->user()->Customer_ID !== (int) $customerId) {
+            return response()->json(['message' => 'Forbidden.'], 403);
+        }
+
+        return response()->json([
+            'count' => Booking::where('Customer_ID', $customerId)
+                ->where('Customer_Seen', false)
+                ->whereNotNull('Customer_Message')
+                ->count(),
+        ]);
+    }
+
+    public function customerNotifications(Request $request, $customerId)
+    {
+        if ((int) $request->user()->Customer_ID !== (int) $customerId) {
+            return response()->json(['message' => 'Forbidden.'], 403);
+        }
+
+        return response()->json(
+            Booking::with('package')
+                ->where('Customer_ID', $customerId)
+                ->where('Customer_Seen', false)
+                ->whereNotNull('Customer_Message')
+                ->latest('Booking_ID')
+                ->get(['Booking_ID', 'Package_ID', 'Booking_Date', 'Status', 'Customer_Message', 'Customer_Seen'])
+        );
+    }
+
+    public function markCustomerNotificationsAsSeen(Request $request, $customerId)
+    {
+        if ((int) $request->user()->Customer_ID !== (int) $customerId) {
+            return response()->json(['message' => 'Forbidden.'], 403);
+        }
+
+        Booking::where('Customer_ID', $customerId)
+            ->where('Customer_Seen', false)
+            ->whereNotNull('Customer_Message')
+            ->update(['Customer_Seen' => true]);
+
+        return response()->json(['message' => 'Booking notifications cleared']);
     }
 }

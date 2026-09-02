@@ -43,7 +43,7 @@ export function BookingCard() {
 
   const isDark = theme === "dark";
 
-  const cardClass = "card p-6";
+  const cardClass = "card p-4 sm:p-6";
   const iconBoxClass = isDark
     ? "flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-sacramento-400 to-sacramento-300 text-white"
     : "flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-sacramento to-sacramento-600 text-white";
@@ -101,17 +101,17 @@ export function BookingCard() {
       </div>
 
       {bookings.length === 0 ? (
-        <div className="px-4 py-8 text-center">
+        <div className="px-4 py-6 sm:py-8 text-center">
           <div className="mb-3 text-5xl">🦁</div>
           <p className={`text-[15px] font-medium ${mutedTextClass}`}>No safari adventures booked yet!</p>
           <p className={`mt-1 text-sm ${mutedTextClass}`}>Explore our packages and start your journey.</p>
         </div>
       ) : (
-        <div className="flex max-h-[500px] flex-col gap-4 overflow-y-auto">
+        <div className="flex max-h-[400px] sm:max-h-[500px] flex-col gap-4 overflow-y-auto">
           {bookings.map((booking) => {
             const pkg = booking.package;
             return (
-              <div key={booking.Booking_ID} className={isDark ? "rounded-2xl border border-border-dark bg-surface p-4" : "rounded-2xl border border-border-light bg-surface-2 p-4"}>
+              <div key={booking.Booking_ID} className={isDark ? "rounded-2xl border border-border-dark bg-surface p-3 sm:p-4" : "rounded-2xl border border-border-light bg-surface-2 p-3 sm:p-4"}>
                 <div className="mb-3 flex items-start justify-between">
                   <h4 className={`text-[16px] font-bold ${isDark ? "text-white" : "text-charcoal"}`}>{pkg?.Package_Name || "Unknown Safari"}</h4>
                   <span className={booking.Status === "Completed" ? `ml-2 whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.5px] ${completedBadgeClass}` : `ml-2 whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.5px] ${confirmedBadgeClass}`}>
@@ -119,7 +119,7 @@ export function BookingCard() {
                   </span>
                 </div>
 
-                <div className={`mb-3 grid grid-cols-2 gap-2 text-sm ${fieldTextClass}`}>
+                <div className={`mb-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm ${fieldTextClass}`}>
                   <DateField Icon={CalendarDays} value={booking.Booking_Date} dark={isDark} />
                   <DateField Icon={Clock} value={booking.Pickup_Time} dark={isDark} />
                   <div className="col-span-2 flex items-center gap-1.5">
