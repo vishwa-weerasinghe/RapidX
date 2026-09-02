@@ -1085,7 +1085,7 @@ export default function App() {
                     />
                     <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
                       <button
-                        onClick={() => scrollToSection("packages")}
+                        onClick={() => navigate(`/blog#${loc.id}`)}
                         className="bg-castleton text-white font-bold text-sm px-6 py-3 rounded-full hover:bg-opacity-90 transition duration-300 shadow-lg transform translate-y-4 group-hover:translate-y-0"
                       >
                         Learn More
