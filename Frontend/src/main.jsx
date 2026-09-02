@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import "./index.css";
 
 import App from "./App.jsx";
+import Blog from "./pages/public/Blog.jsx";
 import Register from "./pages/user/register.jsx";
 import Login from "./pages/public/login.jsx";
 import ForgotPassword from "./pages/public/ForgotPassword.jsx";
@@ -60,6 +61,7 @@ createRoot(document.getElementById("root")).render(
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<App />} />
+          <Route path="/blog" element={<Blog />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
