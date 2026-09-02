@@ -25,6 +25,7 @@ import MyBookings from "./pages/user/MyBookings";
 
 import Appointments from "./pages/admin/appointment.jsx";
 import GuestBooking from "./pages/public/booking.jsx";
+import PolicyPage from "./pages/public/PolicyPage.jsx";
 import AddToCart from "./pages/user/Addtocart.jsx";
 import Cart from "./pages/user/Cart.jsx";
 
@@ -62,6 +63,10 @@ createRoot(document.getElementById("root")).render(
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/password-reset/:token" element={<ResetPassword />} />
           <Route path="/booking" element={<GuestBooking />} />
+          <Route path="/help/:type" element={<PolicyPage />} />
+          <Route path="/privacy-policy" element={<PolicyPage />} />
+          <Route path="/terms-and-conditions" element={<PolicyPage />} />
+          <Route path="/return-refund-policy" element={<PolicyPage />} />
           <Route path="/addtocart/:id" element={<AddToCart />} />
 
           {/* Customer Routes */}

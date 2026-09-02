@@ -1846,22 +1846,25 @@ export default function App() {
 
             <div>
               <h4 className="text-sm font-bold tracking-wider mb-6 uppercase text-gray-900">
-                Legal
+                Help
               </h4>
               <ul className="space-y-3 text-sm text-gray-500 font-medium">
-                {["Privacy Policy", "Terms & Conditions", "FAQs"].map(
-                  (item, idx) => (
-                    <li key={idx}>
-                      <a
-                        href="#"
-                        className="hover:text-castleton hover:translate-x-1 transition-all duration-300 flex items-center gap-2"
-                      >
-                        <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-                        {item}
-                      </a>
-                    </li>
-                  ),
-                )}
+                {[
+                  { label: "Frequently", path: "/help/frequently" },
+                  { label: "Privacy Policy", path: "/privacy-policy" },
+                  { label: "Terms and Conditions", path: "/terms-and-conditions" },
+                  { label: "Return & Refund Policy", path: "/return-refund-policy" },
+                ].map((item) => (
+                  <li key={item.path}>
+                    <Link
+                      to={item.path}
+                      className="hover:text-castleton hover:translate-x-1 transition-all duration-300 flex items-center gap-2"
+                    >
+                      <span className="w-1 h-1 rounded-full bg-gray-300"></span>
+                      {item.label}
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
