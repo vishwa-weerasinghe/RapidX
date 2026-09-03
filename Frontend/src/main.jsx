@@ -27,6 +27,7 @@ import Cancellation from "./pages/user/cancellation.jsx";
 
 import Appointments from "./pages/admin/appointment.jsx";
 import GuestBooking from "./pages/public/booking.jsx";
+import PolicyPage from "./pages/public/PolicyPage.jsx";
 import PaymentSuccess from "./pages/public/PaymentSuccess.jsx";
 import PaymentCancel from "./pages/public/PaymentCancel.jsx";
 import AddToCart from "./pages/user/Addtocart.jsx";
@@ -67,6 +68,10 @@ createRoot(document.getElementById("root")).render(
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/password-reset/:token" element={<ResetPassword />} />
           <Route path="/booking" element={<GuestBooking />} />
+          <Route path="/help/:type" element={<PolicyPage />} />
+          <Route path="/privacy-policy" element={<PolicyPage />} />
+          <Route path="/terms-and-conditions" element={<PolicyPage />} />
+          <Route path="/return-refund-policy" element={<PolicyPage />} />
           <Route path="/payment/success" element={<PaymentSuccess />} />
           <Route path="/payment/cancel" element={<PaymentCancel />} />
           <Route path="/addtocart/:id" element={<AddToCart />} />

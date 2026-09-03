@@ -1837,78 +1837,54 @@ export default function App() {
                 </ul>
               </div>
 
-              <div>
-                <h4 className="text-sm font-bold tracking-wider mb-6 uppercase text-gray-900">
-                  Safari Parks
-                </h4>
-                <ul className="space-y-3 text-sm text-gray-500 font-medium">
-                  {[
-                    "Minneriya Park",
-                    "Kaudulla Park",
-                    "Wasgamuwa Park",
-                    "Hurulu Eco Park",
-                  ].map((park, idx) => (
-                    <li key={idx}>
-                      <button
-                        onClick={() => scrollToSection("packages")}
-                        className="hover:text-castleton hover:translate-x-1 transition-all duration-300 flex items-center gap-2"
-                      >
-                        <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-                        {park}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div>
-                <h4 className="text-sm font-bold tracking-wider mb-6 uppercase text-gray-900">
-                  Legal
-                </h4>
-                <ul className="space-y-3 text-sm text-gray-500 font-medium">
-                  {["Privacy Policy", "Terms & Conditions", "FAQs"].map(
-                    (item, idx) => (
-                      <li key={idx}>
-                        <a
-                          href="#"
-                          className="hover:text-castleton hover:translate-x-1 transition-all duration-300 flex items-center gap-2"
-                        >
-                          <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-                          {item}
-                        </a>
-                      </li>
-                    ),
-                  )}
-                </ul>
-              </div>
+            <div>
+              <h4 className="text-sm font-bold tracking-wider mb-6 uppercase text-gray-900">
+                Safari Parks
+              </h4>
+              <ul className="space-y-3 text-sm text-gray-500 font-medium">
+                {[
+                  "Minneriya Park",
+                  "Kaudulla Park",
+                  "Wasgamuwa Park",
+                  "Hurulu Eco Park",
+                ].map((park, idx) => (
+                  <li key={idx}>
+                    <button
+                      onClick={() => scrollToSection("packages")}
+                      className="hover:text-castleton hover:translate-x-1 transition-all duration-300 flex items-center gap-2"
+                    >
+                      <span className="w-1 h-1 rounded-full bg-gray-300"></span>
+                      {park}
+                    </button>
+                  </li>
+                ))}
+              </ul>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center justify-between pt-8 border-t border-gray-200 text-gray-400 text-sm font-medium">
-              <p>
-                &copy; {new Date().getFullYear()} Minneriyawildjeepsafari.com. All
-                Rights Reserved.
-              </p>
-              <div className="flex gap-4 mt-4 sm:mt-0">
-                <a
-                  href="https://facebook.com/share/1AmhHo7Cg2/"
-                  className="hover:text-castleton transition-colors"
-                >
-                  Facebook
-                </a>
-                <a
-                  href="https://www.instagram.com/minneriyawildjeepsafari"
-                  className="hover:text-castleton transition-colors"
-                >
-                  Instagram
-                </a>
-                <a
-                  href="https://www.tripadvisor.com/Attraction_Review-g304133-d15640558-Reviews-Minneriya_Wild_Jeep_Safari-Dambulla_Central_Province.html"
-                  className="hover:text-castleton transition-colors"
-                >
-                  TripAdvisor
-                </a>
-              </div>
+            <div>
+              <h4 className="text-sm font-bold tracking-wider mb-6 uppercase text-gray-900">
+                Help
+              </h4>
+              <ul className="space-y-3 text-sm text-gray-500 font-medium">
+                {[
+                  { label: "Frequently", path: "/help/frequently" },
+                  { label: "Privacy Policy", path: "/privacy-policy" },
+                  { label: "Terms and Conditions", path: "/terms-and-conditions" },
+                  { label: "Return & Refund Policy", path: "/return-refund-policy" },
+                ].map((item) => (
+                  <li key={item.path}>
+                    <Link
+                      to={item.path}
+                      className="hover:text-castleton hover:translate-x-1 transition-all duration-300 flex items-center gap-2"
+                    >
+                      <span className="w-1 h-1 rounded-full bg-gray-300"></span>
+                      {item.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </div>
+          </div>
           </div>
         </footer>
 
