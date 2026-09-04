@@ -153,10 +153,12 @@ export function Header({ user, toggleSidebar }) {
           <button
             onClick={handleLogout}
             disabled={loading}
-            className="btn-danger rounded-full"
+            title="Logout"
+            aria-label="Logout"
+            className="btn-danger rounded-full px-2 sm:px-4"
           >
             <LogOut className="w-4 h-4" />
-            <span>{loading ? 'Logging out...' : 'Logout'}</span>
+            <span className="hidden sm:inline">{loading ? 'Logging out...' : 'Logout'}</span>
           </button>
         </div>
       </div>
