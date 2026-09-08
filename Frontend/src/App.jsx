@@ -88,6 +88,7 @@ export default function App() {
 
   // --- STATE MANAGEMENT ---
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isHelpMenuOpen, setIsHelpMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -100,6 +101,13 @@ export default function App() {
   const [bookingDate, setBookingDate] = useState("");
   const [adultsCount, setAdultsCount] = useState(1);
   const [childrenCount, setChildrenCount] = useState(0);
+
+  const helpLinks = [
+    { label: "Frequently", path: "/help/frequently" },
+    { label: "Privacy Policy", path: "/privacy-policy" },
+    { label: "Terms and Conditions", path: "/terms-and-conditions" },
+    { label: "Return & Refund Policy", path: "/return-refund-policy" },
+  ];
 
   const handleWidgetSubmit = (e) => {
     e.preventDefault();
@@ -612,6 +620,37 @@ export default function App() {
                     </button>
                   </li>
                 ))}
+
+                <li className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setIsHelpMenuOpen((prev) => !prev)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 ${isScrolled
+                      ? "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-slate-800/50"
+                      : "text-white/80 hover:text-white hover:bg-white/10"
+                      }`}
+                  >
+                    Help
+                    <span className={`text-[10px] transition-transform duration-200 ${isHelpMenuOpen ? "rotate-180" : ""}`}>
+                      ▾
+                    </span>
+                  </button>
+
+                  {isHelpMenuOpen && (
+                    <div className="absolute right-0 top-full z-50 mt-3 w-64 rounded-2xl border border-[#dfe8dc] bg-[#fffdf9] p-2 shadow-[0_20px_40px_rgba(20,52,38,0.12)] dark:border-slate-700 dark:bg-slate-900">
+                      {helpLinks.map((item) => (
+                        <Link
+                          key={item.path}
+                          to={item.path}
+                          onClick={() => setIsHelpMenuOpen(false)}
+                          className="block rounded-xl px-3 py-2 text-sm font-medium text-[#1d4334] transition-colors hover:bg-[#edf7ef] hover:text-[#1b5d3d] dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-white"
+                        >
+                          {item.label}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </li>
               </ul>
             </nav>
 
@@ -696,6 +735,24 @@ export default function App() {
                 </div>
 
                 <div className="h-[1px] bg-slate-200/80 dark:bg-neutral-800 my-1" />
+
+                <div className="rounded-2xl border border-[#dfe8dc] bg-[#f8faf5] p-3 dark:border-slate-700 dark:bg-slate-800/80">
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[#163c2c] dark:text-slate-200">
+                    Help
+                  </p>
+                  <div className="grid grid-cols-1 gap-2">
+                    {helpLinks.map((item) => (
+                      <Link
+                        key={item.path}
+                        to={item.path}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="rounded-xl px-3 py-2 text-sm font-medium text-[#1d4334] transition-colors hover:bg-[#edf7ef] hover:text-[#1b5d3d] dark:text-slate-200 dark:hover:bg-slate-700 dark:hover:text-white"
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
 
                 {/* Mobile Auth Actions */}
                 <div>
@@ -1811,8 +1868,8 @@ export default function App() {
                   </span>
                 </div>
                 <p className="text-gray-500 text-sm leading-relaxed">
-                  Minneriya wild jeep safari is a leading Sri Lanka jeep safari
-                  company offering unforgettable wildlife experiences.
+                  We offer unforgettable wildlife experiences in Sri Lanka with
+                  expert-guided jeep safaris and memorable adventures.
                 </p>
               </div>
 
@@ -1861,11 +1918,11 @@ export default function App() {
               </ul>
             </div>
 
-            <div>
-              <h4 className="text-sm font-bold tracking-wider mb-6 uppercase text-gray-900">
+            <div className="rounded-2xl border border-[#dfe8dc] bg-[#f8faf5] p-5 shadow-[0_14px_30px_rgba(20,52,38,0.06)]">
+              <h4 className="mb-5 text-sm font-bold uppercase tracking-[0.18em] text-[#163c2c]">
                 Help
               </h4>
-              <ul className="space-y-3 text-sm text-gray-500 font-medium">
+              <ul className="space-y-3 text-sm font-medium text-[#42584a]">
                 {[
                   { label: "Frequently", path: "/help/frequently" },
                   { label: "Privacy Policy", path: "/privacy-policy" },
@@ -1875,9 +1932,9 @@ export default function App() {
                   <li key={item.path}>
                     <Link
                       to={item.path}
-                      className="hover:text-castleton hover:translate-x-1 transition-all duration-300 flex items-center gap-2"
+                      className="group flex items-center gap-2 rounded-lg px-2 py-1.5 transition-all duration-300 hover:bg-[#e8f3eb] hover:text-[#1b5d3d]"
                     >
-                      <span className="w-1 h-1 rounded-full bg-gray-300"></span>
+                      <span className="h-1.5 w-1.5 rounded-full bg-[#2a704d] transition-transform duration-300 group-hover:scale-125"></span>
                       {item.label}
                     </Link>
                   </li>

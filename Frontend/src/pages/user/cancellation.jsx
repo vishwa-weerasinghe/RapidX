@@ -12,7 +12,7 @@ const policySections = [
     ],
   },
   {
-    title: "2) Cancellations by Minneriya Wild Jeep Safari",
+    title: "2) Cancellations by the Service Provider",
     text: "If we cancel or reschedule your safari because of a park closure, unsafe weather, jeep breakdown, or another unforeseen circumstance, you will receive a full refund when rescheduling is not possible.",
   },
   {
@@ -41,7 +41,7 @@ const policySections = [
   },
   {
     title: "7) Contact Us",
-    text: "Minneriya Wild Jeep Safari | info@minneriyawildjeepsafari.com | Phone/WhatsApp: +94 77 890 2811",
+    text: "Email: info@minneriyawildjeepsafari.com | Phone/WhatsApp: +94 77 890 2811",
   },
 ];
 
