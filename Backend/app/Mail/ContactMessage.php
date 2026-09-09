@@ -32,9 +32,11 @@ class ContactMessage extends Mailable implements ShouldQueue
         $senderName = $this->contactData['name'] ?? 'Wild Safari Visitor';
         $senderEmail = $this->contactData['email'] ?? 'no-reply@wildsafari.com';
         
-        // Laravel's log mailer or SMTP needs a valid envelope structure
+        // Most SMTP providers (Gmail, Brevo, Mailgun, etc.) reject emails if 'from' is not the authenticated sender.
+        // Use system address for 'from' and set user's email as 'replyTo'.
         return new Envelope(
-            from: new Address($senderEmail, $senderName),
+            from: new Address(config('mail.from.address'), config('mail.from.name', 'Wild Jeep Safari')),
+            replyTo: [new Address($senderEmail, $senderName)],
             subject: 'New Safari Booking System Inquiry: ' . ($this->contactData['subject'] ?? 'General'),
         );
     }
