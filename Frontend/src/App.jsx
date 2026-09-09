@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import SEO from "./components/SEO";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
@@ -88,8 +88,26 @@ export default function App() {
 
   // --- STATE MANAGEMENT ---
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isHelpMenuOpen, setIsHelpMenuOpen] = useState(false);
+  const [isBlogMenuOpen, setIsBlogMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const blogMenuRef = useRef(null);
+
+  const blogLinks = [
+    { label: "Minneriya National Park", path: "/blog#minneriya", description: "The Great Elephant Gathering" },
+    { label: "Kaudulla National Park", path: "/blog#kaudulla", description: "Pristine Wildlife Corridor" },
+    { label: "Wasgamuwa National Park", path: "/blog#wasgamuwa", description: "Gathering Place of Bears" },
+    { label: "Hurulu Eco Park", path: "/blog#hurulu", description: "UNESCO Biosphere Reserve" },
+  ];
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (blogMenuRef.current && !blogMenuRef.current.contains(event.target)) {
+        setIsBlogMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
   const [activeSection, setActiveSection] = useState("home");
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -102,12 +120,6 @@ export default function App() {
   const [adultsCount, setAdultsCount] = useState(1);
   const [childrenCount, setChildrenCount] = useState(0);
 
-  const helpLinks = [
-    { label: "Frequently", path: "/help/frequently" },
-    { label: "Privacy Policy", path: "/privacy-policy" },
-    { label: "Terms and Conditions", path: "/terms-and-conditions" },
-    { label: "Return & Refund Policy", path: "/return-refund-policy" },
-  ];
 
   const handleWidgetSubmit = (e) => {
     e.preventDefault();
@@ -527,7 +539,7 @@ export default function App() {
   return (
     <>
       <SEO
-        title="Online Safari Booking Sri Lanka | Minneriya, Kaudulla & Wasgamuwa Jeep Tours"
+        title="Online Safari Booking Sri Lanka | Minneriya, Kaudulla & Wasgamuwa Jeep Safari Tours"
         description="Book trusted Sri Lanka jeep safaris online. Experience the famous Minneriya Elephant Gathering, Kaudulla & Wasgamuwa with experienced local drivers. Instant booking & best rates."
         canonical="https://www.minneriyawildjeepsafari.com"
       />
@@ -621,31 +633,46 @@ export default function App() {
                   </li>
                 ))}
 
-                <li className="relative">
+                <li className="relative" ref={blogMenuRef}>
                   <button
                     type="button"
-                    onClick={() => setIsHelpMenuOpen((prev) => !prev)}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 ${isScrolled
-                      ? "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-slate-800/50"
-                      : "text-white/80 hover:text-white hover:bg-white/10"
+                    onClick={() => setIsBlogMenuOpen((prev) => !prev)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 ${isBlogMenuOpen
+                      ? "bg-sacramento text-white shadow shadow-sacramento/25"
+                      : isScrolled
+                        ? "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-slate-800/50"
+                        : "text-white/80 hover:text-white hover:bg-white/10"
                       }`}
                   >
-                    Help
-                    <span className={`text-[10px] transition-transform duration-200 ${isHelpMenuOpen ? "rotate-180" : ""}`}>
+                    Blog
+                    <span className={`text-[10px] transition-transform duration-200 ${isBlogMenuOpen ? "rotate-180" : ""}`}>
                       ▾
                     </span>
                   </button>
 
-                  {isHelpMenuOpen && (
-                    <div className="absolute right-0 top-full z-50 mt-3 w-64 rounded-2xl border border-[#dfe8dc] bg-[#fffdf9] p-2 shadow-[0_20px_40px_rgba(20,52,38,0.12)] dark:border-slate-700 dark:bg-slate-900">
-                      {helpLinks.map((item) => (
+                  {isBlogMenuOpen && (
+                    <div className="absolute right-0 top-full z-50 mt-3 w-72 rounded-2xl border border-[#dfe8dc] bg-[#fffdf9] p-2.5 shadow-[0_20px_40px_rgba(20,52,38,0.15)] backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900">
+                      <div className="px-3 py-1.5 border-b border-slate-100 dark:border-slate-800 mb-1">
+                        <p className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                          Safari Travel Guides
+                        </p>
+                      </div>
+                      {blogLinks.map((item) => (
                         <Link
                           key={item.path}
                           to={item.path}
-                          onClick={() => setIsHelpMenuOpen(false)}
-                          className="block rounded-xl px-3 py-2 text-sm font-medium text-[#1d4334] transition-colors hover:bg-[#edf7ef] hover:text-[#1b5d3d] dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-white"
+                          onClick={() => setIsBlogMenuOpen(false)}
+                          className="group flex flex-col rounded-xl px-3 py-2 text-left transition-all hover:bg-[#edf7ef] dark:hover:bg-slate-800"
                         >
-                          {item.label}
+                          <span className="text-xs font-bold text-[#1d4334] group-hover:text-[#1b5d3d] dark:text-slate-200 dark:group-hover:text-white flex items-center justify-between">
+                            {item.label}
+                            <span className="text-xs text-castleton opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                          </span>
+                          {item.description && (
+                            <span className="text-[11px] text-slate-400 dark:text-slate-500">
+                              {item.description}
+                            </span>
+                          )}
                         </Link>
                       ))}
                     </div>
@@ -737,18 +764,28 @@ export default function App() {
                 <div className="h-[1px] bg-slate-200/80 dark:bg-neutral-800 my-1" />
 
                 <div className="rounded-2xl border border-[#dfe8dc] bg-[#f8faf5] p-3 dark:border-slate-700 dark:bg-slate-800/80">
-                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[#163c2c] dark:text-slate-200">
-                    Help
-                  </p>
-                  <div className="grid grid-cols-1 gap-2">
-                    {helpLinks.map((item) => (
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#163c2c] dark:text-slate-200">
+                      Blog & Safari Guides
+                    </p>
+                    <Link
+                      to="/blog"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="text-[11px] font-bold text-sacramento hover:underline dark:text-castleton-300"
+                    >
+                      View All
+                    </Link>
+                  </div>
+                  <div className="grid grid-cols-1 gap-1">
+                    {blogLinks.slice(1).map((item) => (
                       <Link
                         key={item.path}
                         to={item.path}
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className="rounded-xl px-3 py-2 text-sm font-medium text-[#1d4334] transition-colors hover:bg-[#edf7ef] hover:text-[#1b5d3d] dark:text-slate-200 dark:hover:bg-slate-700 dark:hover:text-white"
+                        className="rounded-xl px-3 py-2 text-xs font-medium text-[#1d4334] transition-colors hover:bg-[#edf7ef] hover:text-[#1b5d3d] dark:text-slate-200 dark:hover:bg-slate-700 dark:hover:text-white flex items-center justify-between"
                       >
-                        {item.label}
+                        <span>{item.label}</span>
+                        <span className="text-[10px] text-slate-400">→</span>
                       </Link>
                     ))}
                   </div>
@@ -794,6 +831,7 @@ export default function App() {
           id="home"
           className="relative min-h-[100svh] sm:h-screen sm:min-h-[650px] flex items-center overflow-hidden pt-16"
         >
+          {/* Background Slides */}
           <div className="absolute inset-0 z-0 overflow-hidden">
             {heroSlides.map((slide, index) => (
               <div
@@ -803,63 +841,82 @@ export default function App() {
                 <img
                   src={slide}
                   alt="Elephant Gathering Scene"
-                  className="w-full h-full object-cover object-[65%_center] sm:object-[center_80%] lg:object-right"
+                  className="w-full h-full object-cover object-[65%_center] sm:object-[center_80%] lg:object-right transition-all duration-500 dark:brightness-[0.88]"
                 />
               </div>
             ))}
           </div>
 
+          {/* Balanced Overlay for Optimal Text Readability & Image Visibility */}
+          <div className="absolute inset-0 z-[1] bg-gradient-to-r from-black/60 via-black/35 to-transparent dark:from-black/75 dark:via-black/50 dark:to-black/20 pointer-events-none transition-colors duration-500" />
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/30 to-transparent dark:from-black/50 dark:to-transparent pointer-events-none z-[1]" />
+
+          {/* Content */}
           <div className="max-w-7xl mx-auto px-4 md:px-6 w-full relative z-20">
             <div className="max-w-2xl text-white ml-0 md:ml-8 lg:ml-12 mt-12 md:mt-0">
-              <span className="text-amber-400 font-semibold uppercase tracking-widest text-sm sm:text-base block mb-3 drop-shadow-md">
+              {/* Pill Badge */}
+              <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold uppercase tracking-widest mb-5 bg-black/40 border border-white/20 text-amber-300 dark:bg-amber-400/10 dark:border-amber-400/30 dark:text-amber-300 backdrop-blur-md shadow-lg">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-400"></span>
+                </span>
                 Explore Sri Lanka's Wildlife
-              </span>
-              <h1 className="font-serif text-[2.5rem] leading-[1.1] sm:text-5xl md:text-6xl font-bold mb-6 text-white drop-shadow-lg">
-                Witness Sri Lanka's Legendary Wild Elephant Gathering
+              </div>
+
+              {/* Title */}
+              <h1 className="font-serif text-[2.5rem] leading-[1.1] sm:text-5xl md:text-6xl font-bold mb-6 text-white drop-shadow-2xl">
+                Witness Sri Lanka's Legendary{" "}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-emerald-300 to-teal-200 dark:from-amber-300 dark:via-emerald-400 dark:to-teal-300">
+                  Wild Elephant Gathering
+                </span>
               </h1>
-              <p className="text-gray-100 font-medium tracking-wide text-sm sm:text-base block mb-8 drop-shadow-md max-w-xl leading-relaxed">
+
+              {/* Description */}
+              <p className="text-neutral-100 dark:text-neutral-300 font-medium tracking-wide text-sm sm:text-base mb-8 drop-shadow-md max-w-xl leading-relaxed">
                 Experience unforgettable close-up encounters with majestic
-                elephants in Minneriya and Kaudulla National Parks
+                elephants in Minneriya and Kaudulla National Parks.
               </p>
 
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-12">
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-10">
                 <button
                   onClick={() => handleBookNow()}
-                  className="bg-[#2E7D32] text-white font-bold text-center px-8 py-3.5 rounded-full shadow-md hover:bg-[#1B5E20] hover:shadow-lg transition-all duration-300 transform hover:-translate-y-[2px]"
+                  className="bg-[#2E7D32] hover:bg-[#1B5E20] dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-bold text-center px-8 py-3.5 rounded-full shadow-lg shadow-emerald-950/40 hover:shadow-xl hover:shadow-emerald-900/60 transition-all duration-300 transform hover:-translate-y-[2px] active:translate-y-0"
                 >
                   Book Now
                 </button>
                 <button
                   onClick={() => scrollToSection("packages")}
-                  className="bg-white/10 backdrop-blur-sm border border-white/50 text-white font-semibold text-center px-10 py-3.5 rounded-full shadow-sm hover:bg-white/20 hover:border-white transition-all duration-300 transform hover:-translate-y-[2px]"
+                  className="bg-white/10 dark:bg-neutral-900/60 backdrop-blur-md border border-white/40 dark:border-neutral-700/80 text-white font-semibold text-center px-8 sm:px-10 py-3.5 rounded-full shadow-sm hover:bg-white/20 dark:hover:bg-neutral-800/80 hover:border-white dark:hover:border-neutral-500 transition-all duration-300 transform hover:-translate-y-[2px]"
                 >
                   Explore Safari Packages
                 </button>
               </div>
 
-              <div className="grid grid-cols-3 gap-6 pt-6 border-t border-white/20 max-w-md">
-                <div>
-                  <span className="text-2xl sm:text-3xl font-bold text-white block">
-                    2,500+
+              {/* Glassmorphic Stats Grid */}
+              <div className="grid grid-cols-3 gap-3 sm:gap-4 pt-6 border-t border-white/20 dark:border-white/10 max-w-lg">
+                <div className="rounded-2xl p-3 bg-black/25 dark:bg-neutral-900/60 backdrop-blur-md border border-white/10 dark:border-white/5 transition-all">
+                  <span className="text-2xl sm:text-3xl font-extrabold text-white dark:text-emerald-400 block tracking-tight">
+                    2,500 +
                   </span>
-                  <span className="text-s sm:text-sm font-bold text-neutral-300">
+                  <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-neutral-300 dark:text-neutral-400 mt-1 block">
                     Happy Travelers
                   </span>
                 </div>
-                <div>
-                  <span className="text-2xl sm:text-3xl font-bold text-white-400 block">
-                    5.0/5.0
+                <div className="rounded-2xl p-3 bg-black/25 dark:bg-neutral-900/60 backdrop-blur-md border border-white/10 dark:border-white/5 transition-all">
+                  <span className="text-2xl sm:text-3xl font-extrabold text-amber-300 dark:text-amber-400 block tracking-tight">
+                    5.0 / 5.0
                   </span>
-                  <span className="text-s sm:text-sm font-bold text-neutral-300">
-                    TripAdvisor Rating
+                  <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-neutral-300 dark:text-neutral-400 mt-1 block">
+                    TripAdvisor
                   </span>
                 </div>
-                <div>
-                  <span className="text-2xl sm:text-3xl font-bold text-white-400 block">
-                    24/7
+                <div className="rounded-2xl p-3 bg-black/25 dark:bg-neutral-900/60 backdrop-blur-md border border-white/10 dark:border-white/5 transition-all">
+                  <span className="text-2xl sm:text-3xl font-extrabold text-white dark:text-teal-300 block tracking-tight">
+                    24 / 7
                   </span>
-                  <span className="text-s sm:text-sm font-bold text-neutral-300">
-                    Available
+                  <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-neutral-300 dark:text-neutral-400 mt-1 block">
+                    Support
                   </span>
                 </div>
               </div>
@@ -1894,54 +1951,54 @@ export default function App() {
                 </ul>
               </div>
 
-            <div>
-              <h4 className="text-sm font-bold tracking-wider mb-6 uppercase text-gray-900">
-                Safari Parks
-              </h4>
-              <ul className="space-y-3 text-sm text-gray-500 font-medium">
-                {[
-                  "Minneriya Park",
-                  "Kaudulla Park",
-                  "Wasgamuwa Park",
-                  "Hurulu Eco Park",
-                ].map((park, idx) => (
-                  <li key={idx}>
-                    <button
-                      onClick={() => scrollToSection("packages")}
-                      className="hover:text-castleton hover:translate-x-1 transition-all duration-300 flex items-center gap-2"
-                    >
-                      <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-                      {park}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
+              <div>
+                <h4 className="text-sm font-bold tracking-wider mb-6 uppercase text-gray-900">
+                  Safari Parks
+                </h4>
+                <ul className="space-y-3 text-sm text-gray-500 font-medium">
+                  {[
+                    "Minneriya Park",
+                    "Kaudulla Park",
+                    "Wasgamuwa Park",
+                    "Hurulu Eco Park",
+                  ].map((park, idx) => (
+                    <li key={idx}>
+                      <button
+                        onClick={() => scrollToSection("packages")}
+                        className="hover:text-castleton hover:translate-x-1 transition-all duration-300 flex items-center gap-2"
+                      >
+                        <span className="w-1 h-1 rounded-full bg-gray-300"></span>
+                        {park}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-            <div className="rounded-2xl border border-[#dfe8dc] bg-[#f8faf5] p-5 shadow-[0_14px_30px_rgba(20,52,38,0.06)]">
-              <h4 className="mb-5 text-sm font-bold uppercase tracking-[0.18em] text-[#163c2c]">
-                Help
-              </h4>
-              <ul className="space-y-3 text-sm font-medium text-[#42584a]">
-                {[
-                  { label: "Frequently", path: "/help/frequently" },
-                  { label: "Privacy Policy", path: "/privacy-policy" },
-                  { label: "Terms and Conditions", path: "/terms-and-conditions" },
-                  { label: "Return & Refund Policy", path: "/return-refund-policy" },
-                ].map((item) => (
-                  <li key={item.path}>
-                    <Link
-                      to={item.path}
-                      className="group flex items-center gap-2 rounded-lg px-2 py-1.5 transition-all duration-300 hover:bg-[#e8f3eb] hover:text-[#1b5d3d]"
-                    >
-                      <span className="h-1.5 w-1.5 rounded-full bg-[#2a704d] transition-transform duration-300 group-hover:scale-125"></span>
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+              <div className="rounded-2xl border border-[#dfe8dc] bg-[#f8faf5] p-5 shadow-[0_14px_30px_rgba(20,52,38,0.06)]">
+                <h4 className="mb-5 text-sm font-bold uppercase tracking-[0.18em] text-[#163c2c]">
+                  Help
+                </h4>
+                <ul className="space-y-3 text-sm font-medium text-[#42584a]">
+                  {[
+                    { label: "Frequently", path: "/help/frequently" },
+                    { label: "Privacy Policy", path: "/privacy-policy" },
+                    { label: "Terms and Conditions", path: "/terms-and-conditions" },
+                    { label: "Return & Refund Policy", path: "/return-refund-policy" },
+                  ].map((item) => (
+                    <li key={item.path}>
+                      <Link
+                        to={item.path}
+                        className="group flex items-center gap-2 rounded-lg px-2 py-1.5 transition-all duration-300 hover:bg-[#e8f3eb] hover:text-[#1b5d3d]"
+                      >
+                        <span className="h-1.5 w-1.5 rounded-full bg-[#2a704d] transition-transform duration-300 group-hover:scale-125"></span>
+                        {item.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
-          </div>
           </div>
         </footer>
 
