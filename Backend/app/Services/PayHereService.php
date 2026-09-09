@@ -89,6 +89,35 @@ class PayHereService
     }
 
     /**
+     * Verify payment status directly with PayHere Merchant Search API.
+     */
+    public function verifyPaymentWithPayHere(string $orderId): ?array
+    {
+        $accessToken = $this->getAccessToken();
+        if (!$accessToken) {
+            return null;
+        }
+
+        try {
+            $response = \Illuminate\Support\Facades\Http::withToken($accessToken)
+                ->get($this->getMerchantApiBaseUrl() . '/payment/search', [
+                    'order_id' => $orderId,
+                ]);
+
+            if ($response->successful()) {
+                $data = $response->json('data');
+                if (is_array($data) && count($data) > 0) {
+                    return $data[0];
+                }
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('PayHere Payment Search Verification Error: ' . $e->getMessage());
+        }
+
+        return null;
+    }
+
+    /**
      * Generate the MD5 security hash required by PayHere for checkout.
      *
      * Formula: strtoupper(md5(merchant_id + order_id + amountFormatted + currency + strtoupper(md5(merchant_secret))))
