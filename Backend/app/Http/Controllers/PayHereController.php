@@ -85,7 +85,13 @@ class PayHereController extends Controller
             }
 
             $package = Package::findOrFail($request->Package_ID);
-            $amount = (float) $request->Payment;
+
+            // Server-side price calculation to prevent client-side price tampering
+            $expectedAdultPrice = (int) $request->No_of_adults * (float) $package->Price_for_adult;
+            $expectedChildPrice = (int) $request->No_of_child * (float) $package->Price_for_child;
+            $serverCalculatedAmount = $expectedAdultPrice + $expectedChildPrice;
+            $amount = $serverCalculatedAmount > 0 ? $serverCalculatedAmount : (float) $request->Payment;
+
             $currency = config('payhere.currency', 'USD');
 
             // Unique Order Reference
@@ -168,9 +174,21 @@ class PayHereController extends Controller
         }
 
         $bookingIds = $cartEntries->pluck('Booking_ID');
-        $bookings = Booking::whereIn('Booking_ID', $bookingIds)->get();
+        $bookings = Booking::with('package')->whereIn('Booking_ID', $bookingIds)->get();
 
-        $totalAmount = (float) $bookings->sum('Payment');
+        // Server-side authoritative price recalculation to prevent cart price tampering
+        $totalAmount = (float) $bookings->sum(function ($b) {
+            if ($b->package) {
+                $expected = ((int) $b->No_of_adults * (float) $b->package->Price_for_adult)
+                          + ((int) $b->No_of_child * (float) $b->package->Price_for_child);
+                if ($expected > 0) {
+                    $b->update(['Payment' => $expected]);
+                    return $expected;
+                }
+            }
+            return (float) $b->Payment;
+        });
+
         $currency = config('payhere.currency', 'USD');
 
         return DB::transaction(function () use ($customerId, $customer, $bookings, $totalAmount, $currency) {
@@ -300,7 +318,7 @@ class PayHereController extends Controller
 
     /**
      * Confirm a payment after successful client SDK checkout or return.
-     * Marks Payment as Success, all associated Bookings as Confirmed, and clears the Customer's Cart.
+     * Only confirms if already verified by signed webhook, verified by PayHere API, or invoked by admin.
      */
     public function confirm(Request $request)
     {
@@ -315,6 +333,7 @@ class PayHereController extends Controller
 
         // Ownership check for authenticated users
         $user = $request->user('sanctum') ?? auth('sanctum')->user();
+        $isAdmin = false;
         if ($user) {
             $isAdmin = in_array(strtolower($user->role ?? ''), ['admin', 'administrator', 'superadmin']);
             if (!$isAdmin && (int) $user->Customer_ID !== (int) $payment->Customer_ID) {
@@ -322,8 +341,36 @@ class PayHereController extends Controller
             }
         }
 
-        return DB::transaction(function () use ($payment) {
-            if ($payment->status !== 'Success') {
+        // 1. If already marked Success by PayHere signed IPN webhook, return confirmed
+        if ($payment->status === 'Success') {
+            return response()->json([
+                'success'  => true,
+                'message'  => 'Payment is already confirmed.',
+                'order_id' => $payment->order_id,
+                'status'   => 'Success',
+                'payment'  => $payment,
+            ]);
+        }
+
+        // 2. Verify with PayHere Merchant Search API if caller is not an admin
+        $verified = false;
+        if ($isAdmin) {
+            $verified = true;
+        } else {
+            $payHereRecord = $this->payHereService->verifyPaymentWithPayHere($payment->order_id);
+            if ($payHereRecord && (int) ($payHereRecord['status_code'] ?? 0) === 2) {
+                $verified = true;
+                $payment->update([
+                    'payhere_payment_id' => $payHereRecord['payment_id'] ?? $payment->payhere_payment_id,
+                    'payment_method'     => $payHereRecord['method'] ?? $payment->payment_method,
+                    'status_code'        => 2,
+                    'status_message'     => $payHereRecord['status_message'] ?? 'Payment Completed Successfully',
+                ]);
+            }
+        }
+
+        if ($verified) {
+            return DB::transaction(function () use ($payment) {
                 $payment->update([
                     'status'         => 'Success',
                     'status_message' => 'Payment Completed & Confirmed',
@@ -338,18 +385,26 @@ class PayHereController extends Controller
                 if ($payment->Customer_ID) {
                     Cart::where('Customer_ID', $payment->Customer_ID)->delete();
                 }
-                
-                $this->sendConfirmationEmails($payment);
-            }
 
-            return response()->json([
-                'success'  => true,
-                'message'  => 'Payment confirmed and bookings updated successfully',
-                'order_id' => $payment->order_id,
-                'status'   => 'Success',
-                'payment'  => $payment->fresh(['bookings.package', 'customer']),
-            ]);
-        });
+                $this->sendConfirmationEmails($payment);
+
+                return response()->json([
+                    'success'  => true,
+                    'message'  => 'Payment confirmed and bookings updated successfully',
+                    'order_id' => $payment->order_id,
+                    'status'   => 'Success',
+                    'payment'  => $payment->fresh(['bookings.package', 'customer']),
+                ]);
+            });
+        }
+
+        return response()->json([
+            'success'  => false,
+            'message'  => 'Payment is pending verification from the payment gateway.',
+            'order_id' => $payment->order_id,
+            'status'   => $payment->status,
+            'payment'  => $payment,
+        ], 200);
     }
 
     /**
