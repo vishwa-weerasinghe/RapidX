@@ -57,3 +57,24 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## Running Backend Tests
+
+**Prerequisite:** confirm SQLite support is enabled in PHP by running:
+php -m | grep sqlite
+(should list pdo_sqlite and sqlite3 — if not, enable them in your php.ini and restart)
+
+**One-time setup (each team member runs this locally):**
+1. cp .env.testing.example .env.testing
+2. Open .env.testing and fill in PAYHERE_MERCHANT_ID and PAYHERE_SECRET
+   → Get sandbox credentials from the PayHere sandbox dashboard: https://sandbox.payhere.lk
+   → Ask [team lead name] if you don't have sandbox account access yet
+3. Run: php artisan key:generate --env=testing
+   (if it errors saying the file doesn't exist, first add a blank line APP_KEY= to .env.testing, then re-run)
+
+**Running the tests:**
+php artisan test
+
+Note: .env.testing is in .gitignore and will NOT be pushed to GitHub or pulled by teammates —
+this is intentional, since it holds credentials. Everyone needs to create their own from the
+.example file above.
