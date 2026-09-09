@@ -89,14 +89,21 @@ export default function App() {
   // --- STATE MANAGEMENT ---
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isBlogMenuOpen, setIsBlogMenuOpen] = useState(false);
+  const [isMobileBlogOpen, setIsMobileBlogOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const blogMenuRef = useRef(null);
 
   const blogLinks = [
     { label: "Minneriya National Park", path: "/blog#minneriya", description: "The Great Elephant Gathering" },
-    { label: "Kaudulla National Park", path: "/blog#kaudulla", description: "Pristine Wildlife Corridor" },
-    { label: "Wasgamuwa National Park", path: "/blog#wasgamuwa", description: "Gathering Place of Bears" },
-    { label: "Hurulu Eco Park", path: "/blog#hurulu", description: "UNESCO Biosphere Reserve" },
+    { label: "Kaudulla National Park", path: "/blog#kaudulla", description: "The Pristine Wildlife Corridor" },
+    { label: "Wasgamuwa National Park", path: "/blog#wasgamuwa", description: "The Gathering Place of Bears" },
+    { label: "Hurulu Eco Park", path: "/blog#hurulu", description: "The Vital Elephant Corridor" },
+    { label: "Full Day Safari Experience", path: "/blog#full-day-safari", description: "Hurulu Eco Park & Minneriya or Kaudulla" },
+    { label: "Dambulla Cultural & Safari Tour", path: "/blog#dambulla-safari", description: "Cave Temple, Economic Center & Evening Safari" },
+    { label: "Hiriwadunna Village Tour", path: "/blog#hiriwadunna-village-tour", description: "Experience Authentic Sri Lankan Rural Life" },
+    { label: "Polonnaruwa Ruins & Safari Tour", path: "/blog#polonnaruwa-safari", description: "Medieval Capital & Evening Safari" },
+    { label: "Sigiriya / Pidurangala & Safari Tour", path: "/blog#sigiriya-pidurangala-safari", description: "Majestic Rock Hiking & Evening Safari" },
+    { label: "Sigiriya Village Tour", path: "/blog#sigiriya-village-tour", description: "Experience Authentic Sri Lankan Rural Life" },
   ];
 
   useEffect(() => {
@@ -335,6 +342,7 @@ export default function App() {
 
   const scrollToSection = (id) => {
     setIsMobileMenuOpen(false);
+    setIsMobileBlogOpen(false);
     const target = document.getElementById(id);
     if (target) {
       // Calculate accurate position regardless of parent positioning
@@ -651,30 +659,50 @@ export default function App() {
                   </button>
 
                   {isBlogMenuOpen && (
-                    <div className="absolute right-0 top-full z-50 mt-3 w-72 rounded-2xl border border-[#dfe8dc] bg-[#fffdf9] p-2.5 shadow-[0_20px_40px_rgba(20,52,38,0.15)] backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900">
-                      <div className="px-3 py-1.5 border-b border-slate-100 dark:border-slate-800 mb-1">
+                    <div className="absolute right-0 top-full z-50 mt-3 w-80 sm:w-88 rounded-2xl border border-[#dfe8dc] bg-[#fffdf9] p-2.5 shadow-[0_20px_40px_rgba(20,52,38,0.15)] backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900 flex flex-col max-h-[75vh]">
+                      <div className="px-3 py-2 border-b border-slate-100 dark:border-slate-800 mb-1 flex items-center justify-between shrink-0">
                         <p className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500">
                           Safari Travel Guides
                         </p>
-                      </div>
-                      {blogLinks.map((item) => (
                         <Link
-                          key={item.path}
-                          to={item.path}
+                          to="/blog"
                           onClick={() => setIsBlogMenuOpen(false)}
-                          className="group flex flex-col rounded-xl px-3 py-2 text-left transition-all hover:bg-[#edf7ef] dark:hover:bg-slate-800"
+                          className="text-[11px] font-bold text-sacramento hover:underline dark:text-castleton-300 flex items-center gap-1"
                         >
-                          <span className="text-xs font-bold text-[#1d4334] group-hover:text-[#1b5d3d] dark:text-slate-200 dark:group-hover:text-white flex items-center justify-between">
-                            {item.label}
-                            <span className="text-xs text-castleton opacity-0 group-hover:opacity-100 transition-opacity">→</span>
-                          </span>
-                          {item.description && (
-                            <span className="text-[11px] text-slate-400 dark:text-slate-500">
-                              {item.description}
-                            </span>
-                          )}
+                          View All
+                          <span className="text-xs">→</span>
                         </Link>
-                      ))}
+                      </div>
+                      <div className="overflow-y-auto pr-1 space-y-0.5">
+                        {blogLinks.map((item) => (
+                          <Link
+                            key={item.path}
+                            to={item.path}
+                            onClick={() => setIsBlogMenuOpen(false)}
+                            className="group flex flex-col rounded-xl px-3 py-2 text-left transition-all hover:bg-[#edf7ef] dark:hover:bg-slate-800"
+                          >
+                            <span className="text-xs font-bold text-[#1d4334] group-hover:text-[#1b5d3d] dark:text-slate-200 dark:group-hover:text-white flex items-center justify-between">
+                              {item.label}
+                              <span className="text-xs text-castleton opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                            </span>
+                            {item.description && (
+                              <span className="text-[11px] text-slate-400 dark:text-slate-500 line-clamp-1">
+                                {item.description}
+                              </span>
+                            )}
+                          </Link>
+                        ))}
+                      </div>
+                      <div className="pt-2 mt-1 border-t border-slate-100 dark:border-slate-800 shrink-0">
+                        <Link
+                          to="/blog"
+                          onClick={() => setIsBlogMenuOpen(false)}
+                          className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-bold text-sacramento hover:bg-[#edf7ef] dark:text-emerald-400 dark:hover:bg-slate-800 transition-colors"
+                        >
+                          <span>View All Guides & Tours</span>
+                          <span>→</span>
+                        </Link>
+                      </div>
                     </div>
                   )}
                 </li>
@@ -722,7 +750,10 @@ export default function App() {
 
               {/* Simple Modern Mobile Menu Toggle Button */}
               <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                onClick={() => {
+                  setIsMobileMenuOpen((prev) => !prev);
+                  setIsMobileBlogOpen(false);
+                }}
                 className={`md:hidden flex items-center justify-center p-2.5 rounded-full transition-all duration-300 active:scale-95 ${isMobileMenuOpen
                   ? "bg-sacramento text-white shadow-md"
                   : isScrolled
@@ -737,7 +768,7 @@ export default function App() {
 
             {/* Simple Modern Mobile Navigation Dropdown Menu */}
             {isMobileMenuOpen && (
-              <div className="absolute top-full left-0 right-0 mt-3 p-4 rounded-3xl bg-white/95 dark:bg-neutral-900/95 backdrop-blur-2xl border border-slate-200/80 dark:border-neutral-800/80 shadow-2xl transition-all duration-300 md:hidden z-50 flex flex-col gap-3">
+              <div className="absolute top-full left-0 right-0 mt-3 p-4 rounded-3xl bg-white/95 dark:bg-neutral-900/95 backdrop-blur-2xl border border-slate-200/80 dark:border-neutral-800/80 shadow-2xl transition-all duration-300 md:hidden z-50 flex flex-col gap-2.5">
                 <div className="grid grid-cols-2 gap-1.5">
                   {[
                     "home",
@@ -759,37 +790,80 @@ export default function App() {
                       {section}
                     </button>
                   ))}
+
+                  {/* Blog Button in mobile nav grid just like desktop nav bar */}
+                  <button
+                    type="button"
+                    onClick={() => setIsMobileBlogOpen((prev) => !prev)}
+                    className={`py-2.5 px-3 rounded-xl text-xs font-bold capitalize tracking-wide transition-all duration-200 text-left flex items-center justify-between ${isMobileBlogOpen
+                      ? "bg-sacramento text-white shadow-md shadow-sacramento/30"
+                      : "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-neutral-800"
+                      }`}
+                  >
+                    <span>Blog</span>
+                    <span className={`text-[10px] transition-transform duration-200 ${isMobileBlogOpen ? "rotate-180" : ""}`}>
+                      ▾
+                    </span>
+                  </button>
                 </div>
 
-                <div className="h-[1px] bg-slate-200/80 dark:bg-neutral-800 my-1" />
-
-                <div className="rounded-2xl border border-[#dfe8dc] bg-[#f8faf5] p-3 dark:border-slate-700 dark:bg-slate-800/80">
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#163c2c] dark:text-slate-200">
-                      Blog & Safari Guides
-                    </p>
-                    <Link
-                      to="/blog"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="text-[11px] font-bold text-sacramento hover:underline dark:text-castleton-300"
-                    >
-                      View All
-                    </Link>
-                  </div>
-                  <div className="grid grid-cols-1 gap-1">
-                    {blogLinks.slice(1).map((item) => (
+                {/* Blog Dropdown Menu (only appears when Blog is toggled, matching desktop) */}
+                {isMobileBlogOpen && (
+                  <div className="rounded-2xl border border-[#dfe8dc] bg-[#fffdf9] p-2.5 shadow-lg backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900 flex flex-col max-h-64 transition-all">
+                    <div className="px-3 py-2 border-b border-slate-100 dark:border-slate-800 mb-1 flex items-center justify-between shrink-0">
+                      <p className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                        Safari Travel Guides
+                      </p>
                       <Link
-                        key={item.path}
-                        to={item.path}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="rounded-xl px-3 py-2 text-xs font-medium text-[#1d4334] transition-colors hover:bg-[#edf7ef] hover:text-[#1b5d3d] dark:text-slate-200 dark:hover:bg-slate-700 dark:hover:text-white flex items-center justify-between"
+                        to="/blog"
+                        onClick={() => {
+                          setIsMobileMenuOpen(false);
+                          setIsMobileBlogOpen(false);
+                        }}
+                        className="text-[11px] font-bold text-sacramento hover:underline dark:text-castleton-300 flex items-center gap-1"
                       >
-                        <span>{item.label}</span>
-                        <span className="text-[10px] text-slate-400">→</span>
+                        View All
+                        <span className="text-xs">→</span>
                       </Link>
-                    ))}
+                    </div>
+                    <div className="overflow-y-auto pr-1 space-y-0.5">
+                      {blogLinks.map((item) => (
+                        <Link
+                          key={item.path}
+                          to={item.path}
+                          onClick={() => {
+                            setIsMobileMenuOpen(false);
+                            setIsMobileBlogOpen(false);
+                          }}
+                          className="group flex flex-col rounded-xl px-3 py-2 text-left transition-all hover:bg-[#edf7ef] dark:hover:bg-slate-800"
+                        >
+                          <span className="text-xs font-bold text-[#1d4334] group-hover:text-[#1b5d3d] dark:text-slate-200 dark:group-hover:text-white flex items-center justify-between">
+                            {item.label}
+                            <span className="text-xs text-castleton opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                          </span>
+                          {item.description && (
+                            <span className="text-[11px] text-slate-400 dark:text-slate-500 line-clamp-1">
+                              {item.description}
+                            </span>
+                          )}
+                        </Link>
+                      ))}
+                    </div>
+                    <div className="pt-2 mt-1 border-t border-slate-100 dark:border-slate-800 shrink-0">
+                      <Link
+                        to="/blog"
+                        onClick={() => {
+                          setIsMobileMenuOpen(false);
+                          setIsMobileBlogOpen(false);
+                        }}
+                        className="flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl text-xs font-bold text-sacramento hover:bg-[#edf7ef] dark:text-emerald-400 dark:hover:bg-slate-800 transition-colors"
+                      >
+                        <span>View All Guides & Tours</span>
+                        <span>→</span>
+                      </Link>
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Mobile Auth Actions */}
                 <div>
