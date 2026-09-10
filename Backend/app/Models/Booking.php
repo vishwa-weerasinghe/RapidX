@@ -62,4 +62,19 @@ class Booking extends Model
     {
         return $this->belongsTo(Payment::class, 'Payment_ID');
     }
+
+    /**
+     * Map of additional pickup area fees
+     */
+    public static function getAreaFee(?string $area): float
+    {
+        $areaFees = [
+            'Dambulla'  => 5.0,
+            'Sigiriya'  => 15.0,
+            'Habarana'  => 18.0,
+            'Kandalama' => 15.0,
+        ];
+
+        return $area && isset($areaFees[$area]) ? (float) $areaFees[$area] : 0.0;
+    }
 }
