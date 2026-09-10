@@ -2049,11 +2049,11 @@ export default function App() {
                 </ul>
               </div>
 
-              <div className="rounded-2xl border border-[#dfe8dc] bg-[#f8faf5] p-5 shadow-[0_14px_30px_rgba(20,52,38,0.06)]">
-                <h4 className="mb-5 text-sm font-bold uppercase tracking-[0.18em] text-[#163c2c]">
+              <div>
+                <h4 className="text-sm font-bold tracking-wider mb-6 uppercase text-gray-900">
                   Help
                 </h4>
-                <ul className="space-y-3 text-sm font-medium text-[#42584a]">
+                <ul className="space-y-3 text-sm text-gray-500 font-medium">
                   {[
                     { label: "Frequently", path: "/help/frequently" },
                     { label: "Privacy Policy", path: "/privacy-policy" },
@@ -2063,9 +2063,9 @@ export default function App() {
                     <li key={item.path}>
                       <Link
                         to={item.path}
-                        className="group flex items-center gap-2 rounded-lg px-2 py-1.5 transition-all duration-300 hover:bg-[#e8f3eb] hover:text-[#1b5d3d]"
+                        className="group flex items-center gap-2 rounded-lg px-2 transition-all duration-300 hover:bg-[#e8f3eb] hover:text-[#1b5d3d]"
                       >
-                        <span className="h-1.5 w-1.5 rounded-full bg-[#2a704d] transition-transform duration-300 group-hover:scale-125"></span>
+                        <span className="w-1 h-1 rounded-full bg-gray-300 transition-transform duration-300 group-hover:scale-125"></span>
                         {item.label}
                       </Link>
                     </li>
