@@ -86,10 +86,11 @@ class PayHereController extends Controller
 
             $package = Package::findOrFail($request->Package_ID);
 
-            // Server-side price calculation to prevent client-side price tampering
+            // Server-side price calculation to prevent client-side price tampering (including pickup area fee)
+            $areaFee = Booking::getAreaFee($request->Area);
             $expectedAdultPrice = (int) $request->No_of_adults * (float) $package->Price_for_adult;
             $expectedChildPrice = (int) $request->No_of_child * (float) $package->Price_for_child;
-            $serverCalculatedAmount = $expectedAdultPrice + $expectedChildPrice;
+            $serverCalculatedAmount = $expectedAdultPrice + $expectedChildPrice + $areaFee;
             $amount = $serverCalculatedAmount > 0 ? $serverCalculatedAmount : (float) $request->Payment;
 
             $currency = config('payhere.currency', 'USD');
@@ -176,11 +177,13 @@ class PayHereController extends Controller
         $bookingIds = $cartEntries->pluck('Booking_ID');
         $bookings = Booking::with('package')->whereIn('Booking_ID', $bookingIds)->get();
 
-        // Server-side authoritative price recalculation to prevent cart price tampering
+        // Server-side authoritative price recalculation to prevent cart price tampering (including pickup area fee)
         $totalAmount = (float) $bookings->sum(function ($b) {
             if ($b->package) {
+                $areaFee = Booking::getAreaFee($b->Area);
                 $expected = ((int) $b->No_of_adults * (float) $b->package->Price_for_adult)
-                          + ((int) $b->No_of_child * (float) $b->package->Price_for_child);
+                          + ((int) $b->No_of_child * (float) $b->package->Price_for_child)
+                          + $areaFee;
                 if ($expected > 0) {
                     $b->update(['Payment' => $expected]);
                     return $expected;

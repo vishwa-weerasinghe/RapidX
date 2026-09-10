@@ -81,10 +81,11 @@ class BookingController extends Controller
             $customerId = $customer->Customer_ID;
         }
 
-        // Server-side authoritative price calculation (prevents client price tampering)
+        // Server-side authoritative price calculation (prevents client price tampering, including pickup area fee)
         $package = \App\Models\Package::find($request->Package_ID);
+        $areaFee = Booking::getAreaFee($request->Area);
         $expectedPayment = $package
-            ? (((int) $request->No_of_adults * (float) $package->Price_for_adult) + ((int) $request->No_of_child * (float) $package->Price_for_child))
+            ? (((int) $request->No_of_adults * (float) $package->Price_for_adult) + ((int) $request->No_of_child * (float) $package->Price_for_child) + $areaFee)
             : 0;
         $paymentAmount = ($expectedPayment > 0 && !$createdByAdmin) ? $expectedPayment : (float) ($request->Payment ?? 0);
 

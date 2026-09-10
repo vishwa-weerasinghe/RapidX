@@ -74,10 +74,11 @@ class CartController extends Controller
             $customer = \App\Models\Customer::find($customerId);
         }
 
-        // Authoritative server-side price calculation to prevent price tampering
+        // Authoritative server-side price calculation to prevent price tampering (including pickup area fee)
         $package = \App\Models\Package::find($request->Package_ID);
+        $areaFee = Booking::getAreaFee($request->Area);
         $expectedPayment = $package
-            ? (((int) $request->No_of_adults * (float) $package->Price_for_adult) + ((int) $request->No_of_child * (float) $package->Price_for_child))
+            ? (((int) $request->No_of_adults * (float) $package->Price_for_adult) + ((int) $request->No_of_child * (float) $package->Price_for_child) + $areaFee)
             : 0;
         $paymentAmount = $expectedPayment > 0 ? $expectedPayment : (float) $request->Payment;
 
