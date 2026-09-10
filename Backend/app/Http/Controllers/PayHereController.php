@@ -442,13 +442,25 @@ class PayHereController extends Controller
 
             // Send to Customer
             if ($payment->customer && $payment->customer->Email) {
-                Mail::to($payment->customer->Email)->send(new BookingConfirmationMail($payment, false));
+                $htmlContent = (new BookingConfirmationMail($payment, false))->render();
+                \App\Services\BrevoMailService::send(
+                    $payment->customer->Email,
+                    'Booking Confirmation - Order #' . $payment->order_id,
+                    $htmlContent,
+                    $payment->customer->Name ?? null
+                );
             }
 
             // Send to Admin
             $adminEmail = env('ADMIN_EMAIL');
             if ($adminEmail) {
-                Mail::to($adminEmail)->send(new BookingConfirmationMail($payment, true));
+                $htmlContentAdmin = (new BookingConfirmationMail($payment, true))->render();
+                \App\Services\BrevoMailService::send(
+                    $adminEmail,
+                    '[ADMIN NOTIFICATION] Booking Confirmation - Order #' . $payment->order_id,
+                    $htmlContentAdmin,
+                    'Admin'
+                );
             }
         } catch (\Exception $e) {
             Log::error('Failed to send booking confirmation emails for order ' . $payment->order_id . ': ' . $e->getMessage());
