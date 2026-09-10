@@ -27,7 +27,7 @@ class ContactController extends Controller
 
         try {
             // Recipient can be defined in .env, falling back to MAIL_FROM_ADDRESS
-            $recipient = config('mail.contact_destination', config('mail.from.address', 'admin@wildsafari.com'));
+            $recipient = env('CONTACT_DESTINATION_EMAIL', config('mail.from.address', 'admin@wildsafari.com'));
 
             // Send email using Laravel Mail Facade
             Mail::to($recipient)->send(new ContactMessage($validated));

@@ -115,15 +115,4 @@ return [
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Contact Form Destination
-    |--------------------------------------------------------------------------
-    |
-    | The email address where contact form submissions will be delivered.
-    |
-    */
-
-    'contact_destination' => env('CONTACT_DESTINATION_EMAIL', env('MAIL_FROM_ADDRESS', 'admin@wildsafari.com')),
-
 ];
