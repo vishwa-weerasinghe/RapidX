@@ -19,7 +19,7 @@ const blogSections = [
     date: "Aug 15, 2026",
     img: minneriyaImg,
     paragraphs: [
-      'Minneriya National Park is world-renowned for the magnificent "Elephant Gathering" that occurs during the dry season, typically between July and October. Hundreds of wild elephants converge around the Minneriya tank to graze on the fresh grass revealed by the receding waters.',
+      "Minneriya National Park is world-renowned for the magnificent \"Elephant Gathering\" that occurs during the dry season, typically between July and October. Hundreds of wild elephants converge around the Minneriya tank to graze on the fresh grass revealed by the receding waters.",
       "Spanning over 8,800 hectares, the park offers a diverse landscape of dry tropical forest, grasslands, and wetlands. Beyond elephants, you might spot leopards, sloth bears, sambar deer, and a vast array of bird species including painted storks, pelicans, and the endemic Sri Lanka junglefowl.",
       "Whether you are a wildlife enthusiast or a casual traveler, a safari here promises breathtaking scenery and unforgettable close encounters with nature at its most spectacular.",
     ],
@@ -30,7 +30,7 @@ const blogSections = [
         duration: "2.5 - 3 Hours",
         guests: "Max 6 Guests per Jeep",
         startTime: "5:30 AM - 7:30 AM",
-        description: "A morning safari at Minneriya National Park offers a serene start to the day, with opportunities to witness wildlife awakening in their natural habitat. Youâ€™re likely to spot herds of wild elephants, especially during the dry season (Julyâ€“October), as they gather around the Minneriya Tank to drink and bathe. Other common sightings include sambar deer, monkeys, rabbits, jackals, toque macaques, wild buffalo, crocodiles, and a variety of bird species. Morning safari time you can see about 20% of elephants but if youâ€™re lucky you can see more. The soft morning light also makes it ideal for photography and peaceful wildlife observation.",
+        description: "A morning safari at Minneriya National Park offers a serene start to the day, with opportunities to witness wildlife awakening in their natural habitat. You're likely to spot herds of wild elephants, especially during the dry season (July–October), as they gather around the Minneriya Tank to drink and bathe. Other common sightings include sambar deer, monkeys, rabbits, jackals, toque macaques, wild buffalo, crocodiles, and a variety of bird species. Morning safari time you can see about 20% of elephants but if you're lucky you can see more. The soft morning light also makes it ideal for photography and peaceful wildlife observation.",
         departureLocations: "Hotels in Dambulla, Kandalama, Sigiriya, Minneriya, and Habarana",
         included: [
           "Private Safari Jeep Hire",
@@ -47,7 +47,7 @@ const blogSections = [
         ],
         whatToBring: ["Light-colored clothing", "Cap or hat", "Sunscreen", "Drinking water", "Camera"],
         additionalInfo: [
-          "Children under 5: Free | 11+: Adult Ticket",
+          "Children Policy: Free for under 5 years | Child Rate for 5–10 years | Adult Rate for 11+ years",
           "For same-day & next-day bookings: Contact WhatsApp +94 778902811",
           "Not recommended for pregnant women or participants with serious medical conditions",
           "Tours may shift to Kaudulla or Eco Park if fewer elephants are visible (no extra fee, no refunds)"
@@ -60,7 +60,7 @@ const blogSections = [
         duration: "2.5 - 3 Hours",
         guests: "Max 6 Guests per Jeep",
         startTime: "12:00 PM - 2:30 PM",
-        description: "An evening safari in Minneriya National Park offers an unforgettable wildlife experience, especially during the dry season (July â€“ October) when hundreds of Asian elephants gather around the ancient Minneriya Tank â€” a spectacular natural event known as â€œThe Gathering.â€ As the sun sets, visitors can witness herds of elephants bathing, grazing, and interacting in the open plains. Along the way, you may also spot deer, monkeys, crocodiles, bird species like eagles and storks, and occasionally sloth bears or leopards. The golden evening light creates a perfect backdrop for nature lovers and photographers alike.",
+        description: "An evening safari in Minneriya National Park offers an unforgettable wildlife experience, especially during the dry season (July – October) when hundreds of Asian elephants gather around the ancient Minneriya Tank — a spectacular natural event known as \"The Gathering.\" As the sun sets, visitors can witness herds of elephants bathing, grazing, and interacting in the open plains. Along the way, you may also spot deer, monkeys, crocodiles, bird species like eagles and storks, and occasionally sloth bears or leopards. The golden evening light creates a perfect backdrop for nature lovers and photographers alike.",
         departureLocations: "Hotels in Dambulla, Kandalama, Sigiriya, Minneriya, and Habarana",
         included: [
           "Private Safari Jeep Hire",
@@ -77,8 +77,8 @@ const blogSections = [
         ],
         whatToBring: ["Light-colored clothing", "Cap or hat", "Sunscreen", "Drinking water", "Camera"],
         additionalInfo: [
-          "Best Period to Visit: July â€“ October (Elephant Gathering is most spectacular). Peak: Aug & Sept.",
-          "Children under 5: Free | 11+: Adult Ticket",
+          "Best Period to Visit: July – October (Elephant Gathering is most spectacular). Peak: Aug & Sept.",
+          "Children Policy: Free for under 5 years | Child Rate for 5–10 years | Adult Rate for 11+ years",
           "For same-day & next-day bookings: Contact WhatsApp +94 778902811",
           "Not recommended for pregnant women or participants with serious medical conditions",
           "Tours may shift to Kaudulla or Eco Park if fewer elephants are visible (no extra fee, no refunds)",
@@ -92,7 +92,7 @@ const blogSections = [
         duration: "3.5 - 4 Hours",
         guests: "Max 6 Guests per Jeep",
         startTime: "5:30 AM or 2:00 PM",
-        description: "A half-day safari in Minneriya National Park offers an exciting opportunity to witness Sri Lankaâ€™s rich wildlife and scenic landscapes in a compact yet fulfilling experience. The highlight is the chance to see large herds of Asian elephants, especially during the dry season (July to October), when they gather around the Minneriya Tank to feed, bathe, and socialize. Along the way, you may also encounter other wildlife such as sambar deer, spotted deer, toque macaques, crocodiles, and a wide variety of birds including peacocks, eagles, and storks. The safari takes you through grasslands, forest patches, and wetland areas, providing diverse habitats and excellent photo opportunities.",
+        description: "A half-day safari in Minneriya National Park offers an exciting opportunity to witness Sri Lanka's rich wildlife and scenic landscapes in a compact yet fulfilling experience. The highlight is the chance to see large herds of Asian elephants, especially during the dry season (July to October), when they gather around the Minneriya Tank to feed, bathe, and socialize. Along the way, you may also encounter other wildlife such as sambar deer, spotted deer, toque macaques, crocodiles, and a wide variety of birds including peacocks, eagles, and storks. The safari takes you through grasslands, forest patches, and wetland areas, providing diverse habitats and excellent photo opportunities.",
         departureLocations: "Hotels in Dambulla, Kandalama, Sigiriya, Minneriya, and Habarana",
         included: [
           "Private Safari Jeep Hire",
@@ -109,8 +109,8 @@ const blogSections = [
         ],
         whatToBring: ["Light-colored clothing", "Cap or hat", "Sunscreen", "Drinking water", "Camera"],
         additionalInfo: [
-          "Best Period to Visit: July â€“ October (Elephant Gathering is most spectacular). Peak: Aug & Sept.",
-          "Children under 5: Free | 12+: Adult Ticket",
+          "Best Period to Visit: July – October (Elephant Gathering is most spectacular). Peak: Aug & Sept.",
+          "Children Policy: Free for under 5 years | Child Rate for 5–11 years | Adult Rate for 12+ years",
           "For same-day & next-day bookings: Contact WhatsApp +94 778902811",
           "Not recommended for pregnant women or participants with serious medical conditions",
           "Tours may shift to Kaudulla or Eco Park if fewer elephants are visible (no extra fee, no refunds)"
@@ -139,7 +139,7 @@ const blogSections = [
         duration: "2.5 - 3 Hours",
         guests: "Max 6 Guests per Jeep",
         startTime: "5:30 AM - 7:00 AM",
-        description: "A morning in Kaudulla National Park offers an exciting opportunity to witness large herds of wild elephants, especially during the dry season (August to October) when they gather around the Kaudulla Tank. Alongside elephants, you may also spot sambar deer, wild boar, peacocks, toque macaques, and a variety of birds. During morning safari time you can typically see about 20% of the elephants, but if youâ€™re lucky you can see more. The landscape is a mix of grasslands, forests, and wetlands, making for scenic photography and excellent wildlife viewing.",
+        description: "A morning in Kaudulla National Park offers an exciting opportunity to witness large herds of wild elephants, especially during the dry season (August to October) when they gather around the Kaudulla Tank. Alongside elephants, you may also spot sambar deer, wild boar, peacocks, toque macaques, and a variety of birds. During morning safari time you can typically see about 20% of the elephants, but if you're lucky you can see more. The landscape is a mix of grasslands, forests, and wetlands, making for scenic photography and excellent wildlife viewing.",
         departureLocations: "Hotels in Dambulla, Kandalama, Sigiriya, Minneriya, and Habarana",
         included: [
           "Private Safari Jeep Hire",
@@ -156,8 +156,8 @@ const blogSections = [
         ],
         whatToBring: ["Light-colored clothing", "Cap or hat", "Sunscreen", "Drinking water", "Camera"],
         additionalInfo: [
-          "Best Period to Visit: Dry Season (Aug â€“ Dec). Peak gathering: Sept & Oct (200+ elephants).",
-          "Children under 5: Free | 11+: Adult Ticket",
+          "Best Period to Visit: Dry Season (Aug – Dec). Peak gathering: Sept & Oct (200+ elephants).",
+          "Children Policy: Free for under 5 years | Child Rate for 5–10 years | Adult Rate for 11+ years",
           "For same-day & next-day bookings: Contact WhatsApp +94 778902811",
           "Not recommended for pregnant women or participants with serious medical conditions",
           "Tours may shift to Minneriya or Eco Park if fewer elephants are visible (no extra fee, no refunds)"
@@ -187,8 +187,8 @@ const blogSections = [
         ],
         whatToBring: ["Light-colored clothing", "Cap or hat", "Sunscreen", "Drinking water", "Camera"],
         additionalInfo: [
-          "Best Period to Visit: Dry Season (Aug â€“ Dec). Peak gathering: Sept & Oct (200+ elephants).",
-          "Children under 5: Free | 11+: Adult Ticket",
+          "Best Period to Visit: Dry Season (Aug – Dec). Peak gathering: Sept & Oct (200+ elephants).",
+          "Children Policy: Free for under 5 years | Child Rate for 5–10 years | Adult Rate for 11+ years",
           "For same-day & next-day bookings: Contact WhatsApp +94 778902811",
           "Not recommended for pregnant women or participants with serious medical conditions",
           "Tours may shift to Minneriya or Eco Park if fewer elephants are visible (no extra fee, no refunds)"
@@ -218,8 +218,8 @@ const blogSections = [
         ],
         whatToBring: ["Light-colored clothing", "Cap or hat", "Sunscreen", "Drinking water", "Camera"],
         additionalInfo: [
-          "Best Period to Visit: Dry Season (Aug â€“ Dec). Peak gathering: Sept & Oct (200+ elephants).",
-          "Children under 5: Free | 11+: Adult Ticket",
+          "Best Period to Visit: Dry Season (Aug – Dec). Peak gathering: Sept & Oct (200+ elephants).",
+          "Children Policy: Free for under 5 years | Child Rate for 5–10 years | Adult Rate for 11+ years",
           "For same-day & next-day bookings: Contact WhatsApp +94 778902811",
           "Not recommended for pregnant women or participants with serious medical conditions",
           "Tours may shift to Minneriya or Eco Park if fewer elephants are visible (no extra fee, no refunds)"
@@ -238,7 +238,7 @@ const blogSections = [
     img: wasgamuwaImg,
     paragraphs: [
       "Wasgamuwa National Park is an off-the-beaten-path destination that offers a more remote and intimate safari experience. Bordered by the Mahaweli and Amban rivers, the park's dense forests and expansive grasslands are rich in biodiversity.",
-      'The name "Wasgamuwa" translates to "gathering place of bears" in ancient Sinhala, paying tribute to the elusive sloth bears that inhabit the area. The park is also home to elephants, leopards, water buffalo, and marsh crocodiles.',
+      'The name \"Wasgamuwa\" translates to \"gathering place of bears\" in ancient Sinhala, paying tribute to the elusive sloth bears that inhabit the area. The park is also home to elephants, leopards, water buffalo, and marsh crocodiles.',
       "Because it is far less crowded than other parks, Wasgamuwa allows visitors to enjoy the wilderness in relative solitude. Its rugged beauty and ancient historical ruins add a unique and unforgettable charm to the safari adventure.",
     ],
     tourPackages: [
@@ -266,8 +266,8 @@ const blogSections = [
         ],
         whatToBring: ["Light-colored clothing", "Cap or hat", "Sunscreen", "Drinking water", "Camera"],
         additionalInfo: [
-          "Best Period to Visit: Dry Season (May â€“ Sept). Peak: June-Sept. Shoulder: Nov-May.",
-          "Children under 5: Free | 12+: Adult Ticket",
+          "Best Period to Visit: Dry Season (May – Sept). Peak: June-Sept. Shoulder: Nov-May.",
+          "Children Policy: Free for under 5 years | Child Rate for 5–11 years | Adult Rate for 12+ years",
           "For same-day & next-day bookings: Contact WhatsApp +94778902811",
           "Not recommended for pregnant women or participants with heart complaints or serious medical conditions"
         ],
@@ -295,7 +295,7 @@ const blogSections = [
         duration: "3 - 3.5 Hours",
         guests: "Max 6 Guests per Jeep",
         startTime: "6:30 AM (Morning) or 1:30 PM (Evening)",
-        description: "At Hurulu Eco Park, visitors can enjoy close-up sightings of Asian elephants, especially during the dry season when herds migrate from nearby parks like Minneriya and Kaudulla. The parkâ€™s lush dry evergreen forest also shelters spotted deer, wild boar, toque macaques, sambar deer, and a variety of bird species such as peacocks, eagles, and kingfishers. While rarer, animals like sloth bears and leopards may also be spotted. The safari offers a quieter, more intimate wildlife experience compared to the busier nearby parks.",
+        description: "At Hurulu Eco Park, visitors can enjoy close-up sightings of Asian elephants, especially during the dry season when herds migrate from nearby parks like Minneriya and Kaudulla. The park's lush dry evergreen forest also shelters spotted deer, wild boar, toque macaques, sambar deer, and a variety of bird species such as peacocks, eagles, and kingfishers. While rarer, animals like sloth bears and leopards may also be spotted. The safari offers a quieter, more intimate wildlife experience compared to the busier nearby parks.",
         departureLocations: "Habarana Area (Pickup from Sigiriya, Dambulla, Kandalama Area with additional fee)",
         included: [
           "Private Safari Jeep Hire",
@@ -313,7 +313,7 @@ const blogSections = [
         whatToBring: ["Light-colored clothing", "Cap or hat", "Sunscreen", "Drinking water", "Camera"],
         additionalInfo: [
           "Best Period to Visit: Dec - June when herds migrate here. Also good from May - Oct.",
-          "Children under 5: Free | 12+: Adult Ticket",
+          "Children Policy: Free for under 5 years | Child Rate for 5–11 years | Adult Rate for 12+ years",
           "For same-day & next-day bookings: Contact WhatsApp +94778902811",
           "Not recommended for pregnant women or participants with heart complaints",
           "Tours may shift to Minneriya or Kaudulla if fewer elephants are visible (no extra fee, no refunds)"
@@ -326,14 +326,14 @@ const blogSections = [
     id: "full-day-safari",
     title: "Full Day Safari Experience",
     subtitle: "Hurulu Eco Park & Minneriya or Kaudulla",
-    tags: ["Full Day", "Multi-Park", "Elephant Corridor"],
+    tags: ["Full Day", "Multi-Park", 'Elephant Corridor'],
     readTime: "5 min read",
     date: "Dec 12, 2026",
     img: minneriyaImg,
     paragraphs: [
-      "A safari covering both Hurulu Eco Park and either Minneriya or Kaudulla National Parks offers a rich and varied wildlife experience, as all these parks are part of the 'Elephant Corridor' in Sri Lankaâ€™s North Central Province.",
-      "The main highlight is the chance to see large herds of Asian elephants, especially during the dry season (July to October), when they migrate between the parks in search of food and water â€” often resulting in sightings of over 200 elephants in one place. Beyond elephants, you may encounter sambar deer, spotted deer, wild boar, toque macaques, grey langurs, and excellent birdwatching opportunities.",
-      "Each park has its own charm â€” Minneriya is known for its ancient tank and open grasslands, Kaudulla features more forest cover, and Hurulu offers unique terrain. A combined safari increases your chances of wildlife sightings and offers a deeper appreciation of the regionâ€™s natural diversity."
+      "A safari covering both Hurulu Eco Park and either Minneriya or Kaudulla National Parks offers a rich and varied wildlife experience, as all these parks are part of the 'Elephant Corridor' in Sri Lanka's North Central Province.",
+      "The main highlight is the chance to see large herds of Asian elephants, especially during the dry season (July to October), when they migrate between the parks in search of food and water — often resulting in sightings of over 200 elephants in one place. Beyond elephants, you may encounter sambar deer, spotted deer, wild boar, toque macaques, grey langurs, and excellent birdwatching opportunities.",
+      "Each park has its own charm — Minneriya is known for its ancient tank and open grasslands, Kaudulla features more forest cover, and Hurulu offers unique terrain. A combined safari increases your chances of wildlife sightings and offers a deeper appreciation of the region's natural diversity."
     ],
     tourPackages: [
       {
@@ -342,7 +342,7 @@ const blogSections = [
         duration: "8 Hours (Split Session)",
         guests: "Max 6 Guests per Jeep",
         startTime: "6:00 AM",
-        description: "An amazing full-day experience covering two parks! This safari covers both Hurulu Eco Park and either Minneriya or Kaudulla National Park. Follow the migrating herds of Asian elephants between the parks and increase your chances of seeing the spectacular gatherings. Each park has its own charmâ€”Minneriya features ancient tanks and open grasslands, Kaudulla has more forest cover, and Hurulu offers unique terrain. A combined safari gives you the deepest appreciation of the region's natural diversity.",
+        description: "An amazing full-day experience covering two parks! This safari covers both Hurulu Eco Park and either Minneriya or Kaudulla National Park. Follow the migrating herds of Asian elephants between the parks and increase your chances of seeing the spectacular gatherings. Each park has its own charm—Minneriya features ancient tanks and open grasslands, Kaudulla has more forest cover, and Hurulu offers unique terrain. A combined safari gives you the deepest appreciation of the region's natural diversity.",
         departureLocations: "Habarana Area (Pickup from Sigiriya, Dambulla, Kandalama Area with additional fee)",
         included: [
           "Private Safari Jeep Hire",
@@ -363,7 +363,7 @@ const blogSections = [
           "Tour Programme: 6:00 AM (Morning Safari) -> 10:00 AM (Rest at Hotel) -> 2:00 PM (Evening Safari) -> 6:00 PM (Drop-off)",
           "Optional Mid-day: Hiriwadunna Village Tour with Lunch available during the break.",
           "Best Period to Visit: July - October for the Gathering, or Dec-Jan to catch migrating herds.",
-          "Children under 5: Free | 12+: Adult Ticket",
+          "Children Policy: Free for under 5 years | Child Rate for 5–11 years | Adult Rate for 12+ years",
           "For same-day & next-day bookings: Contact WhatsApp +94778902811",
           "Not recommended for pregnant women or participants with serious medical conditions"
         ],
@@ -381,8 +381,8 @@ const blogSections = [
     img: minneriyaImg,
     paragraphs: [
       "Located in the heart of Sri Lanka, Dambulla offers a unique blend of spiritual heritage and vibrant local life. The iconic Dambulla Rock Cave Temple, a UNESCO World Heritage Site, invites visitors to explore over 2,000 years of Buddhist history through its stunning cave shrines filled with ancient murals and statues.",
-      "Just minutes away, the Dambulla Economic Center pulses with energy as one of the islandâ€™s largest wholesale markets, where farmers, traders, and buyers converge day and night amidst colorful piles of fresh produce. Together, these two sites capture the essence of Dambulla â€” a place where sacred tradition and everyday life beautifully coexist.",
-      "Following your cultural exploration, embark on an evening safari in Minneriya, Kaudulla, or Hurulu Eco Park. Youâ€™ll likely see majestic herds of wild elephants grazing, bathing, or moving together through grasslands and forest. Each park offers a slightly different landscape, but all are rich in biodiversity and perfect for nature lovers."
+      "Just minutes away, the Dambulla Economic Center pulses with energy as one of the island's largest wholesale markets, where farmers, traders, and buyers converge day and night amidst colorful piles of fresh produce. Together, these two sites capture the essence of Dambulla — a place where sacred tradition and everyday life beautifully coexist.",
+      "Following your cultural exploration, embark on an evening safari in Minneriya, Kaudulla, or Hurulu Eco Park. You'll likely see majestic herds of wild elephants grazing, bathing, or moving together through grasslands and forest. Each park offers a slightly different landscape, but all are rich in biodiversity and perfect for nature lovers."
     ],
     tourPackages: [
       {
@@ -417,7 +417,7 @@ const blogSections = [
         additionalInfo: [
           "Tour Plan: 9:00 AM (Dambulla Temple & Econ Center) -> 12:30 PM (Lunch) -> 2:30 PM (Safari Tour) -> 6:00 PM (Return)",
           "Safari Park Selection: We will choose Minneriya, Kaudulla, or Eco Park based on where elephant sightings are best that day.",
-          "Children under 5: Free | 12+: Adult Ticket",
+          "Children Policy: Free for under 5 years | Child Rate for 5–11 years | Adult Rate for 12+ years",
           "For same-day bookings: Contact WhatsApp +94778902811",
           "Not recommended for pregnant women or participants with serious medical conditions"
         ],
@@ -434,7 +434,7 @@ const blogSections = [
     date: "Feb 22, 2027",
     img: huruluImg,
     paragraphs: [
-      "A Habarana village tour offers an authentic glimpse into traditional Sri Lankan rural life, set amidst the scenic countryside of the islandâ€™s cultural triangle. The tour provides a meaningful opportunity to connect with the local community, appreciate their warm hospitality, and understand age-old customs that have remained unchanged for generations.",
+      "A Habarana village tour offers an authentic glimpse into traditional Sri Lankan rural life, set amidst the scenic countryside of the island's cultural triangle. The tour provides a meaningful opportunity to connect with the local community, appreciate their warm hospitality, and understand age-old customs that have remained unchanged for generations.",
       "The experience typically includes a peaceful bullock cart ride through rustic village paths, giving you an authentic taste of rural life passing lush paddy fields and mud huts. Following this, you will enjoy a calm catamaran boat ride across a tranquil lake surrounded by lotus and water lilies.",
       "As part of the village safari, guests can take part in hands-on activities like grinding rice, weaving palm leaves, and observing a live cooking demonstration. The highlight is participating in preparing a simple, delicious Sri Lankan lunch cooked over a wood-fired clay stove, followed by a hearty traditional buffet lunch."
     ],
@@ -484,8 +484,8 @@ const blogSections = [
     date: "Mar 15, 2027",
     img: kaudullaImg,
     paragraphs: [
-      "Step back in time as you explore the majestic ruins of Polonnaruwa, Sri Lankaâ€™s medieval capital and a UNESCO World Heritage Site. Once a thriving royal city in the 11th to 13th centuries, Polonnaruwa is a remarkable testament to the islandâ€™s rich history, advanced engineering, and spiritual depth. Wander through ancient palaces, intricately carved temples, and giant Buddha statues that whisper stories of a grand civilization. From the sacred Gal Vihara to the imposing Royal Palace, each stone holds echoes of kings, monks, and artisans who shaped this cultural marvel.",
-      "Following your historical exploration, you will embark on an evening safari in Minneriya, Kaudulla, or Hurulu Eco Park. Youâ€™ll likely see majestic herds of wild elephantsâ€”sometimes in the hundredsâ€”grazing, bathing, or moving together through grasslands and forest.",
+      "Step back in time as you explore the majestic ruins of Polonnaruwa, Sri Lanka's medieval capital and a UNESCO World Heritage Site. Once a thriving royal city in the 11th to 13th centuries, Polonnaruwa is a remarkable testament to the island's rich history, advanced engineering, and spiritual depth. Wander through ancient palaces, intricately carved temples, and giant Buddha statues that whisper stories of a grand civilization. From the sacred Gal Vihara to the imposing Royal Palace, each stone holds echoes of kings, monks, and artisans who shaped this cultural marvel.",
+      "Following your historical exploration, you will embark on an evening safari in Minneriya, Kaudulla, or Hurulu Eco Park. You'll likely see majestic herds of wild elephants—sometimes in the hundreds—grazing, bathing, or moving together through grasslands and forest.",
       "These parks are part of an elephant corridor, so sightings depend on the season. Along with elephants, you may spot other wildlife such as deer, monkeys, peacocks, crocodiles, and a variety of birds, all set against beautiful backdrops of open plains, forests, and ancient water reservoirs. Each park offers a slightly different landscape and experience, but all are rich in biodiversity and perfect for nature lovers."
     ],
     tourPackages: [
@@ -523,7 +523,7 @@ const blogSections = [
         additionalInfo: [
           "Tour Plan: 9:00 AM (Polonnaruwa Ruins) -> 12:30 PM (Lunch) -> 2:30 PM (Safari Tour) -> 6:00 PM (Return)",
           "Safari Park Selection: We will choose Minneriya, Kaudulla, or Eco Park based on where elephant sightings are best that day.",
-          "Children under 5: Free | 12+: Adult Ticket",
+          "Children Policy: Free for under 5 years | Child Rate for 5–11 years | Adult Rate for 12+ years",
           "For same-day bookings: Contact WhatsApp +94778902811",
           "Not recommended for pregnant women or participants with serious medical conditions"
         ],
@@ -540,9 +540,9 @@ const blogSections = [
     date: "Apr 2, 2027",
     img: kaudullaImg,
     paragraphs: [
-      "Climbing Sigiriya offers a majestic experience as you ascend the iconic Lion Rock fortress, with its ancient frescoes, mirror wall, royal gardens, and panoramic views from the topâ€”alongside rich history as a 5th-century palace and UNESCO site. In contrast, Pidurangala is a more natural, less crowded hike with a bit of rock scrambling at the end, but rewards you with stunning sunrise or sunset viewsâ€”including a perfect view of Sigiriya itself.",
+      "Climbing Sigiriya offers a majestic experience as you ascend the iconic Lion Rock fortress, with its ancient frescoes, mirror wall, royal gardens, and panoramic views from the top—alongside rich history as a 5th-century palace and UNESCO site. In contrast, Pidurangala is a more natural, less crowded hike with a bit of rock scrambling at the end, but rewards you with stunning sunrise or sunset views—including a perfect view of Sigiriya itself.",
       "Sigiriya is best for history and archaeology lovers, while Pidurangala is ideal for budget travelers, photographers, and hikers seeking a peaceful atmosphere and incredible scenery.",
-      "Following your hike, embark on an evening safari in Minneriya, Kaudulla, or Hurulu Eco Park. Youâ€™ll likely see majestic herds of wild elephants grazing, bathing, or moving together through grasslands and forest. Each park offers a slightly different landscape, but all are rich in biodiversity and perfect for nature lovers."
+      "Following your hike, embark on an evening safari in Minneriya, Kaudulla, or Hurulu Eco Park. You'll likely see majestic herds of wild elephants grazing, bathing, or moving together through grasslands and forest. Each park offers a slightly different landscape, but all are rich in biodiversity and perfect for nature lovers."
     ],
     tourPackages: [
       {
@@ -578,7 +578,7 @@ const blogSections = [
           "Tour Plan: 9:00 AM (Rock Hike) -> 12:30 PM (Lunch) -> 2:30 PM (Safari Tour) -> 6:00 PM (Return)",
           "Sunrise Option: Start at 4:30 AM if you prefer a cooler hike and a stunning sunrise.",
           "Safari Park Selection: We will choose Minneriya, Kaudulla, or Eco Park based on where elephant sightings are best that day.",
-          "Children under 5: Free | 12+: Adult Ticket",
+          "Children Policy: Free for under 5 years | Child Rate for 5–11 years | Adult Rate for 12+ years",
           "For same-day bookings: Contact WhatsApp +94778902811",
           "Not recommended for pregnant women or participants with serious medical conditions"
         ],
@@ -595,7 +595,7 @@ const blogSections = [
     date: "May 10, 2027",
     img: huruluImg,
     paragraphs: [
-      "A Sigiriya village tour offers an authentic glimpse into traditional Sri Lankan rural life, set amidst the scenic countryside of the islandâ€™s cultural triangle. The tour provides a meaningful opportunity to connect with the local community, appreciate their warm hospitality, and understand age-old customs that have remained unchanged for generations.",
+      "A Sigiriya village tour offers an authentic glimpse into traditional Sri Lankan rural life, set amidst the scenic countryside of the island's cultural triangle. The tour provides a meaningful opportunity to connect with the local community, appreciate their warm hospitality, and understand age-old customs that have remained unchanged for generations.",
       "The experience typically includes a peaceful bullock cart ride through rustic village paths, giving you an authentic taste of rural life passing lush paddy fields and mud huts. Following this, you will enjoy a calm catamaran boat ride across a tranquil lake surrounded by lotus and water lilies.",
       "As part of the village safari, guests can take part in hands-on activities like grinding rice, weaving palm leaves, and observing a live cooking demonstration. The highlight is participating in preparing a simple, delicious Sri Lankan lunch cooked over a wood-fired clay stove, followed by a hearty traditional buffet lunch."
     ],
@@ -878,7 +878,7 @@ export default function Blog() {
                                 : "text-neutral-500 bg-neutral-100"
                             }`}
                           >
-                            {isOpen ? "â–² Hide Details" : "â–¼ View Details"}
+                            {isOpen ? "▲ Hide Details" : "▼ View Details"}
                           </div>
                         </button>
 
@@ -967,7 +967,7 @@ export default function Blog() {
                               </div>
                             </div>
 
-                            {/* Additional Info + Departure + Cancellation */}
+                            {/* Additional Info + Departure + Policy Link */}
                             <div
                               className={`p-4 sm:p-6 border-t space-y-4 ${
                                 isDark ? "border-neutral-800" : "border-neutral-100"
@@ -995,7 +995,7 @@ export default function Blog() {
                                         isDark ? "text-neutral-400" : "text-neutral-500"
                                       }`}
                                     >
-                                      <span className="text-sacramento mt-0.5 shrink-0">â€¢</span>
+                                      <span className="text-sacramento mt-0.5 shrink-0">•</span>
                                       {info}
                                     </li>
                                   ))}
@@ -1003,14 +1003,19 @@ export default function Blog() {
                               </div>
 
                               <div
-                                className={`text-xs rounded-lg p-3 ${
+                                className={`text-xs rounded-lg p-3 flex flex-wrap items-center justify-between gap-2 ${
                                   isDark ? "bg-neutral-800/50 text-neutral-400" : "bg-neutral-50 text-neutral-500"
                                 }`}
                               >
-                                <span className={`font-bold ${isDark ? "text-neutral-300" : "text-neutral-600"}`}>
-                                  Cancellation:{" "}
+                                <span className={isDark ? "text-neutral-400" : "text-neutral-500"}>
+                                  Looking for cancellation and refund terms?
                                 </span>
-                                {pkg.cancellation}
+                                <Link
+                                  to="/return-refund-policy"
+                                  className="font-bold text-sacramento hover:underline flex items-center gap-1"
+                                >
+                                  View Refund & Return Policy →
+                                </Link>
                               </div>
 
                               {/* CTA Button */}
