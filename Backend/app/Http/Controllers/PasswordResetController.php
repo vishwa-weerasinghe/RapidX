@@ -41,12 +41,12 @@ class PasswordResetController extends Controller
 
         if ($status === Password::RESET_LINK_SENT) {
             return response()->json([
-                'message' => 'Password reset link has been sent to your email address.'
+                'message' => 'Reset link sent to your email.'
             ], 200);
         }
 
         return response()->json([
-            'message' => 'Unable to send reset link. Please try again later.'
+            'message' => 'Unable to send reset link to that email.'
         ], 400);
     }
 
@@ -101,12 +101,12 @@ class PasswordResetController extends Controller
 
         if ($status === Password::PASSWORD_RESET) {
             return response()->json([
-                'message' => 'Your password has been successfully reset! You can now sign in with your new password.'
+                'message' => 'Password has been successfully reset.'
             ], 200);
         }
 
         return response()->json([
-            'message' => 'Invalid or expired reset token. Please request a new password reset link.'
+            'message' => 'Invalid token or email.'
         ], 400);
     }
 }
