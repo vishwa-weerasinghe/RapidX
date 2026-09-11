@@ -35,10 +35,12 @@ export function Header({ user, toggleSidebar }) {
   };
 
   useEffect(() => {
-    fetchUnreadBookings()
-    const interval = setInterval(fetchUnreadBookings, 5000)
-    return () => clearInterval(interval)
-  }, [customerId])
+  const token = localStorage.getItem('token');
+  if (!customerId || !token) return;
+  fetchUnreadBookings();
+  const interval = setInterval(fetchUnreadBookings, 5000);
+  return () => clearInterval(interval);
+}, [customerId]);
 
   const handleBookingNotifications = async () => {
     const token = localStorage.getItem('token');
