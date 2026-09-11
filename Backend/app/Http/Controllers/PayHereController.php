@@ -361,14 +361,41 @@ class PayHereController extends Controller
             $verified = true;
         } else {
             $payHereRecord = $this->payHereService->verifyPaymentWithPayHere($payment->order_id);
-            if ($payHereRecord && (int) ($payHereRecord['status_code'] ?? 0) === 2) {
-                $verified = true;
-                $payment->update([
-                    'payhere_payment_id' => $payHereRecord['payment_id'] ?? $payment->payhere_payment_id,
-                    'payment_method'     => $payHereRecord['method'] ?? $payment->payment_method,
-                    'status_code'        => 2,
-                    'status_message'     => $payHereRecord['status_message'] ?? 'Payment Completed Successfully',
-                ]);
+            if ($payHereRecord) {
+                $status = strtoupper((string) ($payHereRecord['status'] ?? ''));
+                $statusCode = isset($payHereRecord['status_code']) ? (int) $payHereRecord['status_code'] : null;
+
+                $isSuccess = ($statusCode === 2) || in_array($status, ['RECEIVED', 'SUCCESS', 'COMPLETED']);
+                $isFailed = ($statusCode === -1 || $statusCode === -2) || in_array($status, ['FAILED', 'CANCELLED', 'DECLINED']);
+
+                $method = null;
+                if (isset($payHereRecord['payment_method']['method'])) {
+                    $method = $payHereRecord['payment_method']['method'];
+                } elseif (isset($payHereRecord['method'])) {
+                    $method = $payHereRecord['method'];
+                }
+
+                if ($isSuccess) {
+                    $verified = true;
+                    $payment->update([
+                        'payhere_payment_id' => $payHereRecord['payment_id'] ?? $payment->payhere_payment_id,
+                        'payment_method'     => $method ?? $payment->payment_method,
+                        'status_code'        => 2,
+                        'status_message'     => $payHereRecord['status_message'] ?? 'Payment Completed Successfully',
+                    ]);
+                } elseif ($isFailed) {
+                    $isCancelled = ($statusCode === -1 || $status === 'CANCELLED');
+                    $payment->update([
+                        'status'         => $isCancelled ? 'Cancelled' : 'Failed',
+                        'status_code'    => $statusCode ?? ($isCancelled ? -1 : -2),
+                        'status_message' => $payHereRecord['status_message'] ?? 'Payment Failed or Declined',
+                    ]);
+                    Booking::where('Payment_ID', $payment->Payment_ID)
+                        ->where('Status', '!=', 'Confirmed')
+                        ->update([
+                            'Status' => $isCancelled ? 'Cancelled' : 'Failed',
+                        ]);
+                }
             }
         }
 
@@ -455,7 +482,7 @@ class PayHereController extends Controller
             }
 
             // Send to Admin
-            $adminEmail = env('ADMIN_EMAIL');
+            $adminEmail = env('ADMIN_EMAIL', env('CONTACT_DESTINATION_EMAIL', 'vishwaweerasinghe0@gmail.com'));
             if ($adminEmail) {
                 $htmlContentAdmin = (new BookingConfirmationMail($payment, true))->render();
                 \App\Services\BrevoMailService::send(
