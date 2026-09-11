@@ -67,4 +67,15 @@ class User extends Authenticatable implements CanResetPasswordContract
     {
         return $this->Email;
     }
+
+    /**
+     * Send the password reset notification using custom notification.
+     *
+     * @param  string  $token
+     * @return void
+     */
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new \App\Notifications\CustomResetPasswordNotification($token));
+    }
 }
