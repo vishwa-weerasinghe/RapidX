@@ -22,7 +22,10 @@ import minneriyaImg from "./assets/minneriya.jpg";
 import kaudullaImg from "./assets/kaudulla.jpg";
 import wasgamuwaImg from "./assets/wasgamuwa.jpg";
 import huruluImg from "./assets/hurulu.jpg";
-
+import {
+  PackageCardSkeleton,
+  ReviewCardSkeleton,
+} from "./components/Skeletons";
 
 export default function App() {
   // --- CONSUME SYSTEM THEME ---
@@ -192,6 +195,7 @@ export default function App() {
 
   const [packages, setPackages] = useState([]);
   const [galleryImages, setGalleryImages] = useState([]);
+  const [packagesLoading, setPackagesLoading] = useState(true);
 
   useEffect(() => {
     // 1. Fetch Packages from DB
@@ -228,7 +232,8 @@ export default function App() {
           setPackages(mapped);
         }
       })
-      .catch((err) => console.error("Error loading packages:", err));
+      .catch((err) => console.error("Error loading packages:", err))
+      .finally(() => setPackagesLoading(false));
 
     // 2. Fetch Media Gallery from DB
     api
@@ -362,6 +367,8 @@ export default function App() {
 
   const [reviews, setReviews] = useState([]);
   const [tripadvisorReviews, setTripadvisorReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
+  const [tripadvisorLoading, setTripadvisorLoading] = useState(true);
   const [showAllTripadvisorReviews, setShowAllTripadvisorReviews] =
     useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
@@ -410,7 +417,8 @@ export default function App() {
           setTripadvisorReviews(res.data);
         }
       })
-      .catch((err) => console.error("Error loading TripAdvisor reviews:", err));
+      .catch((err) => console.error("Error loading TripAdvisor reviews:", err))
+      .finally(() => setTripadvisorLoading(false));
 
     api
       .get("/reviews")
@@ -477,7 +485,8 @@ export default function App() {
           setReviews([]);
         }
       })
-      .catch((err) => console.error("Error loading reviews:", err));
+      .catch((err) => console.error("Error loading reviews:", err))
+      .finally(() => setReviewsLoading(false));
   };
 
   useEffect(() => {
@@ -1353,85 +1362,96 @@ export default function App() {
 
             {/* Cards */}
             <div className="flex flex-wrap justify-center gap-8">
-              {packages.map((pkg, idx) => (
-                <div
-                  key={idx}
-                  className="w-full sm:w-[calc(50%-1rem)] lg:w-[260px] bg-white rounded-3xl overflow-hidden border border-gray-200 shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col"
-                >
-                  {/* Image */}
-                  <div className="relative h-56 overflow-hidden bg-gray-50">
-                    <img
-                      src={pkg.img}
-                      alt={pkg.title}
-                      className="w-full h-full object-cover object-center transition-transform duration-500 hover:scale-105"
-                    />
+              {packagesLoading && packages.length === 0 ? (
+                Array.from({ length: 4 }).map((_, idx) => (
+                  <PackageCardSkeleton key={`pkg-skeleton-${idx}`} />
+                ))
+              ) : packages.length > 0 ? (
+                packages.map((pkg, idx) => (
+                  <div
+                    key={idx}
+                    className="w-full sm:w-[calc(50%-1rem)] lg:w-[260px] bg-white rounded-3xl overflow-hidden border border-gray-200 shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col"
+                  >
+                    {/* Image */}
+                    <div className="relative h-56 overflow-hidden bg-gray-50">
+                      <img
+                        src={pkg.img}
+                        alt={pkg.title}
+                        loading="lazy"
+                        className="w-full h-full object-cover object-center transition-transform duration-500 hover:scale-105"
+                      />
 
-                    {pkg.popular && (
-                      <span className="absolute top-4 right-4 bg-pink-600 text-white text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full border border-pink-500 shadow-md hover:scale-105 transition-all duration-300">
-                        Popular
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Content */}
-                  <div className="p-5 flex flex-col flex-grow">
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">
-                      {pkg.title}
-                    </h3>
-
-                    <div className="mb-4 max-h-32 overflow-auto">
-                      <p className="text-sm text-gray-500 leading-relaxed whitespace-pre-line break-words">
-                        {pkg.desc}
-                      </p>
+                      {pkg.popular && (
+                        <span className="absolute top-4 right-4 bg-pink-600 text-white text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full border border-pink-500 shadow-md hover:scale-105 transition-all duration-300">
+                          Popular
+                        </span>
+                      )}
                     </div>
 
-                    {/* Features */}
-                    <ul className="space-y-2 text-sm text-gray-600 mb-4">
-                      <li className="flex items-center gap-2">
-                        <span className="text-green-600">✓</span>
-                        Professional Guide
-                      </li>
+                    {/* Content */}
+                    <div className="p-5 flex flex-col flex-grow">
+                      <h3 className="text-lg font-bold text-gray-900 mb-2">
+                        {pkg.title}
+                      </h3>
 
-                      <li className="flex items-center gap-2">
-                        <span className="text-green-600">✓</span>
-                        Comfortable Jeep
-                      </li>
+                      <div className="mb-4 max-h-32 overflow-auto">
+                        <p className="text-sm text-gray-500 leading-relaxed whitespace-pre-line break-words">
+                          {pkg.desc}
+                        </p>
+                      </div>
 
-                      <li className="flex items-center gap-2">
-                        <span className="text-green-600">✓</span>
-                        Reasonable Prices
-                      </li>
-                    </ul>
+                      {/* Features */}
+                      <ul className="space-y-2 text-sm text-gray-600 mb-4">
+                        <li className="flex items-center gap-2">
+                          <span className="text-green-600">✓</span>
+                          Professional Guide
+                        </li>
 
-                    {/* Price */}
-                    <div className="flex items-center justify-between border-t border-gray-100 pt-4 mb-4">
-                      <span className="text-sm text-gray-500">Starting From</span>
+                        <li className="flex items-center gap-2">
+                          <span className="text-green-600">✓</span>
+                          Comfortable Jeep
+                        </li>
 
-                      <div className="text-right">
-                        <div className="text-xl font-bold text-castleton">$ {pkg.price.toLocaleString()}</div>
-                        <div className="text-xs text-gray-500">per adult</div>
+                        <li className="flex items-center gap-2">
+                          <span className="text-green-600">✓</span>
+                          Reasonable Prices
+                        </li>
+                      </ul>
+
+                      {/* Price */}
+                      <div className="flex items-center justify-between border-t border-gray-100 pt-4 mb-4">
+                        <span className="text-sm text-gray-500">Starting From</span>
+
+                        <div className="text-right">
+                          <div className="text-xl font-bold text-castleton">$ {pkg.price.toLocaleString()}</div>
+                          <div className="text-xs text-gray-500">per adult</div>
+                        </div>
+                      </div>
+
+                      {/* Buttons */}
+                      <div className="flex gap-3 mt-auto">
+                        <button
+                          onClick={() => handleBookNow(pkg)}
+                          className="flex-1 bg-[#2E7D32] text-white font-bold text-center py-2.5 rounded-xl shadow-md hover:bg-[#1B5E20] hover:shadow-lg transition-all duration-300 transform hover:-translate-y-[2px]"
+                        >
+                          Book Now
+                        </button>
+
+                        <button
+                          onClick={() => handleAddToCart(pkg)}
+                          className="flex-1 border-2 border-sacramento text-sacramento py-2.5 rounded-xl font-semibold hover:bg-sacramento/10 transition-colors"
+                        >
+                          Add to Cart
+                        </button>
                       </div>
                     </div>
-
-                    {/* Buttons */}
-                    <div className="flex gap-3 mt-auto">
-                      <button
-                        onClick={() => handleBookNow(pkg)}
-                        className="flex-1 bg-[#2E7D32] text-white font-bold text-center py-2.5 rounded-xl shadow-md hover:bg-[#1B5E20] hover:shadow-lg transition-all duration-300 transform hover:-translate-y-[2px]"
-                      >
-                        Book Now
-                      </button>
-
-                      <button
-                        onClick={() => handleAddToCart(pkg)}
-                        className="flex-1 border-2 border-sacramento text-sacramento py-2.5 rounded-xl font-semibold hover:bg-sacramento/10 transition-colors"
-                      >
-                        Add to Cart
-                      </button>
-                    </div>
                   </div>
+                ))
+              ) : (
+                <div className="py-12 text-center text-gray-500">
+                  No packages available at the moment.
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </section>
@@ -1495,7 +1515,11 @@ export default function App() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-6">
-                {tripadvisorVisibleReviews.length > 0 ? (
+                {tripadvisorLoading && tripadvisorVisibleReviews.length === 0 ? (
+                  Array.from({ length: 4 }).map((_, index) => (
+                    <ReviewCardSkeleton key={`ta-skeleton-${index}`} />
+                  ))
+                ) : tripadvisorVisibleReviews.length > 0 ? (
                   tripadvisorVisibleReviews.map((rev, index) =>
                     renderReviewCard(rev, index),
                   )
@@ -1542,6 +1566,7 @@ export default function App() {
               <PublicReviewSection
                 reviews={systemVisibleReviews}
                 renderReviewCard={renderReviewCard}
+                loading={reviewsLoading}
               />
             </div>
           </div>
