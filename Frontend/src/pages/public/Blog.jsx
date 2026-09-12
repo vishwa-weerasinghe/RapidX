@@ -25,7 +25,7 @@ const blogSections = [
     ],
     tourPackages: [
       {
-        name: "Morning Safari",
+        name: "Minneriya Morning Safari",
         price: "$90.00",
         duration: "2.5 - 3 Hours",
         guests: "Max 6 Guests per Jeep",
@@ -55,7 +55,7 @@ const blogSections = [
         cancellation: "10% fee (20+ days before), scaling up to 60% fee (1+ days before)"
       },
       {
-        name: "Evening Safari",
+        name: "Minneriya Evening Safari",
         price: "$90.00",
         duration: "2.5 - 3 Hours",
         guests: "Max 6 Guests per Jeep",
@@ -87,7 +87,7 @@ const blogSections = [
         cancellation: "10% fee (20+ days before), 20% fee (10+ days before), scaling up to 60% fee (1+ days before)"
       },
       {
-        name: "Half Day Safari (Morning or Evening)",
+        name: "Minneriya Half Day Safari (Morning or Evening)",
         price: "$100.00",
         duration: "3.5 - 4 Hours",
         guests: "Max 6 Guests per Jeep",
@@ -134,7 +134,7 @@ const blogSections = [
     ],
     tourPackages: [
       {
-        name: "Morning Safari",
+        name: "Kaudulla Morning Safari",
         price: "$90.00",
         duration: "2.5 - 3 Hours",
         guests: "Max 6 Guests per Jeep",
@@ -165,7 +165,7 @@ const blogSections = [
         cancellation: "10% fee (20+ days before), 25% fee (10+ days before), scaling up to 60% fee (1+ days before)"
       },
       {
-        name: "Evening Safari",
+        name: "Kaudulla Evening Safari",
         price: "$90.00",
         duration: "2.5 - 3 Hours",
         guests: "Max 6 Guests per Jeep",
@@ -196,7 +196,7 @@ const blogSections = [
         cancellation: "10% fee (20+ days before), 25% fee (10+ days before), scaling up to 60% fee (1+ days before)"
       },
       {
-        name: "Half Day Safari (Morning or Evening)",
+        name: "Kaudulla Half Day Safari (Morning or Evening)",
         price: "$100.00",
         duration: "3.5 - 4 Hours",
         guests: "Max 6 Guests per Jeep",
@@ -291,7 +291,7 @@ const blogSections = [
     tourPackages: [
       {
         name: "Hurulu Eco Park Safari (Morning or Evening)",
-        price: "$70.00",
+        price: "Adult $50 - $70 | Child $15",
         duration: "3 - 3.5 Hours",
         guests: "Max 6 Guests per Jeep",
         startTime: "6:30 AM (Morning) or 1:30 PM (Evening)",
@@ -319,6 +319,40 @@ const blogSections = [
           "Tours may shift to Minneriya or Kaudulla if fewer elephants are visible (no extra fee, no refunds)"
         ],
         cancellation: "20+ days: 15% fee, 15+ days: 10% fee, 10+ days: 40% fee, 8+ days: 60% fee, 2 days or less: 100% fee. Unusable features are non-refundable."
+      },
+      {
+        name: "Hurulu Eco Park Half Day Safari",
+        price: "Adult $50 - $72.5 | Child $35",
+        duration: "3.5 Hours",
+        guests: "Max 6 Guests per Jeep",
+        startTime: "7:00 AM – 1:30 PM",
+        description: "Meet your professional safari jeep driver from your hotel for your 3–3.5 hour morning jeep safari tour of Hurulu eco park. At Hurulu Eco Park, visitors can enjoy close-up sightings of Asian elephants, especially during the dry season when herds migrate from nearby parks like Minneriya and Kaudulla. The park's lush dry evergreen forest also shelters spotted deer, wild boar, toque macaques, sambar deer, and a variety of bird species such as peacocks, eagles, and kingfishers. While rarer, animals like sloth bears and leopards may also be spotted. The safari offers a quieter, more intimate wildlife experience compared to the busier nearby parks. When your tour is complete, your vehicle will return you to your hotel or original departure point.",
+        departureLocations: "Hotel in Habarana area (Pickup from Sigiriya, Dambulla, Kandalama Area with additional fee)",
+        included: [
+          "Comfortable Safari Jeep (Private)",
+          "Experienced & professional driver",
+          "Park Entrance Ticket",
+          "Park Service Fee $10",
+          "Jeep & Driver Entrance fee",
+          "Government tax rate 18%",
+          "Hotel pickup & drop-off",
+          "Binoculars",
+          "Water bottles"
+        ],
+        excluded: [
+          "Tips for safari driver & park ranger (recommended)",
+          "Food and drinks"
+        ],
+        whatToBring: ["Light color clothing", "Cap or hat", "Sunscreen", "Drinking water", "Camera"],
+        additionalInfo: [
+          "Best Period to Visit: Dry Season (May – September). Also January through June as migrating herds move here.",
+          "Time are subject to change due to local traffic conditions. Hotel pickups start approximately 60-90 minutes prior to this time as per your hotel location. Contact our driver and verify your exact pickup time.",
+          "Children Policy: Free for under 5 years | Child Rate for 5–11 years | Adult Rate for 12+ years",
+          "For same-day & next-day bookings, please contact us via call or WhatsApp with exact pickup location at +94778902811",
+          "Not recommended for participants with heart complaints or other serious medical conditions",
+          "At some seasons, if there is a less number of elephants visible, we may change the tour to Kaudulla National Park or Minneriya National Park as an alternative without additional fee to give a better safari experience. (No refund for Safari Tour Changes)"
+        ],
+        cancellation: "20+ Days before departure: 15% fee, 15 Days before departure: 10% fee, 10 Days before departure: 40% fee, 8 Days before departure: 60% fee, 2 Days or less: 100% fee. Unusable features are non-refundable"
       }
     ]
   },
@@ -338,7 +372,7 @@ const blogSections = [
     tourPackages: [
       {
         name: "Full Day Safari (Hurulu + Minneriya/Kaudulla)",
-        price: "$150.00",
+        price: "Adult $100 - $150 | Child $35",
         duration: "8 Hours (Split Session)",
         guests: "Max 6 Guests per Jeep",
         startTime: "6:00 AM",
@@ -441,7 +475,7 @@ const blogSections = [
     tourPackages: [
       {
         name: "Hiriwadunna Village Safari",
-        price: "$40.00",
+        price: "Adult $30 - $40 | Child $20",
         duration: "2 Hours 30 Minutes",
         guests: "Max 6 Guests",
         startTime: "8:00 AM",
@@ -834,9 +868,19 @@ export default function Blog() {
                               <h4 className="text-base sm:text-lg font-bold truncate">
                                 {pkg.name}
                               </h4>
-                              <span className="text-lg sm:text-xl font-bold text-sacramento whitespace-nowrap">
-                                {pkg.price}
-                              </span>
+                              {pkg.price.includes("|") ? (
+                                <div className="flex flex-wrap items-center gap-2">
+                                  {pkg.price.split("|").map((pPart, i) => (
+                                    <span key={i} className="inline-flex items-center px-3 py-1 rounded-full bg-sacramento/10 text-sacramento text-sm sm:text-base font-bold border border-sacramento/20 whitespace-nowrap shadow-sm">
+                                      {pPart.trim()}
+                                    </span>
+                                  ))}
+                                </div>
+                              ) : (
+                                <span className="inline-flex items-center px-3 py-1 rounded-full bg-sacramento/10 text-sacramento text-sm sm:text-base font-bold border border-sacramento/20 whitespace-nowrap shadow-sm">
+                                  {pkg.price}
+                                </span>
+                              )}
                             </div>
                             <div
                               className={`flex flex-wrap items-center gap-x-4 gap-y-1 text-xs sm:text-sm ${
