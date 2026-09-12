@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../../axios";
+import { ReviewCardSkeleton } from "../../components/Skeletons";
 
 const defaultReviewForm = { name: "", email: "", rating: 5, message: "" };
 
@@ -9,6 +10,7 @@ export default function Review({
   title = "Write a Review",
   description = "Share your experience with our service.",
   layout = "section",
+  loading: loadingReviews = false,
 }) {
   const [reviewForm, setReviewForm] = useState(defaultReviewForm);
   const [loading, setLoading] = useState(false);
@@ -213,7 +215,9 @@ export default function Review({
     <div className="mt-8 border-t border-[#dce8d7] pt-6 dark:border-[#15311f]">
       <h3 className="text-xl font-semibold">Recent Reviews</h3>
       <div className="mt-4 space-y-3">
-        {visibleReviews.length === 0 ? (
+        {loadingReviews && visibleReviews.length === 0 ? (
+          Array.from({ length: 3 }).map((_, i) => <ReviewCardSkeleton key={i} />)
+        ) : visibleReviews.length === 0 ? (
           <p className="text-[#4b5d47] dark:text-[#b3c4b1]">No reviews yet. Be the first to share your experience.</p>
         ) : (
           visibleReviews.map((review) => (
@@ -240,7 +244,13 @@ export default function Review({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] gap-6 lg:items-start">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {visibleReviews.map((rev, index) => renderCard(rev, index))}
+        {loadingReviews && visibleReviews.length === 0 ? (
+          Array.from({ length: 4 }).map((_, index) => (
+            <ReviewCardSkeleton key={index} />
+          ))
+        ) : (
+          visibleReviews.map((rev, index) => renderCard(rev, index))
+        )}
       </div>
 
       <div className="rounded-2xl border border-gray-100 bg-gray-50 p-6 shadow-sm lg:sticky lg:top-24">
