@@ -85,7 +85,7 @@ export default function VehicleForm() {
   if (loading) return <div className="p-6 text-muted">Loading...</div>;
 
   return (
-    <div className="p-6 max-w-xl">
+    <div className="p-6 w-full">
       <h1 className="text-2xl font-bold text-charcoal dark:text-white mb-6">
         {isEdit ? "Edit Vehicle" : "Add Vehicle"}
       </h1>
