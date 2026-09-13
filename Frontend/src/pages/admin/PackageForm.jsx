@@ -93,7 +93,7 @@ export default function PackageForm() {
   }
 
   return (
-    <div className="p-6 max-w-xl">
+    <div className="p-6 w-full">
       <h1 className="text-2xl font-bold text-charcoal dark:text-white mb-6">
         {isEdit ? "Edit Package" : "Add Package"}
       </h1>
