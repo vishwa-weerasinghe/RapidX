@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../../axios";
+import { STATIC_BLOGS } from "../../constants/staticBlogs";
 
 const initialState = {
   Package_Name: "",
@@ -8,6 +9,7 @@ const initialState = {
   Price_for_adult: "",
   Price_for_child: "",
   Image: null,
+  blog_id: "",
 };
 
 export default function PackageForm() {
@@ -39,6 +41,7 @@ export default function PackageForm() {
           Price_for_adult: res.data.Price_for_adult || "",
           Price_for_child: res.data.Price_for_child || "",
           Image: res.data.Image || "",
+          blog_id: res.data.blog_id || "",
         });
       })
       .catch((err) => console.error(err))
@@ -62,6 +65,7 @@ export default function PackageForm() {
     formData.append("Description", form.Description);
     formData.append("Price_for_adult", form.Price_for_adult);
     formData.append("Price_for_child", form.Price_for_child);
+    formData.append("blog_id", form.blog_id || "");
 
     if (form.Image instanceof File) {
       formData.append("Image", form.Image);
@@ -197,6 +201,31 @@ export default function PackageForm() {
             <p className="text-red-500 text-xs mt-1">
               {errors.Image[0]}
             </p>
+          )}
+        </div>
+
+        {/* Related Blog */}
+        <div>
+          <label className="block text-sm font-medium text-charcoal dark:text-white mb-1">
+            Related Blog
+          </label>
+
+          <select
+            name="blog_id"
+            value={form.blog_id}
+            onChange={handleChange}
+            className="form-input"
+          >
+            <option value="">No Related Blog</option>
+            {STATIC_BLOGS.map((blog) => (
+              <option key={blog.blogId} value={blog.blogId}>
+                {blog.title}
+              </option>
+            ))}
+          </select>
+
+          {errors.blog_id && (
+            <p className="text-red-500 text-xs mt-1">{errors.blog_id[0]}</p>
           )}
         </div>
 

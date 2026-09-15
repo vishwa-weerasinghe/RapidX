@@ -7,7 +7,8 @@ import {
   ArrowRight,
 } from "lucide-react";
 import api from "../../axios";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { getStaticBlog } from "../../constants/staticBlogs";
 
 export default function Packages() {
 
@@ -105,7 +106,10 @@ export default function Packages() {
       ) : (
         <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-10">
 
-          {filteredPackages.map((pkg) => (
+          {filteredPackages.map((pkg) => {
+            const relatedBlog = getStaticBlog(pkg.blog_id);
+
+            return (
 
             <div
               key={pkg.id}
@@ -198,11 +202,21 @@ export default function Packages() {
                   <ArrowRight size={18} />
                 </button>
 
+                {relatedBlog && (
+                  <Link
+                    to={`/blog#${relatedBlog.slug}`}
+                    className="mt-3 block w-full text-center text-sacramento hover:underline"
+                  >
+                    Read More
+                  </Link>
+                )}
+
               </div>
 
             </div>
 
-          ))}
+            );
+          })}
 
         </div>
       )}

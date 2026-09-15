@@ -74,6 +74,50 @@ class PackageControllerTest extends TestCase
         ]);
     }
 
+    public function test_admin_can_create_a_package_with_an_optional_blog_id(): void
+    {
+        $response = $this->actingAs($this->adminUser(), 'sanctum')
+            ->postJson('/api/packages', [
+                'Package_Name' => 'Minneriya Safari',
+                'Description' => 'Safari package linked to the Minneriya guide',
+                'Price_for_adult' => 200.00,
+                'Price_for_child' => 120.00,
+                'blog_id' => 1,
+            ]);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('blog_id', 1);
+
+        $this->assertDatabaseHas('packages', [
+            'Package_Name' => 'Minneriya Safari',
+            'blog_id' => 1,
+        ]);
+    }
+
+    public function test_admin_can_remove_a_package_blog_link(): void
+    {
+        $package = Package::create([
+            'Package_Name' => 'Special Safari Package',
+            'Description' => 'Package without a related blog',
+            'Price_for_adult' => 150.00,
+            'Price_for_child' => 90.00,
+            'blog_id' => 1,
+        ]);
+
+        $response = $this->actingAs($this->adminUser(), 'sanctum')
+            ->putJson('/api/packages/' . $package->id, [
+                'blog_id' => null,
+            ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('blog_id', null);
+
+        $this->assertDatabaseHas('packages', [
+            'id' => $package->id,
+            'blog_id' => null,
+        ]);
+    }
+
     public function test_admin_can_create_a_package_with_an_image(): void
     {
         $secureUrl = 'https://res.cloudinary.com/demo/package-images/safari.jpg';

@@ -8,10 +8,12 @@ import minneriyaImg from "../../assets/minneriya.jpg";
 import kaudullaImg from "../../assets/kaudulla.jpg";
 import wasgamuwaImg from "../../assets/wasgamuwa.jpg";
 import huruluImg from "../../assets/hurulu.jpg";
+import { STATIC_BLOGS } from "../../constants/staticBlogs";
 
 const blogSections = [
   {
     id: "minneriya",
+    blogId: STATIC_BLOGS[0].blogId,
     title: "Minneriya National Park",
     subtitle: "The Great Elephant Gathering",
     tags: ["Wildlife", "Elephants", "Dry Season"],
@@ -121,6 +123,7 @@ const blogSections = [
   },
   {
     id: "kaudulla",
+    blogId: STATIC_BLOGS[1].blogId,
     title: "Kaudulla National Park",
     subtitle: "The Pristine Wildlife Corridor",
     tags: ["Bird Watching", "Jeep Safari", "Nature"],
@@ -230,6 +233,7 @@ const blogSections = [
   },
   {
     id: "wasgamuwa",
+    blogId: STATIC_BLOGS[2].blogId,
     title: "Wasgamuwa National Park",
     subtitle: "The Gathering Place of Bears",
     tags: ["Off The Beaten Path", "Sloth Bears", "Adventure"],
@@ -277,6 +281,7 @@ const blogSections = [
   },
   {
     id: "hurulu",
+    blogId: STATIC_BLOGS[3].blogId,
     title: "Hurulu Eco Park",
     subtitle: "The Vital Elephant Corridor",
     tags: ["Eco Tourism", "Biosphere", "Leopards"],
@@ -358,6 +363,7 @@ const blogSections = [
   },
   {
     id: "full-day-safari",
+    blogId: STATIC_BLOGS[4].blogId,
     title: "Full Day Safari Experience",
     subtitle: "Hurulu Eco Park & Minneriya or Kaudulla",
     tags: ["Full Day", "Multi-Park", 'Elephant Corridor'],
@@ -407,6 +413,7 @@ const blogSections = [
   },
   {
     id: "dambulla-safari",
+    blogId: STATIC_BLOGS[5].blogId,
     title: "Dambulla Cultural & Safari Tour",
     subtitle: "Cave Temple, Economic Center & Evening Safari",
     tags: ["Culture", "Temple", "Wildlife"],
@@ -461,6 +468,7 @@ const blogSections = [
   },
   {
     id: "hiriwadunna-village-tour",
+    blogId: STATIC_BLOGS[6].blogId,
     title: "Hiriwadunna Village Tour",
     subtitle: "Experience Authentic Sri Lankan Rural Life",
     tags: ["Culture", "Village Life", "Eco Tourism"],
@@ -511,6 +519,7 @@ const blogSections = [
   },
   {
     id: "polonnaruwa-safari",
+    blogId: STATIC_BLOGS[7].blogId,
     title: "Polonnaruwa Ruins & Safari Tour",
     subtitle: "Medieval Capital & Evening Safari",
     tags: ["History", "UNESCO", "Wildlife"],
@@ -567,6 +576,7 @@ const blogSections = [
   },
   {
     id: "sigiriya-pidurangala-safari",
+    blogId: STATIC_BLOGS[8].blogId,
     title: "Sigiriya / Pidurangala & Safari Tour",
     subtitle: "Majestic Rock Hiking & Evening Safari",
     tags: ["Hiking", "Landmark", "Wildlife"],
@@ -622,6 +632,7 @@ const blogSections = [
   },
   {
     id: "sigiriya-village-tour",
+    blogId: STATIC_BLOGS[9].blogId,
     title: "Sigiriya Village Tour",
     subtitle: "Experience Authentic Sri Lankan Rural Life",
     tags: ["Culture", "Village Life", "Eco Tourism"],

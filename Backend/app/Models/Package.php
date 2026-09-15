@@ -15,6 +15,7 @@ class Package extends Model
         'Price_for_adult',
         'Price_for_child',
         'Image',
+        'blog_id',
     ];
 
     public function bookings()

@@ -40,6 +40,7 @@ class PackageController extends Controller
             'Price_for_adult'  => 'required|numeric|min:0',
             'Price_for_child'  => 'required|numeric|min:0',
             'Image' => 'nullable|image|mimes:jpeg,png,jpg,webp',
+            'blog_id' => 'nullable|integer|min:1|max:10',
         ]);
         if ($request->hasFile('Image')) {
             try {
@@ -78,7 +79,7 @@ class PackageController extends Controller
             'Price_for_adult'  => 'sometimes|required|numeric|min:0',
             'Price_for_child'  => 'sometimes|required|numeric|min:0',
             'Image' => 'nullable|image|mimes:jpeg,png,jpg,webp',
-    
+            'blog_id' => 'sometimes|nullable|integer|min:1|max:10',
 
         ]);
         if ($request->hasFile('Image')) {
