@@ -32,8 +32,9 @@ class PayHerePaymentTest extends TestCase
         return Package::create(array_merge([
             'Package_Name'    => 'Minneriya Elephant Safari',
             'Description'     => 'World famous elephant gathering tour.',
-            'Price_for_adult' => 150.00,
-            'Price_for_child' => 75.00,
+            'price_one_adult' => 150.00,
+            'price_more_adult' => 150.00,
+            'price_child' => 75.00,
         ], $overrides));
     }
 
@@ -210,8 +211,8 @@ class PayHerePaymentTest extends TestCase
 
     public function test_cart_checkout_initiation_creates_single_parent_payment_for_all_cart_bookings(): void
     {
-        $package1 = $this->createPackage(['Package_Name' => 'Morning Tour', 'Price_for_adult' => 75.00]);
-        $package2 = $this->createPackage(['Package_Name' => 'Evening Tour', 'Price_for_adult' => 100.00]);
+        $package1 = $this->createPackage(['Package_Name' => 'Morning Tour', 'price_one_adult' => 75.00, 'price_more_adult' => 75.00]);
+        $package2 = $this->createPackage(['Package_Name' => 'Evening Tour', 'price_one_adult' => 100.00, 'price_more_adult' => 100.00]);
         $customer = $this->createCustomer();
 
         // Each booking has 2 adults: (2 * 75 = 150) + (2 * 100 = 200) = 350.00
@@ -243,7 +244,7 @@ class PayHerePaymentTest extends TestCase
 
     public function test_cart_checkout_initiation_recalculates_price_preventing_tampering(): void
     {
-        $package = $this->createPackage(['Package_Name' => 'Safari Premium', 'Price_for_adult' => 150.00]);
+        $package = $this->createPackage(['Package_Name' => 'Safari Premium', 'price_one_adult' => 150.00, 'price_more_adult' => 150.00]);
         $customer = $this->createCustomer();
 
         // Malicious client sets booking payment to 1.00 instead of 2 * 150 = 300.00
@@ -598,8 +599,9 @@ class PayHerePaymentTest extends TestCase
     public function test_single_booking_initiation_recalculates_tampered_price(): void
     {
         $package = $this->createPackage([
-            'Price_for_adult' => 100.00,
-            'Price_for_child' => 50.00,
+            'price_one_adult' => 100.00,
+            'price_more_adult' => 100.00,
+            'price_child' => 50.00,
         ]);
 
         // Attempt to pass 1.00 USD instead of (2 * 100) + (1 * 50) = 250.00

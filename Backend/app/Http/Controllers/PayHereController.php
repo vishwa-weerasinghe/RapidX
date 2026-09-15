@@ -88,9 +88,7 @@ class PayHereController extends Controller
 
             // Server-side price calculation to prevent client-side price tampering (including pickup area fee)
             $areaFee = Booking::getAreaFee($request->Area);
-            $expectedAdultPrice = (int) $request->No_of_adults * (float) $package->Price_for_adult;
-            $expectedChildPrice = (int) $request->No_of_child * (float) $package->Price_for_child;
-            $serverCalculatedAmount = $expectedAdultPrice + $expectedChildPrice + $areaFee;
+            $serverCalculatedAmount = $package->calculatePrice((int) $request->No_of_adults, (int) $request->No_of_child) + $areaFee;
             $amount = $serverCalculatedAmount > 0 ? $serverCalculatedAmount : (float) $request->Payment;
 
             $currency = config('payhere.currency', 'USD');
@@ -181,9 +179,7 @@ class PayHereController extends Controller
         $totalAmount = (float) $bookings->sum(function ($b) {
             if ($b->package) {
                 $areaFee = Booking::getAreaFee($b->Area);
-                $expected = ((int) $b->No_of_adults * (float) $b->package->Price_for_adult)
-                          + ((int) $b->No_of_child * (float) $b->package->Price_for_child)
-                          + $areaFee;
+                $expected = $b->package->calculatePrice((int) $b->No_of_adults, (int) $b->No_of_child) + $areaFee;
                 if ($expected > 0) {
                     $b->update(['Payment' => $expected]);
                     return $expected;

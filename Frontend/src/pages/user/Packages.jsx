@@ -163,12 +163,31 @@ export default function Packages() {
                         className="text-sacramento"
                       />
 
-                      <span>Adult</span>
+                      <span>1 Adult</span>
 
                     </div>
 
                     <span className="font-bold text-sacramento">
-                      $ {pkg.Price_for_adult}
+                      $ {pkg.price_one_adult}
+                    </span>
+
+                  </div>
+
+                  <div className="flex justify-between items-center">
+
+                    <div className="flex items-center gap-2">
+
+                      <Users
+                        size={18}
+                        className="text-sacramento"
+                      />
+
+                      <span>Per Adult (2+)</span>
+
+                    </div>
+
+                    <span className="font-bold text-sacramento">
+                      $ {pkg.price_more_adult}
                     </span>
 
                   </div>
@@ -187,7 +206,7 @@ export default function Packages() {
                     </div>
 
                     <span className="font-bold text-sacramento">
-                      $ {pkg.Price_for_child}
+                      $ {pkg.price_child}
                     </span>
 
                   </div>

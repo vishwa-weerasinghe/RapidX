@@ -38,8 +38,9 @@ class PackageControllerTest extends TestCase
         Package::create([
             'Package_Name' => 'Weekend Escape',
             'Description' => 'A short getaway package',
-            'Price_for_adult' => 150.00,
-            'Price_for_child' => 90.00,
+            'price_one_adult' => 150.00,
+            'price_more_adult' => 150.00,
+            'price_child' => 90.00,
         ]);
 
         $response = $this->actingAs($this->adminUser(), 'sanctum')
@@ -58,8 +59,9 @@ class PackageControllerTest extends TestCase
             ->postJson('/api/packages', [
                 'Package_Name' => 'Family Package',
                 'Description' => 'Great for family trips',
-                'Price_for_adult' => 200.50,
-                'Price_for_child' => 120.25,
+                'price_one_adult' => 200.50,
+                'price_more_adult' => 200.50,
+                'price_child' => 120.25,
             ]);
 
         $response->assertStatus(201)
@@ -69,8 +71,9 @@ class PackageControllerTest extends TestCase
         $this->assertDatabaseHas('packages', [
             'Package_Name' => 'Family Package',
             'Description' => 'Great for family trips',
-            'Price_for_adult' => 200.50,
-            'Price_for_child' => 120.25,
+            'price_one_adult' => 200.50,
+            'price_more_adult' => 200.50,
+            'price_child' => 120.25,
         ]);
     }
 
@@ -80,8 +83,9 @@ class PackageControllerTest extends TestCase
             ->postJson('/api/packages', [
                 'Package_Name' => 'Minneriya Safari',
                 'Description' => 'Safari package linked to the Minneriya guide',
-                'Price_for_adult' => 200.00,
-                'Price_for_child' => 120.00,
+                'price_one_adult' => 200.00,
+                'price_more_adult' => 200.00,
+                'price_child' => 120.00,
                 'blog_id' => 1,
             ]);
 
@@ -99,8 +103,9 @@ class PackageControllerTest extends TestCase
         $package = Package::create([
             'Package_Name' => 'Special Safari Package',
             'Description' => 'Package without a related blog',
-            'Price_for_adult' => 150.00,
-            'Price_for_child' => 90.00,
+            'price_one_adult' => 150.00,
+            'price_more_adult' => 150.00,
+            'price_child' => 90.00,
             'blog_id' => 1,
         ]);
 
@@ -127,8 +132,9 @@ class PackageControllerTest extends TestCase
             ->post('/api/packages', [
                 'Package_Name' => 'Image Package',
                 'Description' => 'Package with an uploaded image',
-                'Price_for_adult' => 175.00,
-                'Price_for_child' => 95.00,
+                'price_one_adult' => 175.00,
+                'price_more_adult' => 175.00,
+                'price_child' => 95.00,
                 'Image' => UploadedFile::fake()->create('safari.jpg', 100, 'image/jpeg'),
             ]);
 
@@ -148,12 +154,13 @@ class PackageControllerTest extends TestCase
             ->postJson('/api/packages', [
                 'Package_Name' => '',
                 'Description' => '',
-                'Price_for_adult' => '',
-                'Price_for_child' => '',
+                'price_one_adult' => '',
+                'price_more_adult' => '',
+                'price_child' => '',
             ]);
 
         $response->assertStatus(422)
-            ->assertJsonValidationErrors(['Package_Name', 'Description', 'Price_for_adult', 'Price_for_child']);
+            ->assertJsonValidationErrors(['Package_Name', 'Description', 'price_one_adult', 'price_more_adult', 'price_child']);
 
         $this->assertDatabaseCount('packages', 0);
     }
@@ -164,12 +171,13 @@ class PackageControllerTest extends TestCase
             ->postJson('/api/packages', [
                 'Package_Name' => str_repeat('A', 101),
                 'Description' => 'Valid description',
-                'Price_for_adult' => -5,
-                'Price_for_child' => 'not-a-number',
+                'price_one_adult' => -5,
+                'price_more_adult' => -5,
+                'price_child' => 'not-a-number',
             ]);
 
         $response->assertStatus(422)
-            ->assertJsonValidationErrors(['Package_Name', 'Price_for_adult', 'Price_for_child']);
+            ->assertJsonValidationErrors(['Package_Name', 'price_one_adult', 'price_more_adult', 'price_child']);
 
         $this->assertDatabaseCount('packages', 0);
     }
@@ -179,16 +187,18 @@ class PackageControllerTest extends TestCase
         $package = Package::create([
             'Package_Name' => 'Protected Package',
             'Description' => 'Should not be accessible',
-            'Price_for_adult' => 100.00,
-            'Price_for_child' => 60.00,
+            'price_one_adult' => 100.00,
+            'price_more_adult' => 100.00,
+            'price_child' => 60.00,
         ]);
 
         $this->getJson('/api/packages')->assertStatus(200);
         $this->postJson('/api/packages', [
             'Package_Name' => 'New Package',
             'Description' => 'Should fail',
-            'Price_for_adult' => 80.00,
-            'Price_for_child' => 40.00,
+            'price_one_adult' => 80.00,
+            'price_more_adult' => 80.00,
+            'price_child' => 40.00,
         ])->assertStatus(401);
         $this->getJson('/api/packages/' . $package->id)->assertStatus(200);
         $this->putJson('/api/packages/' . $package->id, [
@@ -204,16 +214,18 @@ class PackageControllerTest extends TestCase
         $package = Package::create([
             'Package_Name' => 'Protected Package',
             'Description' => 'Should remain unchanged',
-            'Price_for_adult' => 100.00,
-            'Price_for_child' => 60.00,
+            'price_one_adult' => 100.00,
+            'price_more_adult' => 100.00,
+            'price_child' => 60.00,
         ]);
         $user = $this->authenticatedUser();
 
         $this->actingAs($user, 'sanctum')->postJson('/api/packages', [
             'Package_Name' => 'New Package',
             'Description' => 'Should fail',
-            'Price_for_adult' => 80.00,
-            'Price_for_child' => 40.00,
+            'price_one_adult' => 80.00,
+            'price_more_adult' => 80.00,
+            'price_child' => 40.00,
         ])->assertStatus(403);
 
         $this->actingAs($user, 'sanctum')->putJson('/api/packages/' . $package->id, [
@@ -235,25 +247,26 @@ class PackageControllerTest extends TestCase
         $package = Package::create([
             'Package_Name' => 'Original Package',
             'Description' => 'Original description',
-            'Price_for_adult' => 120.00,
-            'Price_for_child' => 80.00,
+            'price_one_adult' => 120.00,
+            'price_more_adult' => 120.00,
+            'price_child' => 80.00,
         ]);
 
         $response = $this->actingAs($this->adminUser(), 'sanctum')
             ->putJson('/api/packages/' . $package->id, [
                 'Package_Name' => 'Updated Package',
-                'Price_for_adult' => 140.00,
+                'price_one_adult' => 140.00,
             ]);
 
         $response->assertStatus(200)
             ->assertJsonPath('Package_Name', 'Updated Package');
 
-        $this->assertEquals(140.0, $response->json('Price_for_adult'));
+        $this->assertEquals(140.0, $response->json('price_one_adult'));
 
         $this->assertDatabaseHas('packages', [
             'id' => $package->id,
             'Package_Name' => 'Updated Package',
-            'Price_for_adult' => 140.00,
+            'price_one_adult' => 140.00,
             'Description' => 'Original description',
         ]);
     }
@@ -263,8 +276,9 @@ class PackageControllerTest extends TestCase
         $package = Package::create([
             'Package_Name' => 'Delete Me',
             'Description' => 'To be removed',
-            'Price_for_adult' => 90.00,
-            'Price_for_child' => 50.00,
+            'price_one_adult' => 90.00,
+            'price_more_adult' => 90.00,
+            'price_child' => 50.00,
         ]);
 
         $response = $this->actingAs($this->adminUser(), 'sanctum')
@@ -285,8 +299,9 @@ class PackageControllerTest extends TestCase
         $package = Package::create([
             'Package_Name' => 'Package With Image',
             'Description' => 'Its image should be removed too.',
-            'Price_for_adult' => 90.00,
-            'Price_for_child' => 50.00,
+            'price_one_adult' => 90.00,
+            'price_more_adult' => 90.00,
+            'price_child' => 50.00,
             'Image' => $imagePath,
         ]);
 

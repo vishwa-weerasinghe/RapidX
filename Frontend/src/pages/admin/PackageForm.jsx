@@ -6,8 +6,9 @@ import { STATIC_BLOGS } from "../../constants/staticBlogs";
 const initialState = {
   Package_Name: "",
   Description: "",
-  Price_for_adult: "",
-  Price_for_child: "",
+  price_one_adult: "",
+  price_more_adult: "",
+  price_child: "",
   Image: null,
   blog_id: "",
 };
@@ -38,8 +39,9 @@ export default function PackageForm() {
         setForm({
           Package_Name: res.data.Package_Name || "",
           Description: res.data.Description || "",
-          Price_for_adult: res.data.Price_for_adult || "",
-          Price_for_child: res.data.Price_for_child || "",
+          price_one_adult: res.data.price_one_adult || "",
+          price_more_adult: res.data.price_more_adult || "",
+          price_child: res.data.price_child || "",
           Image: res.data.Image || "",
           blog_id: res.data.blog_id || "",
         });
@@ -63,8 +65,9 @@ export default function PackageForm() {
     const formData = new FormData();
     formData.append("Package_Name", form.Package_Name);
     formData.append("Description", form.Description);
-    formData.append("Price_for_adult", form.Price_for_adult);
-    formData.append("Price_for_child", form.Price_for_child);
+    formData.append("price_one_adult", form.price_one_adult);
+    formData.append("price_more_adult", form.price_more_adult);
+    formData.append("price_child", form.price_child);
     formData.append("blog_id", form.blog_id || "");
 
     if (form.Image instanceof File) {
@@ -230,25 +233,46 @@ export default function PackageForm() {
         </div>
 
         {/* Prices */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-4">
 
           <div>
             <label className="block text-sm font-medium text-charcoal dark:text-white mb-1">
-              Price (Adult)
+              Price (1 Adult)
             </label>
 
             <input
               type="number"
               step="0.01"
-              name="Price_for_adult"
-              value={form.Price_for_adult}
+              name="price_one_adult"
+              value={form.price_one_adult}
               onChange={handleChange}
               className="form-input"
             />
 
-            {errors.Price_for_adult && (
+            {errors.price_one_adult && (
               <p className="text-red-500 text-xs mt-1">
-                {errors.Price_for_adult[0]}
+                {errors.price_one_adult[0]}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-charcoal dark:text-white mb-1">
+              Price (Per Adult 2+)
+            </label>
+
+            <input
+              type="number"
+              step="0.01"
+              name="price_more_adult"
+              value={form.price_more_adult}
+              onChange={handleChange}
+              className="form-input"
+            />
+
+            {errors.price_more_adult && (
+              <p className="text-red-500 text-xs mt-1">
+                {errors.price_more_adult[0]}
               </p>
             )}
           </div>
@@ -261,15 +285,15 @@ export default function PackageForm() {
             <input
               type="number"
               step="0.01"
-              name="Price_for_child"
-              value={form.Price_for_child}
+              name="price_child"
+              value={form.price_child}
               onChange={handleChange}
               className="form-input"
             />
 
-            {errors.Price_for_child && (
+            {errors.price_child && (
               <p className="text-red-500 text-xs mt-1">
-                {errors.Price_for_child[0]}
+                {errors.price_child[0]}
               </p>
             )}
           </div>

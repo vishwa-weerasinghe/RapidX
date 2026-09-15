@@ -216,10 +216,13 @@ export default function Bookings() {
   const calculateCreatePayment = () => {
     if (!selectedPackage) return 0;
 
-    const adultTotal = Number(createForm.No_of_adults || 0) * Number(selectedPackage.Price_for_adult || 0);
-    const childTotal = Number(createForm.No_of_child || 0) * Number(selectedPackage.Price_for_child || 0);
+    const adults = Number(createForm.No_of_adults || 0);
+    const adultRate = adults <= 1
+      ? Number(selectedPackage.price_one_adult || 0)
+      : Number(selectedPackage.price_more_adult || 0);
+    const childTotal = Number(createForm.No_of_child || 0) * Number(selectedPackage.price_child || 0);
 
-    return adultTotal + childTotal;
+    return adults * adultRate + childTotal;
   };
 
   const handleCreateBooking = async (event) => {
@@ -572,7 +575,7 @@ export default function Bookings() {
                     <option value="">Select a package</option>
                     {packages.map((item) => (
                       <option key={item.Package_ID || item.id} value={item.Package_ID || item.id}>
-                        {item.Package_Name} - $ {item.Price_for_adult} (Adult) / $ {item.Price_for_child} (Child)
+                        {item.Package_Name} - 1 Adult: $ {item.price_one_adult} / Adult (2+): $ {item.price_more_adult} / Child: $ {item.price_child}
                       </option>
                     ))}
                   </select>

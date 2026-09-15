@@ -213,24 +213,34 @@ export default function App() {
             ...res.data.map((pkg) => Number(pkg.bookings_count || 0)),
           );
 
-          const mapped = res.data.map((pkg) => ({
-            id: pkg.id,
-            blog_id: pkg.blog_id,
-            title: pkg.Package_Name,
-            desc: pkg.Description,
-            price: Number(pkg.Price_for_adult) || 0,
-            img: pkg.Image
-              ? pkg.Image.startsWith("http")
-                ? pkg.Image
-                : `${backendUrl}/storage/${pkg.Image}`
-              : fallbackImage,
-            popular:
-              Number(pkg.bookings_count || 0) === maxBookings &&
-              maxBookings > 0,
-            Price_for_adult: pkg.Price_for_adult,
-            Price_for_child: pkg.Price_for_child,
-            Package_Name: pkg.Package_Name,
-          }));
+          const mapped = res.data.map((pkg) => {
+            const oneAdult = Number(pkg.price_one_adult) || 0;
+            const moreAdult = Number(pkg.price_more_adult) || 0;
+
+            return {
+              id: pkg.id,
+              blog_id: pkg.blog_id,
+              title: pkg.Package_Name,
+              desc: pkg.Description,
+              // "Starting from" shows the lowest available adult rate.
+              price:
+                oneAdult > 0 && moreAdult > 0
+                  ? Math.min(oneAdult, moreAdult)
+                  : oneAdult || moreAdult,
+              img: pkg.Image
+                ? pkg.Image.startsWith("http")
+                  ? pkg.Image
+                  : `${backendUrl}/storage/${pkg.Image}`
+                : fallbackImage,
+              popular:
+                Number(pkg.bookings_count || 0) === maxBookings &&
+                maxBookings > 0,
+              price_one_adult: oneAdult,
+              price_more_adult: moreAdult,
+              price_child: Number(pkg.price_child) || 0,
+              Package_Name: pkg.Package_Name,
+            };
+          });
           setPackages(mapped);
         }
       })

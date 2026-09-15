@@ -36,8 +36,9 @@ class DashboardControllerTest extends TestCase
         return Package::create(array_merge([
             'Package_Name'    => 'Safari Explorer',
             'Description'     => 'Explore the wild.',
-            'Price_for_adult' => 150.00,
-            'Price_for_child' => 75.00,
+            'price_one_adult' => 150.00,
+            'price_more_adult' => 150.00,
+            'price_child' => 75.00,
         ], $overrides));
     }
 
