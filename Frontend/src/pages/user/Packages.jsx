@@ -205,9 +205,10 @@ export default function Packages() {
                 {relatedBlog && (
                   <Link
                     to={`/blog#${relatedBlog.slug}`}
-                    className="mt-3 block w-full text-center text-sacramento hover:underline"
+                    className="mt-3 inline-flex items-center justify-center gap-1 text-sacramento font-semibold hover:underline"
                   >
                     Read More
+                    <ArrowRight size={16} />
                   </Link>
                 )}
 

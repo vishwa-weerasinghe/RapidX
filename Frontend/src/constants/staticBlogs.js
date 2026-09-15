@@ -12,5 +12,7 @@ export const STATIC_BLOGS = [
 ];
 
 export function getStaticBlog(blogId) {
-  return STATIC_BLOGS.find((blog) => blog.blogId === Number(blogId));
+  const normalizedBlogId = String(blogId ?? "").trim();
+
+  return STATIC_BLOGS.find((blog) => String(blog.blogId) === normalizedBlogId);
 }

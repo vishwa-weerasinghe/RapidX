@@ -26,6 +26,7 @@ import {
   PackageCardSkeleton,
   ReviewCardSkeleton,
 } from "./components/Skeletons";
+import { getStaticBlog } from "./constants/staticBlogs";
 
 export default function App() {
   // --- CONSUME SYSTEM THEME ---
@@ -214,6 +215,7 @@ export default function App() {
 
           const mapped = res.data.map((pkg) => ({
             id: pkg.id,
+            blog_id: pkg.blog_id,
             title: pkg.Package_Name,
             desc: pkg.Description,
             price: Number(pkg.Price_for_adult) || 0,
@@ -1367,7 +1369,10 @@ export default function App() {
                   <PackageCardSkeleton key={`pkg-skeleton-${idx}`} />
                 ))
               ) : packages.length > 0 ? (
-                packages.map((pkg, idx) => (
+                packages.map((pkg, idx) => {
+                  const relatedBlog = getStaticBlog(pkg.blog_id);
+
+                  return (
                   <div
                     key={idx}
                     className="w-full sm:w-[calc(50%-1rem)] lg:w-[260px] bg-white rounded-3xl overflow-hidden border border-gray-200 shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col"
@@ -1444,9 +1449,20 @@ export default function App() {
                           Add to Cart
                         </button>
                       </div>
+
+                      {relatedBlog && (
+                        <Link
+                          to={`/blog#${relatedBlog.slug}`}
+                          className="mt-3 inline-flex items-center justify-center gap-1 text-sacramento font-bold hover:underline transition-colors"
+                        >
+                          Read More
+                          <span className="text-xs">→</span>
+                        </Link>
+                      )}
                     </div>
                   </div>
-                ))
+                  );
+                })
               ) : (
                 <div className="py-12 text-center text-gray-500">
                   No packages available at the moment.
