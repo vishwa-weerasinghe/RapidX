@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../../axios";
+import { STATIC_BLOGS } from "../../constants/staticBlogs";
 
 const initialState = {
   title: "",
   description: "",
+  blog_id: "",
 };
 
 export default function MediaForm() {
@@ -29,8 +31,9 @@ export default function MediaForm() {
       .get(`/media/${id}`)
       .then((res) => {
         setForm({
-          title: res.data.title,
+          title: res.data.title || "",
           description: res.data.description || "",
+          blog_id: res.data.blog_id || "",
         });
         if (res.data.file_path) {
           setExistingImageUrl(res.data.file_path);
@@ -60,6 +63,7 @@ export default function MediaForm() {
     const formData = new FormData();
     formData.append("title", form.title);
     formData.append("description", form.description);
+    formData.append("blog_id", form.blog_id || "");
 
     if (selectedFile) {
       formData.append("image", selectedFile);
@@ -145,6 +149,29 @@ export default function MediaForm() {
           />
           {errors.description && (
             <p className="text-red-500 text-xs mt-1">{errors.description[0]}</p>
+          )}
+        </div>
+
+        {/* Related Blog */}
+        <div>
+          <label className="block text-sm font-medium text-charcoal dark:text-white mb-1">
+            Related Blog
+          </label>
+          <select
+            name="blog_id"
+            value={form.blog_id}
+            onChange={handleChange}
+            className="form-input"
+          >
+            <option value="">No Related Blog</option>
+            {STATIC_BLOGS.map((blog) => (
+              <option key={blog.blogId} value={blog.blogId}>
+                {blog.title}
+              </option>
+            ))}
+          </select>
+          {errors.blog_id && (
+            <p className="text-red-500 text-xs mt-1">{errors.blog_id[0]}</p>
           )}
         </div>
 
