@@ -49,19 +49,23 @@ export function PackageCardSkeleton() {
           <div className="h-3.5 w-2/3 skeleton-shimmer rounded" />
         </div>
 
-        {/* Feature Checkmarks */}
-        <div className="space-y-2.5 mb-5 mt-auto">
-          <div className="flex items-center gap-2.5">
-            <div className="w-4 h-4 rounded-full skeleton-shimmer shrink-0" />
-            <div className="h-3 w-32 skeleton-shimmer rounded" />
-          </div>
-          <div className="flex items-center gap-2.5">
-            <div className="w-4 h-4 rounded-full skeleton-shimmer shrink-0" />
-            <div className="h-3 w-28 skeleton-shimmer rounded" />
-          </div>
-          <div className="flex items-center gap-2.5">
-            <div className="w-4 h-4 rounded-full skeleton-shimmer shrink-0" />
+        {/* Feature Checkmarks (2 columns) */}
+        <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 mb-5 mt-auto">
+          <div className="flex items-center gap-2">
+            <div className="w-3.5 h-3.5 rounded-full skeleton-shimmer shrink-0" />
             <div className="h-3 w-24 skeleton-shimmer rounded" />
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3.5 h-3.5 rounded-full skeleton-shimmer shrink-0" />
+            <div className="h-3 w-24 skeleton-shimmer rounded" />
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3.5 h-3.5 rounded-full skeleton-shimmer shrink-0" />
+            <div className="h-3 w-20 skeleton-shimmer rounded" />
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3.5 h-3.5 rounded-full skeleton-shimmer shrink-0" />
+            <div className="h-3 w-20 skeleton-shimmer rounded" />
           </div>
         </div>
 
