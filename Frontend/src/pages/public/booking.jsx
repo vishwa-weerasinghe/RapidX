@@ -16,7 +16,6 @@ import {
     FileText,
     Globe,
     ShoppingCart,
-    ChevronLeft,
     Info,
     Compass,
 } from "lucide-react";
@@ -56,25 +55,74 @@ export default function Booking() {
 
     // Load packages and set initial selected package
     useEffect(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
         fetchPackages();
-    }, []);
+    }, [id, location.state]);
 
     const fetchPackages = async () => {
         try {
             const res = await api.get("/packages");
-            setPackagesList(res.data);
+            const packages = Array.isArray(res.data) ? res.data : [];
+            setPackagesList(packages);
 
             const statePkgId = location.state?.packageId;
-            const initialId = id || statePkgId || (isEditMode ? "" : (res.data[0]?.Package_ID || res.data[0]?.id || ""));
-            setSelectedPackageId(initialId);
+            const statePkgName = location.state?.packageName;
+            const stateBlogId = location.state?.blogId;
+            const stateSectionId = location.state?.sectionId;
+            const searchParams = new URLSearchParams(location.search);
+            const queryPkgId = searchParams.get("packageId") || searchParams.get("package");
+            const queryPkgName = searchParams.get("name") || searchParams.get("packageName");
 
-            const foundPkg = res.data.find(
-                (p) => String(p.Package_ID || p.id) === String(initialId)
-            );
+            let targetId = id || queryPkgId || statePkgId;
+            let foundPkg = null;
+
+            if (targetId) {
+                foundPkg = packages.find(
+                    (p) => String(p.Package_ID || p.id) === String(targetId)
+                );
+            }
+
+            const targetName = statePkgName || queryPkgName;
+            if (!foundPkg && targetName) {
+                const targetLower = targetName.toLowerCase().trim();
+                foundPkg = packages.find(
+                    (p) => (p.Package_Name || p.title || "").toLowerCase().trim() === targetLower
+                );
+                if (!foundPkg) {
+                    foundPkg = packages.find((p) => {
+                        const pName = (p.Package_Name || p.title || "").toLowerCase();
+                        return pName.includes(targetLower) || targetLower.includes(pName);
+                    });
+                }
+            }
+
+            if (!foundPkg && stateBlogId) {
+                foundPkg = packages.find((p) => String(p.blog_id) === String(stateBlogId));
+            }
+
+            if (!foundPkg && stateSectionId) {
+                const secLower = String(stateSectionId).toLowerCase().trim();
+                foundPkg = packages.find((p) => {
+                    const pName = (p.Package_Name || p.title || "").toLowerCase();
+                    return pName.includes(secLower);
+                });
+            }
+
             if (foundPkg) {
+                const resolvedId = foundPkg.Package_ID || foundPkg.id;
+                setSelectedPackageId(resolvedId);
                 setPkg(foundPkg);
-            } else if (res.data.length > 0) {
-                setPkg(res.data[0]);
+            } else {
+                // Do not auto-select any package when none was explicitly requested
+                setSelectedPackageId("");
+                setPkg(null);
+            }
+
+            if (location.state?.pickupTime) {
+                setForm((prev) => ({
+                    ...prev,
+                    Pickup_Time: location.state.pickupTime,
+                }));
             }
         } catch (err) {
             console.log(err);
@@ -149,9 +197,7 @@ export default function Booking() {
         const foundPkg = packagesList.find(
             (p) => String(p.Package_ID || p.id) === String(pkgId)
         );
-        if (foundPkg) {
-            setPkg(foundPkg);
-        }
+        setPkg(foundPkg || null);
     };
 
     // handle input change
@@ -196,6 +242,11 @@ export default function Booking() {
     // submit booking
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!selectedPackageId || !pkg) {
+            alert("Please select a tour package to proceed with your booking.");
+            return;
+        }
 
         const payload = {
             Booking_Date: form.Booking_Date,
@@ -280,24 +331,14 @@ export default function Booking() {
 
     return (
         <>
-          <SEO
-            title="Book Your Sri Lanka Jeep Safari | Minneriya, Kaudulla & Wasgamuwa"
-            description="Instantly book a jeep safari in Minneriya, Kaudulla or Wasgamuwa National Park. Choose your package, date, and number of guests. Best rates guaranteed."
-            canonical="https://www.minneriyawildjeepsafari.com/booking"
-          />
-        <div className="min-h-screen bg-offwhite dark:bg-[#050505] text-[#1f2b20] dark:text-[#f5f7f2] py-12 px-4 md:px-6 transition-colors duration-300">
-            <div className="max-w-4xl mx-auto space-y-6">
-                {/* Navigation Action */}
-                <button
-                    onClick={() => navigate(-1)}
-                    className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-slate-500 hover:text-sacramento dark:text-slate-400 dark:hover:text-castleton-300 transition-colors"
-                >
-                    <ChevronLeft size={16} />
-                    Back
-                </button>
-
-                <div className="flex justify-center">
-                    <div className="w-full max-w-2xl bg-[#fcfaf5] dark:bg-[#0d0d0d] border border-[#dce8d7] dark:border-[#15311f] rounded-3xl shadow-xl p-6 md:p-8 space-y-8">
+            <SEO
+                title="Book Your Sri Lanka Jeep Safari | Minneriya, Kaudulla & Wasgamuwa"
+                description="Instantly book a jeep safari in Minneriya, Kaudulla or Wasgamuwa National Park. Choose your package, date, and number of guests. Best rates guaranteed."
+                canonical="https://www.minneriyawildjeepsafari.com/booking"
+            />
+            <div className="min-h-screen bg-offwhite dark:bg-[#050505] text-[#1f2b20] dark:text-[#f5f7f2] py-12 px-4 md:px-6 transition-colors duration-300">
+                <div className="max-w-2xl mx-auto">
+                    <div className="w-full bg-[#fcfaf5] dark:bg-[#0d0d0d] border border-[#dce8d7] dark:border-[#15311f] rounded-3xl shadow-xl p-6 md:p-8 space-y-8">
                         <div>
                             <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
                                 {isEditMode ? "Edit Booking" : "Book Your Adventure"}
@@ -310,37 +351,72 @@ export default function Booking() {
                         <form onSubmit={handleSubmit} className="space-y-6">
                             {/* Section 0: Package Selector */}
                             <div className="space-y-4">
-                                <div className="flex items-center gap-2 pb-2 border-b border-slate-50 dark:border-slate-800/40">
-                                    <Compass size={16} className="text-castleton" />
-                                    <h4 className="text-xs font-extrabold uppercase tracking-widest text-slate-400">
-                                        Choose Safari Package
-                                    </h4>
+                                <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800/60">
+                                    <div className="flex items-center gap-2">
+                                        <Compass size={18} className="text-castleton dark:text-castleton-400" />
+                                        <h4 className="text-xs sm:text-sm font-extrabold uppercase tracking-widest text-slate-600 dark:text-slate-300">
+                                            Choose Safari Package
+                                        </h4>
+                                    </div>
+                                    {!selectedPackageId && (
+                                        <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-3 py-1 rounded-full border border-amber-200 dark:border-amber-800/40">
+                                            Package Required
+                                        </span>
+                                    )}
                                 </div>
 
-                                <div className="flex flex-col gap-1.5">
-                                    <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
-                                        Available Packages
+                                <div className="flex flex-col gap-2">
+                                    <label className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-200">
+                                        Select Safari Tour Package <span className="text-red-500">*</span>
                                     </label>
                                     <div className="relative">
                                         <select
                                             value={selectedPackageId}
                                             onChange={handlePackageChange}
-                                            className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3.5 px-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all appearance-none cursor-pointer"
+                                            className={`w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm sm:text-base font-semibold py-4 pl-4 sm:pl-5 pr-12 rounded-2xl border-2 transition-all appearance-none cursor-pointer shadow-sm min-h-[56px] ${!selectedPackageId
+                                                ? "border-amber-400/80 dark:border-amber-500/60 ring-2 ring-amber-400/20"
+                                                : "border-slate-200 dark:border-slate-700 hover:border-castleton dark:hover:border-castleton-400 focus:border-castleton focus:ring-4 focus:ring-castleton/20"
+                                                }`}
                                             required
                                         >
-                                            <option value="" disabled>-- Select a tour package --</option>
+                                            <option value="" disabled className="text-slate-400 font-normal">
+                                                -- Select a tour package --
+                                            </option>
                                             {Array.isArray(packagesList) && packagesList.map((p) => (
-                                                <option key={p.Package_ID || p.id} value={p.Package_ID || p.id}>
-                                                    {p.Package_Name} - 1 Adult: $ {p.price_one_adult} / Adult (2+): $ {p.price_more_adult} / Child: $ {p.price_child}
+                                                <option
+                                                    key={p.Package_ID || p.id}
+                                                    value={p.Package_ID || p.id}
+                                                    className="py-2 text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-900"
+                                                >
+                                                    {p.Package_Name} (1 Adult: ${p.price_one_adult} | 2+ Adults: ${p.price_more_adult} | Child: ${p.price_child})
                                                 </option>
                                             ))}
                                         </select>
-                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
-                                            <svg className="fill-current h-4 w-4" viewBox="0 0 20 20">
+                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4 text-slate-500 dark:text-slate-400">
+                                            <svg className="h-5 w-5 fill-current" viewBox="0 0 20 20">
                                                 <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
                                             </svg>
                                         </div>
                                     </div>
+
+                                    {/* Selected package badge preview or hint */}
+                                    {pkg ? (
+                                        <div className="mt-1 p-3.5 rounded-xl bg-sacramento/5 dark:bg-sacramento/10 border border-sacramento/20 text-xs sm:text-sm flex flex-wrap items-center justify-between gap-2 animate-fade-in">
+                                            <div className="flex items-center gap-2">
+                                                <span className="w-2.5 h-2.5 rounded-full bg-sacramento shrink-0"></span>
+                                                <span className="font-bold text-sacramento dark:text-sacramento-300">
+                                                    {pkg.Package_Name}
+                                                </span>
+                                            </div>
+                                            <div className="text-slate-600 dark:text-slate-300 text-xs">
+                                                Rates: <span className="font-bold text-slate-900 dark:text-white">${pkg.price_one_adult}</span> (Single Adult) • <span className="font-bold text-slate-900 dark:text-white">${pkg.price_more_adult}</span> (2+ Adults) • <span className="font-bold text-slate-900 dark:text-white">${pkg.price_child}</span> (Child)
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <p className="text-xs text-slate-500 dark:text-slate-400 italic">
+                                            Please choose a safari package above to view rates and continue booking.
+                                        </p>
+                                    )}
                                 </div>
                             </div>
 
@@ -406,7 +482,7 @@ export default function Booking() {
                                         <option value="Habarana">Habarana (+ $18.00)</option>
                                         <option value="Kandalama">Kandalama (+ $15.00)</option>
                                     </select>
-                                </div> 
+                                </div>
 
                                 <div className="flex flex-col gap-1.5">
                                     <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
@@ -426,7 +502,7 @@ export default function Booking() {
                                     </div>
                                 </div>
 
-                                
+
                             </div>
 
                             {/* Section 2: Guest Details / Traveler Info */}
@@ -438,114 +514,114 @@ export default function Booking() {
                                     </h4>
                                 </div>
 
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div className="flex flex-col gap-1.5">
-                                            <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
-                                                First Name
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="First_Name"
-                                                placeholder="John"
-                                                value={form.First_Name}
-                                                onChange={handleChange}
-                                                className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 px-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all"
-                                                required
-                                            />
-                                        </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="flex flex-col gap-1.5">
+                                        <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                                            First Name
+                                        </label>
+                                        <input
+                                            type="text"
+                                            name="First_Name"
+                                            placeholder="John"
+                                            value={form.First_Name}
+                                            onChange={handleChange}
+                                            className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 px-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all"
+                                            required
+                                        />
+                                    </div>
 
-                                        <div className="flex flex-col gap-1.5">
-                                            <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
-                                                Last Name
-                                            </label>
+                                    <div className="flex flex-col gap-1.5">
+                                        <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                                            Last Name
+                                        </label>
+                                        <input
+                                            type="text"
+                                            name="Last_Name"
+                                            placeholder="Doe"
+                                            value={form.Last_Name}
+                                            onChange={handleChange}
+                                            className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 px-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="flex flex-col gap-1.5">
+                                        <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                                            Email Address
+                                        </label>
+                                        <div className="relative flex items-center">
+                                            <Mail size={14} className="absolute left-4 text-slate-400 pointer-events-none" />
                                             <input
-                                                type="text"
-                                                name="Last_Name"
-                                                placeholder="Doe"
-                                                value={form.Last_Name}
+                                                type="email"
+                                                name="Email"
+                                                placeholder="john@example.com"
+                                                value={form.Email}
                                                 onChange={handleChange}
-                                                className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 px-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all"
+                                                className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 pl-10 pr-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all"
                                                 required
                                             />
                                         </div>
                                     </div>
 
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div className="flex flex-col gap-1.5">
-                                            <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
-                                                Email Address
-                                            </label>
-                                            <div className="relative flex items-center">
-                                                <Mail size={14} className="absolute left-4 text-slate-400 pointer-events-none" />
-                                                <input
-                                                    type="email"
-                                                    name="Email"
-                                                    placeholder="john@example.com"
-                                                    value={form.Email}
-                                                    onChange={handleChange}
-                                                    className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 pl-10 pr-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all"
-                                                    required
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="flex flex-col gap-1.5">
-                                            <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
-                                                Phone Number
-                                            </label>
-                                            <div className="relative flex items-center">
-                                                <Phone size={14} className="absolute left-4 text-slate-400 pointer-events-none" />
-                                                <input
-                                                    type="text"
-                                                    name="Phone_No"
-                                                    placeholder="+94 77 123 4567"
-                                                    value={form.Phone_No}
-                                                    onChange={handleChange}
-                                                    className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 pl-10 pr-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all"
-                                                    required
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div className="flex flex-col gap-1.5">
-                                            <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
-                                                NIC / Passport Number
-                                            </label>
-                                            <div className="relative flex items-center">
-                                                <FileText size={14} className="absolute left-4 text-slate-400 pointer-events-none" />
-                                                <input
-                                                    type="text"
-                                                    name="NIC"
-                                                    placeholder="e.g. 199512345678"
-                                                    value={form.NIC}
-                                                    onChange={handleChange}
-                                                    className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 pl-10 pr-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all"
-                                                    required
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="flex flex-col gap-1.5">
-                                            <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
-                                                Country
-                                            </label>
-                                            <div className="relative flex items-center">
-                                                <Globe size={14} className="absolute left-4 text-slate-400 pointer-events-none" />
-                                                <input
-                                                    type="text"
-                                                    name="Country"
-                                                    placeholder="e.g. Sri Lanka"
-                                                    value={form.Country}
-                                                    onChange={handleChange}
-                                                    className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 pl-10 pr-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all"
-                                                    required
-                                                />
-                                            </div>
+                                    <div className="flex flex-col gap-1.5">
+                                        <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                                            Phone Number
+                                        </label>
+                                        <div className="relative flex items-center">
+                                            <Phone size={14} className="absolute left-4 text-slate-400 pointer-events-none" />
+                                            <input
+                                                type="text"
+                                                name="Phone_No"
+                                                placeholder="+94 77 123 4567"
+                                                value={form.Phone_No}
+                                                onChange={handleChange}
+                                                className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 pl-10 pr-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all"
+                                                required
+                                            />
                                         </div>
                                     </div>
                                 </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="flex flex-col gap-1.5">
+                                        <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                                            NIC / Passport Number
+                                        </label>
+                                        <div className="relative flex items-center">
+                                            <FileText size={14} className="absolute left-4 text-slate-400 pointer-events-none" />
+                                            <input
+                                                type="text"
+                                                name="NIC"
+                                                placeholder="e.g. 199512345678"
+                                                value={form.NIC}
+                                                onChange={handleChange}
+                                                className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 pl-10 pr-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-col gap-1.5">
+                                        <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                                            Country
+                                        </label>
+                                        <div className="relative flex items-center">
+                                            <Globe size={14} className="absolute left-4 text-slate-400 pointer-events-none" />
+                                            <input
+                                                type="text"
+                                                name="Country"
+                                                placeholder="e.g. Sri Lanka"
+                                                value={form.Country}
+                                                onChange={handleChange}
+                                                className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 pl-10 pr-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
                             {/* Section 3: Travelers Count */}
                             <div className="space-y-4 pt-2">
@@ -600,30 +676,35 @@ export default function Booking() {
                                             <p className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">
                                                 Total Reservation Cost
                                             </p>
-                                                    <p className="text-xl font-black text-slate-900 dark:text-white mt-0.5 tracking-tight">
-                                                        $ {new Intl.NumberFormat().format(getFinalTotal())}
-                                                    </p>
+                                            <p className="text-xl font-black text-slate-900 dark:text-white mt-0.5 tracking-tight">
+                                                $ {new Intl.NumberFormat().format(getFinalTotal())}
+                                            </p>
                                         </div>
                                     </div>
-                                            <div className="text-right text-[11px] font-bold text-slate-400 dark:text-slate-500">
-                                                <p>{form.No_of_adults} Adult{Number(form.No_of_adults) > 1 ? "s" : ""} × $ {Number(form.No_of_adults) <= 1 ? pkg.price_one_adult : pkg.price_more_adult}</p>
-                                                {form.No_of_child > 0 && (
-                                                    <p className="mt-0.5">{form.No_of_child} Child(ren) × $ {pkg.price_child}</p>
-                                                )}
-                                                {form.Area && (
-                                                    <p className="mt-0.5">{form.Area} surcharge: $ {new Intl.NumberFormat().format(getAreaExtra())}</p>
-                                                )}
-                                            </div>
+                                    <div className="text-right text-[11px] font-bold text-slate-400 dark:text-slate-500">
+                                        <p>{form.No_of_adults} Adult{Number(form.No_of_adults) > 1 ? "s" : ""} × $ {Number(form.No_of_adults) <= 1 ? pkg.price_one_adult : pkg.price_more_adult}</p>
+                                        {form.No_of_child > 0 && (
+                                            <p className="mt-0.5">{form.No_of_child} Child(ren) × $ {pkg.price_child}</p>
+                                        )}
+                                        {form.Area && (
+                                            <p className="mt-0.5">{form.Area} surcharge: $ {new Intl.NumberFormat().format(getAreaExtra())}</p>
+                                        )}
+                                    </div>
                                 </div>
                             )}
 
                             {/* Submit & Cart Action */}
                             <button
                                 type="submit"
-                                className="w-full bg-sacramento hover:bg-sacramento-600 text-white font-extrabold text-sm uppercase py-4 rounded-xl shadow-lg shadow-sacramento/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2 group"
+                                disabled={!selectedPackageId}
+                                className="w-full bg-sacramento hover:bg-sacramento-600 disabled:bg-slate-300 dark:disabled:bg-slate-800 disabled:text-slate-500 disabled:cursor-not-allowed text-white font-extrabold text-sm uppercase py-4 rounded-xl shadow-lg shadow-sacramento/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2 group cursor-pointer"
                             >
                                 <ShoppingCart size={16} />
-                                {isEditMode ? "Update Booking" : `Pay with PayHere • $ ${new Intl.NumberFormat().format(getFinalTotal())}`}
+                                {isEditMode
+                                    ? "Update Booking"
+                                    : pkg
+                                        ? `Confirm & Pay • $ ${new Intl.NumberFormat().format(getFinalTotal())}`
+                                        : "Select a Package to Continue"}
                             </button>
                             {isEditMode && (
                                 <button
@@ -638,7 +719,6 @@ export default function Booking() {
                     </div>
                 </div>
             </div>
-        </div>
         </>
     );
 }

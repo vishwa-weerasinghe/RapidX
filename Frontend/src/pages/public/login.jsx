@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import SEO from "../../components/SEO";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
@@ -9,6 +10,9 @@ export default function Login() {
   const [Password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [emailReadOnly, setEmailReadOnly] = useState(true);
+  const [passwordReadOnly, setPasswordReadOnly] = useState(true);
 
   const navigate = useNavigate();
 
@@ -107,14 +111,14 @@ export default function Login() {
             </div>
           )}
 
-          <form className="mt-6 space-y-5" onSubmit={handleLogin}>
+          <form className="mt-6 space-y-5" onSubmit={handleLogin} autoComplete="on">
             {/* Email / Username field */}
             <div>
               <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider">
                 Email Address
               </label>
               <div className="relative mt-1">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-300">
+                <span className="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-3 text-gray-300">
                   {/* Mail Icon matching Register layout */}
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -134,8 +138,13 @@ export default function Login() {
                 <input
                   type="email"
                   name="Email"
+                  id="login-email"
+                  autoComplete="username"
                   required
-                  className="block w-full rounded-lg border border-white/20 bg-white/10 py-2.5 pl-10 pr-3 text-white placeholder-gray-400 backdrop-blur-sm transition focus:border-castleton-300 focus:outline-none focus:ring-1 focus:ring-castleton-300 sm:text-sm"
+                  readOnly={emailReadOnly}
+                  onFocus={() => setEmailReadOnly(false)}
+                  onClick={() => setEmailReadOnly(false)}
+                  className="auth-glass-input block w-full rounded-lg border border-white/20 bg-white/10 py-2.5 pl-10 pr-3 text-white placeholder-gray-400 backdrop-blur-sm transition focus:border-castleton-300 focus:outline-none focus:ring-1 focus:ring-castleton-300 sm:text-sm"
                   placeholder="john@email.com"
                   value={Email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -156,7 +165,7 @@ export default function Login() {
                 </label>
               </div>
               <div className="relative mt-1">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-300">
+                <span className="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-3 text-gray-300">
                   {/* Lock Icon matching Register layout */}
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -174,14 +183,32 @@ export default function Login() {
                   </svg>
                 </span>
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   name="Password"
+                  id="login-password"
+                  autoComplete="current-password"
                   required
-                  className="block w-full rounded-lg border border-white/20 bg-white/10 py-2.5 pl-10 pr-3 text-white placeholder-gray-400 backdrop-blur-sm transition focus:border-castleton-300 focus:outline-none focus:ring-1 focus:ring-castleton-300 sm:text-sm"
+                  readOnly={passwordReadOnly}
+                  onFocus={() => setPasswordReadOnly(false)}
+                  onClick={() => setPasswordReadOnly(false)}
+                  className="auth-glass-input block w-full rounded-lg border border-white/20 bg-white/10 py-2.5 pl-10 pr-10 text-white placeholder-gray-400 backdrop-blur-sm transition focus:border-castleton-300 focus:outline-none focus:ring-1 focus:ring-castleton-300 sm:text-sm"
                   placeholder="••••••••"
                   value={Password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute inset-y-0 right-0 z-10 flex items-center pr-3 text-gray-300 hover:text-white transition-colors cursor-pointer"
+                  tabIndex={-1}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5 text-gray-300 hover:text-white transition-colors" />
+                  ) : (
+                    <Eye className="w-5 h-5 text-gray-300 hover:text-white transition-colors" />
+                  )}
+                </button>
               </div>
               {errors.Password && (
                 <p className="mt-1 text-xs text-red-300 font-medium">

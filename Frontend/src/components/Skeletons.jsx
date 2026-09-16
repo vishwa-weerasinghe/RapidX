@@ -30,9 +30,9 @@ export function TopLoadingBar({ progress = 0, visible = true }) {
  */
 export function PackageCardSkeleton() {
   return (
-    <div className="w-full sm:w-[calc(50%-1rem)] lg:w-[260px] bg-white dark:bg-[#1D2B22] rounded-3xl overflow-hidden border border-gray-200 dark:border-[#2F4437] shadow-sm flex flex-col transition-colors">
+    <div className="w-full bg-white dark:bg-[#1D2B22] rounded-3xl overflow-hidden border border-gray-200 dark:border-[#2F4437] shadow-sm flex flex-col transition-colors">
       {/* Image Skeleton */}
-      <div className="relative h-56 skeleton-shimmer overflow-hidden">
+      <div className="relative h-64 sm:h-72 skeleton-shimmer overflow-hidden">
         {/* Subtle inner shine */}
         <div className="absolute inset-0 bg-black/5 dark:bg-white/5" />
       </div>

@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   Menu,
   X,
+  ArrowRight,
 } from "lucide-react";
 import ThemeToggle from "./components/ThemeToggle";
 import { useTheme } from "./context/ThemeContext";
@@ -1284,7 +1285,8 @@ export default function App() {
               {safariLocations.map((loc) => (
                 <div
                   key={loc.id}
-                  className="rounded-3xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-500 group bg-white flex flex-col"
+                  onClick={() => navigate(`/blog#${loc.id}`)}
+                  className="rounded-3xl overflow-hidden shadow-sm border border-gray-100 dark:border-neutral-800 hover:shadow-xl hover:-translate-y-2 transition-all duration-500 group bg-white dark:bg-neutral-900 flex flex-col cursor-pointer"
                 >
                   <div className="relative h-56 overflow-hidden">
                     <img
@@ -1292,12 +1294,23 @@ export default function App() {
                       alt={loc.title}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
-                    <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+
+                    {/* Subtle translucent background overlay so the photo appears clearly while providing contrast */}
+                    <div className="absolute inset-0 bg-black/25 group-hover:bg-black/35 transition-colors duration-300 flex items-center justify-center">
+                      {/* Centered Liquid Glass Learn More Button (No Arrow) */}
                       <button
-                        onClick={() => navigate(`/blog#${loc.id}`)}
-                        className="bg-castleton text-white font-bold text-sm px-6 py-3 rounded-full hover:bg-opacity-90 transition duration-300 shadow-lg transform translate-y-4 group-hover:translate-y-0"
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/blog#${loc.id}`);
+                        }}
+                        className="relative px-6 py-2.5 rounded-full text-sm font-bold text-white bg-white/20 hover:bg-white/30 active:scale-95 backdrop-blur-sm border border-white/40 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] hover:shadow-[0_8px_32px_0_rgba(46,125,50,0.4)] hover:border-white/60 hover:scale-105 transition-all duration-300 cursor-pointer overflow-hidden tracking-wide"
                       >
-                        Learn More
+                        {/* Specular glass reflection layer */}
+                        <span className="absolute inset-0 bg-gradient-to-b from-white/40 via-white/10 to-transparent opacity-75 pointer-events-none rounded-full" />
+                        <span className="relative drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)]">
+                          Learn More
+                        </span>
                       </button>
                     </div>
                   </div>
@@ -1372,8 +1385,8 @@ export default function App() {
               </p>
             </div>
 
-            {/* Cards */}
-            <div className="flex flex-wrap justify-center gap-8">
+            {/* Cards Grid: 2 per row */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10 max-w-5xl mx-auto">
               {packagesLoading && packages.length === 0 ? (
                 Array.from({ length: 4 }).map((_, idx) => (
                   <PackageCardSkeleton key={`pkg-skeleton-${idx}`} />
@@ -1383,94 +1396,94 @@ export default function App() {
                   const relatedBlog = getStaticBlog(pkg.blog_id);
 
                   return (
-                  <div
-                    key={idx}
-                    className="w-full sm:w-[calc(50%-1rem)] lg:w-[260px] bg-white rounded-3xl overflow-hidden border border-gray-200 shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col"
-                  >
-                    {/* Image */}
-                    <div className="relative h-56 overflow-hidden bg-gray-50">
-                      <img
-                        src={pkg.img}
-                        alt={pkg.title}
-                        loading="lazy"
-                        className="w-full h-full object-cover object-center transition-transform duration-500 hover:scale-105"
-                      />
+                    <div
+                      key={idx}
+                      className="w-full bg-white dark:bg-neutral-900 rounded-3xl overflow-hidden border border-gray-200 dark:border-neutral-800 shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col"
+                    >
+                      {/* Image */}
+                      <div className="relative h-64 sm:h-72 overflow-hidden bg-gray-50 dark:bg-neutral-800">
+                        <img
+                          src={pkg.img}
+                          alt={pkg.title}
+                          loading="lazy"
+                          className="w-full h-full object-cover object-center transition-transform duration-500 hover:scale-105"
+                        />
 
-                      {pkg.popular && (
-                        <span className="absolute top-4 right-4 bg-pink-600 text-white text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full border border-pink-500 shadow-md hover:scale-105 transition-all duration-300">
-                          Popular
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Content */}
-                    <div className="p-5 flex flex-col flex-grow">
-                      <h3 className="text-lg font-bold text-gray-900 mb-2">
-                        {pkg.title}
-                      </h3>
-
-                      <div className="mb-4 max-h-32 overflow-auto">
-                        <p className="text-sm text-gray-500 leading-relaxed whitespace-pre-line break-words">
-                          {pkg.desc}
-                        </p>
+                        {pkg.popular && (
+                          <span className="absolute top-4 right-4 bg-pink-600 text-white text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full border border-pink-500 shadow-md hover:scale-105 transition-all duration-300">
+                            Popular
+                          </span>
+                        )}
                       </div>
 
-                      {/* Features */}
-                      <ul className="space-y-2 text-sm text-gray-600 mb-4">
-                        <li className="flex items-center gap-2">
-                          <span className="text-green-600">✓</span>
-                          Professional Guide
-                        </li>
+                      {/* Content */}
+                      <div className="p-6 sm:p-7 flex flex-col flex-grow">
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                          {pkg.title}
+                        </h3>
 
-                        <li className="flex items-center gap-2">
-                          <span className="text-green-600">✓</span>
-                          Comfortable Jeep
-                        </li>
-
-                        <li className="flex items-center gap-2">
-                          <span className="text-green-600">✓</span>
-                          Reasonable Prices
-                        </li>
-                      </ul>
-
-                      {/* Price */}
-                      <div className="flex items-center justify-between border-t border-gray-100 pt-4 mb-4">
-                        <span className="text-sm text-gray-500">Starting From</span>
-
-                        <div className="text-right">
-                          <div className="text-xl font-bold text-castleton">$ {pkg.price.toLocaleString()}</div>
-                          <div className="text-xs text-gray-500">per adult</div>
+                        <div className="mb-4 max-h-32 overflow-auto">
+                          <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed whitespace-pre-line break-words">
+                            {pkg.desc}
+                          </p>
                         </div>
+
+                        {/* Features */}
+                        <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300 mb-4">
+                          <li className="flex items-center gap-2">
+                            <span className="text-green-600">✓</span>
+                            Professional Guide
+                          </li>
+
+                          <li className="flex items-center gap-2">
+                            <span className="text-green-600">✓</span>
+                            Comfortable Jeep
+                          </li>
+
+                          <li className="flex items-center gap-2">
+                            <span className="text-green-600">✓</span>
+                            Reasonable Prices
+                          </li>
+                        </ul>
+
+                        {/* Price */}
+                        <div className="flex items-center justify-between border-t border-gray-100 dark:border-neutral-800 pt-4 mb-4">
+                          <span className="text-sm text-gray-500 dark:text-gray-400">Starting From</span>
+
+                          <div className="text-right">
+                            <div className="text-2xl font-bold text-castleton dark:text-emerald-400">$ {pkg.price.toLocaleString()}</div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400">per adult</div>
+                          </div>
+                        </div>
+
+                        {/* Buttons */}
+                        <div className="flex gap-3 mt-auto">
+                          <button
+                            onClick={() => handleBookNow(pkg)}
+                            className="flex-1 bg-[#2E7D32] text-white font-bold text-center py-3 rounded-xl shadow-md hover:bg-[#1B5E20] hover:shadow-lg transition-all duration-300 transform hover:-translate-y-[2px] cursor-pointer"
+                          >
+                            Book Now
+                          </button>
+
+                          <button
+                            onClick={() => handleAddToCart(pkg)}
+                            className="flex-1 border-2 border-sacramento text-sacramento dark:text-emerald-400 dark:border-emerald-500/40 py-3 rounded-xl font-semibold hover:bg-sacramento/10 transition-colors cursor-pointer"
+                          >
+                            Add to Cart
+                          </button>
+                        </div>
+
+                        {relatedBlog && (
+                          <Link
+                            to={`/blog#${relatedBlog.slug}`}
+                            className="mt-3 inline-flex items-center justify-center gap-1 text-sacramento dark:text-emerald-400 font-bold hover:underline transition-colors"
+                          >
+                            Read More
+                            <span className="text-xs">→</span>
+                          </Link>
+                        )}
                       </div>
-
-                      {/* Buttons */}
-                      <div className="flex gap-3 mt-auto">
-                        <button
-                          onClick={() => handleBookNow(pkg)}
-                          className="flex-1 bg-[#2E7D32] text-white font-bold text-center py-2.5 rounded-xl shadow-md hover:bg-[#1B5E20] hover:shadow-lg transition-all duration-300 transform hover:-translate-y-[2px]"
-                        >
-                          Book Now
-                        </button>
-
-                        <button
-                          onClick={() => handleAddToCart(pkg)}
-                          className="flex-1 border-2 border-sacramento text-sacramento py-2.5 rounded-xl font-semibold hover:bg-sacramento/10 transition-colors"
-                        >
-                          Add to Cart
-                        </button>
-                      </div>
-
-                      {relatedBlog && (
-                        <Link
-                          to={`/blog#${relatedBlog.slug}`}
-                          className="mt-3 inline-flex items-center justify-center gap-1 text-sacramento font-bold hover:underline transition-colors"
-                        >
-                          Read More
-                          <span className="text-xs">→</span>
-                        </Link>
-                      )}
                     </div>
-                  </div>
                   );
                 })
               ) : (
