@@ -105,7 +105,7 @@ export default function App() {
     { label: "Hurulu Eco Park", path: "/blog#hurulu", description: "The Vital Elephant Corridor" },
     { label: "Full Day Safari Experience", path: "/blog#full-day-safari", description: "Hurulu Eco Park & Minneriya or Kaudulla" },
     { label: "Dambulla Cultural & Safari Tour", path: "/blog#dambulla-safari", description: "Cave Temple, Economic Center & Evening Safari" },
-    { label: "Hiriwadunna Village Tour", path: "/blog#hiriwadunna-village-tour", description: "Experience Authentic Sri Lankan Rural Life" },
+    { label: "Village Tour", path: "/blog#hiriwadunna-village-tour", description: "Experience Authentic Sri Lankan Rural Life" },
     { label: "Polonnaruwa Ruins & Safari Tour", path: "/blog#polonnaruwa-safari", description: "Medieval Capital & Evening Safari" },
     { label: "Sigiriya / Pidurangala & Safari Tour", path: "/blog#sigiriya-pidurangala-safari", description: "Majestic Rock Hiking & Evening Safari" },
     { label: "Sigiriya Village Tour", path: "/blog#sigiriya-village-tour", description: "Experience Authentic Sri Lankan Rural Life" },
@@ -1052,7 +1052,7 @@ export default function App() {
                     </div>
                     <div>
                       <span className="block text-gray-800 font-bold text-lg leading-none">
-                        Since 2020
+                        Since 2016
                       </span>
                       <span className="text-gray-500 text-sm">
                         Trusted Safari
@@ -1429,20 +1429,32 @@ export default function App() {
                         </div>
 
                         {/* Features */}
-                        <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300 mb-4">
+                        <ul className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-600 dark:text-gray-300 mb-4">
                           <li className="flex items-center gap-2">
-                            <span className="text-green-600">✓</span>
-                            Professional Guide
+                            <span className="text-green-600 shrink-0">✓</span>
+                            <span>Professional Guide</span>
                           </li>
 
                           <li className="flex items-center gap-2">
-                            <span className="text-green-600">✓</span>
-                            Comfortable Jeep
+                            <span className="text-green-600 shrink-0">✓</span>
+                            <span>Comfortable Jeep</span>
                           </li>
 
                           <li className="flex items-center gap-2">
-                            <span className="text-green-600">✓</span>
-                            Reasonable Prices
+                            <span className="text-green-600 shrink-0">✓</span>
+                            <span>Reasonable Prices</span>
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <span className="text-green-600 shrink-0">✓</span>
+                            <span>Entrance Ticket</span>
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <span className="text-green-600 shrink-0">✓</span>
+                            <span>Water Bottle</span>
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <span className="text-green-600 shrink-0">✓</span>
+                            <span>Binoculars</span>
                           </li>
                         </ul>
 
