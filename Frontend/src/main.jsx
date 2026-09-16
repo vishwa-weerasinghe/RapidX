@@ -69,6 +69,7 @@ createRoot(document.getElementById("root")).render(
           <Route path="/password-reset/:token" element={<ResetPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/booking" element={<GuestBooking />} />
+          <Route path="/booking/:id" element={<GuestBooking />} />
           <Route path="/help/:type" element={<PolicyPage />} />
           <Route path="/privacy-policy" element={<PolicyPage />} />
           <Route path="/terms-and-conditions" element={<PolicyPage />} />

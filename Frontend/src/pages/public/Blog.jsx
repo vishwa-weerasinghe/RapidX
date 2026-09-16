@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTheme } from "../../context/ThemeContext";
 import SEO from "../../components/SEO";
+import api from "../../axios";
 import { ChevronLeft, Calendar, Clock, ArrowRight, MapPin, Check, X, Users, DollarSign, Info } from "lucide-react";
 
 import minneriyaImg from "../../assets/minneriya.jpg";
@@ -689,10 +690,104 @@ const blogSections = [
 export default function Blog() {
   const { theme } = useTheme();
   const location = useLocation();
+  const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState("");
   const [expandedPkg, setExpandedPkg] = useState({});
+  const [dbPackages, setDbPackages] = useState([]);
 
   const isDark = theme === "dark";
+
+  useEffect(() => {
+    api
+      .get("/packages")
+      .then((res) => {
+        if (res.data && Array.isArray(res.data)) {
+          setDbPackages(res.data);
+        }
+      })
+      .catch((err) => console.error("Error loading packages in blog:", err));
+  }, []);
+
+  const handleBookSafari = (pkg, section) => {
+    let matchedId = null;
+
+    if (dbPackages.length > 0) {
+      const pkgNameLower = (pkg?.name || "").toLowerCase().trim();
+      const sectionIdLower = (section?.id || "").toLowerCase().trim();
+      const blogId = section?.blogId;
+
+      // 1. Exact name match
+      let found = dbPackages.find(
+        (p) => (p.Package_Name || p.title || "").toLowerCase().trim() === pkgNameLower
+      );
+
+      // 2. Match by blog_id
+      if (!found && blogId) {
+        const blogMatches = dbPackages.filter((p) => String(p.blog_id) === String(blogId));
+        if (blogMatches.length === 1) {
+          found = blogMatches[0];
+        } else if (blogMatches.length > 1) {
+          found =
+            blogMatches.find((p) => {
+              const dbName = (p.Package_Name || p.title || "").toLowerCase();
+              if (pkgNameLower.includes("morning") && dbName.includes("morning")) return true;
+              if (pkgNameLower.includes("evening") && dbName.includes("evening")) return true;
+              if (pkgNameLower.includes("half day") && dbName.includes("half day")) return true;
+              return false;
+            }) || blogMatches[0];
+        }
+      }
+
+      // 3. Match by section slug or keyword in package name
+      if (!found) {
+        const sectionMatches = dbPackages.filter((p) => {
+          const dbName = (p.Package_Name || p.title || "").toLowerCase();
+          return dbName.includes(sectionIdLower);
+        });
+        if (sectionMatches.length > 0) {
+          found =
+            sectionMatches.find((p) => {
+              const dbName = (p.Package_Name || p.title || "").toLowerCase();
+              if (pkgNameLower.includes("morning") && dbName.includes("morning")) return true;
+              if (pkgNameLower.includes("evening") && dbName.includes("evening")) return true;
+              if (pkgNameLower.includes("half day") && dbName.includes("half day")) return true;
+              return false;
+            }) || sectionMatches[0];
+        }
+      }
+
+      // 4. Substring name match
+      if (!found) {
+        found = dbPackages.find((p) => {
+          const dbName = (p.Package_Name || p.title || "").toLowerCase();
+          return dbName && (pkgNameLower.includes(dbName) || dbName.includes(pkgNameLower));
+        });
+      }
+
+      if (found) {
+        matchedId = found.Package_ID || found.id;
+      }
+    }
+
+    let recommendedTime = undefined;
+    const lowerName = (pkg?.name || "").toLowerCase();
+    if (lowerName.includes("morning")) {
+      recommendedTime = "07:00";
+    } else if (lowerName.includes("evening")) {
+      recommendedTime = "13:00";
+    }
+
+    navigate("/booking", {
+      state: {
+        packageId: matchedId,
+        packageName: pkg?.name,
+        sectionId: section?.id,
+        sectionTitle: section?.title,
+        blogId: section?.blogId,
+        pickupTime: recommendedTime,
+      },
+    });
+  };
 
   const togglePkg = (sectionId, pkgIdx) => {
     const key = `${sectionId}-${pkgIdx}`;
@@ -735,28 +830,9 @@ export default function Blog() {
       />
 
       <div
-        className={`min-h-screen transition-colors duration-300 ${
-          isDark ? "bg-neutral-950 text-neutral-100" : "bg-gray-50 text-neutral-900"
-        }`}
+        className={`min-h-screen transition-colors duration-300 ${isDark ? "bg-neutral-950 text-neutral-100" : "bg-gray-50 text-neutral-900"
+          }`}
       >
-        {/* Top Navigation Bar */}
-        <header
-          className={`sticky top-0 z-50 border-b transition-colors duration-300 ${
-            isDark
-              ? "bg-neutral-950/95 border-neutral-800"
-              : "bg-white/95 border-neutral-200"
-          } backdrop-blur-md`}
-        >
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center">
-            <Link
-              to="/"
-              className="flex items-center gap-1.5 text-sm font-semibold text-neutral-500 hover:text-sacramento transition-colors"
-            >
-              <ChevronLeft size={18} />
-              <span>Back to Home</span>
-            </Link>
-          </div>
-        </header>
 
         {/* Content Layout with Sidebar */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 flex gap-8 lg:gap-12">
@@ -764,9 +840,8 @@ export default function Blog() {
           <aside className="hidden lg:block w-56 shrink-0">
             <div className="sticky top-20">
               <p
-                className={`text-[11px] font-bold uppercase tracking-widest mb-4 ${
-                  isDark ? "text-neutral-500" : "text-neutral-400"
-                }`}
+                className={`text-[11px] font-bold uppercase tracking-widest mb-4 ${isDark ? "text-neutral-500" : "text-neutral-400"
+                  }`}
               >
                 Safari Tours
               </p>
@@ -775,15 +850,13 @@ export default function Blog() {
                   <a
                     key={`side-${s.id}`}
                     href={`#${s.id}`}
-                    className={`block text-sm py-2 px-3 rounded-lg transition-all duration-200 ${
-                      activeSection === s.id
-                        ? "bg-sacramento/10 text-sacramento font-semibold border-l-2 border-sacramento"
-                        : `${
-                            isDark
-                              ? "text-neutral-500 hover:text-neutral-200 hover:bg-neutral-800/50"
-                              : "text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100"
-                          }`
-                    }`}
+                    className={`block text-sm py-2 px-3 rounded-lg transition-all duration-200 ${activeSection === s.id
+                      ? "bg-sacramento/10 text-sacramento font-semibold border-l-2 border-sacramento"
+                      : `${isDark
+                        ? "text-neutral-500 hover:text-neutral-200 hover:bg-neutral-800/50"
+                        : "text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100"
+                      }`
+                      }`}
                   >
                     {s.title}
                   </a>
@@ -794,320 +867,325 @@ export default function Blog() {
 
           {/* Main Content */}
           <main className="flex-1 min-w-0">
-          {blogSections.map((section, index) => (
-            <section
-              key={section.id}
-              id={section.id}
-              className={`scroll-mt-20 ${index > 0 ? "mt-16 sm:mt-20" : ""}`}
-            >
-              {/* Section Hero Card */}
-              <div
-                className={`rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm border ${
-                  isDark ? "border-neutral-800 bg-neutral-900" : "border-neutral-200 bg-white"
-                }`}
+            {blogSections.map((section, index) => (
+              <section
+                key={section.id}
+                id={section.id}
+                className={`scroll-mt-20 ${index > 0 ? "mt-16 sm:mt-20" : ""}`}
               >
-                {/* Image with overlay */}
-                <div className="relative aspect-[21/9] sm:aspect-[21/8] overflow-hidden">
-                  <img
-                    src={section.img}
-                    alt={section.title}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-8">
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      {section.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-full bg-white/20 text-white backdrop-blur-sm"
-                        >
-                          {tag}
-                        </span>
+                {/* Section Hero Card */}
+                <div
+                  className={`rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm border ${isDark ? "border-neutral-800 bg-neutral-900" : "border-neutral-200 bg-white"
+                    }`}
+                >
+                  {/* Image with overlay */}
+                  <div className="relative aspect-[21/9] sm:aspect-[21/8] overflow-hidden">
+                    <img
+                      src={section.img}
+                      alt={section.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-8">
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {section.tags.map((tag) => (
+                          <span
+                            key={tag}
+                            className="text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-full bg-white/20 text-white backdrop-blur-sm"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                      <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white leading-tight">
+                        {section.title}
+                      </h2>
+                      <p className="text-sm sm:text-base text-white/80 mt-1">{section.subtitle}</p>
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  <div className="p-5 sm:p-8">
+                    <div
+                      className={`space-y-3 text-sm sm:text-base leading-relaxed ${isDark ? "text-neutral-300" : "text-neutral-600"
+                        }`}
+                    >
+                      {section.paragraphs.map((para, i) => (
+                        <p key={i}>{para}</p>
                       ))}
                     </div>
-                    <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white leading-tight">
-                      {section.title}
-                    </h2>
-                    <p className="text-sm sm:text-base text-white/80 mt-1">{section.subtitle}</p>
                   </div>
                 </div>
 
-                {/* Description */}
-                <div className="p-5 sm:p-8">
-                  <div
-                    className={`space-y-3 text-sm sm:text-base leading-relaxed ${
-                      isDark ? "text-neutral-300" : "text-neutral-600"
-                    }`}
-                  >
-                    {section.paragraphs.map((para, i) => (
-                      <p key={i}>{para}</p>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Tour Package Cards */}
-              {section.tourPackages && (
-                <div className="mt-6 sm:mt-8 space-y-4 sm:space-y-5">
-                  <h3
-                    className={`text-lg sm:text-xl font-bold flex items-center gap-2 px-1 ${
-                      isDark ? "text-neutral-200" : "text-neutral-800"
-                    }`}
-                  >
-                    <DollarSign size={20} className="text-sacramento" />
-                    Available Packages ({section.tourPackages.length})
-                  </h3>
-
-                  {section.tourPackages.map((pkg, idx) => {
-                    const isOpen = expandedPkg[`${section.id}-${idx}`];
-                    return (
-                      <div
-                        key={idx}
-                        className={`rounded-xl sm:rounded-2xl border overflow-hidden transition-shadow duration-200 ${
-                          isOpen ? "shadow-md" : "shadow-sm"
-                        } ${
-                          isDark ? "border-neutral-800 bg-neutral-900" : "border-neutral-200 bg-white"
+                {/* Tour Package Cards */}
+                {section.tourPackages && (
+                  <div className="mt-6 sm:mt-8 space-y-4 sm:space-y-5">
+                    <h3
+                      className={`text-lg sm:text-xl font-bold flex items-center gap-2 px-1 ${isDark ? "text-neutral-200" : "text-neutral-800"
                         }`}
-                      >
-                        {/* Package summary row */}
-                        <button
-                          onClick={() => togglePkg(section.id, idx)}
-                          className="w-full text-left p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 cursor-pointer group"
+                    >
+                      <DollarSign size={20} className="text-sacramento" />
+                      Available Packages ({section.tourPackages.length})
+                    </h3>
+
+                    {section.tourPackages.map((pkg, idx) => {
+                      const isOpen = expandedPkg[`${section.id}-${idx}`];
+                      return (
+                        <div
+                          key={idx}
+                          className={`rounded-xl sm:rounded-2xl border overflow-hidden transition-shadow duration-200 ${isOpen ? "shadow-md" : "shadow-sm"
+                            } ${isDark ? "border-neutral-800 bg-neutral-900" : "border-neutral-200 bg-white"
+                            }`}
                         >
-                          <div className="flex-1 min-w-0">
-                            <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-1">
-                              <h4 className="text-base sm:text-lg font-bold truncate">
-                                {pkg.name}
-                              </h4>
-                              {pkg.price.includes("|") ? (
-                                <div className="flex flex-wrap items-center gap-2">
-                                  {pkg.price.split("|").map((pPart, i) => (
-                                    <span key={i} className="inline-flex items-center px-3 py-1 rounded-full bg-sacramento/10 text-sacramento text-sm sm:text-base font-bold border border-sacramento/20 whitespace-nowrap shadow-sm">
-                                      {pPart.trim()}
-                                    </span>
-                                  ))}
-                                </div>
-                              ) : (
-                                <span className="inline-flex items-center px-3 py-1 rounded-full bg-sacramento/10 text-sacramento text-sm sm:text-base font-bold border border-sacramento/20 whitespace-nowrap shadow-sm">
-                                  {pkg.price}
-                                </span>
-                              )}
-                            </div>
-                            <div
-                              className={`flex flex-wrap items-center gap-x-4 gap-y-1 text-xs sm:text-sm ${
-                                isDark ? "text-neutral-400" : "text-neutral-500"
-                              }`}
-                            >
-                              <span className="flex items-center gap-1">
-                                <Clock size={13} /> {pkg.duration}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Calendar size={13} /> {pkg.startTime}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Users size={13} /> {pkg.guests}
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Desktop expand indicator */}
+                          {/* Package summary row */}
                           <div
-                            className={`hidden sm:flex items-center gap-1.5 text-xs font-semibold whitespace-nowrap transition-colors ${
-                              isOpen ? "text-sacramento" : isDark ? "text-neutral-500 group-hover:text-neutral-300" : "text-neutral-400 group-hover:text-neutral-600"
-                            }`}
+                            onClick={() => togglePkg(section.id, idx)}
+                            role="button"
+                            tabIndex={0}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                togglePkg(section.id, idx);
+                              }
+                            }}
+                            className="w-full text-left p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-6 cursor-pointer group"
                           >
-                            {isOpen ? "Hide Details" : "View Details"}
-                            <ChevronLeft
-                              size={14}
-                              className={`transition-transform duration-200 ${isOpen ? "rotate-90" : "-rotate-90"}`}
-                            />
-                          </div>
-
-                          {/* Mobile expand bar */}
-                          <div
-                            className={`sm:hidden text-center text-xs font-semibold py-2 rounded-lg ${
-                              isOpen
-                                ? "text-sacramento bg-sacramento/10"
-                                : isDark
-                                ? "text-neutral-400 bg-neutral-800"
-                                : "text-neutral-500 bg-neutral-100"
-                            }`}
-                          >
-                            {isOpen ? "▲ Hide Details" : "▼ View Details"}
-                          </div>
-                        </button>
-
-                        {/* Expanded package details */}
-                        {isOpen && (
-                          <div
-                            className={`border-t ${
-                              isDark ? "border-neutral-800" : "border-neutral-100"
-                            }`}
-                          >
-                            {/* Description */}
-                            <div className="p-4 sm:p-6">
-                              <p
-                                className={`text-sm leading-relaxed ${
-                                  isDark ? "text-neutral-300" : "text-neutral-600"
-                                }`}
-                              >
-                                {pkg.description}
-                              </p>
-                            </div>
-
-                            {/* Included / Excluded grid */}
-                            <div
-                              className={`grid grid-cols-1 md:grid-cols-2 border-t ${
-                                isDark ? "border-neutral-800" : "border-neutral-100"
-                              }`}
-                            >
-                              <div className="p-4 sm:p-6">
-                                <h5 className="text-sm font-bold mb-3 flex items-center gap-2">
-                                  <Check size={16} className="text-green-500" /> What's Included
-                                </h5>
-                                <ul className="space-y-2">
-                                  {pkg.included.map((item, i) => (
-                                    <li
-                                      key={i}
-                                      className={`text-sm flex items-start gap-2 ${
-                                        isDark ? "text-neutral-300" : "text-neutral-600"
-                                      }`}
-                                    >
-                                      <span className="w-1.5 h-1.5 rounded-full bg-green-500 mt-1.5 shrink-0" />
-                                      {item}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-
-                              <div
-                                className={`p-4 sm:p-6 border-t md:border-t-0 md:border-l ${
-                                  isDark ? "border-neutral-800" : "border-neutral-100"
-                                }`}
-                              >
-                                <h5 className="text-sm font-bold mb-3 flex items-center gap-2">
-                                  <X size={16} className="text-red-400" /> What's Excluded
-                                </h5>
-                                <ul className="space-y-2">
-                                  {pkg.excluded.map((item, i) => (
-                                    <li
-                                      key={i}
-                                      className={`text-sm flex items-start gap-2 ${
-                                        isDark ? "text-neutral-300" : "text-neutral-600"
-                                      }`}
-                                    >
-                                      <span className="w-1.5 h-1.5 rounded-full bg-red-400 mt-1.5 shrink-0" />
-                                      {item}
-                                    </li>
-                                  ))}
-                                </ul>
-
-                                <div className="mt-5">
-                                  <h5 className="text-sm font-bold mb-2">What to Bring</h5>
-                                  <div className="flex flex-wrap gap-1.5">
-                                    {pkg.whatToBring.map((item, i) => (
-                                      <span
-                                        key={i}
-                                        className={`text-xs px-2.5 py-1 rounded-full ${
-                                          isDark
-                                            ? "bg-neutral-800 text-neutral-300"
-                                            : "bg-neutral-100 text-neutral-600"
-                                        }`}
-                                      >
-                                        {item}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-1">
+                                <h4 className="text-base sm:text-lg font-bold truncate">
+                                  {pkg.name}
+                                </h4>
+                                {pkg.price.includes("|") ? (
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    {pkg.price.split("|").map((pPart, i) => (
+                                      <span key={i} className="inline-flex items-center px-3 py-1 rounded-full bg-sacramento/10 text-sacramento text-sm sm:text-base font-bold border border-sacramento/20 whitespace-nowrap shadow-sm">
+                                        {pPart.trim()}
                                       </span>
                                     ))}
                                   </div>
-                                </div>
+                                ) : (
+                                  <span className="inline-flex items-center px-3 py-1 rounded-full bg-sacramento/10 text-sacramento text-sm sm:text-base font-bold border border-sacramento/20 whitespace-nowrap shadow-sm">
+                                    {pkg.price}
+                                  </span>
+                                )}
+                              </div>
+                              <div
+                                className={`flex flex-wrap items-center gap-x-4 gap-y-1 text-xs sm:text-sm ${isDark ? "text-neutral-400" : "text-neutral-500"
+                                  }`}
+                              >
+                                <span className="flex items-center gap-1">
+                                  <Clock size={13} /> {pkg.duration}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Calendar size={13} /> {pkg.startTime}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Users size={13} /> {pkg.guests}
+                                </span>
                               </div>
                             </div>
 
-                            {/* Additional Info + Departure + Policy Link */}
-                            <div
-                              className={`p-4 sm:p-6 border-t space-y-4 ${
-                                isDark ? "border-neutral-800" : "border-neutral-100"
-                              }`}
-                            >
-                              <div className="flex items-start gap-2 text-sm">
-                                <MapPin size={16} className="text-sacramento mt-0.5 shrink-0" />
-                                <div>
-                                  <span className="font-bold">Pickup: </span>
-                                  <span className={isDark ? "text-neutral-400" : "text-neutral-500"}>
-                                    {pkg.departureLocations}
-                                  </span>
-                                </div>
-                              </div>
-
-                              <div>
-                                <h5 className="text-sm font-bold mb-2 flex items-center gap-1.5">
-                                  <Info size={14} className="text-sacramento" /> Good to Know
-                                </h5>
-                                <ul className="space-y-1.5">
-                                  {pkg.additionalInfo.map((info, i) => (
-                                    <li
-                                      key={i}
-                                      className={`text-xs sm:text-sm flex items-start gap-2 ${
-                                        isDark ? "text-neutral-400" : "text-neutral-500"
-                                      }`}
-                                    >
-                                      <span className="text-sacramento mt-0.5 shrink-0">•</span>
-                                      {info}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
+                            {/* Desktop expand & Book action */}
+                            <div className="flex items-center gap-3 self-end sm:self-center shrink-0">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleBookSafari(pkg, section);
+                                }}
+                                className="inline-flex items-center gap-1.5 bg-sacramento hover:bg-castleton text-white text-xs sm:text-sm font-bold px-3.5 sm:px-4 py-2 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
+                              >
+                                Book Safari
+                                <ArrowRight size={14} />
+                              </button>
 
                               <div
-                                className={`text-xs rounded-lg p-3 flex flex-wrap items-center justify-between gap-2 ${
-                                  isDark ? "bg-neutral-800/50 text-neutral-400" : "bg-neutral-50 text-neutral-500"
-                                }`}
+                                className={`hidden sm:flex items-center gap-1.5 text-xs font-semibold whitespace-nowrap transition-colors ${isOpen ? "text-sacramento" : isDark ? "text-neutral-500 group-hover:text-neutral-300" : "text-neutral-400 group-hover:text-neutral-600"
+                                  }`}
                               >
-                                <span className={isDark ? "text-neutral-400" : "text-neutral-500"}>
-                                  Looking for cancellation and refund terms?
-                                </span>
-                                <Link
-                                  to="/return-refund-policy"
-                                  className="font-bold text-sacramento hover:underline flex items-center gap-1"
-                                >
-                                  View Refund & Return Policy →
-                                </Link>
-                              </div>
-
-                              {/* CTA Button */}
-                              <div className="pt-2">
-                                <Link
-                                  to="/#packages"
-                                  className="inline-flex items-center justify-center gap-2 bg-sacramento hover:bg-castleton text-white text-sm font-bold px-5 py-3 rounded-xl transition-all duration-200"
-                                >
-                                  Book a Safari
-                                  <ArrowRight size={16} />
-                                </Link>
+                                {isOpen ? "Hide Details" : "View Details"}
+                                <ChevronLeft
+                                  size={14}
+                                  className={`transition-transform duration-200 ${isOpen ? "rotate-90" : "-rotate-90"}`}
+                                />
                               </div>
                             </div>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </section>
-          ))}
 
-          {/* Bottom CTA */}
-          <div className="mt-16 sm:mt-20 text-center pb-8">
-            <p className={`text-sm mb-4 ${isDark ? "text-neutral-400" : "text-neutral-500"}`}>
-              Can't find what you're looking for?
-            </p>
-            <Link
-              to="/#packages"
-              className="inline-flex items-center gap-2 bg-sacramento hover:bg-castleton text-white text-sm font-bold px-6 py-3 rounded-xl shadow-sm transition-all duration-200"
-            >
-              View All Packages
-              <ArrowRight size={16} />
-            </Link>
-          </div>
-        </main>
+                            {/* Mobile expand bar */}
+                            <div
+                              className={`sm:hidden text-center text-xs font-semibold py-2 rounded-lg ${isOpen
+                                ? "text-sacramento bg-sacramento/10"
+                                : isDark
+                                  ? "text-neutral-400 bg-neutral-800"
+                                  : "text-neutral-500 bg-neutral-100"
+                                }`}
+                            >
+                              {isOpen ? "▲ Hide Details" : "▼ View Details"}
+                            </div>
+                          </div>
+
+                          {/* Expanded package details */}
+                          {isOpen && (
+                            <div
+                              className={`border-t ${isDark ? "border-neutral-800" : "border-neutral-100"
+                                }`}
+                            >
+                              {/* Description */}
+                              <div className="p-4 sm:p-6">
+                                <p
+                                  className={`text-sm leading-relaxed ${isDark ? "text-neutral-300" : "text-neutral-600"
+                                    }`}
+                                >
+                                  {pkg.description}
+                                </p>
+                              </div>
+
+                              {/* Included / Excluded grid */}
+                              <div
+                                className={`grid grid-cols-1 md:grid-cols-2 border-t ${isDark ? "border-neutral-800" : "border-neutral-100"
+                                  }`}
+                              >
+                                <div className="p-4 sm:p-6">
+                                  <h5 className="text-sm font-bold mb-3 flex items-center gap-2">
+                                    <Check size={16} className="text-green-500" /> What's Included
+                                  </h5>
+                                  <ul className="space-y-2">
+                                    {pkg.included.map((item, i) => (
+                                      <li
+                                        key={i}
+                                        className={`text-sm flex items-start gap-2 ${isDark ? "text-neutral-300" : "text-neutral-600"
+                                          }`}
+                                      >
+                                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 mt-1.5 shrink-0" />
+                                        {item}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+
+                                <div
+                                  className={`p-4 sm:p-6 border-t md:border-t-0 md:border-l ${isDark ? "border-neutral-800" : "border-neutral-100"
+                                    }`}
+                                >
+                                  <h5 className="text-sm font-bold mb-3 flex items-center gap-2">
+                                    <X size={16} className="text-red-400" /> What's Excluded
+                                  </h5>
+                                  <ul className="space-y-2">
+                                    {pkg.excluded.map((item, i) => (
+                                      <li
+                                        key={i}
+                                        className={`text-sm flex items-start gap-2 ${isDark ? "text-neutral-300" : "text-neutral-600"
+                                          }`}
+                                      >
+                                        <span className="w-1.5 h-1.5 rounded-full bg-red-400 mt-1.5 shrink-0" />
+                                        {item}
+                                      </li>
+                                    ))}
+                                  </ul>
+
+                                  <div className="mt-5">
+                                    <h5 className="text-sm font-bold mb-2">What to Bring</h5>
+                                    <div className="flex flex-wrap gap-1.5">
+                                      {pkg.whatToBring.map((item, i) => (
+                                        <span
+                                          key={i}
+                                          className={`text-xs px-2.5 py-1 rounded-full ${isDark
+                                            ? "bg-neutral-800 text-neutral-300"
+                                            : "bg-neutral-100 text-neutral-600"
+                                            }`}
+                                        >
+                                          {item}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Additional Info + Departure + Policy Link */}
+                              <div
+                                className={`p-4 sm:p-6 border-t space-y-4 ${isDark ? "border-neutral-800" : "border-neutral-100"
+                                  }`}
+                              >
+                                <div className="flex items-start gap-2 text-sm">
+                                  <MapPin size={16} className="text-sacramento mt-0.5 shrink-0" />
+                                  <div>
+                                    <span className="font-bold">Pickup: </span>
+                                    <span className={isDark ? "text-neutral-400" : "text-neutral-500"}>
+                                      {pkg.departureLocations}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div>
+                                  <h5 className="text-sm font-bold mb-2 flex items-center gap-1.5">
+                                    <Info size={14} className="text-sacramento" /> Good to Know
+                                  </h5>
+                                  <ul className="space-y-1.5">
+                                    {pkg.additionalInfo.map((info, i) => (
+                                      <li
+                                        key={i}
+                                        className={`text-xs sm:text-sm flex items-start gap-2 ${isDark ? "text-neutral-400" : "text-neutral-500"
+                                          }`}
+                                      >
+                                        <span className="text-sacramento mt-0.5 shrink-0">•</span>
+                                        {info}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+
+                                <div
+                                  className={`text-xs rounded-lg p-3 flex flex-wrap items-center justify-between gap-2 ${isDark ? "bg-neutral-800/50 text-neutral-400" : "bg-neutral-50 text-neutral-500"
+                                    }`}
+                                >
+                                  <span className={isDark ? "text-neutral-400" : "text-neutral-500"}>
+                                    Looking for cancellation and refund terms?
+                                  </span>
+                                  <Link
+                                    to="/return-refund-policy"
+                                    className="font-bold text-sacramento hover:underline flex items-center gap-1"
+                                  >
+                                    View Refund & Return Policy →
+                                  </Link>
+                                </div>
+
+                                {/* CTA Button */}
+                                <div className="pt-2 flex flex-wrap items-center gap-3">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleBookSafari(pkg, section)}
+                                    className="inline-flex items-center justify-center gap-2 bg-sacramento hover:bg-castleton text-white text-sm font-bold px-6 py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 cursor-pointer"
+                                  >
+                                    Book Safari
+                                    <ArrowRight size={16} />
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </section>
+            ))}
+
+            {/* Bottom CTA */}
+            <div className="mt-16 sm:mt-20 text-center pb-8">
+              <p className={`text-sm mb-4 ${isDark ? "text-neutral-400" : "text-neutral-500"}`}>
+                Can't find what you're looking for?
+              </p>
+              <Link
+                to="/#packages"
+                className="inline-flex items-center gap-2 bg-sacramento hover:bg-castleton text-white text-sm font-bold px-6 py-3 rounded-xl shadow-sm transition-all duration-200"
+              >
+                View All Packages
+                <ArrowRight size={16} />
+              </Link>
+            </div>
+          </main>
         </div>
       </div>
     </>

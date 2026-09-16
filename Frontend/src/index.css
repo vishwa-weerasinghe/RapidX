@@ -472,3 +472,15 @@ body {
     animation: shimmer 1.8s infinite ease-in-out;
   }
 }
+
+/* Modern Autofill styling for dark / frosted-glass auth inputs */
+.auth-glass-input:-webkit-autofill,
+.auth-glass-input:-webkit-autofill:hover,
+.auth-glass-input:-webkit-autofill:focus,
+.auth-glass-input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #1a271f inset !important;
+  -webkit-text-fill-color: #ffffff !important;
+  caret-color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.35) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
