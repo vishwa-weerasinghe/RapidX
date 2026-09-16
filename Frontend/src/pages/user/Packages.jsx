@@ -107,7 +107,7 @@ export default function Packages() {
         <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-10">
 
           {filteredPackages.map((pkg) => {
-            const relatedBlog = getStaticBlog(pkg.blog_id);
+            const relatedBlog = getStaticBlog(pkg.blog_id, pkg.Package_Name || pkg.title);
 
             return (
 

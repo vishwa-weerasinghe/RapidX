@@ -15,5 +15,6 @@ class Media extends Model
         'title',
         'description',
         'file_path',
+        'blog_id',
     ];
 }

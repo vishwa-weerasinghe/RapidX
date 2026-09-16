@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTheme } from "../../context/ThemeContext";
 import SEO from "../../components/SEO";
 import api from "../../axios";
-import { ChevronLeft, Calendar, Clock, ArrowRight, MapPin, Check, X, Users, DollarSign, Info } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar, Clock, ArrowRight, MapPin, Check, X, Users, DollarSign, Info, Camera } from "lucide-react";
 
 import minneriyaImg from "../../assets/minneriya.jpg";
 import kaudullaImg from "../../assets/kaudulla.jpg";
@@ -697,6 +697,51 @@ export default function Blog() {
 
   const isDark = theme === "dark";
 
+  const [dbMedia, setDbMedia] = useState([]);
+  const [lightboxPhoto, setLightboxPhoto] = useState(null);
+  const [lightboxList, setLightboxList] = useState([]);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+
+  const openLightbox = (photo, list) => {
+    const idx = list.findIndex((p) => p.id === photo.id);
+    setLightboxList(list);
+    setLightboxIndex(idx >= 0 ? idx : 0);
+    setLightboxPhoto(photo);
+  };
+
+  const closeLightbox = () => {
+    setLightboxPhoto(null);
+    setLightboxList([]);
+    setLightboxIndex(0);
+  };
+
+  const handlePrevPhoto = (e) => {
+    e?.stopPropagation();
+    if (lightboxList.length <= 1) return;
+    const nextIdx = (lightboxIndex - 1 + lightboxList.length) % lightboxList.length;
+    setLightboxIndex(nextIdx);
+    setLightboxPhoto(lightboxList[nextIdx]);
+  };
+
+  const handleNextPhoto = (e) => {
+    e?.stopPropagation();
+    if (lightboxList.length <= 1) return;
+    const nextIdx = (lightboxIndex + 1) % lightboxList.length;
+    setLightboxIndex(nextIdx);
+    setLightboxPhoto(lightboxList[nextIdx]);
+  };
+
+  useEffect(() => {
+    if (!lightboxPhoto) return;
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") closeLightbox();
+      if (e.key === "ArrowLeft") handlePrevPhoto();
+      if (e.key === "ArrowRight") handleNextPhoto();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [lightboxPhoto, lightboxIndex, lightboxList]);
+
   useEffect(() => {
     api
       .get("/packages")
@@ -706,6 +751,15 @@ export default function Blog() {
         }
       })
       .catch((err) => console.error("Error loading packages in blog:", err));
+
+    api
+      .get("/media")
+      .then((res) => {
+        if (res.data && Array.isArray(res.data)) {
+          setDbMedia(res.data);
+        }
+      })
+      .catch((err) => console.error("Error loading media in blog:", err));
   }, []);
 
   const handleBookSafari = (pkg, section) => {
@@ -867,340 +921,418 @@ export default function Blog() {
 
           {/* Main Content */}
           <main className="flex-1 min-w-0">
-            {blogSections.map((section, index) => (
-              <section
-                key={section.id}
-                id={section.id}
-                className={`scroll-mt-20 ${index > 0 ? "mt-16 sm:mt-20" : ""}`}
-              >
-                {/* Section Hero Card */}
-                <div
-                  className={`rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm border ${isDark ? "border-neutral-800 bg-neutral-900" : "border-neutral-200 bg-white"
-                    }`}
+            {blogSections.map((section, index) => {
+              const sectionMedia = dbMedia.filter(
+                (m) => String(m.blog_id) === String(section.blogId)
+              );
+              const heroImage = sectionMedia.length > 0 ? sectionMedia[0].file_path : section.img;
+
+              return (
+                <section
+                  key={section.id}
+                  id={section.id}
+                  className={`scroll-mt-20 ${index > 0 ? "mt-16 sm:mt-20" : ""}`}
                 >
-                  {/* Image with overlay */}
-                  <div className="relative aspect-[21/9] sm:aspect-[21/8] overflow-hidden">
-                    <img
-                      src={section.img}
-                      alt={section.title}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                    <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-8">
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        {section.tags.map((tag) => (
-                          <span
-                            key={tag}
-                            className="text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-full bg-white/20 text-white backdrop-blur-sm"
-                          >
-                            {tag}
-                          </span>
+                  {/* Section Hero Card */}
+                  <div
+                    className={`rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm border ${isDark ? "border-neutral-800 bg-neutral-900" : "border-neutral-200 bg-white"
+                      }`}
+                  >
+                    {/* Image with overlay */}
+                    <div className="relative aspect-[21/9] sm:aspect-[21/8] overflow-hidden group">
+                      <img
+                        src={heroImage}
+                        alt={section.title}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        onError={(e) => {
+                          e.target.src = section.img;
+                        }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+
+                      {/* Badge if media photos exist from gallery */}
+                      {sectionMedia.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => openLightbox(sectionMedia[0], sectionMedia)}
+                          className="absolute top-4 right-4 z-10 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/60 hover:bg-black/85 backdrop-blur-md text-white text-xs font-semibold shadow-lg transition-all border border-white/20 cursor-pointer"
+                          title="View photo gallery"
+                        >
+                          <Camera size={14} className="text-[#29AB87]" />
+                          <span>{sectionMedia.length} {sectionMedia.length === 1 ? "Photo" : "Photos"}</span>
+                        </button>
+                      )}
+
+                      <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-8">
+                        <div className="flex flex-wrap gap-2 mb-3">
+                          {section.tags.map((tag) => (
+                            <span
+                              key={tag}
+                              className="text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-full bg-white/20 text-white backdrop-blur-sm"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white leading-tight">
+                          {section.title}
+                        </h2>
+                        <p className="text-sm sm:text-base text-white/80 mt-1">{section.subtitle}</p>
+                      </div>
+                    </div>
+
+                    {/* Description */}
+                    <div className="p-5 sm:p-8">
+                      <div
+                        className={`space-y-3 text-sm sm:text-base leading-relaxed ${isDark ? "text-neutral-300" : "text-neutral-600"
+                          }`}
+                      >
+                        {section.paragraphs.map((para, i) => (
+                          <p key={i}>{para}</p>
                         ))}
                       </div>
-                      <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white leading-tight">
-                        {section.title}
-                      </h2>
-                      <p className="text-sm sm:text-base text-white/80 mt-1">{section.subtitle}</p>
                     </div>
-                  </div>
 
-                  {/* Description */}
-                  <div className="p-5 sm:p-8">
-                    <div
-                      className={`space-y-3 text-sm sm:text-base leading-relaxed ${isDark ? "text-neutral-300" : "text-neutral-600"
-                        }`}
-                    >
-                      {section.paragraphs.map((para, i) => (
-                        <p key={i}>{para}</p>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+                    {/* Safari Photos Gallery from Media Table */}
+                    {sectionMedia.length > 0 && (
+                      <div className={`p-5 sm:p-8 pt-6 border-t ${isDark ? "border-neutral-800 bg-neutral-900/60" : "border-neutral-100 bg-neutral-50/50"}`}>
+                        <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-lg bg-sacramento/10 text-sacramento flex items-center justify-center">
+                              <Camera size={18} />
+                            </div>
 
-                {/* Tour Package Cards */}
-                {section.tourPackages && (
-                  <div className="mt-6 sm:mt-8 space-y-4 sm:space-y-5">
-                    <h3
-                      className={`text-lg sm:text-xl font-bold flex items-center gap-2 px-1 ${isDark ? "text-neutral-200" : "text-neutral-800"
-                        }`}
-                    >
-                      <DollarSign size={20} className="text-sacramento" />
-                      Available Packages ({section.tourPackages.length})
-                    </h3>
+                          </div>
+                          <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${isDark ? "bg-neutral-800 text-neutral-300" : "bg-white text-neutral-600 border border-neutral-200 shadow-xs"}`}>
+                            Click any photo to enlarge
+                          </span>
+                        </div>
 
-                    {section.tourPackages.map((pkg, idx) => {
-                      const isOpen = expandedPkg[`${section.id}-${idx}`];
-                      return (
-                        <div
-                          key={idx}
-                          className={`rounded-xl sm:rounded-2xl border overflow-hidden transition-shadow duration-200 ${isOpen ? "shadow-md" : "shadow-sm"
-                            } ${isDark ? "border-neutral-800 bg-neutral-900" : "border-neutral-200 bg-white"
-                            }`}
-                        >
-                          {/* Package summary row */}
-                          <div
-                            onClick={() => togglePkg(section.id, idx)}
-                            role="button"
-                            tabIndex={0}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter" || e.key === " ") {
-                                e.preventDefault();
-                                togglePkg(section.id, idx);
-                              }
-                            }}
-                            className="w-full text-left p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-6 cursor-pointer group"
-                          >
-                            <div className="flex-1 min-w-0">
-                              <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-1">
-                                <h4 className="text-base sm:text-lg font-bold truncate">
-                                  {pkg.name}
-                                </h4>
-                                {pkg.price.includes("|") ? (
-                                  <div className="flex flex-wrap items-center gap-2">
-                                    {pkg.price.split("|").map((pPart, i) => (
-                                      <span key={i} className="inline-flex items-center px-3 py-1 rounded-full bg-sacramento/10 text-sacramento text-sm sm:text-base font-bold border border-sacramento/20 whitespace-nowrap shadow-sm">
-                                        {pPart.trim()}
-                                      </span>
-                                    ))}
-                                  </div>
-                                ) : (
-                                  <span className="inline-flex items-center px-3 py-1 rounded-full bg-sacramento/10 text-sacramento text-sm sm:text-base font-bold border border-sacramento/20 whitespace-nowrap shadow-sm">
-                                    {pkg.price}
-                                  </span>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
+                          {sectionMedia.map((photo, photoIdx) => (
+                            <div
+                              key={photo.id || photoIdx}
+                              onClick={() => openLightbox(photo, sectionMedia)}
+                              role="button"
+                              tabIndex={0}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter" || e.key === " ") {
+                                  e.preventDefault();
+                                  openLightbox(photo, sectionMedia);
+                                }
+                              }}
+                              className="group relative aspect-[4/3] rounded-xl overflow-hidden cursor-pointer bg-neutral-200 dark:bg-neutral-800 border border-black/5 dark:border-white/5 shadow-xs hover:shadow-md transition-all duration-300 hover:-translate-y-0.5"
+                            >
+                              <img
+                                src={photo.file_path}
+                                alt={photo.title || section.title}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                onError={(e) => {
+                                  e.target.src = section.img;
+                                }}
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-2.5 sm:p-3">
+                                <p className="text-white text-xs sm:text-sm font-semibold truncate leading-tight">
+                                  {photo.title || section.title}
+                                </p>
+                                {photo.description && (
+                                  <p className="text-white/80 text-[11px] line-clamp-1 mt-0.5">
+                                    {photo.description}
+                                  </p>
                                 )}
                               </div>
-                              <div
-                                className={`flex flex-wrap items-center gap-x-4 gap-y-1 text-xs sm:text-sm ${isDark ? "text-neutral-400" : "text-neutral-500"
-                                  }`}
-                              >
-                                <span className="flex items-center gap-1">
-                                  <Clock size={13} /> {pkg.duration}
-                                </span>
-                                <span className="flex items-center gap-1">
-                                  <Calendar size={13} /> {pkg.startTime}
-                                </span>
-                                <span className="flex items-center gap-1">
-                                  <Users size={13} /> {pkg.guests}
-                                </span>
-                              </div>
                             </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
 
-                            {/* Desktop expand & Book action */}
-                            <div className="flex items-center gap-3 self-end sm:self-center shrink-0">
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleBookSafari(pkg, section);
-                                }}
-                                className="inline-flex items-center gap-1.5 bg-sacramento hover:bg-castleton text-white text-xs sm:text-sm font-bold px-3.5 sm:px-4 py-2 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
-                              >
-                                Book Safari
-                                <ArrowRight size={14} />
-                              </button>
+                  {/* Tour Package Cards */}
+                  {section.tourPackages && (
+                    <div className="mt-6 sm:mt-8 space-y-4 sm:space-y-5">
+                      <h3
+                        className={`text-lg sm:text-xl font-bold flex items-center gap-2 px-1 ${isDark ? "text-neutral-200" : "text-neutral-800"
+                          }`}
+                      >
+                        <DollarSign size={20} className="text-sacramento" />
+                        Available Packages ({section.tourPackages.length})
+                      </h3>
 
-                              <div
-                                className={`hidden sm:flex items-center gap-1.5 text-xs font-semibold whitespace-nowrap transition-colors ${isOpen ? "text-sacramento" : isDark ? "text-neutral-500 group-hover:text-neutral-300" : "text-neutral-400 group-hover:text-neutral-600"
-                                  }`}
-                              >
-                                {isOpen ? "Hide Details" : "View Details"}
-                                <ChevronLeft
-                                  size={14}
-                                  className={`transition-transform duration-200 ${isOpen ? "rotate-90" : "-rotate-90"}`}
-                                />
-                              </div>
-                            </div>
-
-                            {/* Mobile expand bar */}
+                      {section.tourPackages.map((pkg, idx) => {
+                        const isOpen = expandedPkg[`${section.id}-${idx}`];
+                        return (
+                          <div
+                            key={idx}
+                            className={`rounded-xl sm:rounded-2xl border overflow-hidden transition-shadow duration-200 ${isOpen ? "shadow-md" : "shadow-sm"
+                              } ${isDark ? "border-neutral-800 bg-neutral-900" : "border-neutral-200 bg-white"
+                              }`}
+                          >
+                            {/* Package summary row */}
                             <div
-                              className={`sm:hidden text-center text-xs font-semibold py-2 rounded-lg ${isOpen
-                                ? "text-sacramento bg-sacramento/10"
-                                : isDark
-                                  ? "text-neutral-400 bg-neutral-800"
-                                  : "text-neutral-500 bg-neutral-100"
-                                }`}
+                              onClick={() => togglePkg(section.id, idx)}
+                              role="button"
+                              tabIndex={0}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter" || e.key === " ") {
+                                  e.preventDefault();
+                                  togglePkg(section.id, idx);
+                                }
+                              }}
+                              className="w-full text-left p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-6 cursor-pointer group"
                             >
-                              {isOpen ? "▲ Hide Details" : "▼ View Details"}
-                            </div>
-                          </div>
-
-                          {/* Expanded package details */}
-                          {isOpen && (
-                            <div
-                              className={`border-t ${isDark ? "border-neutral-800" : "border-neutral-100"
-                                }`}
-                            >
-                              {/* Description */}
-                              <div className="p-4 sm:p-6">
-                                <p
-                                  className={`text-sm leading-relaxed ${isDark ? "text-neutral-300" : "text-neutral-600"
-                                    }`}
-                                >
-                                  {pkg.description}
-                                </p>
-                              </div>
-
-                              {/* Included / Excluded grid */}
-                              <div
-                                className={`grid grid-cols-1 md:grid-cols-2 border-t ${isDark ? "border-neutral-800" : "border-neutral-100"
-                                  }`}
-                              >
-                                <div className="p-4 sm:p-6">
-                                  <h5 className="text-sm font-bold mb-3 flex items-center gap-2">
-                                    <Check size={16} className="text-green-500" /> What's Included
-                                  </h5>
-                                  <ul className="space-y-2">
-                                    {pkg.included.map((item, i) => (
-                                      <li
-                                        key={i}
-                                        className={`text-sm flex items-start gap-2 ${isDark ? "text-neutral-300" : "text-neutral-600"
-                                          }`}
-                                      >
-                                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 mt-1.5 shrink-0" />
-                                        {item}
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </div>
-
-                                <div
-                                  className={`p-4 sm:p-6 border-t md:border-t-0 md:border-l ${isDark ? "border-neutral-800" : "border-neutral-100"
-                                    }`}
-                                >
-                                  <h5 className="text-sm font-bold mb-3 flex items-center gap-2">
-                                    <X size={16} className="text-red-400" /> What's Excluded
-                                  </h5>
-                                  <ul className="space-y-2">
-                                    {pkg.excluded.map((item, i) => (
-                                      <li
-                                        key={i}
-                                        className={`text-sm flex items-start gap-2 ${isDark ? "text-neutral-300" : "text-neutral-600"
-                                          }`}
-                                      >
-                                        <span className="w-1.5 h-1.5 rounded-full bg-red-400 mt-1.5 shrink-0" />
-                                        {item}
-                                      </li>
-                                    ))}
-                                  </ul>
-
-                                  <div className="mt-5">
-                                    <h5 className="text-sm font-bold mb-2">What to Bring</h5>
-                                    <div className="flex flex-wrap gap-1.5">
-                                      {pkg.whatToBring.map((item, i) => (
-                                        <span
-                                          key={i}
-                                          className={`text-xs px-2.5 py-1 rounded-full ${isDark
-                                            ? "bg-neutral-800 text-neutral-300"
-                                            : "bg-neutral-100 text-neutral-600"
-                                            }`}
-                                        >
-                                          {item}
+                              <div className="flex-1 min-w-0">
+                                <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-1">
+                                  <h4 className="text-base sm:text-lg font-bold truncate">
+                                    {pkg.name}
+                                  </h4>
+                                  {pkg.price.includes("|") ? (
+                                    <div className="flex flex-wrap items-center gap-2">
+                                      {pkg.price.split("|").map((pPart, i) => (
+                                        <span key={i} className="inline-flex items-center px-3 py-1 rounded-full bg-sacramento/10 text-sacramento text-sm sm:text-base font-bold border border-sacramento/20 whitespace-nowrap shadow-sm">
+                                          {pPart.trim()}
                                         </span>
                                       ))}
                                     </div>
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* Additional Info + Departure + Policy Link */}
-                              <div
-                                className={`p-4 sm:p-6 border-t space-y-4 ${isDark ? "border-neutral-800" : "border-neutral-100"
-                                  }`}
-                              >
-                                <div className="flex items-start gap-2 text-sm">
-                                  <MapPin size={16} className="text-sacramento mt-0.5 shrink-0" />
-                                  <div>
-                                    <span className="font-bold">Pickup: </span>
-                                    <span className={isDark ? "text-neutral-400" : "text-neutral-500"}>
-                                      {pkg.departureLocations}
+                                  ) : (
+                                    <span className="inline-flex items-center px-3 py-1 rounded-full bg-sacramento/10 text-sacramento text-sm sm:text-base font-bold border border-sacramento/20 whitespace-nowrap shadow-sm">
+                                      {pkg.price}
                                     </span>
-                                  </div>
+                                  )}
                                 </div>
-
-                                <div>
-                                  <h5 className="text-sm font-bold mb-2 flex items-center gap-1.5">
-                                    <Info size={14} className="text-sacramento" /> Good to Know
-                                  </h5>
-                                  <ul className="space-y-1.5">
-                                    {pkg.additionalInfo.map((info, i) => {
-                                      const isWhatsApp = info.toLowerCase().includes("whatsapp");
-                                      return (
-                                        <li
-                                          key={i}
-                                          className={`text-xs sm:text-sm flex items-start gap-2 ${isDark ? "text-neutral-400" : "text-neutral-500"
-                                            }`}
-                                        >
-                                          <span className="text-sacramento mt-0.5 shrink-0">•</span>
-                                          {isWhatsApp ? (
-                                            <a
-                                              href={`https://wa.me/94778902811?text=${encodeURIComponent(
-                                                `Hello! I would like to inquire about same-day/next-day booking for ${pkg.name} (${section.title}). Are jeeps available?`
-                                              )}`}
-                                              target="_blank"
-                                              rel="noopener noreferrer"
-                                              className="text-emerald-600 hover:text-emerald-700 font-semibold underline inline-flex items-center gap-1 transition-colors"
-                                            >
-                                              {info} 💬
-                                            </a>
-                                          ) : (
-                                            info
-                                          )}
-                                        </li>
-                                      );
-                                    })}
-                                  </ul>
-                                </div>
-
                                 <div
-                                  className={`text-xs rounded-lg p-3 flex flex-wrap items-center justify-between gap-2 ${isDark ? "bg-neutral-800/50 text-neutral-400" : "bg-neutral-50 text-neutral-500"
+                                  className={`flex flex-wrap items-center gap-x-4 gap-y-1 text-xs sm:text-sm ${isDark ? "text-neutral-400" : "text-neutral-500"
                                     }`}
                                 >
-                                  <span className={isDark ? "text-neutral-400" : "text-neutral-500"}>
-                                    Looking for cancellation and refund terms?
+                                  <span className="flex items-center gap-1">
+                                    <Clock size={13} /> {pkg.duration}
                                   </span>
-                                  <Link
-                                    to="/return-refund-policy"
-                                    className="font-bold text-sacramento hover:underline flex items-center gap-1"
-                                  >
-                                    View Refund & Return Policy →
-                                  </Link>
-                                </div>
-
-                                {/* CTA Buttons */}
-                                <div className="pt-2 flex flex-wrap items-center gap-3">
-                                  <button
-                                    type="button"
-                                    onClick={() => handleBookSafari(pkg, section)}
-                                    className="inline-flex items-center justify-center gap-2 bg-sacramento hover:bg-castleton text-white text-sm font-bold px-6 py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 cursor-pointer"
-                                  >
-                                    Book Safari
-                                    <ArrowRight size={16} />
-                                  </button>
-
-                                  <a
-                                    href={`https://wa.me/94778902811?text=${encodeURIComponent(
-                                      `Hello! I would like to inquire about the "${pkg.name}" tour at ${section.title}. Could you please provide availability and details?`
-                                    )}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20ba59] text-white text-sm font-bold px-5 py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 cursor-pointer"
-                                  >
-                                    <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                                      <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
-                                    </svg>
-                                    Inquire via WhatsApp
-                                  </a>
+                                  <span className="flex items-center gap-1">
+                                    <Calendar size={13} /> {pkg.startTime}
+                                  </span>
+                                  <span className="flex items-center gap-1">
+                                    <Users size={13} /> {pkg.guests}
+                                  </span>
                                 </div>
                               </div>
+
+                              {/* Desktop expand & Book action */}
+                              <div className="flex items-center gap-3 self-end sm:self-center shrink-0">
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleBookSafari(pkg, section);
+                                  }}
+                                  className="inline-flex items-center gap-1.5 bg-sacramento hover:bg-castleton text-white text-xs sm:text-sm font-bold px-3.5 sm:px-4 py-2 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
+                                >
+                                  Book Safari
+                                  <ArrowRight size={14} />
+                                </button>
+
+                                <div
+                                  className={`hidden sm:flex items-center gap-1.5 text-xs font-semibold whitespace-nowrap transition-colors ${isOpen ? "text-sacramento" : isDark ? "text-neutral-500 group-hover:text-neutral-300" : "text-neutral-400 group-hover:text-neutral-600"
+                                    }`}
+                                >
+                                  {isOpen ? "Hide Details" : "View Details"}
+                                  <ChevronLeft
+                                    size={14}
+                                    className={`transition-transform duration-200 ${isOpen ? "rotate-90" : "-rotate-90"}`}
+                                  />
+                                </div>
+                              </div>
+
+                              {/* Mobile expand bar */}
+                              <div
+                                className={`sm:hidden text-center text-xs font-semibold py-2 rounded-lg ${isOpen
+                                  ? "text-sacramento bg-sacramento/10"
+                                  : isDark
+                                    ? "text-neutral-400 bg-neutral-800"
+                                    : "text-neutral-500 bg-neutral-100"
+                                  }`}
+                              >
+                                {isOpen ? "▲ Hide Details" : "▼ View Details"}
+                              </div>
                             </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </section>
-            ))}
+
+                            {/* Expanded package details */}
+                            {isOpen && (
+                              <div
+                                className={`border-t ${isDark ? "border-neutral-800" : "border-neutral-100"
+                                  }`}
+                              >
+                                {/* Description */}
+                                <div className="p-4 sm:p-6">
+                                  <p
+                                    className={`text-sm leading-relaxed ${isDark ? "text-neutral-300" : "text-neutral-600"
+                                      }`}
+                                  >
+                                    {pkg.description}
+                                  </p>
+                                </div>
+
+                                {/* Included / Excluded grid */}
+                                <div
+                                  className={`grid grid-cols-1 md:grid-cols-2 border-t ${isDark ? "border-neutral-800" : "border-neutral-100"
+                                    }`}
+                                >
+                                  <div className="p-4 sm:p-6">
+                                    <h5 className="text-sm font-bold mb-3 flex items-center gap-2">
+                                      <Check size={16} className="text-green-500" /> What's Included
+                                    </h5>
+                                    <ul className="space-y-2">
+                                      {pkg.included.map((item, i) => (
+                                        <li
+                                          key={i}
+                                          className={`text-sm flex items-start gap-2 ${isDark ? "text-neutral-300" : "text-neutral-600"
+                                            }`}
+                                        >
+                                          <span className="w-1.5 h-1.5 rounded-full bg-green-500 mt-1.5 shrink-0" />
+                                          {item}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+
+                                  <div
+                                    className={`p-4 sm:p-6 border-t md:border-t-0 md:border-l ${isDark ? "border-neutral-800" : "border-neutral-100"
+                                      }`}
+                                  >
+                                    <h5 className="text-sm font-bold mb-3 flex items-center gap-2">
+                                      <X size={16} className="text-red-400" /> What's Excluded
+                                    </h5>
+                                    <ul className="space-y-2">
+                                      {pkg.excluded.map((item, i) => (
+                                        <li
+                                          key={i}
+                                          className={`text-sm flex items-start gap-2 ${isDark ? "text-neutral-300" : "text-neutral-600"
+                                            }`}
+                                        >
+                                          <span className="w-1.5 h-1.5 rounded-full bg-red-400 mt-1.5 shrink-0" />
+                                          {item}
+                                        </li>
+                                      ))}
+                                    </ul>
+
+                                    <div className="mt-5">
+                                      <h5 className="text-sm font-bold mb-2">What to Bring</h5>
+                                      <div className="flex flex-wrap gap-1.5">
+                                        {pkg.whatToBring.map((item, i) => (
+                                          <span
+                                            key={i}
+                                            className={`text-xs px-2.5 py-1 rounded-full ${isDark
+                                              ? "bg-neutral-800 text-neutral-300"
+                                              : "bg-neutral-100 text-neutral-600"
+                                              }`}
+                                          >
+                                            {item}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Additional Info + Departure + Policy Link */}
+                                <div
+                                  className={`p-4 sm:p-6 border-t space-y-4 ${isDark ? "border-neutral-800" : "border-neutral-100"
+                                    }`}
+                                >
+                                  <div className="flex items-start gap-2 text-sm">
+                                    <MapPin size={16} className="text-sacramento mt-0.5 shrink-0" />
+                                    <div>
+                                      <span className="font-bold">Pickup: </span>
+                                      <span className={isDark ? "text-neutral-400" : "text-neutral-500"}>
+                                        {pkg.departureLocations}
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  <div>
+                                    <h5 className="text-sm font-bold mb-2 flex items-center gap-1.5">
+                                      <Info size={14} className="text-sacramento" /> Good to Know
+                                    </h5>
+                                    <ul className="space-y-1.5">
+                                      {pkg.additionalInfo.map((info, i) => {
+                                        const isWhatsApp = info.toLowerCase().includes("whatsapp");
+                                        return (
+                                          <li
+                                            key={i}
+                                            className={`text-xs sm:text-sm flex items-start gap-2 ${isDark ? "text-neutral-400" : "text-neutral-500"
+                                              }`}
+                                          >
+                                            <span className="text-sacramento mt-0.5 shrink-0">•</span>
+                                            {isWhatsApp ? (
+                                              <a
+                                                href={`https://wa.me/94778902811?text=${encodeURIComponent(
+                                                  `Hello! I would like to inquire about same-day/next-day booking for ${pkg.name} (${section.title}). Are jeeps available?`
+                                                )}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-emerald-600 hover:text-emerald-700 font-semibold underline inline-flex items-center gap-1 transition-colors"
+                                              >
+                                                {info} 💬
+                                              </a>
+                                            ) : (
+                                              info
+                                            )}
+                                          </li>
+                                        );
+                                      })}
+                                    </ul>
+                                  </div>
+
+                                  <div
+                                    className={`text-xs rounded-lg p-3 flex flex-wrap items-center justify-between gap-2 ${isDark ? "bg-neutral-800/50 text-neutral-400" : "bg-neutral-50 text-neutral-500"
+                                      }`}
+                                  >
+                                    <span className={isDark ? "text-neutral-400" : "text-neutral-500"}>
+                                      Looking for cancellation and refund terms?
+                                    </span>
+                                    <Link
+                                      to="/return-refund-policy"
+                                      className="font-bold text-sacramento hover:underline flex items-center gap-1"
+                                    >
+                                      View Refund & Return Policy →
+                                    </Link>
+                                  </div>
+
+                                  {/* CTA Buttons */}
+                                  <div className="pt-2 flex flex-wrap items-center gap-3">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleBookSafari(pkg, section)}
+                                      className="inline-flex items-center justify-center gap-2 bg-sacramento hover:bg-castleton text-white text-sm font-bold px-6 py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 cursor-pointer"
+                                    >
+                                      Book Safari
+                                      <ArrowRight size={16} />
+                                    </button>
+
+                                    <a
+                                      href={`https://wa.me/94778902811?text=${encodeURIComponent(
+                                        `Hello! I would like to inquire about the "${pkg.name}" tour at ${section.title}. Could you please provide availability and details?`
+                                      )}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20ba59] text-white text-sm font-bold px-5 py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 cursor-pointer"
+                                    >
+                                      <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                                        <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
+                                      </svg>
+                                      Inquire via WhatsApp
+                                    </a>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </section>
+              );
+            })}
 
             {/* Bottom CTA */}
             <div className="mt-16 sm:mt-20 text-center pb-8">
@@ -1218,6 +1350,78 @@ export default function Blog() {
           </main>
         </div>
       </div>
+      {/* Lightbox Modal */}
+      {lightboxPhoto && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6"
+          onClick={closeLightbox}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            className="relative max-w-4xl w-full max-h-[90vh] flex flex-col items-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close button */}
+            <button
+              type="button"
+              onClick={closeLightbox}
+              className="absolute -top-12 right-0 sm:right-0 p-2 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full transition cursor-pointer"
+              aria-label="Close photo preview"
+            >
+              <X size={24} />
+            </button>
+
+            {/* Navigation buttons */}
+            {lightboxList.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={handlePrevPhoto}
+                  className="absolute left-2 sm:-left-14 top-1/2 -translate-y-1/2 p-2.5 sm:p-3 text-white bg-black/60 hover:bg-black/80 sm:bg-white/10 sm:hover:bg-white/20 rounded-full transition cursor-pointer z-10"
+                  aria-label="Previous photo"
+                >
+                  <ChevronLeft size={24} />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleNextPhoto}
+                  className="absolute right-2 sm:-right-14 top-1/2 -translate-y-1/2 p-2.5 sm:p-3 text-white bg-black/60 hover:bg-black/80 sm:bg-white/10 sm:hover:bg-white/20 rounded-full transition cursor-pointer z-10"
+                  aria-label="Next photo"
+                >
+                  <ChevronRight size={24} />
+                </button>
+              </>
+            )}
+
+            {/* Large Image */}
+            <div className="w-full max-h-[75vh] flex items-center justify-center overflow-hidden rounded-2xl bg-black/40">
+              <img
+                src={lightboxPhoto.file_path}
+                alt={lightboxPhoto.title || "Safari Photo"}
+                className="max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl"
+              />
+            </div>
+
+            {/* Photo details */}
+            <div className="mt-4 text-center text-white max-w-2xl px-4">
+              <h4 className="text-base sm:text-lg font-bold">
+                {lightboxPhoto.title || "Safari Wildlife Photo"}
+              </h4>
+              {lightboxPhoto.description && (
+                <p className="text-xs sm:text-sm text-white/80 mt-1">
+                  {lightboxPhoto.description}
+                </p>
+              )}
+              {lightboxList.length > 1 && (
+                <p className="text-xs text-white/50 mt-1 font-mono">
+                  {lightboxIndex + 1} of {lightboxList.length}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

@@ -1393,7 +1393,7 @@ export default function App() {
                 ))
               ) : packages.length > 0 ? (
                 packages.map((pkg, idx) => {
-                  const relatedBlog = getStaticBlog(pkg.blog_id);
+                  const relatedBlog = getStaticBlog(pkg.blog_id, pkg.title || pkg.Package_Name);
 
                   return (
                     <div

@@ -14,9 +14,15 @@ class MediaController extends Controller
         return in_array(strtolower((string) $role), ['admin', 'administrator', 'superadmin'], true);
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(Media::latest()->get());
+        $query = Media::latest();
+
+        if ($request->filled('blog_id')) {
+            $query->where('blog_id', $request->blog_id);
+        }
+
+        return response()->json($query->get());
     }
 
     public function store(Request $request)
@@ -28,6 +34,7 @@ class MediaController extends Controller
         $validated = $request->validate([
             'title'       => 'required|string|max:100',
             'description' => 'nullable|string',
+            'blog_id'     => 'nullable|integer',
             'image'       => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:10240',
         ]);
 
@@ -71,6 +78,7 @@ class MediaController extends Controller
         $validated = $request->validate([
             'title'       => 'sometimes|required|string|max:100',
             'description' => 'nullable|string',
+            'blog_id'     => 'sometimes|nullable|integer',
             'image'       => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10240',
         ]);
 
