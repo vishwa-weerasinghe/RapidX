@@ -46,8 +46,9 @@ class BookingControllerTest extends TestCase
         $package = Package::create([
             'Package_Name' => 'City Tour',
             'Description' => 'A sample package',
-            'Price_for_adult' => 1000,
-            'Price_for_child' => 500,
+            'price_one_adult' => 1000,
+            'price_more_adult' => 1000,
+            'price_child' => 500,
         ]);
 
         DB::table('packages')->where('id', $package->id)->update(['Package_ID' => $package->id]);

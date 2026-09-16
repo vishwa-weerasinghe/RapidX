@@ -7,7 +7,8 @@ import {
   ArrowRight,
 } from "lucide-react";
 import api from "../../axios";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { getStaticBlog } from "../../constants/staticBlogs";
 
 export default function Packages() {
 
@@ -105,7 +106,10 @@ export default function Packages() {
       ) : (
         <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-10">
 
-          {filteredPackages.map((pkg) => (
+          {filteredPackages.map((pkg) => {
+            const relatedBlog = getStaticBlog(pkg.blog_id);
+
+            return (
 
             <div
               key={pkg.id}
@@ -159,12 +163,31 @@ export default function Packages() {
                         className="text-sacramento"
                       />
 
-                      <span>Adult</span>
+                      <span>1 Adult</span>
 
                     </div>
 
                     <span className="font-bold text-sacramento">
-                      $ {pkg.Price_for_adult}
+                      $ {pkg.price_one_adult}
+                    </span>
+
+                  </div>
+
+                  <div className="flex justify-between items-center">
+
+                    <div className="flex items-center gap-2">
+
+                      <Users
+                        size={18}
+                        className="text-sacramento"
+                      />
+
+                      <span>Per Adult (2+)</span>
+
+                    </div>
+
+                    <span className="font-bold text-sacramento">
+                      $ {pkg.price_more_adult}
                     </span>
 
                   </div>
@@ -183,7 +206,7 @@ export default function Packages() {
                     </div>
 
                     <span className="font-bold text-sacramento">
-                      $ {pkg.Price_for_child}
+                      $ {pkg.price_child}
                     </span>
 
                   </div>
@@ -198,11 +221,22 @@ export default function Packages() {
                   <ArrowRight size={18} />
                 </button>
 
+                {relatedBlog && (
+                  <Link
+                    to={`/blog#${relatedBlog.slug}`}
+                    className="mt-3 inline-flex items-center justify-center gap-1 text-sacramento font-semibold hover:underline"
+                  >
+                    Read More
+                    <ArrowRight size={16} />
+                  </Link>
+                )}
+
               </div>
 
             </div>
 
-          ))}
+            );
+          })}
 
         </div>
       )}

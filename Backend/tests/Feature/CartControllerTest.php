@@ -24,8 +24,9 @@ class CartControllerTest extends TestCase
         return Package::create(array_merge([
             'Package_Name'    => 'Morning Safari',
             'Description'     => 'A guided safari.',
-            'Price_for_adult' => 100.00,
-            'Price_for_child' => 50.00,
+            'price_one_adult' => 100.00,
+            'price_more_adult' => 100.00,
+            'price_child' => 50.00,
         ], $overrides));
     }
 

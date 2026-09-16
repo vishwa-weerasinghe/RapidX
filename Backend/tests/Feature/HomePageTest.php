@@ -35,8 +35,9 @@ class HomePageTest extends TestCase
         return Package::create(array_merge([
             'Package_Name'    => 'Minneriya Safari',
             'Description'     => 'World-famous elephant gathering.',
-            'Price_for_adult' => 150.00,
-            'Price_for_child' => 75.00,
+            'price_one_adult' => 150.00,
+            'price_more_adult' => 150.00,
+            'price_child' => 75.00,
         ], $overrides));
     }
 
@@ -96,8 +97,9 @@ class HomePageTest extends TestCase
         $this->createPackage([
             'Package_Name'    => 'Full Day Safari',
             'Description'     => 'An amazing full day in the wild.',
-            'Price_for_adult' => 200.00,
-            'Price_for_child' => 100.00,
+            'price_one_adult' => 200.00,
+            'price_more_adult' => 200.00,
+            'price_child' => 100.00,
         ]);
 
         $response = $this->getJson('/api/packages');
@@ -108,12 +110,13 @@ class HomePageTest extends TestCase
         $this->assertArrayHasKey('id', $pkg);
         $this->assertArrayHasKey('Package_Name', $pkg);
         $this->assertArrayHasKey('Description', $pkg);
-        $this->assertArrayHasKey('Price_for_adult', $pkg);
-        $this->assertArrayHasKey('Price_for_child', $pkg);
+        $this->assertArrayHasKey('price_one_adult', $pkg);
+        $this->assertArrayHasKey('price_more_adult', $pkg);
+        $this->assertArrayHasKey('price_child', $pkg);
 
         $this->assertEquals('Full Day Safari', $pkg['Package_Name']);
-        $this->assertEquals(200.00, $pkg['Price_for_adult']);
-        $this->assertEquals(100.00, $pkg['Price_for_child']);
+        $this->assertEquals(200.00, $pkg['price_one_adult']);
+        $this->assertEquals(100.00, $pkg['price_child']);
     }
 
     // =========================================================================

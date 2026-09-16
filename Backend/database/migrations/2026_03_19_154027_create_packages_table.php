@@ -18,8 +18,9 @@ return new class extends Migration
 
             $table->string('Package_Name', 100);
             $table->text('Description');
-            $table->decimal('Price_for_adult', 10, 2);
-            $table->decimal('Price_for_child', 10, 2);
+            $table->decimal('price_one_adult', 10, 2);
+            $table->decimal('price_more_adult', 10, 2);
+            $table->decimal('price_child', 10, 2);
             
             $table->string('Image')->nullable();
             $table->timestamps();

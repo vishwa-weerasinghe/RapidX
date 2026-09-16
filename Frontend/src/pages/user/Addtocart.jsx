@@ -104,8 +104,9 @@ export default function Booking() {
   const getTotal = () => {
     if (!pkg) return 0;
 
-    const adultTotal = form.No_of_adults * pkg.Price_for_adult;
-    const childTotal = form.No_of_child * pkg.Price_for_child;
+    const adultRate = Number(form.No_of_adults) <= 1 ? pkg.price_one_adult : pkg.price_more_adult;
+    const adultTotal = Number(form.No_of_adults) * Number(adultRate || 0);
+    const childTotal = Number(form.No_of_child) * Number(pkg.price_child || 0);
 
     return adultTotal + childTotal;
   };
@@ -487,9 +488,9 @@ export default function Booking() {
                     </div>
                   </div>
                   <div className="text-right text-[11px] font-bold text-slate-400 dark:text-slate-500">
-                    <p>{form.No_of_adults} Adult(s) × $ {pkg.Price_for_adult}</p>
+                    <p>{form.No_of_adults} Adult{Number(form.No_of_adults) > 1 ? "s" : ""} × $ {Number(form.No_of_adults) <= 1 ? pkg.price_one_adult : pkg.price_more_adult}</p>
                     {form.No_of_child > 0 && (
-                      <p className="mt-0.5">{form.No_of_child} Child(ren) × $ {pkg.Price_for_child}</p>
+                      <p className="mt-0.5">{form.No_of_child} Child(ren) × $ {pkg.price_child}</p>
                     )}
                     {getAreaExtra() > 0 && (
                       <p className="mt-0.5 text-castleton dark:text-emerald-400 font-semibold">

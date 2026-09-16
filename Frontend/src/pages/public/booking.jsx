@@ -165,8 +165,9 @@ export default function Booking() {
     // calculate total price (base without area extra)
     const getTotal = () => {
         if (!pkg) return 0;
-        const adultTotal = form.No_of_adults * pkg.Price_for_adult;
-        const childTotal = form.No_of_child * pkg.Price_for_child;
+        const adultRate = Number(form.No_of_adults) <= 1 ? pkg.price_one_adult : pkg.price_more_adult;
+        const adultTotal = Number(form.No_of_adults) * Number(adultRate || 0);
+        const childTotal = Number(form.No_of_child) * Number(pkg.price_child || 0);
         return adultTotal + childTotal;
     };
 
@@ -330,7 +331,7 @@ export default function Booking() {
                                             <option value="" disabled>-- Select a tour package --</option>
                                             {Array.isArray(packagesList) && packagesList.map((p) => (
                                                 <option key={p.Package_ID || p.id} value={p.Package_ID || p.id}>
-                                                    {p.Package_Name} - $ {p.Price_for_adult} (Adult) / $ {p.Price_for_child} (Child)
+                                                    {p.Package_Name} - 1 Adult: $ {p.price_one_adult} / Adult (2+): $ {p.price_more_adult} / Child: $ {p.price_child}
                                                 </option>
                                             ))}
                                         </select>
@@ -605,9 +606,9 @@ export default function Booking() {
                                         </div>
                                     </div>
                                             <div className="text-right text-[11px] font-bold text-slate-400 dark:text-slate-500">
-                                                <p>{form.No_of_adults} Adult(s) × $ {pkg.Price_for_adult}</p>
+                                                <p>{form.No_of_adults} Adult{Number(form.No_of_adults) > 1 ? "s" : ""} × $ {Number(form.No_of_adults) <= 1 ? pkg.price_one_adult : pkg.price_more_adult}</p>
                                                 {form.No_of_child > 0 && (
-                                                    <p className="mt-0.5">{form.No_of_child} Child(ren) × $ {pkg.Price_for_child}</p>
+                                                    <p className="mt-0.5">{form.No_of_child} Child(ren) × $ {pkg.price_child}</p>
                                                 )}
                                                 {form.Area && (
                                                     <p className="mt-0.5">{form.Area} surcharge: $ {new Intl.NumberFormat().format(getAreaExtra())}</p>
