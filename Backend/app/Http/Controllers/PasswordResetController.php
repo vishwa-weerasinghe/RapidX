@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Auth\Events\PasswordReset;
 use App\Models\User;
+use App\Mail\ResetPasswordMail;
+use App\Services\BrevoMailService;
 
 class PasswordResetController extends Controller
 {
@@ -37,17 +40,54 @@ class PasswordResetController extends Controller
             ], 404);
         }
 
-        $status = Password::broker()->sendResetLink(['Email' => $email]);
+        try {
+            // Generate secure token via Laravel password broker
+            $token = Password::broker()->createToken($user);
 
-        if ($status === Password::RESET_LINK_SENT) {
+            // Determine frontend SPA URL dynamically based on request origin
+            $origin = $request->header('Origin') ?: $request->header('Referer');
+            $frontendUrl = null;
+
+            if ($origin) {
+                $parsed = parse_url($origin);
+                if (isset($parsed['scheme']) && isset($parsed['host'])) {
+                    $frontendUrl = $parsed['scheme'] . '://' . $parsed['host'] . (isset($parsed['port']) ? ':' . $parsed['port'] : '');
+                }
+            }
+
+            if (empty($frontendUrl)) {
+                $frontendUrl = env('FRONTEND_URL') ?: config('app.frontend_url', 'http://localhost:5173');
+            }
+
+            $frontendUrl = rtrim($frontendUrl, '/');
+            $resetUrl = $frontendUrl . '/password-reset/' . $token . '?email=' . urlencode($user->Email);
+            $expireMinutes = config('auth.passwords.' . config('auth.defaults.passwords') . '.expire', 60);
+
+            // Render HTML content using Mailable (matching BookingConfirmationMail & ContactMessage)
+            $htmlContent = (new ResetPasswordMail($user, $resetUrl, $expireMinutes))->render();
+
+            // Send directly via Brevo REST API (Port 443)
+            BrevoMailService::send(
+                $user->Email,
+                'Reset Your Password - Minneriya Wild Jeep Safari',
+                $htmlContent,
+                $user->User_Name ?? 'Valued Customer'
+            );
+
             return response()->json([
                 'message' => 'Reset link sent to your email.'
             ], 200);
-        }
 
-        return response()->json([
-            'message' => 'Unable to send reset link to that email.'
-        ], 400);
+        } catch (\Exception $e) {
+            Log::error('Failed to send reset password email: ' . $e->getMessage(), [
+                'exception' => $e,
+                'email' => $email,
+            ]);
+
+            return response()->json([
+                'message' => 'Unable to send reset link to that email. Please try again later.'
+            ], 500);
+        }
     }
 
     /**

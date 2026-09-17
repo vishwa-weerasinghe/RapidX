@@ -11,8 +11,6 @@ export default function Login() {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [emailReadOnly, setEmailReadOnly] = useState(true);
-  const [passwordReadOnly, setPasswordReadOnly] = useState(true);
 
   const navigate = useNavigate();
 
@@ -86,7 +84,7 @@ export default function Login() {
         robots="noindex, follow"
       />
       <div
-        className="flex min-h-screen items-center justify-center bg-cover bg-center bg-no-repeat px-4 relative"
+        className="flex min-h-screen items-center justify-center bg-cover bg-center bg-no-repeat py-8 sm:py-12 px-3 sm:px-4 relative"
         style={{
           backgroundImage: `url(${loginBg})`,
         }}
@@ -95,9 +93,9 @@ export default function Login() {
         <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"></div>
 
         {/* Balanced login form container sizing */}
-        <div className="relative w-full max-w-md rounded-2xl border border-white/20 bg-white/10 p-8 shadow-2xl backdrop-blur-md">
+        <div className="relative w-full max-w-md rounded-2xl border border-white/20 bg-white/10 p-5 sm:p-8 shadow-2xl backdrop-blur-md">
           <div className="text-center">
-            <h2 className="text-3xl font-extrabold tracking-tight text-white drop-shadow-sm">
+            <h2 className="mt-2 sm:mt-4 text-2xl sm:text-3xl font-extrabold tracking-tight text-white drop-shadow-sm">
               Welcome Back
             </h2>
             <p className="text-xs font-semibold tracking-widest text-castleton-300 uppercase mt-1">
@@ -141,10 +139,7 @@ export default function Login() {
                   id="login-email"
                   autoComplete="username"
                   required
-                  readOnly={emailReadOnly}
-                  onFocus={() => setEmailReadOnly(false)}
-                  onClick={() => setEmailReadOnly(false)}
-                  className="auth-glass-input block w-full rounded-lg border border-white/20 bg-white/10 py-2.5 pl-10 pr-3 text-white placeholder-gray-400 backdrop-blur-sm transition focus:border-castleton-300 focus:outline-none focus:ring-1 focus:ring-castleton-300 sm:text-sm"
+                  className="auth-glass-input block w-full min-h-[44px] rounded-lg border border-white/20 bg-white/10 py-2.5 pl-10 pr-3 text-white placeholder-gray-400 backdrop-blur-sm transition focus:border-castleton-300 focus:outline-none focus:ring-1 focus:ring-castleton-300 text-base sm:text-sm"
                   placeholder="john@email.com"
                   value={Email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -188,10 +183,7 @@ export default function Login() {
                   id="login-password"
                   autoComplete="current-password"
                   required
-                  readOnly={passwordReadOnly}
-                  onFocus={() => setPasswordReadOnly(false)}
-                  onClick={() => setPasswordReadOnly(false)}
-                  className="auth-glass-input block w-full rounded-lg border border-white/20 bg-white/10 py-2.5 pl-10 pr-10 text-white placeholder-gray-400 backdrop-blur-sm transition focus:border-castleton-300 focus:outline-none focus:ring-1 focus:ring-castleton-300 sm:text-sm"
+                  className="auth-glass-input block w-full min-h-[44px] rounded-lg border border-white/20 bg-white/10 py-2.5 pl-10 pr-10 text-white placeholder-gray-400 backdrop-blur-sm transition focus:border-castleton-300 focus:outline-none focus:ring-1 focus:ring-castleton-300 text-base sm:text-sm"
                   placeholder="••••••••"
                   value={Password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -229,7 +221,7 @@ export default function Login() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center items-center rounded-lg bg-gradient-to-r from-sacramento to-castleton px-4 py-3 text-sm font-bold uppercase tracking-wider text-white shadow-lg transition hover:from-sacramento-600 hover:to-castleton-600 disabled:opacity-50"
+                className="w-full min-h-[48px] flex justify-center items-center rounded-lg bg-gradient-to-r from-sacramento to-castleton px-4 py-3 text-sm font-bold uppercase tracking-wider text-white shadow-lg transition hover:from-sacramento-600 hover:to-castleton-600 disabled:opacity-50 cursor-pointer"
               >
                 {loading ? "Signing In..." : "Sign In →"}
               </button>

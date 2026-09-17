@@ -75,7 +75,7 @@
                                 <tr>
                                     <td style="padding: 16px 20px; width: 50%;">
                                         <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #6b8273; letter-spacing: 0.5px;">Total Amount Paid</div>
-                                        <div style="font-size: 18px; font-weight: 800; color: #1e7e34; margin-top: 2px;">Rs. {{ number_format($payment->amount, 2) }}</div>
+                                        <div style="font-size: 18px; font-weight: 800; color: #1e7e34; margin-top: 2px;">$ {{ number_format($payment->amount, 2) }}</div>
                                     </td>
                                     <td style="padding: 16px 20px; width: 50%;">
                                         <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #6b8273; letter-spacing: 0.5px;">Payment Status</div>
@@ -104,7 +104,7 @@
                                         @if(!empty($payment->customer->Phone_No))
                                         <tr>
                                             <td style="padding: 10px 16px; border-bottom: 1px solid #e1eade; font-weight: 600; color: #5a6e60;">Phone / WhatsApp:</td>
-                                            <td style="padding: 10px 16px; border-bottom: 1px solid #e1eade; color: #153825;"><a href="tel:{{ $payment->customer->Phone_No }}" style="color: #153825; text-decoration: none; font-weight: 600;">{{ $payment->customer->Phone_Number }}</a></td>
+                                            <td style="padding: 10px 16px; border-bottom: 1px solid #e1eade; color: #153825;"><a href="tel:{{ $payment->customer->Phone_No }}" style="color: #153825; text-decoration: none; font-weight: 600;">{{ $payment->customer->Phone_No }}</a></td>
                                         </tr>
                                         @endif
                                         @if(!empty($payment->customer->NIC))
@@ -191,7 +191,7 @@
                         <td align="center" style="background-color: #f7faf8; padding: 24px 30px; border-top: 1px solid #e1eade; font-size: 12px; color: #6b8273; line-height: 1.6;">
                             <div style="margin-bottom: 10px;">
                                 <strong>Need assistance or change your pickup point?</strong><br>
-                                Contact us via WhatsApp / Call: <a href="tel:+94778902811" style="color: #1e7e34; font-weight: 700; text-decoration: none;">+94 77 123 4567</a> 
+                                Contact us via WhatsApp / Call: <a href="tel:+94778902811" style="color: #1e7e34; font-weight: 700; text-decoration: none;">+94 77 8902811</a> 
                                 &nbsp;•&nbsp; 
                                 Email: <a href="mailto:info@minneriyawildjeepsafari.com" style="color: #1e7e34; font-weight: 700; text-decoration: none;">info@minneriyawildjeepsafari.com</a>
                             </div>

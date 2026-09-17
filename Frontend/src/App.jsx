@@ -1432,7 +1432,7 @@ export default function App() {
                         <ul className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-600 dark:text-gray-300 mb-4">
                           <li className="flex items-center gap-2">
                             <span className="text-green-600 shrink-0">✓</span>
-                            <span>Professional Guide</span>
+                            <span>Professional Driver</span>
                           </li>
 
                           <li className="flex items-center gap-2">
@@ -1455,6 +1455,10 @@ export default function App() {
                           <li className="flex items-center gap-2">
                             <span className="text-green-600 shrink-0">✓</span>
                             <span>Binoculars</span>
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <span className="text-green-600 shrink-0">✓</span>
+                            <span>Pick-Up & Drop-Off</span>
                           </li>
                         </ul>
 
