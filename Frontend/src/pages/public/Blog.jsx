@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTheme } from "../../context/ThemeContext";
 import SEO from "../../components/SEO";
 import api from "../../axios";
-import { ChevronLeft, ChevronRight, Calendar, Clock, ArrowRight, MapPin, Check, X, Users, DollarSign, Info, Camera } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar, Clock, ArrowRight, MapPin, Check, X, Users, DollarSign, Info, Camera, Compass, Sparkles } from "lucide-react";
 
 import minneriyaImg from "../../assets/minneriya.jpg";
 import kaudullaImg from "../../assets/kaudulla.jpg";
@@ -687,6 +687,265 @@ const blogSections = [
   }
 ];
 
+function ModernBlogGallery({ photos, onPhotoClick, fallbackImg, isDark }) {
+  const [mobileIndex, setMobileIndex] = useState(0);
+  const [touchStartX, setTouchStartX] = useState(null);
+
+  if (!photos || photos.length === 0) {
+    return (
+      <div className="relative aspect-[16/9] sm:aspect-[21/9] overflow-hidden rounded-2xl bg-neutral-100 dark:bg-neutral-800">
+        <img
+          src={fallbackImg}
+          alt="Safari destination"
+          className="w-full h-full object-cover"
+        />
+      </div>
+    );
+  }
+
+  // Single Photo: Cinematic full-width presentation with subtle hover zoom
+  if (photos.length === 1) {
+    const photo = photos[0];
+    return (
+      <div
+        onClick={() => onPhotoClick(photo, photos, 0)}
+        className="group relative aspect-[16/9] sm:aspect-[21/9] overflow-hidden rounded-2xl cursor-pointer bg-neutral-900 shadow-xs border border-black/5 dark:border-white/5"
+      >
+        <img
+          src={photo.file_path || photo.url}
+          alt={photo.title || "Safari photo"}
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          onError={(e) => {
+            if (fallbackImg) e.target.src = fallbackImg;
+          }}
+        />
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
+        <div className="absolute bottom-3 right-3 px-3 py-1.5 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-md text-white text-xs font-semibold flex items-center gap-1.5 shadow-md border border-white/20 transition-all opacity-0 group-hover:opacity-100">
+          <Camera size={13} className="text-[#29AB87]" />
+          <span>View Fullscreen</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Multiple Photos:
+  // Desktop: Airbnb-style Bento Mosaic Grid
+  // Mobile: Touch-swipeable Carousel with arrows and dots
+  const handlePrev = (e) => {
+    e.stopPropagation();
+    setMobileIndex((prev) => (prev === 0 ? photos.length - 1 : prev - 1));
+  };
+
+  const handleNext = (e) => {
+    e.stopPropagation();
+    setMobileIndex((prev) => (prev === photos.length - 1 ? 0 : prev + 1));
+  };
+
+  const handleTouchStart = (e) => {
+    setTouchStartX(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = (e) => {
+    if (touchStartX === null) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchStartX - touchEndX;
+    if (diff > 45) {
+      handleNext(e);
+    } else if (diff < -45) {
+      handlePrev(e);
+    }
+    setTouchStartX(null);
+  };
+
+  return (
+    <div className="relative">
+      {/* Desktop Bento Mosaic (md and up) */}
+      <div className="hidden md:block">
+        {photos.length === 2 && (
+          <div className="grid grid-cols-2 gap-2.5 h-[340px] lg:h-[390px] rounded-2xl overflow-hidden">
+            {photos.map((photo, idx) => (
+              <div
+                key={photo.id || idx}
+                onClick={() => onPhotoClick(photo, photos, idx)}
+                className="group relative h-full overflow-hidden cursor-pointer bg-neutral-900"
+              >
+                <img
+                  src={photo.file_path || photo.url}
+                  alt={photo.title || `Safari view ${idx + 1}`}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  onError={(e) => {
+                    if (fallbackImg) e.target.src = fallbackImg;
+                  }}
+                />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-colors duration-300" />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {photos.length === 3 && (
+          <div className="grid grid-cols-12 gap-2.5 h-[360px] lg:h-[420px] rounded-2xl overflow-hidden">
+            {/* Main Featured Photo (Left 65%) */}
+            <div
+              onClick={() => onPhotoClick(photos[0], photos, 0)}
+              className="col-span-8 group relative h-full overflow-hidden cursor-pointer bg-neutral-900"
+            >
+              <img
+                src={photos[0].file_path || photos[0].url}
+                alt={photos[0].title || "Main view"}
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                onError={(e) => {
+                  if (fallbackImg) e.target.src = fallbackImg;
+                }}
+              />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
+            </div>
+
+            {/* Stack of 2 photos on the Right (35%) */}
+            <div className="col-span-4 grid grid-rows-2 gap-2.5 h-full">
+              {photos.slice(1, 3).map((photo, idx) => (
+                <div
+                  key={photo.id || idx + 1}
+                  onClick={() => onPhotoClick(photo, photos, idx + 1)}
+                  className="group relative h-full overflow-hidden cursor-pointer bg-neutral-900"
+                >
+                  <img
+                    src={photo.file_path || photo.url}
+                    alt={photo.title || `Safari view ${idx + 2}`}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    onError={(e) => {
+                      if (fallbackImg) e.target.src = fallbackImg;
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-colors duration-300" />
+                  {idx === 1 && (
+                    <div className="absolute bottom-3 right-3 px-3 py-1.5 rounded-full bg-black/70 hover:bg-black/90 backdrop-blur-md text-white text-xs font-bold flex items-center gap-1.5 shadow-lg border border-white/20 transition-transform group-hover:scale-105">
+                      <Camera size={13} className="text-[#29AB87]" />
+                      <span>{photos.length} Photos</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {photos.length >= 4 && (
+          <div className="grid grid-cols-12 gap-2.5 h-[380px] lg:h-[440px] rounded-2xl overflow-hidden">
+            {/* Main Featured Photo (Left 60%) */}
+            <div
+              onClick={() => onPhotoClick(photos[0], photos, 0)}
+              className="col-span-7 group relative h-full overflow-hidden cursor-pointer bg-neutral-900"
+            >
+              <img
+                src={photos[0].file_path || photos[0].url}
+                alt={photos[0].title || "Main view"}
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                onError={(e) => {
+                  if (fallbackImg) e.target.src = fallbackImg;
+                }}
+              />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
+            </div>
+
+            {/* 2x2 Grid of Photos on Right (40%) */}
+            <div className="col-span-5 grid grid-cols-2 grid-rows-2 gap-2.5 h-full">
+              {photos.slice(1, 5).map((photo, idx) => {
+                const isLastSlot = idx === 3;
+                const remaining = photos.length - 4;
+                return (
+                  <div
+                    key={photo.id || idx + 1}
+                    onClick={() => onPhotoClick(photo, photos, idx + 1)}
+                    className="group relative h-full overflow-hidden cursor-pointer bg-neutral-900"
+                  >
+                    <img
+                      src={photo.file_path || photo.url}
+                      alt={photo.title || `Safari view ${idx + 2}`}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      onError={(e) => {
+                        if (fallbackImg) e.target.src = fallbackImg;
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-colors duration-300" />
+                    {isLastSlot && remaining > 0 && (
+                      <div className="absolute inset-0 bg-black/60 hover:bg-black/70 backdrop-blur-[2px] flex flex-col items-center justify-center text-white transition-all">
+                        <Camera size={20} className="text-[#29AB87] mb-1" />
+                        <span className="text-sm font-bold">+{remaining} More</span>
+                      </div>
+                    )}
+                    {isLastSlot && remaining <= 0 && (
+                      <div className="absolute bottom-2.5 right-2.5 px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-md text-white text-[11px] font-bold flex items-center gap-1 border border-white/20">
+                        <Camera size={12} className="text-[#29AB87]" />
+                        <span>{photos.length} Photos</span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Mobile Swipeable Carousel (sm and below) */}
+      <div
+        className="block md:hidden relative aspect-[16/10] rounded-2xl overflow-hidden bg-neutral-900 select-none"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
+        <img
+          src={photos[mobileIndex]?.file_path || photos[mobileIndex]?.url}
+          alt={photos[mobileIndex]?.title || "Safari view"}
+          onClick={() => onPhotoClick(photos[mobileIndex], photos, mobileIndex)}
+          className="w-full h-full object-cover cursor-pointer"
+          onError={(e) => {
+            if (fallbackImg) e.target.src = fallbackImg;
+          }}
+        />
+
+        {/* Counter Badge */}
+        <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-md text-white text-xs font-semibold flex items-center gap-1.5 shadow-md border border-white/20">
+          <Camera size={13} className="text-[#29AB87]" />
+          <span>{mobileIndex + 1} / {photos.length}</span>
+        </div>
+
+        {/* Prev / Next Arrows */}
+        <button
+          type="button"
+          onClick={handlePrev}
+          className="absolute left-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-xs border border-white/20 shadow-md cursor-pointer transition-transform active:scale-95"
+          aria-label="Previous photo"
+        >
+          <ChevronLeft size={18} />
+        </button>
+        <button
+          type="button"
+          onClick={handleNext}
+          className="absolute right-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-xs border border-white/20 shadow-md cursor-pointer transition-transform active:scale-95"
+          aria-label="Next photo"
+        >
+          <ChevronRight size={18} />
+        </button>
+
+        {/* Dot Indicators */}
+        <div className="absolute bottom-2.5 left-0 right-0 flex items-center justify-center gap-1.5 pointer-events-none">
+          {photos.map((_, dotIdx) => (
+            <div
+              key={dotIdx}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                dotIdx === mobileIndex
+                  ? "w-5 bg-white shadow-xs"
+                  : "w-1.5 bg-white/50"
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Blog() {
   const { theme } = useTheme();
   const location = useLocation();
@@ -702,8 +961,15 @@ export default function Blog() {
   const [lightboxList, setLightboxList] = useState([]);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
-  const openLightbox = (photo, list) => {
-    const idx = list.findIndex((p) => p.id === photo.id);
+  const openLightbox = (photo, list, index = -1) => {
+    let idx = index;
+    if (idx < 0) {
+      idx = list.findIndex(
+        (p) =>
+          (p.id && photo.id ? p.id === photo.id : false) ||
+          (p.file_path || p.url) === (photo.file_path || photo.url)
+      );
+    }
     setLightboxList(list);
     setLightboxIndex(idx >= 0 ? idx : 0);
     setLightboxPhoto(photo);
@@ -884,38 +1150,94 @@ export default function Blog() {
       />
 
       <div
-        className={`min-h-screen transition-colors duration-300 ${isDark ? "bg-neutral-950 text-neutral-100" : "bg-gray-50 text-neutral-900"
-          }`}
+        className={`min-h-screen transition-colors duration-300 ${
+          isDark ? "bg-neutral-950 text-neutral-100" : "bg-neutral-50/60 text-neutral-900"
+        }`}
       >
+        {/* Modern Blog Header Banner */}
+        <div className="relative border-b border-neutral-200/80 dark:border-neutral-800/80 bg-gradient-to-b from-sacramento/5 via-transparent to-transparent">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-8 sm:pt-14 sm:pb-10">
+            <div className="max-w-3xl">
+              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-sacramento/10 text-sacramento border border-sacramento/20">
+                <Compass size={14} /> Expedition Guides & Wildlife Stories
+              </span>
+              <h1 className="mt-4 text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-neutral-900 dark:text-white leading-tight">
+                Sri Lanka Safari Guides & National Parks
+              </h1>
+              <p className="mt-3 text-sm sm:text-base text-neutral-600 dark:text-neutral-400 leading-relaxed">
+                Explore in-depth park guides, elephant gathering schedules, wildlife insights, and reserve your certified jeep safari directly.
+              </p>
+            </div>
 
-        {/* Content Layout with Sidebar */}
+            {/* Quick-Jump Navigation Bar (Scrollable on mobile) */}
+            <div className="mt-6 sm:mt-8 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+              <span className="text-xs font-bold uppercase tracking-wider text-neutral-400 shrink-0 mr-1 hidden sm:inline">
+                Jump to:
+              </span>
+              {blogSections.map((s) => (
+                <a
+                  key={`pill-${s.id}`}
+                  href={`#${s.id}`}
+                  className={`text-xs font-semibold px-3.5 py-2 rounded-xl transition-all shrink-0 cursor-pointer ${
+                    activeSection === s.id
+                      ? "bg-sacramento text-white shadow-sm"
+                      : "bg-white dark:bg-neutral-900 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 border border-neutral-200 dark:border-neutral-800"
+                  }`}
+                >
+                  {s.title.replace(" National Park", "").replace(" Experience", "")}
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Content Layout with Sticky Sidebar */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 flex gap-8 lg:gap-12">
           {/* Sticky Sidebar — desktop only */}
-          <aside className="hidden lg:block w-56 shrink-0">
-            <div className="sticky top-20">
-              <p
-                className={`text-[11px] font-bold uppercase tracking-widest mb-4 ${isDark ? "text-neutral-500" : "text-neutral-400"
+          <aside className="hidden lg:block w-60 shrink-0">
+            <div className="sticky top-24 space-y-4">
+              <div className={`p-4 rounded-2xl border ${isDark ? "bg-neutral-900/80 border-neutral-800" : "bg-white border-neutral-200"} shadow-xs backdrop-blur-md`}>
+                <p
+                  className={`text-[11px] font-bold uppercase tracking-widest mb-3 ${
+                    isDark ? "text-neutral-500" : "text-neutral-400"
                   }`}
-              >
-                Safari Tours
-              </p>
-              <nav className="space-y-0.5">
-                {blogSections.map((s) => (
-                  <a
-                    key={`side-${s.id}`}
-                    href={`#${s.id}`}
-                    className={`block text-sm py-2 px-3 rounded-lg transition-all duration-200 ${activeSection === s.id
-                      ? "bg-sacramento/10 text-sacramento font-semibold border-l-2 border-sacramento"
-                      : `${isDark
-                        ? "text-neutral-500 hover:text-neutral-200 hover:bg-neutral-800/50"
-                        : "text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100"
-                      }`
+                >
+                  Safari Destinations
+                </p>
+                <nav className="space-y-1">
+                  {blogSections.map((s) => (
+                    <a
+                      key={`side-${s.id}`}
+                      href={`#${s.id}`}
+                      className={`block text-xs py-2 px-3 rounded-xl transition-all duration-200 ${
+                        activeSection === s.id
+                          ? "bg-sacramento text-white font-bold shadow-xs"
+                          : `${
+                              isDark
+                                ? "text-neutral-400 hover:text-white hover:bg-neutral-800/60"
+                                : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100"
+                            }`
                       }`}
-                  >
-                    {s.title}
-                  </a>
-                ))}
-              </nav>
+                    >
+                      {s.title}
+                    </a>
+                  ))}
+                </nav>
+              </div>
+
+              {/* Sidebar Quick Inquire Card */}
+              <div className={`p-4 rounded-2xl border ${isDark ? "bg-neutral-900/60 border-neutral-800" : "bg-white border-neutral-200"} text-center`}>
+                <p className="text-xs font-bold text-neutral-800 dark:text-neutral-200">Need Custom Safari Advice?</p>
+                <p className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-1">Our wildlife safari guides are available 24/7 on WhatsApp.</p>
+                <a
+                  href="https://wa.me/94778902811?text=Hello!%20I%20need%20assistance%20choosing%20the%20best%20safari%20package."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-3 inline-flex items-center justify-center gap-1.5 w-full py-2 px-3 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-white text-xs font-bold shadow-xs transition-colors cursor-pointer"
+                >
+                  Chat with Guide 💬
+                </a>
+              </div>
             </div>
           </aside>
 
@@ -925,148 +1247,123 @@ export default function Blog() {
               const sectionMedia = dbMedia.filter(
                 (m) => String(m.blog_id) === String(section.blogId)
               );
-              const heroImage = sectionMedia.length > 0 ? sectionMedia[0].file_path : section.img;
+              const allPhotos =
+                sectionMedia.length > 0
+                  ? sectionMedia
+                  : [
+                      {
+                        id: `static-${section.id}`,
+                        file_path: section.img,
+                        title: section.title,
+                        description: section.subtitle,
+                      },
+                    ];
 
               return (
                 <section
                   key={section.id}
                   id={section.id}
-                  className={`scroll-mt-20 ${index > 0 ? "mt-16 sm:mt-20" : ""}`}
+                  className={`scroll-mt-24 ${index > 0 ? "mt-16 sm:mt-24" : ""}`}
                 >
                   {/* Section Hero Card */}
                   <div
-                    className={`rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm border ${isDark ? "border-neutral-800 bg-neutral-900" : "border-neutral-200 bg-white"
-                      }`}
+                    className={`rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm border ${
+                      isDark ? "border-neutral-800 bg-neutral-900" : "border-neutral-200/90 bg-white"
+                    }`}
                   >
-                    {/* Image with overlay */}
-                    <div className="relative aspect-[21/9] sm:aspect-[21/8] overflow-hidden group">
-                      <img
-                        src={heroImage}
-                        alt={section.title}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                        onError={(e) => {
-                          e.target.src = section.img;
-                        }}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-
-                      {/* Badge if media photos exist from gallery */}
-                      {sectionMedia.length > 0 && (
-                        <button
-                          type="button"
-                          onClick={() => openLightbox(sectionMedia[0], sectionMedia)}
-                          className="absolute top-4 right-4 z-10 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/60 hover:bg-black/85 backdrop-blur-md text-white text-xs font-semibold shadow-lg transition-all border border-white/20 cursor-pointer"
-                          title="View photo gallery"
-                        >
-                          <Camera size={14} className="text-[#29AB87]" />
-                          <span>{sectionMedia.length} {sectionMedia.length === 1 ? "Photo" : "Photos"}</span>
-                        </button>
-                      )}
-
-                      <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-8">
-                        <div className="flex flex-wrap gap-2 mb-3">
+                    {/* Destination Header with Title & Tags */}
+                    <div className="p-5 sm:p-8 pb-4 sm:pb-5">
+                      <div className="flex flex-wrap items-center justify-between gap-3 mb-2.5">
+                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                           {section.tags.map((tag) => (
                             <span
                               key={tag}
-                              className="text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-full bg-white/20 text-white backdrop-blur-sm"
+                              className={`text-[11px] sm:text-xs font-semibold px-2.5 py-1 rounded-full ${
+                                isDark
+                                  ? "bg-sacramento/15 text-[#38d39f] border border-sacramento/20"
+                                  : "bg-sacramento/10 text-sacramento border border-sacramento/15"
+                              }`}
                             >
                               {tag}
                             </span>
                           ))}
                         </div>
-                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white leading-tight">
-                          {section.title}
-                        </h2>
-                        <p className="text-sm sm:text-base text-white/80 mt-1">{section.subtitle}</p>
+                        {section.readTime && (
+                          <span className="text-xs font-medium text-neutral-400 flex items-center gap-1">
+                            <Clock size={13} /> {section.readTime}
+                          </span>
+                        )}
                       </div>
+
+                      <h2
+                        className={`text-2xl sm:text-3xl md:text-4xl font-black tracking-tight leading-tight ${
+                          isDark ? "text-white" : "text-neutral-900"
+                        }`}
+                      >
+                        {section.title}
+                      </h2>
+                      <p
+                        className={`text-sm sm:text-base mt-1 font-medium ${
+                          isDark ? "text-neutral-400" : "text-neutral-600"
+                        }`}
+                      >
+                        {section.subtitle}
+                      </p>
                     </div>
 
-                    {/* Description */}
+                    {/* Integrated Modern Photo Showcase (Bento on Desktop, Carousel on Mobile) */}
+                    <div className="px-5 sm:px-8 pb-2">
+                      <ModernBlogGallery
+                        photos={allPhotos}
+                        fallbackImg={section.img}
+                        onPhotoClick={openLightbox}
+                        isDark={isDark}
+                      />
+                    </div>
+
+                    {/* Description Paragraphs */}
                     <div className="p-5 sm:p-8">
                       <div
-                        className={`space-y-3 text-sm sm:text-base leading-relaxed ${isDark ? "text-neutral-300" : "text-neutral-600"
-                          }`}
+                        className={`space-y-4 text-sm sm:text-base leading-relaxed ${
+                          isDark ? "text-neutral-300" : "text-neutral-700"
+                        }`}
                       >
                         {section.paragraphs.map((para, i) => (
-                          <p key={i}>{para}</p>
+                          <p
+                            key={i}
+                            className={i === 0 ? "text-base sm:text-lg font-medium leading-relaxed text-neutral-800 dark:text-neutral-200" : ""}
+                          >
+                            {para}
+                          </p>
                         ))}
                       </div>
                     </div>
-
-                    {/* Safari Photos Gallery from Media Table */}
-                    {sectionMedia.length > 0 && (
-                      <div className={`p-5 sm:p-8 pt-6 border-t ${isDark ? "border-neutral-800 bg-neutral-900/60" : "border-neutral-100 bg-neutral-50/50"}`}>
-                        <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-                          <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-lg bg-sacramento/10 text-sacramento flex items-center justify-center">
-                              <Camera size={18} />
-                            </div>
-
-                          </div>
-                          <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${isDark ? "bg-neutral-800 text-neutral-300" : "bg-white text-neutral-600 border border-neutral-200 shadow-xs"}`}>
-                            Click any photo to enlarge
-                          </span>
-                        </div>
-
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
-                          {sectionMedia.map((photo, photoIdx) => (
-                            <div
-                              key={photo.id || photoIdx}
-                              onClick={() => openLightbox(photo, sectionMedia)}
-                              role="button"
-                              tabIndex={0}
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter" || e.key === " ") {
-                                  e.preventDefault();
-                                  openLightbox(photo, sectionMedia);
-                                }
-                              }}
-                              className="group relative aspect-[4/3] rounded-xl overflow-hidden cursor-pointer bg-neutral-200 dark:bg-neutral-800 border border-black/5 dark:border-white/5 shadow-xs hover:shadow-md transition-all duration-300 hover:-translate-y-0.5"
-                            >
-                              <img
-                                src={photo.file_path}
-                                alt={photo.title || section.title}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                onError={(e) => {
-                                  e.target.src = section.img;
-                                }}
-                              />
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-2.5 sm:p-3">
-                                <p className="text-white text-xs sm:text-sm font-semibold truncate leading-tight">
-                                  {photo.title || section.title}
-                                </p>
-                                {photo.description && (
-                                  <p className="text-white/80 text-[11px] line-clamp-1 mt-0.5">
-                                    {photo.description}
-                                  </p>
-                                )}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
                   </div>
 
                   {/* Tour Package Cards */}
                   {section.tourPackages && (
-                    <div className="mt-6 sm:mt-8 space-y-4 sm:space-y-5">
-                      <h3
-                        className={`text-lg sm:text-xl font-bold flex items-center gap-2 px-1 ${isDark ? "text-neutral-200" : "text-neutral-800"
+                    <div className="mt-6 sm:mt-8 space-y-4">
+                      <div className="flex items-center justify-between px-1">
+                        <h3
+                          className={`text-base sm:text-lg font-bold flex items-center gap-2 ${
+                            isDark ? "text-neutral-200" : "text-neutral-800"
                           }`}
-                      >
-                        <DollarSign size={20} className="text-sacramento" />
-                        Available Packages ({section.tourPackages.length})
-                      </h3>
+                        >
+                          <DollarSign size={18} className="text-sacramento" />
+                          Available Safari Packages ({section.tourPackages.length})
+                        </h3>
+                      </div>
 
                       {section.tourPackages.map((pkg, idx) => {
                         const isOpen = expandedPkg[`${section.id}-${idx}`];
                         return (
                           <div
                             key={idx}
-                            className={`rounded-xl sm:rounded-2xl border overflow-hidden transition-shadow duration-200 ${isOpen ? "shadow-md" : "shadow-sm"
-                              } ${isDark ? "border-neutral-800 bg-neutral-900" : "border-neutral-200 bg-white"
-                              }`}
+                            className={`rounded-2xl border overflow-hidden transition-all duration-200 ${
+                              isOpen
+                                ? "shadow-md ring-1 ring-sacramento/30"
+                                : "shadow-xs hover:border-sacramento/40"
+                            } ${isDark ? "border-neutral-800 bg-neutral-900" : "border-neutral-200 bg-white"}`}
                           >
                             {/* Package summary row */}
                             <div
@@ -1079,113 +1376,116 @@ export default function Blog() {
                                   togglePkg(section.id, idx);
                                 }
                               }}
-                              className="w-full text-left p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-6 cursor-pointer group"
+                              className="w-full text-left p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-6 cursor-pointer group"
                             >
                               <div className="flex-1 min-w-0">
-                                <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-1">
-                                  <h4 className="text-base sm:text-lg font-bold truncate">
+                                <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-1.5">
+                                  <h4 className="text-base sm:text-lg font-bold text-neutral-900 dark:text-white truncate">
                                     {pkg.name}
                                   </h4>
                                   {pkg.price.includes("|") ? (
-                                    <div className="flex flex-wrap items-center gap-2">
+                                    <div className="flex flex-wrap items-center gap-1.5">
                                       {pkg.price.split("|").map((pPart, i) => (
-                                        <span key={i} className="inline-flex items-center px-3 py-1 rounded-full bg-sacramento/10 text-sacramento text-sm sm:text-base font-bold border border-sacramento/20 whitespace-nowrap shadow-sm">
+                                        <span
+                                          key={i}
+                                          className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-sacramento/10 text-sacramento text-xs sm:text-sm font-bold border border-sacramento/20 whitespace-nowrap"
+                                        >
                                           {pPart.trim()}
                                         </span>
                                       ))}
                                     </div>
                                   ) : (
-                                    <span className="inline-flex items-center px-3 py-1 rounded-full bg-sacramento/10 text-sacramento text-sm sm:text-base font-bold border border-sacramento/20 whitespace-nowrap shadow-sm">
+                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-sacramento/10 text-sacramento text-xs sm:text-sm font-bold border border-sacramento/20 whitespace-nowrap">
                                       {pkg.price}
                                     </span>
                                   )}
                                 </div>
                                 <div
-                                  className={`flex flex-wrap items-center gap-x-4 gap-y-1 text-xs sm:text-sm ${isDark ? "text-neutral-400" : "text-neutral-500"
-                                    }`}
+                                  className={`flex flex-wrap items-center gap-x-4 gap-y-1 text-xs ${
+                                    isDark ? "text-neutral-400" : "text-neutral-500"
+                                  }`}
                                 >
                                   <span className="flex items-center gap-1">
-                                    <Clock size={13} /> {pkg.duration}
+                                    <Clock size={13} className="text-sacramento" /> {pkg.duration}
                                   </span>
                                   <span className="flex items-center gap-1">
-                                    <Calendar size={13} /> {pkg.startTime}
+                                    <Calendar size={13} className="text-sacramento" /> {pkg.startTime}
                                   </span>
                                   <span className="flex items-center gap-1">
-                                    <Users size={13} /> {pkg.guests}
+                                    <Users size={13} className="text-sacramento" /> {pkg.guests}
                                   </span>
                                 </div>
                               </div>
 
-                              {/* Desktop expand & Book action */}
-                              <div className="flex items-center gap-3 self-end sm:self-center shrink-0">
+                              {/* Action Buttons */}
+                              <div className="flex items-center gap-2.5 self-end sm:self-center shrink-0">
                                 <button
                                   type="button"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleBookSafari(pkg, section);
                                   }}
-                                  className="inline-flex items-center gap-1.5 bg-sacramento hover:bg-castleton text-white text-xs sm:text-sm font-bold px-3.5 sm:px-4 py-2 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
+                                  className="inline-flex items-center gap-1.5 bg-sacramento hover:bg-castleton text-white text-xs sm:text-sm font-bold px-4 py-2.5 rounded-xl shadow-xs hover:shadow-md transition-all duration-200 cursor-pointer"
                                 >
                                   Book Safari
                                   <ArrowRight size={14} />
                                 </button>
 
                                 <div
-                                  className={`hidden sm:flex items-center gap-1.5 text-xs font-semibold whitespace-nowrap transition-colors ${isOpen ? "text-sacramento" : isDark ? "text-neutral-500 group-hover:text-neutral-300" : "text-neutral-400 group-hover:text-neutral-600"
-                                    }`}
+                                  className={`flex items-center gap-1 text-xs font-semibold whitespace-nowrap transition-colors ${
+                                    isOpen
+                                      ? "text-sacramento"
+                                      : isDark
+                                      ? "text-neutral-400 group-hover:text-neutral-200"
+                                      : "text-neutral-500 group-hover:text-neutral-800"
+                                  }`}
                                 >
-                                  {isOpen ? "Hide Details" : "View Details"}
+                                  <span>{isOpen ? "Hide" : "Details"}</span>
                                   <ChevronLeft
                                     size={14}
-                                    className={`transition-transform duration-200 ${isOpen ? "rotate-90" : "-rotate-90"}`}
+                                    className={`transition-transform duration-200 ${
+                                      isOpen ? "rotate-90" : "-rotate-90"
+                                    }`}
                                   />
                                 </div>
                               </div>
-
-                              {/* Mobile expand bar */}
-                              <div
-                                className={`sm:hidden text-center text-xs font-semibold py-2 rounded-lg ${isOpen
-                                  ? "text-sacramento bg-sacramento/10"
-                                  : isDark
-                                    ? "text-neutral-400 bg-neutral-800"
-                                    : "text-neutral-500 bg-neutral-100"
-                                  }`}
-                              >
-                                {isOpen ? "▲ Hide Details" : "▼ View Details"}
-                              </div>
                             </div>
 
-                            {/* Expanded package details */}
+                            {/* Expanded package details (100% of all information preserved) */}
                             {isOpen && (
                               <div
-                                className={`border-t ${isDark ? "border-neutral-800" : "border-neutral-100"
-                                  }`}
+                                className={`border-t ${
+                                  isDark ? "border-neutral-800 bg-neutral-900/40" : "border-neutral-100 bg-neutral-50/40"
+                                }`}
                               >
                                 {/* Description */}
                                 <div className="p-4 sm:p-6">
                                   <p
-                                    className={`text-sm leading-relaxed ${isDark ? "text-neutral-300" : "text-neutral-600"
-                                      }`}
+                                    className={`text-sm leading-relaxed ${
+                                      isDark ? "text-neutral-300" : "text-neutral-600"
+                                    }`}
                                   >
                                     {pkg.description}
                                   </p>
                                 </div>
 
-                                {/* Included / Excluded grid */}
+                                {/* Included / Excluded comparison grid */}
                                 <div
-                                  className={`grid grid-cols-1 md:grid-cols-2 border-t ${isDark ? "border-neutral-800" : "border-neutral-100"
-                                    }`}
+                                  className={`grid grid-cols-1 md:grid-cols-2 border-t ${
+                                    isDark ? "border-neutral-800" : "border-neutral-100"
+                                  }`}
                                 >
                                   <div className="p-4 sm:p-6">
-                                    <h5 className="text-sm font-bold mb-3 flex items-center gap-2">
+                                    <h5 className="text-sm font-bold mb-3 flex items-center gap-2 text-neutral-900 dark:text-white">
                                       <Check size={16} className="text-green-500" /> What's Included
                                     </h5>
                                     <ul className="space-y-2">
                                       {pkg.included.map((item, i) => (
                                         <li
                                           key={i}
-                                          className={`text-sm flex items-start gap-2 ${isDark ? "text-neutral-300" : "text-neutral-600"
-                                            }`}
+                                          className={`text-xs sm:text-sm flex items-start gap-2 ${
+                                            isDark ? "text-neutral-300" : "text-neutral-600"
+                                          }`}
                                         >
                                           <span className="w-1.5 h-1.5 rounded-full bg-green-500 mt-1.5 shrink-0" />
                                           {item}
@@ -1195,18 +1495,20 @@ export default function Blog() {
                                   </div>
 
                                   <div
-                                    className={`p-4 sm:p-6 border-t md:border-t-0 md:border-l ${isDark ? "border-neutral-800" : "border-neutral-100"
-                                      }`}
+                                    className={`p-4 sm:p-6 border-t md:border-t-0 md:border-l ${
+                                      isDark ? "border-neutral-800" : "border-neutral-100"
+                                    }`}
                                   >
-                                    <h5 className="text-sm font-bold mb-3 flex items-center gap-2">
+                                    <h5 className="text-sm font-bold mb-3 flex items-center gap-2 text-neutral-900 dark:text-white">
                                       <X size={16} className="text-red-400" /> What's Excluded
                                     </h5>
                                     <ul className="space-y-2">
                                       {pkg.excluded.map((item, i) => (
                                         <li
                                           key={i}
-                                          className={`text-sm flex items-start gap-2 ${isDark ? "text-neutral-300" : "text-neutral-600"
-                                            }`}
+                                          className={`text-xs sm:text-sm flex items-start gap-2 ${
+                                            isDark ? "text-neutral-300" : "text-neutral-600"
+                                          }`}
                                         >
                                           <span className="w-1.5 h-1.5 rounded-full bg-red-400 mt-1.5 shrink-0" />
                                           {item}
@@ -1215,15 +1517,16 @@ export default function Blog() {
                                     </ul>
 
                                     <div className="mt-5">
-                                      <h5 className="text-sm font-bold mb-2">What to Bring</h5>
+                                      <h5 className="text-sm font-bold mb-2 text-neutral-900 dark:text-white">What to Bring</h5>
                                       <div className="flex flex-wrap gap-1.5">
                                         {pkg.whatToBring.map((item, i) => (
                                           <span
                                             key={i}
-                                            className={`text-xs px-2.5 py-1 rounded-full ${isDark
-                                              ? "bg-neutral-800 text-neutral-300"
-                                              : "bg-neutral-100 text-neutral-600"
-                                              }`}
+                                            className={`text-xs px-2.5 py-1 rounded-full ${
+                                              isDark
+                                                ? "bg-neutral-800 text-neutral-300"
+                                                : "bg-white text-neutral-600 border border-neutral-200"
+                                            }`}
                                           >
                                             {item}
                                           </span>
@@ -1233,24 +1536,25 @@ export default function Blog() {
                                   </div>
                                 </div>
 
-                                {/* Additional Info + Departure + Policy Link */}
+                                {/* Additional Info + Departure + Cancellation */}
                                 <div
-                                  className={`p-4 sm:p-6 border-t space-y-4 ${isDark ? "border-neutral-800" : "border-neutral-100"
-                                    }`}
+                                  className={`p-4 sm:p-6 border-t space-y-4 ${
+                                    isDark ? "border-neutral-800" : "border-neutral-100"
+                                  }`}
                                 >
                                   <div className="flex items-start gap-2 text-sm">
                                     <MapPin size={16} className="text-sacramento mt-0.5 shrink-0" />
                                     <div>
-                                      <span className="font-bold">Pickup: </span>
-                                      <span className={isDark ? "text-neutral-400" : "text-neutral-500"}>
+                                      <span className="font-bold text-neutral-900 dark:text-white">Pickup Locations: </span>
+                                      <span className={isDark ? "text-neutral-400" : "text-neutral-600"}>
                                         {pkg.departureLocations}
                                       </span>
                                     </div>
                                   </div>
 
                                   <div>
-                                    <h5 className="text-sm font-bold mb-2 flex items-center gap-1.5">
-                                      <Info size={14} className="text-sacramento" /> Good to Know
+                                    <h5 className="text-sm font-bold mb-2 flex items-center gap-1.5 text-neutral-900 dark:text-white">
+                                      <Info size={14} className="text-sacramento" /> Good to Know & Policies
                                     </h5>
                                     <ul className="space-y-1.5">
                                       {pkg.additionalInfo.map((info, i) => {
@@ -1258,8 +1562,9 @@ export default function Blog() {
                                         return (
                                           <li
                                             key={i}
-                                            className={`text-xs sm:text-sm flex items-start gap-2 ${isDark ? "text-neutral-400" : "text-neutral-500"
-                                              }`}
+                                            className={`text-xs sm:text-sm flex items-start gap-2 ${
+                                              isDark ? "text-neutral-400" : "text-neutral-600"
+                                            }`}
                                           >
                                             <span className="text-sacramento mt-0.5 shrink-0">•</span>
                                             {isWhatsApp ? (
@@ -1282,13 +1587,19 @@ export default function Blog() {
                                     </ul>
                                   </div>
 
+                                  {pkg.cancellation && (
+                                    <div className="text-xs text-neutral-500 dark:text-neutral-400 bg-neutral-100/70 dark:bg-neutral-800/40 p-3 rounded-xl">
+                                      <span className="font-bold text-neutral-700 dark:text-neutral-300">Cancellation Terms: </span>
+                                      {pkg.cancellation}
+                                    </div>
+                                  )}
+
                                   <div
-                                    className={`text-xs rounded-lg p-3 flex flex-wrap items-center justify-between gap-2 ${isDark ? "bg-neutral-800/50 text-neutral-400" : "bg-neutral-50 text-neutral-500"
-                                      }`}
+                                    className={`text-xs rounded-xl p-3 flex flex-wrap items-center justify-between gap-2 ${
+                                      isDark ? "bg-neutral-800/50 text-neutral-400" : "bg-neutral-100 text-neutral-600"
+                                    }`}
                                   >
-                                    <span className={isDark ? "text-neutral-400" : "text-neutral-500"}>
-                                      Looking for cancellation and refund terms?
-                                    </span>
+                                    <span>Looking for cancellation and refund terms?</span>
                                     <Link
                                       to="/return-refund-policy"
                                       className="font-bold text-sacramento hover:underline flex items-center gap-1"
@@ -1302,9 +1613,9 @@ export default function Blog() {
                                     <button
                                       type="button"
                                       onClick={() => handleBookSafari(pkg, section)}
-                                      className="inline-flex items-center justify-center gap-2 bg-sacramento hover:bg-castleton text-white text-sm font-bold px-6 py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 cursor-pointer"
+                                      className="inline-flex items-center justify-center gap-2 bg-sacramento hover:bg-castleton text-white text-xs sm:text-sm font-bold px-6 py-3 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
                                     >
-                                      Book Safari
+                                      Book Safari Now
                                       <ArrowRight size={16} />
                                     </button>
 
@@ -1314,7 +1625,7 @@ export default function Blog() {
                                       )}`}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className="inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20ba59] text-white text-sm font-bold px-5 py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 cursor-pointer"
+                                      className="inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20ba59] text-white text-xs sm:text-sm font-bold px-5 py-3 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
                                     >
                                       <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
                                         <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
@@ -1335,15 +1646,15 @@ export default function Blog() {
             })}
 
             {/* Bottom CTA */}
-            <div className="mt-16 sm:mt-20 text-center pb-8">
+            <div className="mt-16 sm:mt-24 text-center pb-8">
               <p className={`text-sm mb-4 ${isDark ? "text-neutral-400" : "text-neutral-500"}`}>
-                Can't find what you're looking for?
+                Looking for customized itineraries or other safari destinations?
               </p>
               <Link
                 to="/#packages"
-                className="inline-flex items-center gap-2 bg-sacramento hover:bg-castleton text-white text-sm font-bold px-6 py-3 rounded-xl shadow-sm transition-all duration-200"
+                className="inline-flex items-center gap-2 bg-sacramento hover:bg-castleton text-white text-sm font-bold px-6 py-3.5 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
               >
-                View All Packages
+                Explore All Safari Packages
                 <ArrowRight size={16} />
               </Link>
             </div>
@@ -1397,7 +1708,7 @@ export default function Blog() {
             {/* Large Image */}
             <div className="w-full max-h-[75vh] flex items-center justify-center overflow-hidden rounded-2xl bg-black/40">
               <img
-                src={lightboxPhoto.file_path}
+                src={lightboxPhoto.file_path || lightboxPhoto.url}
                 alt={lightboxPhoto.title || "Safari Photo"}
                 className="max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl"
               />
