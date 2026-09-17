@@ -191,7 +191,7 @@
                         <td align="center" style="background-color: #f7faf8; padding: 24px 30px; border-top: 1px solid #e1eade; font-size: 12px; color: #6b8273; line-height: 1.6;">
                             <div style="margin-bottom: 10px;">
                                 <strong>Need assistance or change your pickup point?</strong><br>
-                                Contact us via WhatsApp / Call: <a href="tel:+94778902811" style="color: #1e7e34; font-weight: 700; text-decoration: none;">+94 77 8902811</a> 
+                                Contact us via WhatsApp / Call: <a href="tel:+94778902811" style="color: #1e7e34; font-weight: 700; text-decoration: none;">+94 77 890 2811</a> 
                                 &nbsp;•&nbsp; 
                                 Email: <a href="mailto:info@minneriyawildjeepsafari.com" style="color: #1e7e34; font-weight: 700; text-decoration: none;">info@minneriyawildjeepsafari.com</a>
                             </div>

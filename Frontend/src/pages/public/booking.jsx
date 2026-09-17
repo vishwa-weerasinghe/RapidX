@@ -18,6 +18,7 @@ import {
     ShoppingCart,
     Info,
     Compass,
+    Loader2,
 } from "lucide-react";
 
 export default function Booking() {
@@ -30,6 +31,7 @@ export default function Booking() {
     const activeCustomer = user || guestCustomer;
 
     const [packagesList, setPackagesList] = useState([]);
+    const [loadingPackages, setLoadingPackages] = useState(true);
     const [selectedPackageId, setSelectedPackageId] = useState(id || "");
     const [pkg, setPkg] = useState(null);
 
@@ -61,6 +63,7 @@ export default function Booking() {
 
     const fetchPackages = async () => {
         try {
+            setLoadingPackages(true);
             const res = await api.get("/packages");
             const packages = Array.isArray(res.data) ? res.data : [];
             setPackagesList(packages);
@@ -126,6 +129,8 @@ export default function Booking() {
             }
         } catch (err) {
             console.log(err);
+        } finally {
+            setLoadingPackages(false);
         }
     };
 
@@ -374,13 +379,13 @@ export default function Booking() {
                                             value={selectedPackageId}
                                             onChange={handlePackageChange}
                                             className={`w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs sm:text-sm font-bold py-3 pl-3.5 sm:pl-4 pr-10 rounded-xl border transition-all appearance-none cursor-pointer truncate min-h-[44px] ${!selectedPackageId
-                                                    ? "border-amber-400/80 dark:border-amber-500/60 ring-2 ring-amber-400/20"
-                                                    : "border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton"
+                                                ? "border-amber-400/80 dark:border-amber-500/60 ring-2 ring-amber-400/20"
+                                                : "border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton"
                                                 }`}
                                             required
                                         >
                                             <option value="" disabled className="text-slate-400 font-normal">
-                                                -- Select a tour package --
+                                                {loadingPackages ? "Loading packages..." : "-- Select a tour package --"}
                                             </option>
                                             {Array.isArray(packagesList) && packagesList.map((p) => (
                                                 <option
@@ -393,9 +398,13 @@ export default function Booking() {
                                             ))}
                                         </select>
                                         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400">
-                                            <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20">
-                                                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-                                            </svg>
+                                            {loadingPackages ? (
+                                                <Loader2 size={16} className="animate-spin text-castleton dark:text-emerald-400" />
+                                            ) : (
+                                                <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20">
+                                                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                                                </svg>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
