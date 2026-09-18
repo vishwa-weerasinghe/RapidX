@@ -27,7 +27,7 @@ import {
   PackageCardSkeleton,
   ReviewCardSkeleton,
 } from "./components/Skeletons";
-import { getStaticBlog } from "./constants/staticBlogs";
+import { getStaticBlogPackageSection } from "./constants/staticBlogPackages";
 
 export default function App() {
   // --- CONSUME SYSTEM THEME ---
@@ -220,7 +220,7 @@ export default function App() {
 
             return {
               id: pkg.id,
-              blog_id: pkg.blog_id,
+              related_package: pkg.related_package,
               title: pkg.Package_Name,
               desc: pkg.Description,
               // "Starting from" shows the lowest available adult rate.
@@ -1393,7 +1393,9 @@ export default function App() {
                 ))
               ) : packages.length > 0 ? (
                 packages.map((pkg, idx) => {
-                  const relatedBlog = getStaticBlog(pkg.blog_id, pkg.title || pkg.Package_Name);
+                  const relatedSection = getStaticBlogPackageSection(
+                    pkg.related_package
+                  );
 
                   return (
                     <div
@@ -1489,9 +1491,9 @@ export default function App() {
                           </button>
                         </div>
 
-                        {relatedBlog && (
+                        {relatedSection && (
                           <Link
-                            to={`/blog#${relatedBlog.slug}`}
+                            to={`/blog#${relatedSection}`}
                             className="mt-3 inline-flex items-center justify-center gap-1 text-sacramento dark:text-emerald-400 font-bold hover:underline transition-colors"
                           >
                             Read More

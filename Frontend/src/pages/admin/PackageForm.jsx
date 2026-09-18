@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../../axios";
-import { STATIC_BLOGS } from "../../constants/staticBlogs";
+import { STATIC_BLOG_PACKAGES } from "../../constants/staticBlogPackages";
 
 const initialState = {
   Package_Name: "",
@@ -10,7 +10,7 @@ const initialState = {
   price_more_adult: "",
   price_child: "",
   Image: null,
-  blog_id: "",
+  related_package: "",
 };
 
 export default function PackageForm() {
@@ -43,7 +43,7 @@ export default function PackageForm() {
           price_more_adult: res.data.price_more_adult || "",
           price_child: res.data.price_child || "",
           Image: res.data.Image || "",
-          blog_id: res.data.blog_id || "",
+          related_package: res.data.related_package || "",
         });
       })
       .catch((err) => console.error(err))
@@ -68,7 +68,7 @@ export default function PackageForm() {
     formData.append("price_one_adult", form.price_one_adult);
     formData.append("price_more_adult", form.price_more_adult);
     formData.append("price_child", form.price_child);
-    formData.append("blog_id", form.blog_id || "");
+    formData.append("related_package", form.related_package || "");
 
     if (form.Image instanceof File) {
       formData.append("Image", form.Image);
@@ -207,28 +207,30 @@ export default function PackageForm() {
           )}
         </div>
 
-        {/* Related Blog */}
+        {/* Related Blog Package */}
         <div>
           <label className="block text-sm font-medium text-charcoal dark:text-white mb-1">
-            Related Blog
+            Related Blog Package
           </label>
 
           <select
-            name="blog_id"
-            value={form.blog_id}
+            name="related_package"
+            value={form.related_package}
             onChange={handleChange}
             className="form-input"
           >
-            <option value="">No Related Blog</option>
-            {STATIC_BLOGS.map((blog) => (
-              <option key={blog.blogId} value={blog.blogId}>
-                {blog.title}
+            <option value="">None</option>
+            {STATIC_BLOG_PACKAGES.map((packageName) => (
+              <option key={packageName} value={packageName}>
+                {packageName}
               </option>
             ))}
           </select>
 
-          {errors.blog_id && (
-            <p className="text-red-500 text-xs mt-1">{errors.blog_id[0]}</p>
+          {errors.related_package && (
+            <p className="text-red-500 text-xs mt-1">
+              {errors.related_package[0]}
+            </p>
           )}
         </div>
 
