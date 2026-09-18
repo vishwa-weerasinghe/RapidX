@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import api from "../../axios";
 import { Link, useNavigate } from "react-router-dom";
-import { getStaticBlog } from "../../constants/staticBlogs";
+import { getStaticBlogPackageSection } from "../../constants/staticBlogPackages";
 
 export default function Packages() {
 
@@ -107,7 +107,9 @@ export default function Packages() {
         <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-10">
 
           {filteredPackages.map((pkg) => {
-            const relatedBlog = getStaticBlog(pkg.blog_id, pkg.Package_Name || pkg.title);
+            const relatedSection = getStaticBlogPackageSection(
+              pkg.related_package
+            );
 
             return (
 
@@ -221,9 +223,9 @@ export default function Packages() {
                   <ArrowRight size={18} />
                 </button>
 
-                {relatedBlog && (
+                {relatedSection && (
                   <Link
-                    to={`/blog#${relatedBlog.slug}`}
+                    to={`/blog#${relatedSection}`}
                     className="mt-3 inline-flex items-center justify-center gap-1 text-sacramento font-semibold hover:underline"
                   >
                     Read More
