@@ -77,7 +77,7 @@ class PackageControllerTest extends TestCase
         ]);
     }
 
-    public function test_admin_can_create_a_package_with_an_optional_blog_id(): void
+    public function test_admin_can_create_a_package_with_an_optional_related_package(): void
     {
         $response = $this->actingAs($this->adminUser(), 'sanctum')
             ->postJson('/api/packages', [
@@ -86,40 +86,40 @@ class PackageControllerTest extends TestCase
                 'price_one_adult' => 200.00,
                 'price_more_adult' => 200.00,
                 'price_child' => 120.00,
-                'blog_id' => 1,
+                'related_package' => 'Minneriya Morning Safari',
             ]);
 
         $response->assertStatus(201)
-            ->assertJsonPath('blog_id', 1);
+            ->assertJsonPath('related_package', 'Minneriya Morning Safari');
 
         $this->assertDatabaseHas('packages', [
             'Package_Name' => 'Minneriya Safari',
-            'blog_id' => 1,
+            'related_package' => 'Minneriya Morning Safari',
         ]);
     }
 
-    public function test_admin_can_remove_a_package_blog_link(): void
+    public function test_admin_can_clear_a_package_related_package(): void
     {
         $package = Package::create([
             'Package_Name' => 'Special Safari Package',
-            'Description' => 'Package without a related blog',
+            'Description' => 'Package without a related package',
             'price_one_adult' => 150.00,
             'price_more_adult' => 150.00,
             'price_child' => 90.00,
-            'blog_id' => 1,
+            'related_package' => 'Minneriya Evening Safari',
         ]);
 
         $response = $this->actingAs($this->adminUser(), 'sanctum')
             ->putJson('/api/packages/' . $package->id, [
-                'blog_id' => null,
+                'related_package' => null,
             ]);
 
         $response->assertStatus(200)
-            ->assertJsonPath('blog_id', null);
+            ->assertJsonPath('related_package', null);
 
         $this->assertDatabaseHas('packages', [
             'id' => $package->id,
-            'blog_id' => null,
+            'related_package' => null,
         ]);
     }
 
