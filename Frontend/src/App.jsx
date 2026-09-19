@@ -93,8 +93,11 @@ export default function App() {
 
   // --- STATE MANAGEMENT ---
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+
   const [isBlogMenuOpen, setIsBlogMenuOpen] = useState(false);
   const [isMobileBlogOpen, setIsMobileBlogOpen] = useState(false);
+
   const [isScrolled, setIsScrolled] = useState(false);
   const blogMenuRef = useRef(null);
 
@@ -131,6 +134,8 @@ export default function App() {
   const [bookingDate, setBookingDate] = useState("");
   const [adultsCount, setAdultsCount] = useState(1);
   const [childrenCount, setChildrenCount] = useState(0);
+
+
 
 
   const handleWidgetSubmit = (e) => {
@@ -611,7 +616,7 @@ export default function App() {
           <div
             className={`max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between transition-all duration-500 relative ${isScrolled
               ? "bg-[var(--page-bg)]/90 dark:bg-[var(--surface)]/90 backdrop-blur-xl rounded-full shadow-lg border border-[var(--border)]/40 py-2.5"
-              : "bg-transparent py-5 border-b border-white/10"
+              : "bg-[#0b2419]/88 dark:bg-[#06130d]/92 backdrop-blur-lg py-5 border-b border-[#d4a017]/35 shadow-[0_8px_24px_rgba(0,0,0,0.28)]"
               }`}
           >
             {/* Logo & Brand Name */}
@@ -628,8 +633,8 @@ export default function App() {
               </div>
               <span
                 className={`text-lg sm:text-xl md:text-2xl font-black tracking-tighter transition-all duration-500 ${isScrolled
-                  ? "bg-clip-text text-transparent bg-gradient-to-r from-sacramento to-castleton dark:from-white dark:to-gray-400"
-                  : "text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)]"
+                  ? "text-[#153827] dark:text-[#f5f0e8]"
+                  : "text-[#fffaf0] drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]"
                   }`}
               >
                 Wild Jeep Safari
@@ -654,14 +659,15 @@ export default function App() {
                       className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 ${activeSection === section
                         ? "bg-sacramento text-white shadow shadow-sacramento/25"
                         : isScrolled
-                          ? "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-slate-800/50"
-                          : "text-white/80 hover:text-white hover:bg-white/10"
+                          ? "text-[#153827] dark:text-[#f5f0e8] hover:text-[#0b2419] dark:hover:text-white hover:bg-[#2e7d32]/15 dark:hover:bg-white/10"
+                          : "text-[#fffaf0] hover:text-white hover:bg-[#d4a017]/20 drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)]"
                         }`}
                     >
                       {section}
                     </button>
                   </li>
                 ))}
+
 
                 <li className="relative" ref={blogMenuRef}>
                   <button
@@ -925,7 +931,7 @@ export default function App() {
         {/* --- HERO SECTION --- */}
         <section
           id="home"
-          className="relative min-h-[100svh] sm:h-screen sm:min-h-[650px] flex items-center overflow-hidden pt-16"
+          className="relative min-h-[100svh] sm:h-screen sm:min-h-[650px] flex items-center overflow-hidden pt-28 sm:pt-32 md:pt-36"
         >
           {/* Background Slides */}
           <div className="absolute inset-0 z-0 overflow-hidden">
@@ -950,14 +956,9 @@ export default function App() {
           {/* Content */}
           <div className="max-w-7xl mx-auto px-4 md:px-6 w-full relative z-20">
             <div className="max-w-2xl text-white ml-0 md:ml-8 lg:ml-12 mt-12 md:mt-0">
-              {/* Pill Badge */}
-              <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold uppercase tracking-widest mb-5 bg-black/40 border border-white/20 text-amber-300 dark:bg-amber-400/10 dark:border-amber-400/30 dark:text-amber-300 backdrop-blur-md shadow-lg">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-400"></span>
-                </span>
+                <span className="inline-block text-amber-400 font-semibold uppercase tracking-widest text-sm sm:text-base mb-3 drop-shadow-md dark:text-amber-200 dark:drop-shadow-[0_2px_8px_rgba(245,193,66,0.7)]">
                 Explore Sri Lanka's Wildlife
-              </div>
+                </span>
 
               {/* Title */}
               <h1 className="font-serif text-[2.5rem] leading-[1.1] sm:text-5xl md:text-6xl font-bold mb-6 text-white drop-shadow-2xl">
@@ -1033,8 +1034,8 @@ export default function App() {
                     alt="Elephant Gathering"
                     className="w-full h-[400px] lg:h-[550px] object-cover hover:scale-105 transition-transform duration-700"
                   />
-                  <div className="absolute bottom-6 left-6 bg-white/90 backdrop-blur-sm px-6 py-4 rounded-xl shadow-md border border-gray-100 flex items-center gap-4">
-                    <div className="w-12 h-12 bg-gray-50 text-castleton rounded-full flex items-center justify-center font-bold text-xl">
+                  <div className="absolute bottom-6 left-6 bg-[#fffaf0]/95 dark:bg-[#fffaf0]/95 backdrop-blur-sm px-6 py-4 rounded-xl shadow-[0_12px_30px_rgba(8,20,15,0.22)] border border-[#d4a017]/35 flex items-center gap-4">
+                    <div className="w-12 h-12 bg-[#0b2419] text-[#d4a017] rounded-full flex items-center justify-center font-bold text-xl">
                       <svg
                         className="w-6 h-6"
                         fill="none"
@@ -1051,10 +1052,10 @@ export default function App() {
                       </svg>
                     </div>
                     <div>
-                      <span className="block text-gray-800 font-bold text-lg leading-none">
-                        Since 2016
+                      <span className="block !text-[#153827] font-bold text-lg leading-none">
+                        Since 2020
                       </span>
-                      <span className="text-gray-500 text-sm">
+                      <span className="!text-[#2e7d32] text-sm font-semibold">
                         Trusted Safari
                       </span>
                     </div>
