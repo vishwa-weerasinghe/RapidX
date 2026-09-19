@@ -85,7 +85,12 @@ class PayHereController extends Controller
             }
 
             $package = Package::findOrFail($request->Package_ID);
-            $amount = (float) $request->Payment;
+
+            // Server-side price calculation to prevent client-side price tampering (including pickup area fee)
+            $areaFee = Booking::getAreaFee($request->Area);
+            $serverCalculatedAmount = $package->calculatePrice((int) $request->No_of_adults, (int) $request->No_of_child) + $areaFee;
+            $amount = $serverCalculatedAmount > 0 ? $serverCalculatedAmount : (float) $request->Payment;
+
             $currency = config('payhere.currency', 'USD');
 
             // Unique Order Reference
@@ -168,9 +173,21 @@ class PayHereController extends Controller
         }
 
         $bookingIds = $cartEntries->pluck('Booking_ID');
-        $bookings = Booking::whereIn('Booking_ID', $bookingIds)->get();
+        $bookings = Booking::with('package')->whereIn('Booking_ID', $bookingIds)->get();
 
-        $totalAmount = (float) $bookings->sum('Payment');
+        // Server-side authoritative price recalculation to prevent cart price tampering (including pickup area fee)
+        $totalAmount = (float) $bookings->sum(function ($b) {
+            if ($b->package) {
+                $areaFee = Booking::getAreaFee($b->Area);
+                $expected = $b->package->calculatePrice((int) $b->No_of_adults, (int) $b->No_of_child) + $areaFee;
+                if ($expected > 0) {
+                    $b->update(['Payment' => $expected]);
+                    return $expected;
+                }
+            }
+            return (float) $b->Payment;
+        });
+
         $currency = config('payhere.currency', 'USD');
 
         return DB::transaction(function () use ($customerId, $customer, $bookings, $totalAmount, $currency) {
@@ -300,7 +317,7 @@ class PayHereController extends Controller
 
     /**
      * Confirm a payment after successful client SDK checkout or return.
-     * Marks Payment as Success, all associated Bookings as Confirmed, and clears the Customer's Cart.
+     * Only confirms if already verified by signed webhook, verified by PayHere API, or invoked by admin.
      */
     public function confirm(Request $request)
     {
@@ -315,6 +332,7 @@ class PayHereController extends Controller
 
         // Ownership check for authenticated users
         $user = $request->user('sanctum') ?? auth('sanctum')->user();
+        $isAdmin = false;
         if ($user) {
             $isAdmin = in_array(strtolower($user->role ?? ''), ['admin', 'administrator', 'superadmin']);
             if (!$isAdmin && (int) $user->Customer_ID !== (int) $payment->Customer_ID) {
@@ -322,8 +340,63 @@ class PayHereController extends Controller
             }
         }
 
-        return DB::transaction(function () use ($payment) {
-            if ($payment->status !== 'Success') {
+        // 1. If already marked Success by PayHere signed IPN webhook, return confirmed
+        if ($payment->status === 'Success') {
+            return response()->json([
+                'success'  => true,
+                'message'  => 'Payment is already confirmed.',
+                'order_id' => $payment->order_id,
+                'status'   => 'Success',
+                'payment'  => $payment,
+            ]);
+        }
+
+        // 2. Verify with PayHere Merchant Search API if caller is not an admin
+        $verified = false;
+        if ($isAdmin) {
+            $verified = true;
+        } else {
+            $payHereRecord = $this->payHereService->verifyPaymentWithPayHere($payment->order_id);
+            if ($payHereRecord) {
+                $status = strtoupper((string) ($payHereRecord['status'] ?? ''));
+                $statusCode = isset($payHereRecord['status_code']) ? (int) $payHereRecord['status_code'] : null;
+
+                $isSuccess = ($statusCode === 2) || in_array($status, ['RECEIVED', 'SUCCESS', 'COMPLETED']);
+                $isFailed = ($statusCode === -1 || $statusCode === -2) || in_array($status, ['FAILED', 'CANCELLED', 'DECLINED']);
+
+                $method = null;
+                if (isset($payHereRecord['payment_method']['method'])) {
+                    $method = $payHereRecord['payment_method']['method'];
+                } elseif (isset($payHereRecord['method'])) {
+                    $method = $payHereRecord['method'];
+                }
+
+                if ($isSuccess) {
+                    $verified = true;
+                    $payment->update([
+                        'payhere_payment_id' => $payHereRecord['payment_id'] ?? $payment->payhere_payment_id,
+                        'payment_method'     => $method ?? $payment->payment_method,
+                        'status_code'        => 2,
+                        'status_message'     => $payHereRecord['status_message'] ?? 'Payment Completed Successfully',
+                    ]);
+                } elseif ($isFailed) {
+                    $isCancelled = ($statusCode === -1 || $status === 'CANCELLED');
+                    $payment->update([
+                        'status'         => $isCancelled ? 'Cancelled' : 'Failed',
+                        'status_code'    => $statusCode ?? ($isCancelled ? -1 : -2),
+                        'status_message' => $payHereRecord['status_message'] ?? 'Payment Failed or Declined',
+                    ]);
+                    Booking::where('Payment_ID', $payment->Payment_ID)
+                        ->where('Status', '!=', 'Confirmed')
+                        ->update([
+                            'Status' => $isCancelled ? 'Cancelled' : 'Failed',
+                        ]);
+                }
+            }
+        }
+
+        if ($verified) {
+            return DB::transaction(function () use ($payment) {
                 $payment->update([
                     'status'         => 'Success',
                     'status_message' => 'Payment Completed & Confirmed',
@@ -338,18 +411,26 @@ class PayHereController extends Controller
                 if ($payment->Customer_ID) {
                     Cart::where('Customer_ID', $payment->Customer_ID)->delete();
                 }
-                
-                $this->sendConfirmationEmails($payment);
-            }
 
-            return response()->json([
-                'success'  => true,
-                'message'  => 'Payment confirmed and bookings updated successfully',
-                'order_id' => $payment->order_id,
-                'status'   => 'Success',
-                'payment'  => $payment->fresh(['bookings.package', 'customer']),
-            ]);
-        });
+                $this->sendConfirmationEmails($payment);
+
+                return response()->json([
+                    'success'  => true,
+                    'message'  => 'Payment confirmed and bookings updated successfully',
+                    'order_id' => $payment->order_id,
+                    'status'   => 'Success',
+                    'payment'  => $payment->fresh(['bookings.package', 'customer']),
+                ]);
+            });
+        }
+
+        return response()->json([
+            'success'  => false,
+            'message'  => 'Payment is pending verification from the payment gateway.',
+            'order_id' => $payment->order_id,
+            'status'   => $payment->status,
+            'payment'  => $payment,
+        ], 200);
     }
 
     /**
@@ -387,13 +468,25 @@ class PayHereController extends Controller
 
             // Send to Customer
             if ($payment->customer && $payment->customer->Email) {
-                Mail::to($payment->customer->Email)->send(new BookingConfirmationMail($payment, false));
+                $htmlContent = (new BookingConfirmationMail($payment, false))->render();
+                \App\Services\BrevoMailService::send(
+                    $payment->customer->Email,
+                    'Booking Confirmation - Order #' . $payment->order_id,
+                    $htmlContent,
+                    $payment->customer->Name ?? null
+                );
             }
 
             // Send to Admin
-            $adminEmail = env('ADMIN_EMAIL');
+            $adminEmail = env('ADMIN_EMAIL', env('CONTACT_DESTINATION_EMAIL', 'vishwaweerasinghe0@gmail.com'));
             if ($adminEmail) {
-                Mail::to($adminEmail)->send(new BookingConfirmationMail($payment, true));
+                $htmlContentAdmin = (new BookingConfirmationMail($payment, true))->render();
+                \App\Services\BrevoMailService::send(
+                    $adminEmail,
+                    '[ADMIN NOTIFICATION] Booking Confirmation - Order #' . $payment->order_id,
+                    $htmlContentAdmin,
+                    'Admin'
+                );
             }
         } catch (\Exception $e) {
             Log::error('Failed to send booking confirmation emails for order ' . $payment->order_id . ': ' . $e->getMessage());

@@ -67,4 +67,41 @@ class User extends Authenticatable implements CanResetPasswordContract
     {
         return $this->Email;
     }
+
+    /**
+     * Send the password reset notification using BrevoMailService and ResetPasswordMail.
+     *
+     * @param  string  $token
+     * @return void
+     */
+    public function sendPasswordResetNotification($token)
+    {
+        try {
+            $origin = request()->header('Origin') ?: request()->header('Referer');
+            $frontendUrl = null;
+            if ($origin) {
+                $parsed = parse_url($origin);
+                if (isset($parsed['scheme']) && isset($parsed['host'])) {
+                    $frontendUrl = $parsed['scheme'] . '://' . $parsed['host'] . (isset($parsed['port']) ? ':' . $parsed['port'] : '');
+                }
+            }
+            if (empty($frontendUrl)) {
+                $frontendUrl = env('FRONTEND_URL') ?: config('app.frontend_url', 'http://localhost:5173');
+            }
+            $frontendUrl = rtrim($frontendUrl, '/');
+            $resetUrl = $frontendUrl . '/password-reset/' . $token . '?email=' . urlencode($this->Email);
+            $expireMinutes = config('auth.passwords.' . config('auth.defaults.passwords') . '.expire', 60);
+
+            $htmlContent = (new \App\Mail\ResetPasswordMail($this, $resetUrl, $expireMinutes))->render();
+
+            \App\Services\BrevoMailService::send(
+                $this->Email,
+                'Reset Your Password - Minneriya Wild Jeep Safari',
+                $htmlContent,
+                $this->User_Name ?? 'Valued Customer'
+            );
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('sendPasswordResetNotification failed: ' . $e->getMessage());
+        }
+    }
 }

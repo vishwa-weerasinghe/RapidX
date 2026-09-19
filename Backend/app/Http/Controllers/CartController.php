@@ -74,6 +74,14 @@ class CartController extends Controller
             $customer = \App\Models\Customer::find($customerId);
         }
 
+        // Authoritative server-side price calculation to prevent price tampering (including pickup area fee)
+        $package = \App\Models\Package::find($request->Package_ID);
+        $areaFee = Booking::getAreaFee($request->Area);
+        $expectedPayment = $package
+            ? ($package->calculatePrice((int) $request->No_of_adults, (int) $request->No_of_child) + $areaFee)
+            : 0;
+        $paymentAmount = $expectedPayment > 0 ? $expectedPayment : (float) $request->Payment;
+
         // Create booking with status 'In Cart'
         $booking = Booking::create([
             'Booking_Date' => $request->Booking_Date,
@@ -82,7 +90,7 @@ class CartController extends Controller
             'Area' => $request->Area ?? null,
             'No_of_adults' => $request->No_of_adults,
             'No_of_child' => $request->No_of_child,
-            'Payment' => $request->Payment,
+            'Payment' => $paymentAmount,
             'Status' => 'In Cart',
             'Customer_ID' => $customerId,
             'Package_ID' => $request->Package_ID,

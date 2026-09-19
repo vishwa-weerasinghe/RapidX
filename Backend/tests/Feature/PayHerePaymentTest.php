@@ -32,8 +32,9 @@ class PayHerePaymentTest extends TestCase
         return Package::create(array_merge([
             'Package_Name'    => 'Minneriya Elephant Safari',
             'Description'     => 'World famous elephant gathering tour.',
-            'Price_for_adult' => 150.00,
-            'Price_for_child' => 75.00,
+            'price_one_adult' => 150.00,
+            'price_more_adult' => 150.00,
+            'price_child' => 75.00,
         ], $overrides));
     }
 
@@ -146,7 +147,7 @@ class PayHerePaymentTest extends TestCase
             'No_of_adults'    => 2,
             'No_of_child'     => 1,
             'Package_ID'      => $package->id,
-            'Payment'         => 375.00,
+            'Payment'         => 390.00,
             'First_Name'      => 'Alice',
             'Last_Name'       => 'Walker',
             'Email'           => 'alice@example.com',
@@ -181,7 +182,7 @@ class PayHerePaymentTest extends TestCase
         $this->assertDatabaseHas('payments', [
             'Payment_ID' => $paymentId,
             'order_id'   => $orderId,
-            'amount'     => 375.00,
+            'amount'     => 390.00,
             'status'     => 'Pending',
         ]);
 
@@ -189,7 +190,7 @@ class PayHerePaymentTest extends TestCase
         $this->assertDatabaseHas('bookings', [
             'Payment_ID' => $paymentId,
             'Status'     => 'Pending',
-            'Payment'    => 375.00,
+            'Payment'    => 390.00,
         ]);
     }
 
@@ -210,10 +211,11 @@ class PayHerePaymentTest extends TestCase
 
     public function test_cart_checkout_initiation_creates_single_parent_payment_for_all_cart_bookings(): void
     {
-        $package1 = $this->createPackage(['Package_Name' => 'Morning Tour']);
-        $package2 = $this->createPackage(['Package_Name' => 'Evening Tour']);
+        $package1 = $this->createPackage(['Package_Name' => 'Morning Tour', 'price_one_adult' => 75.00, 'price_more_adult' => 75.00]);
+        $package2 = $this->createPackage(['Package_Name' => 'Evening Tour', 'price_one_adult' => 100.00, 'price_more_adult' => 100.00]);
         $customer = $this->createCustomer();
 
+        // Each booking has 2 adults: (2 * 75 = 150) + (2 * 100 = 200) = 350.00
         $booking1 = $this->createBookingInCart($customer->Customer_ID, $package1->id, 150.00);
         $booking2 = $this->createBookingInCart($customer->Customer_ID, $package2->id, 200.00);
 
@@ -228,16 +230,43 @@ class PayHerePaymentTest extends TestCase
 
         $paymentId = $response->json('Payment_ID');
 
-        // Verify Payment amount is sum of cart bookings (150 + 200 = 350)
+        // Verify Payment amount is sum of cart bookings calculated server-side (150 + 200 + 30 area fees = 380)
         $this->assertDatabaseHas('payments', [
             'Payment_ID' => $paymentId,
-            'amount'     => 350.00,
+            'amount'     => 380.00,
             'status'     => 'Pending',
         ]);
 
         // Both bookings now reference the single Payment_ID
         $this->assertEquals($paymentId, $booking1->fresh()->Payment_ID);
         $this->assertEquals($paymentId, $booking2->fresh()->Payment_ID);
+    }
+
+    public function test_cart_checkout_initiation_recalculates_price_preventing_tampering(): void
+    {
+        $package = $this->createPackage(['Package_Name' => 'Safari Premium', 'price_one_adult' => 150.00, 'price_more_adult' => 150.00]);
+        $customer = $this->createCustomer();
+
+        // Malicious client sets booking payment to 1.00 instead of 2 * 150 = 300.00
+        $booking = $this->createBookingInCart($customer->Customer_ID, $package->id, 1.00);
+
+        $response = $this->postJson('/api/payhere/initiate', [
+            'checkout_type' => 'cart',
+            'Customer_ID'   => $customer->Customer_ID,
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('success', true);
+
+        $paymentId = $response->json('Payment_ID');
+
+        // Server must recalculate to authoritative price 300.00 + 15.00 area fee = 315.00, ignoring tampered 1.00
+        $this->assertDatabaseHas('payments', [
+            'Payment_ID' => $paymentId,
+            'amount'     => 315.00,
+            'status'     => 'Pending',
+        ]);
+        $this->assertEquals(315.00, (float) $booking->fresh()->Payment);
     }
 
     // -------------------------------------------------------------------------
@@ -487,6 +516,18 @@ class PayHerePaymentTest extends TestCase
             'Booking_ID'  => $booking->Booking_ID,
         ]);
 
+        // Mock PayHereService verification returning confirmed status from gateway
+        $this->mock(\App\Services\PayHereService::class, function ($mock) {
+            $mock->shouldReceive('verifyPaymentWithPayHere')
+                ->with('SAFARI_CART_TEST_CONFIRM')
+                ->andReturn([
+                    'status_code'    => 2,
+                    'payment_id'     => 'PAYHERE_TXN_CONFIRM_123',
+                    'method'         => 'VISA',
+                    'status_message' => 'Payment Completed Successfully',
+                ]);
+        });
+
         $response = $this->postJson('/api/payhere/confirm', [
             'order_id' => 'SAFARI_CART_TEST_CONFIRM',
         ]);
@@ -503,6 +544,96 @@ class PayHerePaymentTest extends TestCase
 
         $this->assertDatabaseMissing('carts', [
             'Customer_ID' => $customer->Customer_ID,
+        ]);
+    }
+
+    public function test_confirm_endpoint_rejects_unverified_unpaid_order(): void
+    {
+        $customer = $this->createCustomer();
+        $package  = $this->createPackage();
+
+        $payment = Payment::create([
+            'order_id'       => 'SAFARI_UNPAID_ORDER_123',
+            'Customer_ID'    => $customer->Customer_ID,
+            'amount'         => 300.00,
+            'currency'       => 'USD',
+            'status'         => 'Pending',
+        ]);
+
+        $booking = Booking::create([
+            'Booking_Date'    => '2026-09-01',
+            'Pickup_Time'     => '06:00',
+            'Pickup_Location' => 'Sigiriya',
+            'No_of_adults'    => 2,
+            'No_of_child'     => 0,
+            'Payment'         => 300.00,
+            'Status'          => 'Pending',
+            'Customer_ID'     => $customer->Customer_ID,
+            'Package_ID'      => $package->id,
+            'Payment_ID'      => $payment->Payment_ID,
+            'Admin_Seen'      => false,
+        ]);
+
+        // PayHere Gateway returns null or failed status
+        $this->mock(\App\Services\PayHereService::class, function ($mock) {
+            $mock->shouldReceive('verifyPaymentWithPayHere')
+                ->with('SAFARI_UNPAID_ORDER_123')
+                ->andReturn(null);
+        });
+
+        $response = $this->postJson('/api/payhere/confirm', [
+            'order_id' => 'SAFARI_UNPAID_ORDER_123',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('success', false)
+            ->assertJsonPath('status', 'Pending');
+
+        $payment->refresh();
+        $this->assertEquals('Pending', $payment->status);
+
+        $booking->refresh();
+        $this->assertEquals('Pending', $booking->Status);
+    }
+
+    public function test_single_booking_initiation_recalculates_tampered_price(): void
+    {
+        $package = $this->createPackage([
+            'price_one_adult' => 100.00,
+            'price_more_adult' => 100.00,
+            'price_child' => 50.00,
+        ]);
+
+        // Attempt to pass 1.00 USD instead of (2 * 100) + (1 * 50) = 250.00
+        $response = $this->postJson('/api/payhere/initiate', [
+            'Booking_Date'    => '2026-09-15',
+            'Pickup_Time'     => '06:30',
+            'Pickup_Location' => 'Heritance Kandalama',
+            'Area'            => 'Kandalama',
+            'No_of_adults'    => 2,
+            'No_of_child'     => 1,
+            'Package_ID'      => $package->id,
+            'Payment'         => 1.00,
+            'First_Name'      => 'Attacker',
+            'Last_Name'       => 'User',
+            'Email'           => 'attacker@example.com',
+            'Phone_No'        => '0779988776',
+            'NIC'             => '998877665V',
+            'Country'         => 'Sri Lanka',
+        ]);
+
+        $response->assertStatus(201);
+
+        $paymentId = $response->json('Payment_ID');
+
+        // Verify that server forced correct calculation: 250.00 + 15.00 area fee = 265.00
+        $this->assertDatabaseHas('payments', [
+            'Payment_ID' => $paymentId,
+            'amount'     => 265.00,
+        ]);
+        $this->assertDatabaseHas('bookings', [
+            'Payment_ID' => $paymentId,
+            'Payment'    => 265.00,
         ]);
     }
 }

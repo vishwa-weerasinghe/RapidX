@@ -41,8 +41,9 @@ export default function Packages() {
     return (
       pkg.Package_Name?.toLowerCase().includes(query) ||
       pkg.Description?.toLowerCase().includes(query) ||
-      String(pkg.Price_for_adult ?? "").includes(query) ||
-      String(pkg.Price_for_child ?? "").includes(query)
+      String(pkg.price_one_adult ?? "").includes(query) ||
+      String(pkg.price_more_adult ?? "").includes(query) ||
+      String(pkg.price_child ?? "").includes(query)
     );
   });
 
@@ -87,7 +88,8 @@ export default function Packages() {
               <tr>
                 <th className="px-4 py-3 text-left">Name</th>
                 <th className="px-4 py-3 text-left">Description</th>
-                <th className="px-4 py-3 text-left">Adult Price</th>
+                <th className="px-4 py-3 text-left">Price (1 Adult)</th>
+                <th className="px-4 py-3 text-left">Price (Per Adult 2+)</th>
                 <th className="px-4 py-3 text-left">Child Price</th>
                 <th className="px-4 py-3 text-right">Actions</th>
               </tr>
@@ -98,7 +100,7 @@ export default function Packages() {
 
               {filteredPackages.length === 0 && (
                 <tr>
-                  <td colSpan="5" className="px-4 py-6 text-center text-muted">
+                  <td colSpan="6" className="px-4 py-6 text-center text-muted">
                     No packages match your search.
                   </td>
                 </tr>
@@ -118,11 +120,15 @@ export default function Packages() {
                   </td>
 
                   <td className="px-4 py-3 text-charcoal/80 dark:text-white/80">
-                    $ {Number(pkg.Price_for_adult).toFixed(2)}
+                    $ {Number(pkg.price_one_adult).toFixed(2)}
                   </td>
 
                   <td className="px-4 py-3 text-charcoal/80 dark:text-white/80">
-                    $ {Number(pkg.Price_for_child).toFixed(2)}
+                    $ {Number(pkg.price_more_adult).toFixed(2)}
+                  </td>
+
+                  <td className="px-4 py-3 text-charcoal/80 dark:text-white/80">
+                    $ {Number(pkg.price_child).toFixed(2)}
                   </td>
 
                   <td className="px-4 py-3 text-right space-x-3">

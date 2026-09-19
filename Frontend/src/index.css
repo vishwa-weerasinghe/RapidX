@@ -438,4 +438,49 @@ body {
   .table-row:hover {
     background-color: var(--surface-2);
   }
+
+  /* Shimmer Loading Skeleton */
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+  .skeleton-shimmer {
+    background: linear-gradient(
+      90deg,
+      #e5e7eb 0%,
+      #f3f4f6 50%,
+      #e5e7eb 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.8s infinite ease-in-out;
+  }
+
+  .dark .skeleton-shimmer,
+  html.dark .skeleton-shimmer {
+    background: linear-gradient(
+      90deg,
+      #1f2b20 0%,
+      #2f4437 50%,
+      #1f2b20 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.8s infinite ease-in-out;
+  }
+}
+
+/* Modern Autofill styling for dark / frosted-glass auth inputs */
+.auth-glass-input:-webkit-autofill,
+.auth-glass-input:-webkit-autofill:hover,
+.auth-glass-input:-webkit-autofill:focus,
+.auth-glass-input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #1a271f inset !important;
+  -webkit-text-fill-color: #ffffff !important;
+  caret-color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.35) !important;
+  transition: background-color 5000s ease-in-out 0s;
 }

@@ -30,6 +30,11 @@ class BookingController extends Controller
     // =========================
     public function userBookings($customerId)
     {
+        $user = request()->user('sanctum') ?? auth('sanctum')->user();
+        if ($user && !$this->isAdmin($user) && (int) $user->Customer_ID !== (int) $customerId) {
+            return response()->json(['message' => 'Unauthorized: You can only view your own bookings.'], 403);
+        }
+
         return response()->json(
             Booking::with(['package', 'vehicle.driver', 'vehicles.driver'])
                 ->where('Customer_ID', $customerId)
@@ -76,6 +81,14 @@ class BookingController extends Controller
             $customerId = $customer->Customer_ID;
         }
 
+        // Server-side authoritative price calculation (prevents client price tampering, including pickup area fee)
+        $package = \App\Models\Package::find($request->Package_ID);
+        $areaFee = Booking::getAreaFee($request->Area);
+        $expectedPayment = $package
+            ? ($package->calculatePrice((int) $request->No_of_adults, (int) $request->No_of_child) + $areaFee)
+            : 0;
+        $paymentAmount = ($expectedPayment > 0 && !$createdByAdmin) ? $expectedPayment : (float) ($request->Payment ?? 0);
+
         $booking = Booking::create([
             'Booking_Date' => $request->Booking_Date,
             'Pickup_Time' => $request->Pickup_Time,
@@ -83,7 +96,7 @@ class BookingController extends Controller
             'Pickup_Location' => $request->Pickup_Location,
             'No_of_adults' => $request->No_of_adults,
             'No_of_child' => $request->No_of_child,
-            'Payment' => $request->Payment ?? 0,
+            'Payment' => $paymentAmount,
             'Status' => $isGuestBooking ? 'Confirmed' : 'Pending',
             'Customer_ID' => $customerId,
             'Package_ID' => $request->Package_ID,
@@ -105,8 +118,15 @@ class BookingController extends Controller
     // =========================
     public function show($id)
     {
-        return Booking::with(['customer', 'package', 'vehicle.driver', 'vehicles.driver'])
+        $booking = Booking::with(['customer', 'package', 'vehicle.driver', 'vehicles.driver'])
             ->findOrFail($id);
+
+        $user = request()->user('sanctum') ?? auth('sanctum')->user();
+        if ($user && !$this->isAdmin($user) && (int) $user->Customer_ID !== (int) $booking->Customer_ID) {
+            return response()->json(['message' => 'Unauthorized: Access to this booking is restricted.'], 403);
+        }
+
+        return response()->json($booking);
     }
 
     // =========================

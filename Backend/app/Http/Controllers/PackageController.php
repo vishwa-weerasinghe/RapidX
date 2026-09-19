@@ -37,9 +37,11 @@ class PackageController extends Controller
         $validated = $request->validate([
             'Package_Name'     => 'required|string|max:100',
             'Description'      => 'required|string',
-            'Price_for_adult'  => 'required|numeric|min:0',
-            'Price_for_child'  => 'required|numeric|min:0',
+            'price_one_adult'  => 'required|numeric|min:0',
+            'price_more_adult' => 'required|numeric|min:0',
+            'price_child'      => 'required|numeric|min:0',
             'Image' => 'nullable|image|mimes:jpeg,png,jpg,webp',
+            'related_package' => 'nullable|string|max:255',
         ]);
         if ($request->hasFile('Image')) {
             try {
@@ -75,10 +77,11 @@ class PackageController extends Controller
         $validated = $request->validate([
             'Package_Name'     => 'sometimes|required|string|max:100',
             'Description'      => 'sometimes|required|string',
-            'Price_for_adult'  => 'sometimes|required|numeric|min:0',
-            'Price_for_child'  => 'sometimes|required|numeric|min:0',
+            'price_one_adult'  => 'sometimes|required|numeric|min:0',
+            'price_more_adult' => 'sometimes|required|numeric|min:0',
+            'price_child'      => 'sometimes|required|numeric|min:0',
             'Image' => 'nullable|image|mimes:jpeg,png,jpg,webp',
-    
+            'related_package' => 'sometimes|nullable|string|max:255',
 
         ]);
         if ($request->hasFile('Image')) {

@@ -50,8 +50,9 @@ class AppointmentControllerTest extends TestCase
         return Package::create([
             'Package_Name' => 'City Tour',
             'Description' => 'A sample package',
-            'Price_for_adult' => 1000,
-            'Price_for_child' => 500,
+            'price_one_adult' => 1000,
+            'price_more_adult' => 1000,
+            'price_child' => 500,
         ]);
     }
 

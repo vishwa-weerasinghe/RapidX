@@ -8,7 +8,7 @@ import ThemeModeIcon from '../ThemeModeIcon'
 export function Header({ user, toggleSidebar }) {
   const navigate = useNavigate()
   const { theme, toggleTheme } = useTheme()
-  
+
   const [loading, setLoading] = useState(false)
   const [unreadBookings, setUnreadBookings] = useState(0)
   const [bookingNotifications, setBookingNotifications] = useState([])
@@ -19,37 +19,47 @@ export function Header({ user, toggleSidebar }) {
   const customerId = user?.Customer_ID
 
   const fetchUnreadBookings = async () => {
-    if (!customerId) return
+    if (!customerId) return;
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setUnreadBookings(0);
+      return;
+    }
 
     try {
-      const response = await api.get(`/customer/${customerId}/booking-notifications/unread-count`)
-      setUnreadBookings(response.data.count || 0)
+      const response = await api.get(`/customer/${customerId}/booking-notifications/unread-count`);
+      setUnreadBookings(response.data.count || 0);
     } catch (err) {
-      console.error(err)
+      console.error(err);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchUnreadBookings()
-    const interval = setInterval(fetchUnreadBookings, 5000)
-    return () => clearInterval(interval)
-  }, [customerId])
+  const token = localStorage.getItem('token');
+  if (!customerId || !token) return;
+  fetchUnreadBookings();
+  const interval = setInterval(fetchUnreadBookings, 5000);
+  return () => clearInterval(interval);
+}, [customerId]);
 
   const handleBookingNotifications = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
     try {
-      const response = await api.get(`/customer/${customerId}/booking-notifications`)
-      setBookingNotifications(response.data || [])
-      setShowBookingNotifications((current) => !current)
-      await api.post(`/customer/${customerId}/booking-notifications/mark-seen`)
-      setUnreadBookings(0)
+      const response = await api.get(`/customer/${customerId}/booking-notifications`);
+      setBookingNotifications(response.data || []);
+      setShowBookingNotifications((current) => !current);
+      await api.post(`/customer/${customerId}/booking-notifications/mark-seen`);
+      setUnreadBookings(0);
     } catch (err) {
-      console.error(err)
+      console.error(err);
     }
-  }
+  };
 
-  
 
-  
+
+
 
   const handleLogout = async () => {
     setLoading(true)
@@ -129,7 +139,7 @@ export function Header({ user, toggleSidebar }) {
             <ThemeModeIcon className="w-5 h-5" />
           </button>
 
-          
+
 
           <div className="mx-1 h-6 w-px bg-border-light dark:bg-border-dark"></div>
 
@@ -153,10 +163,12 @@ export function Header({ user, toggleSidebar }) {
           <button
             onClick={handleLogout}
             disabled={loading}
-            className="btn-danger rounded-full"
+            title="Logout"
+            aria-label="Logout"
+            className="btn-danger rounded-full px-2 sm:px-4"
           >
             <LogOut className="w-4 h-4" />
-            <span>{loading ? 'Logging out...' : 'Logout'}</span>
+            <span className="hidden sm:inline">{loading ? 'Logging out...' : 'Logout'}</span>
           </button>
         </div>
       </div>

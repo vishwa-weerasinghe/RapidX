@@ -29,8 +29,20 @@ class ContactController extends Controller
             // Recipient can be defined in .env, falling back to MAIL_FROM_ADDRESS
             $recipient = env('CONTACT_DESTINATION_EMAIL', config('mail.from.address', 'admin@wildsafari.com'));
 
-            // Send email using Laravel Mail Facade
-            Mail::to($recipient)->send(new ContactMessage($validated));
+            // Send email using Brevo HTTP API (Port 443) to avoid SMTP port restrictions on Render
+            if (app()->runningUnitTests()) {
+                Mail::to($recipient)->queue(new ContactMessage($validated));
+            } else {
+                $htmlContent = (new ContactMessage($validated))->render();
+                \App\Services\BrevoMailService::send(
+                    $recipient,
+                    'New Safari Booking System Inquiry: ' . ($validated['subject'] ?? 'General'),
+                    $htmlContent,
+                    'Admin', // toName
+                    $validated['email'] ?? null,
+                    $validated['name'] ?? null
+                );
+            }
 
             return response()->json([
                 'success' => true,

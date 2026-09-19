@@ -34,7 +34,23 @@ export default function PaymentSuccess() {
             setError(null);
 
             // Fetch actual payment status verified by backend
-            const res = await api.get(`/payhere/status/${orderId}`);
+            let res = await api.get(`/payhere/status/${orderId}`);
+
+            // If still marked as pending, confirm payment from client completion
+            if (res.data?.status === "Pending") {
+                try {
+                    const confirmRes = await api.post("/payhere/confirm", { order_id: orderId });
+                    if (confirmRes.data?.payment) {
+                        setPayment(confirmRes.data.payment);
+                        return;
+                    }
+                    // Re-fetch updated status
+                    res = await api.get(`/payhere/status/${orderId}`);
+                } catch (confirmErr) {
+                    console.warn("Auto-confirm notice:", confirmErr);
+                }
+            }
+
             setPayment(res.data);
         } catch (err) {
             console.error("Payment status error:", err);

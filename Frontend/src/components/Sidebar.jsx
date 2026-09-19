@@ -14,6 +14,7 @@ import {
   ShoppingCart,
   LogOut,
   ArrowLeft,
+  Home,
 } from "lucide-react";
 
 const adminLinks = [
@@ -156,20 +157,19 @@ export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
 
       <div className="min-h-full">
 
-        <div className="relative p-6 border-b border-white/20">
+        <div className="relative p-4 md:p-6 border-b border-white/20">
 
           <button
             onClick={() => {
-              navigate(-1);
               if (typeof setIsOpen === "function") {
                 setIsOpen(false);
               }
             }}
-            className="absolute left-4 top-4 md:hidden p-2 rounded-lg text-white/90 hover:bg-white/15 transition-colors"
-            title="Go back"
-            aria-label="Go back"
+            className="absolute left-3 top-3 md:hidden p-1.5 rounded-lg text-white/90 hover:bg-white/15 transition-colors"
+            title="Close menu"
+            aria-label="Close menu"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-4 h-4" />
           </button>
 
           <div className="flex flex-col items-center">
@@ -178,15 +178,15 @@ export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
               <img
                 src={logoImg}
                 alt="Minneriya Wild Jeep Safari"
-                className="h-14 sm:h-16 md:h-20 w-auto object-contain rounded-full"
+                className="h-10 sm:h-12 md:h-20 w-auto object-contain rounded-full"
               />
             </div>
 
-            <h2 className="mt-4 text-2xl font-bold tracking-wide">
+            <h2 className="mt-1.5 md:mt-4 text-lg md:text-2xl font-bold tracking-wide">
               Wild Safari
             </h2>
 
-            <p className="text-sm text-green-100">
+            <p className="text-xs md:text-sm text-green-100">
               Safari Management System
             </p>
 
@@ -194,9 +194,38 @@ export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
 
         </div>
 
+        {/* Mobile quick nav - Home & Book Now (in header on md+, here in sidebar on mobile) */}
+        {normalizedRole === "customer" && (
+          <div className="md:hidden mt-1.5 px-3 pb-3 space-y-1.5 border-b border-white/20">
+            <button
+              type="button"
+              onClick={() => {
+                navigate("/");
+                if (typeof setIsOpen === "function") setIsOpen(false);
+              }}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-white transition-all duration-300 hover:bg-white/15 hover:translate-x-1"
+            >
+              <Home className="w-[18px] h-[18px]" />
+              <span className="font-medium">Home</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                navigate("/user/packages");
+                if (typeof setIsOpen === "function") setIsOpen(false);
+              }}
+              className="w-full flex items-center justify-start gap-3 px-3 py-2 rounded-lg text-sm bg-white text-sacramento font-semibold shadow-lg transition-all duration-300 hover:bg-sacramento-100 active:scale-[0.98]"
+            >
+              <CalendarCheck className="w-[18px] h-[18px]" />
+              <span className="font-medium">Book Now</span>
+            </button>
+          </div>
+        )}
+
         {/* MENU */}
 
-        <nav className="mt-6 px-4 space-y-2">
+        <nav className="mt-3 px-3 space-y-1 md:mt-6 md:px-4 md:space-y-2">
 
           {links.map((link) => {
 
@@ -211,12 +240,19 @@ export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
                   `
                   flex
                   items-center
-                  gap-4
+                  gap-3
+                  md:gap-4
 
-                  px-4
-                  py-3
+                  px-3
+                  py-2
+                  md:px-4
+                  md:py-3
 
-                  rounded-xl
+                  rounded-lg
+                  md:rounded-xl
+
+                  text-sm
+                  md:text-base
 
                   transition-all
                   duration-300
@@ -250,8 +286,8 @@ export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
                 }
               >
                 <Icon
-                  size={20}
-                  className="transition-transform duration-300 group-hover:scale-110"
+                  size={18}
+                  className="transition-transform duration-300 group-hover:scale-110 md:w-5 md:h-5"
                 />
 
                 <span className="font-medium">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import SEO from "./components/SEO";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   Menu,
   X,
+  ArrowRight,
 } from "lucide-react";
 import ThemeToggle from "./components/ThemeToggle";
 import { useTheme } from "./context/ThemeContext";
@@ -22,7 +23,11 @@ import minneriyaImg from "./assets/minneriya.jpg";
 import kaudullaImg from "./assets/kaudulla.jpg";
 import wasgamuwaImg from "./assets/wasgamuwa.jpg";
 import huruluImg from "./assets/hurulu.jpg";
-
+import {
+  PackageCardSkeleton,
+  ReviewCardSkeleton,
+} from "./components/Skeletons";
+import { getStaticBlogPackageSection } from "./constants/staticBlogPackages";
 
 export default function App() {
   // --- CONSUME SYSTEM THEME ---
@@ -88,7 +93,36 @@ export default function App() {
 
   // --- STATE MANAGEMENT ---
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+
+  const [isBlogMenuOpen, setIsBlogMenuOpen] = useState(false);
+  const [isMobileBlogOpen, setIsMobileBlogOpen] = useState(false);
+
   const [isScrolled, setIsScrolled] = useState(false);
+  const blogMenuRef = useRef(null);
+
+  const blogLinks = [
+    { label: "Minneriya National Park", path: "/blog#minneriya", description: "The Great Elephant Gathering" },
+    { label: "Kaudulla National Park", path: "/blog#kaudulla", description: "The Pristine Wildlife Corridor" },
+    { label: "Wasgamuwa National Park", path: "/blog#wasgamuwa", description: "The Gathering Place of Bears" },
+    { label: "Hurulu Eco Park", path: "/blog#hurulu", description: "The Vital Elephant Corridor" },
+    { label: "Full Day Safari Experience", path: "/blog#full-day-safari", description: "Hurulu Eco Park & Minneriya or Kaudulla" },
+    { label: "Dambulla Cultural & Safari Tour", path: "/blog#dambulla-safari", description: "Cave Temple, Economic Center & Evening Safari" },
+    { label: "Village Tour", path: "/blog#hiriwadunna-village-tour", description: "Experience Authentic Sri Lankan Rural Life" },
+    { label: "Polonnaruwa Ruins & Safari Tour", path: "/blog#polonnaruwa-safari", description: "Medieval Capital & Evening Safari" },
+    { label: "Sigiriya / Pidurangala & Safari Tour", path: "/blog#sigiriya-pidurangala-safari", description: "Majestic Rock Hiking & Evening Safari" },
+    { label: "Sigiriya Village Tour", path: "/blog#sigiriya-village-tour", description: "Experience Authentic Sri Lankan Rural Life" },
+  ];
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (blogMenuRef.current && !blogMenuRef.current.contains(event.target)) {
+        setIsBlogMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
   const [activeSection, setActiveSection] = useState("home");
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -100,6 +134,9 @@ export default function App() {
   const [bookingDate, setBookingDate] = useState("");
   const [adultsCount, setAdultsCount] = useState(1);
   const [childrenCount, setChildrenCount] = useState(0);
+
+
+
 
   const handleWidgetSubmit = (e) => {
     e.preventDefault();
@@ -165,6 +202,7 @@ export default function App() {
 
   const [packages, setPackages] = useState([]);
   const [galleryImages, setGalleryImages] = useState([]);
+  const [packagesLoading, setPackagesLoading] = useState(true);
 
   useEffect(() => {
     // 1. Fetch Packages from DB
@@ -181,27 +219,39 @@ export default function App() {
             ...res.data.map((pkg) => Number(pkg.bookings_count || 0)),
           );
 
-          const mapped = res.data.map((pkg) => ({
-            id: pkg.id,
-            title: pkg.Package_Name,
-            desc: pkg.Description,
-            price: Number(pkg.Price_for_adult) || 0,
-            img: pkg.Image
-              ? pkg.Image.startsWith("http")
-                ? pkg.Image
-                : `${backendUrl}/storage/${pkg.Image}`
-              : fallbackImage,
-            popular:
-              Number(pkg.bookings_count || 0) === maxBookings &&
-              maxBookings > 0,
-            Price_for_adult: pkg.Price_for_adult,
-            Price_for_child: pkg.Price_for_child,
-            Package_Name: pkg.Package_Name,
-          }));
+          const mapped = res.data.map((pkg) => {
+            const oneAdult = Number(pkg.price_one_adult) || 0;
+            const moreAdult = Number(pkg.price_more_adult) || 0;
+
+            return {
+              id: pkg.id,
+              related_package: pkg.related_package,
+              title: pkg.Package_Name,
+              desc: pkg.Description,
+              // "Starting from" shows the lowest available adult rate.
+              price:
+                oneAdult > 0 && moreAdult > 0
+                  ? Math.min(oneAdult, moreAdult)
+                  : oneAdult || moreAdult,
+              img: pkg.Image
+                ? pkg.Image.startsWith("http")
+                  ? pkg.Image
+                  : `${backendUrl}/storage/${pkg.Image}`
+                : fallbackImage,
+              popular:
+                Number(pkg.bookings_count || 0) === maxBookings &&
+                maxBookings > 0,
+              price_one_adult: oneAdult,
+              price_more_adult: moreAdult,
+              price_child: Number(pkg.price_child) || 0,
+              Package_Name: pkg.Package_Name,
+            };
+          });
           setPackages(mapped);
         }
       })
-      .catch((err) => console.error("Error loading packages:", err));
+      .catch((err) => console.error("Error loading packages:", err))
+      .finally(() => setPackagesLoading(false));
 
     // 2. Fetch Media Gallery from DB
     api
@@ -315,6 +365,7 @@ export default function App() {
 
   const scrollToSection = (id) => {
     setIsMobileMenuOpen(false);
+    setIsMobileBlogOpen(false);
     const target = document.getElementById(id);
     if (target) {
       // Calculate accurate position regardless of parent positioning
@@ -334,6 +385,8 @@ export default function App() {
 
   const [reviews, setReviews] = useState([]);
   const [tripadvisorReviews, setTripadvisorReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
+  const [tripadvisorLoading, setTripadvisorLoading] = useState(true);
   const [showAllTripadvisorReviews, setShowAllTripadvisorReviews] =
     useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
@@ -382,7 +435,8 @@ export default function App() {
           setTripadvisorReviews(res.data);
         }
       })
-      .catch((err) => console.error("Error loading TripAdvisor reviews:", err));
+      .catch((err) => console.error("Error loading TripAdvisor reviews:", err))
+      .finally(() => setTripadvisorLoading(false));
 
     api
       .get("/reviews")
@@ -449,7 +503,8 @@ export default function App() {
           setReviews([]);
         }
       })
-      .catch((err) => console.error("Error loading reviews:", err));
+      .catch((err) => console.error("Error loading reviews:", err))
+      .finally(() => setReviewsLoading(false));
   };
 
   useEffect(() => {
@@ -519,7 +574,7 @@ export default function App() {
   return (
     <>
       <SEO
-        title="Online Safari Booking Sri Lanka | Minneriya, Kaudulla & Wasgamuwa Jeep Tours"
+        title="Online Safari Booking Sri Lanka | Minneriya, Kaudulla & Wasgamuwa Jeep Safari Tours"
         description="Book trusted Sri Lanka jeep safaris online. Experience the famous Minneriya Elephant Gathering, Kaudulla & Wasgamuwa with experienced local drivers. Instant booking & best rates."
         canonical="https://www.minneriyawildjeepsafari.com"
       />
@@ -613,16 +668,71 @@ export default function App() {
                   </li>
                 ))}
 
-                <li>
-                  <Link
-                    to="/blog"
-                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 ${isScrolled
-                      ? "text-[#153827] dark:text-[#f5f0e8] hover:text-[#0b2419] dark:hover:text-white hover:bg-[#2e7d32]/15 dark:hover:bg-white/10"
-                      : "text-[#fffaf0] hover:text-white hover:bg-[#d4a017]/20 drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)]"
+
+                <li className="relative" ref={blogMenuRef}>
+                  <button
+                    type="button"
+                    onClick={() => setIsBlogMenuOpen((prev) => !prev)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 ${isBlogMenuOpen
+                      ? "bg-sacramento text-white shadow shadow-sacramento/25"
+                      : isScrolled
+                        ? "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-slate-800/50"
+                        : "text-white/80 hover:text-white hover:bg-white/10"
                       }`}
                   >
                     Blog
-                  </Link>
+                    <span className={`text-[10px] transition-transform duration-200 ${isBlogMenuOpen ? "rotate-180" : ""}`}>
+                      ▾
+                    </span>
+                  </button>
+
+                  {isBlogMenuOpen && (
+                    <div className="absolute right-0 top-full z-50 mt-3 w-80 sm:w-88 rounded-2xl border border-[#dfe8dc] bg-[#fffdf9] p-2.5 shadow-[0_20px_40px_rgba(20,52,38,0.15)] backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900 flex flex-col max-h-[75vh]">
+                      <div className="px-3 py-2 border-b border-slate-100 dark:border-slate-800 mb-1 flex items-center justify-between shrink-0">
+                        <p className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                          Safari Travel Guides
+                        </p>
+                        <Link
+                          to="/blog"
+                          onClick={() => setIsBlogMenuOpen(false)}
+                          className="text-[11px] font-bold text-sacramento hover:underline dark:text-castleton-300 flex items-center gap-1"
+                        >
+                          View All
+                          <span className="text-xs">→</span>
+                        </Link>
+                      </div>
+                      <div className="overflow-y-auto pr-1 space-y-0.5">
+                        {blogLinks.map((item) => (
+                          <Link
+                            key={item.path}
+                            to={item.path}
+                            onClick={() => setIsBlogMenuOpen(false)}
+                            className="group flex flex-col rounded-xl px-3 py-2 text-left transition-all hover:bg-[#edf7ef] dark:hover:bg-slate-800"
+                          >
+                            <span className="text-xs font-bold text-[#1d4334] group-hover:text-[#1b5d3d] dark:text-slate-200 dark:group-hover:text-white flex items-center justify-between">
+                              {item.label}
+                              <span className="text-xs text-castleton opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                            </span>
+                            {item.description && (
+                              <span className="text-[11px] text-slate-400 dark:text-slate-500 line-clamp-1">
+                                {item.description}
+                              </span>
+                            )}
+                          </Link>
+                        ))}
+                      </div>
+                      <div className="pt-2 mt-1 border-t border-slate-100 dark:border-slate-800 shrink-0">
+                        <Link
+                          to="/blog"
+                          onClick={() => setIsBlogMenuOpen(false)}
+                          className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-bold text-sacramento hover:bg-[#edf7ef] dark:text-emerald-400 dark:hover:bg-slate-800 transition-colors"
+                        >
+                          <span>View All Guides & Tours</span>
+                          <span>→</span>
+                        </Link>
+                      </div>
+                    </div>
+                  )}
                 </li>
               </ul>
             </nav>
@@ -668,7 +778,10 @@ export default function App() {
 
               {/* Simple Modern Mobile Menu Toggle Button */}
               <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                onClick={() => {
+                  setIsMobileMenuOpen((prev) => !prev);
+                  setIsMobileBlogOpen(false);
+                }}
                 className={`md:hidden flex items-center justify-center p-2.5 rounded-full transition-all duration-300 active:scale-95 ${isMobileMenuOpen
                   ? "bg-sacramento text-white shadow-md"
                   : isScrolled
@@ -683,7 +796,7 @@ export default function App() {
 
             {/* Simple Modern Mobile Navigation Dropdown Menu */}
             {isMobileMenuOpen && (
-              <div className="absolute top-full left-0 right-0 mt-3 p-4 rounded-3xl bg-white/95 dark:bg-neutral-900/95 backdrop-blur-2xl border border-slate-200/80 dark:border-neutral-800/80 shadow-2xl transition-all duration-300 md:hidden z-50 flex flex-col gap-3">
+              <div className="absolute top-full left-0 right-0 mt-3 p-4 rounded-3xl bg-white/95 dark:bg-neutral-900/95 backdrop-blur-2xl border border-slate-200/80 dark:border-neutral-800/80 shadow-2xl transition-all duration-300 md:hidden z-50 flex flex-col gap-2.5">
                 <div className="grid grid-cols-2 gap-1.5">
                   {[
                     "home",
@@ -705,19 +818,80 @@ export default function App() {
                       {section}
                     </button>
                   ))}
-                </div>
 
-                <div className="h-[1px] bg-slate-200/80 dark:bg-neutral-800 my-1" />
-
-                <div className="rounded-2xl border border-[#dfe8dc] bg-[#f8faf5] p-3 dark:border-slate-700 dark:bg-slate-800/80">
-                  <Link
-                    to="/blog"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="block rounded-xl px-3 py-2 text-sm font-bold text-[#1d4334] transition-colors hover:bg-[#edf7ef] hover:text-[#1b5d3d] dark:text-slate-200 dark:hover:bg-slate-700 dark:hover:text-white"
+                  {/* Blog Button in mobile nav grid just like desktop nav bar */}
+                  <button
+                    type="button"
+                    onClick={() => setIsMobileBlogOpen((prev) => !prev)}
+                    className={`py-2.5 px-3 rounded-xl text-xs font-bold capitalize tracking-wide transition-all duration-200 text-left flex items-center justify-between ${isMobileBlogOpen
+                      ? "bg-sacramento text-white shadow-md shadow-sacramento/30"
+                      : "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-neutral-800"
+                      }`}
                   >
-                    Blog
-                  </Link>
+                    <span>Blog</span>
+                    <span className={`text-[10px] transition-transform duration-200 ${isMobileBlogOpen ? "rotate-180" : ""}`}>
+                      ▾
+                    </span>
+                  </button>
                 </div>
+
+                {/* Blog Dropdown Menu (only appears when Blog is toggled, matching desktop) */}
+                {isMobileBlogOpen && (
+                  <div className="rounded-2xl border border-[#dfe8dc] bg-[#fffdf9] p-2.5 shadow-lg backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900 flex flex-col max-h-64 transition-all">
+                    <div className="px-3 py-2 border-b border-slate-100 dark:border-slate-800 mb-1 flex items-center justify-between shrink-0">
+                      <p className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                        Safari Travel Guides
+                      </p>
+                      <Link
+                        to="/blog"
+                        onClick={() => {
+                          setIsMobileMenuOpen(false);
+                          setIsMobileBlogOpen(false);
+                        }}
+                        className="text-[11px] font-bold text-sacramento hover:underline dark:text-castleton-300 flex items-center gap-1"
+                      >
+                        View All
+                        <span className="text-xs">→</span>
+                      </Link>
+                    </div>
+                    <div className="overflow-y-auto pr-1 space-y-0.5">
+                      {blogLinks.map((item) => (
+                        <Link
+                          key={item.path}
+                          to={item.path}
+                          onClick={() => {
+                            setIsMobileMenuOpen(false);
+                            setIsMobileBlogOpen(false);
+                          }}
+                          className="group flex flex-col rounded-xl px-3 py-2 text-left transition-all hover:bg-[#edf7ef] dark:hover:bg-slate-800"
+                        >
+                          <span className="text-xs font-bold text-[#1d4334] group-hover:text-[#1b5d3d] dark:text-slate-200 dark:group-hover:text-white flex items-center justify-between">
+                            {item.label}
+                            <span className="text-xs text-castleton opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                          </span>
+                          {item.description && (
+                            <span className="text-[11px] text-slate-400 dark:text-slate-500 line-clamp-1">
+                              {item.description}
+                            </span>
+                          )}
+                        </Link>
+                      ))}
+                    </div>
+                    <div className="pt-2 mt-1 border-t border-slate-100 dark:border-slate-800 shrink-0">
+                      <Link
+                        to="/blog"
+                        onClick={() => {
+                          setIsMobileMenuOpen(false);
+                          setIsMobileBlogOpen(false);
+                        }}
+                        className="flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl text-xs font-bold text-sacramento hover:bg-[#edf7ef] dark:text-emerald-400 dark:hover:bg-slate-800 transition-colors"
+                      >
+                        <span>View All Guides & Tours</span>
+                        <span>→</span>
+                      </Link>
+                    </div>
+                  </div>
+                )}
 
                 {/* Mobile Auth Actions */}
                 <div>
@@ -759,6 +933,7 @@ export default function App() {
           id="home"
           className="relative min-h-[100svh] sm:h-screen sm:min-h-[650px] flex items-center overflow-hidden pt-28 sm:pt-32 md:pt-36"
         >
+          {/* Background Slides */}
           <div className="absolute inset-0 z-0 overflow-hidden">
             {heroSlides.map((slide, index) => (
               <div
@@ -768,63 +943,77 @@ export default function App() {
                 <img
                   src={slide}
                   alt="Elephant Gathering Scene"
-                  className="w-full h-full object-cover object-[65%_center] sm:object-[center_80%] lg:object-right"
+                  className="w-full h-full object-cover object-[65%_center] sm:object-[center_80%] lg:object-right transition-all duration-500 dark:brightness-[0.88]"
                 />
               </div>
             ))}
           </div>
 
+          {/* Balanced Overlay for Optimal Text Readability & Image Visibility */}
+          <div className="absolute inset-0 z-[1] bg-gradient-to-r from-black/60 via-black/35 to-transparent dark:from-black/75 dark:via-black/50 dark:to-black/20 pointer-events-none transition-colors duration-500" />
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/30 to-transparent dark:from-black/50 dark:to-transparent pointer-events-none z-[1]" />
+
+          {/* Content */}
           <div className="max-w-7xl mx-auto px-4 md:px-6 w-full relative z-20">
             <div className="max-w-2xl text-white ml-0 md:ml-8 lg:ml-12 mt-12 md:mt-0">
-              <span className="inline-block text-amber-400 font-semibold uppercase tracking-widest text-sm sm:text-base mb-3 drop-shadow-md dark:text-amber-200 dark:drop-shadow-[0_2px_8px_rgba(245,193,66,0.7)]">
+                <span className="inline-block text-amber-400 font-semibold uppercase tracking-widest text-sm sm:text-base mb-3 drop-shadow-md dark:text-amber-200 dark:drop-shadow-[0_2px_8px_rgba(245,193,66,0.7)]">
                 Explore Sri Lanka's Wildlife
-              </span>
-              <h1 className="font-serif text-[2.5rem] leading-[1.1] sm:text-5xl md:text-6xl font-bold mb-6 text-white drop-shadow-lg">
-                Witness Sri Lanka's Legendary Wild Elephant Gathering
+                </span>
+
+              {/* Title */}
+              <h1 className="font-serif text-[2.5rem] leading-[1.1] sm:text-5xl md:text-6xl font-bold mb-6 text-white drop-shadow-2xl">
+                Witness Sri Lanka's Legendary{" "}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-emerald-300 to-teal-200 dark:from-amber-300 dark:via-emerald-400 dark:to-teal-300">
+                  Wild Elephant Gathering
+                </span>
               </h1>
-              <p className="text-gray-100 font-medium tracking-wide text-sm sm:text-base block mb-8 drop-shadow-md max-w-xl leading-relaxed">
+
+              {/* Description */}
+              <p className="text-neutral-100 dark:text-neutral-300 font-medium tracking-wide text-sm sm:text-base mb-8 drop-shadow-md max-w-xl leading-relaxed">
                 Experience unforgettable close-up encounters with majestic
-                elephants in Minneriya and Kaudulla National Parks
+                elephants in Minneriya and Kaudulla National Parks.
               </p>
 
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-12">
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-10">
                 <button
                   onClick={() => handleBookNow()}
-                  className="bg-[#2E7D32] text-white font-bold text-center px-8 py-3.5 rounded-full shadow-md hover:bg-[#1B5E20] hover:shadow-lg transition-all duration-300 transform hover:-translate-y-[2px]"
+                  className="bg-[#2E7D32] hover:bg-[#1B5E20] dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-bold text-center px-8 py-3.5 rounded-full shadow-lg shadow-emerald-950/40 hover:shadow-xl hover:shadow-emerald-900/60 transition-all duration-300 transform hover:-translate-y-[2px] active:translate-y-0"
                 >
                   Book Now
                 </button>
                 <button
                   onClick={() => scrollToSection("packages")}
-                  className="bg-white/10 backdrop-blur-sm border border-white/50 text-white font-semibold text-center px-10 py-3.5 rounded-full shadow-sm hover:bg-white/20 hover:border-white transition-all duration-300 transform hover:-translate-y-[2px]"
+                  className="bg-white/10 dark:bg-neutral-900/60 backdrop-blur-md border border-white/40 dark:border-neutral-700/80 text-white font-semibold text-center px-8 sm:px-10 py-3.5 rounded-full shadow-sm hover:bg-white/20 dark:hover:bg-neutral-800/80 hover:border-white dark:hover:border-neutral-500 transition-all duration-300 transform hover:-translate-y-[2px]"
                 >
                   Explore Safari Packages
                 </button>
               </div>
 
-              <div className="grid grid-cols-3 gap-6 pt-6 border-t border-white/20 max-w-md">
-                <div>
-                  <span className="text-2xl sm:text-3xl font-bold text-white block">
-                    2,500+
+              {/* Glassmorphic Stats Grid */}
+              <div className="grid grid-cols-3 gap-3 sm:gap-4 pt-6 border-t border-white/20 dark:border-white/10 max-w-lg">
+                <div className="rounded-2xl p-3 bg-black/25 dark:bg-neutral-900/60 backdrop-blur-md border border-white/10 dark:border-white/5 transition-all">
+                  <span className="text-2xl sm:text-3xl font-extrabold text-white dark:text-emerald-400 block tracking-tight">
+                    2,500 +
                   </span>
-                  <span className="text-s sm:text-sm font-bold text-neutral-300">
+                  <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-neutral-300 dark:text-neutral-400 mt-1 block">
                     Happy Travelers
                   </span>
                 </div>
-                <div>
-                  <span className="text-2xl sm:text-3xl font-bold text-white-400 block">
-                    5.0/5.0
+                <div className="rounded-2xl p-3 bg-black/25 dark:bg-neutral-900/60 backdrop-blur-md border border-white/10 dark:border-white/5 transition-all">
+                  <span className="text-2xl sm:text-3xl font-extrabold text-amber-300 dark:text-amber-400 block tracking-tight">
+                    5.0 / 5.0
                   </span>
-                  <span className="text-s sm:text-sm font-bold text-neutral-300">
-                    TripAdvisor Rating
+                  <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-neutral-300 dark:text-neutral-400 mt-1 block">
+                    TripAdvisor
                   </span>
                 </div>
-                <div>
-                  <span className="text-2xl sm:text-3xl font-bold text-white-400 block">
-                    24/7
+                <div className="rounded-2xl p-3 bg-black/25 dark:bg-neutral-900/60 backdrop-blur-md border border-white/10 dark:border-white/5 transition-all">
+                  <span className="text-2xl sm:text-3xl font-extrabold text-white dark:text-teal-300 block tracking-tight">
+                    24 / 7
                   </span>
-                  <span className="text-s sm:text-sm font-bold text-neutral-300">
-                    Available
+                  <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-neutral-300 dark:text-neutral-400 mt-1 block">
+                    Support
                   </span>
                 </div>
               </div>
@@ -1097,7 +1286,8 @@ export default function App() {
               {safariLocations.map((loc) => (
                 <div
                   key={loc.id}
-                  className="rounded-3xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-500 group bg-white flex flex-col"
+                  onClick={() => navigate(`/blog#${loc.id}`)}
+                  className="rounded-3xl overflow-hidden shadow-sm border border-gray-100 dark:border-neutral-800 hover:shadow-xl hover:-translate-y-2 transition-all duration-500 group bg-white dark:bg-neutral-900 flex flex-col cursor-pointer"
                 >
                   <div className="relative h-56 overflow-hidden">
                     <img
@@ -1105,12 +1295,23 @@ export default function App() {
                       alt={loc.title}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
-                    <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+
+                    {/* Subtle translucent background overlay so the photo appears clearly while providing contrast */}
+                    <div className="absolute inset-0 bg-black/25 group-hover:bg-black/35 transition-colors duration-300 flex items-center justify-center">
+                      {/* Centered Liquid Glass Learn More Button (No Arrow) */}
                       <button
-                        onClick={() => navigate(`/blog#${loc.id}`)}
-                        className="bg-castleton text-white font-bold text-sm px-6 py-3 rounded-full hover:bg-opacity-90 transition duration-300 shadow-lg transform translate-y-4 group-hover:translate-y-0"
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/blog#${loc.id}`);
+                        }}
+                        className="relative px-6 py-2.5 rounded-full text-sm font-bold text-white bg-white/20 hover:bg-white/30 active:scale-95 backdrop-blur-sm border border-white/40 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] hover:shadow-[0_8px_32px_0_rgba(46,125,50,0.4)] hover:border-white/60 hover:scale-105 transition-all duration-300 cursor-pointer overflow-hidden tracking-wide"
                       >
-                        Learn More
+                        {/* Specular glass reflection layer */}
+                        <span className="absolute inset-0 bg-gradient-to-b from-white/40 via-white/10 to-transparent opacity-75 pointer-events-none rounded-full" />
+                        <span className="relative drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)]">
+                          Learn More
+                        </span>
                       </button>
                     </div>
                   </div>
@@ -1185,87 +1386,130 @@ export default function App() {
               </p>
             </div>
 
-            {/* Cards */}
-            <div className="flex flex-wrap justify-center gap-8">
-              {packages.map((pkg, idx) => (
-                <div
-                  key={idx}
-                  className="w-full sm:w-[calc(50%-1rem)] lg:w-[260px] bg-white rounded-3xl overflow-hidden border border-gray-200 shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col"
-                >
-                  {/* Image */}
-                  <div className="relative h-56 overflow-hidden bg-gray-50">
-                    <img
-                      src={pkg.img}
-                      alt={pkg.title}
-                      className="w-full h-full object-cover object-center transition-transform duration-500 hover:scale-105"
-                    />
+            {/* Cards Grid: 2 per row */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10 max-w-5xl mx-auto">
+              {packagesLoading && packages.length === 0 ? (
+                Array.from({ length: 4 }).map((_, idx) => (
+                  <PackageCardSkeleton key={`pkg-skeleton-${idx}`} />
+                ))
+              ) : packages.length > 0 ? (
+                packages.map((pkg, idx) => {
+                  const relatedSection = getStaticBlogPackageSection(
+                    pkg.related_package
+                  );
 
-                    {pkg.popular && (
-                      <span className="absolute top-4 right-4 bg-pink-600 text-white text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full border border-pink-500 shadow-md hover:scale-105 transition-all duration-300">
-                        Popular
-                      </span>
-                    )}
-                  </div>
+                  return (
+                    <div
+                      key={idx}
+                      className="w-full bg-white dark:bg-neutral-900 rounded-3xl overflow-hidden border border-gray-200 dark:border-neutral-800 shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col"
+                    >
+                      {/* Image */}
+                      <div className="relative h-64 sm:h-72 overflow-hidden bg-gray-50 dark:bg-neutral-800">
+                        <img
+                          src={pkg.img}
+                          alt={pkg.title}
+                          loading="lazy"
+                          className="w-full h-full object-cover object-center transition-transform duration-500 hover:scale-105"
+                        />
 
-                  {/* Content */}
-                  <div className="p-5 flex flex-col flex-grow">
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">
-                      {pkg.title}
-                    </h3>
+                        {pkg.popular && (
+                          <span className="absolute top-4 right-4 bg-pink-600 text-white text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full border border-pink-500 shadow-md hover:scale-105 transition-all duration-300">
+                            Popular
+                          </span>
+                        )}
+                      </div>
 
-                    <div className="mb-4 max-h-32 overflow-auto">
-                      <p className="text-sm text-gray-500 leading-relaxed whitespace-pre-line break-words">
-                        {pkg.desc}
-                      </p>
-                    </div>
+                      {/* Content */}
+                      <div className="p-6 sm:p-7 flex flex-col flex-grow">
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                          {pkg.title}
+                        </h3>
 
-                    {/* Features */}
-                    <ul className="space-y-2 text-sm text-gray-600 mb-4">
-                      <li className="flex items-center gap-2">
-                        <span className="text-green-600">✓</span>
-                        Professional Guide
-                      </li>
+                        <div className="mb-4 max-h-32 overflow-auto">
+                          <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed whitespace-pre-line break-words">
+                            {pkg.desc}
+                          </p>
+                        </div>
 
-                      <li className="flex items-center gap-2">
-                        <span className="text-green-600">✓</span>
-                        Comfortable Jeep
-                      </li>
+                        {/* Features */}
+                        <ul className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-600 dark:text-gray-300 mb-4">
+                          <li className="flex items-center gap-2">
+                            <span className="text-green-600 shrink-0">✓</span>
+                            <span>Professional Driver</span>
+                          </li>
 
-                      <li className="flex items-center gap-2">
-                        <span className="text-green-600">✓</span>
-                        Reasonable Prices
-                      </li>
-                    </ul>
+                          <li className="flex items-center gap-2">
+                            <span className="text-green-600 shrink-0">✓</span>
+                            <span>Comfortable Jeep</span>
+                          </li>
 
-                    {/* Price */}
-                    <div className="flex items-center justify-between border-t border-gray-100 pt-4 mb-4">
-                      <span className="text-sm text-gray-500">Starting From</span>
+                          <li className="flex items-center gap-2">
+                            <span className="text-green-600 shrink-0">✓</span>
+                            <span>Reasonable Prices</span>
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <span className="text-green-600 shrink-0">✓</span>
+                            <span>Entrance Ticket</span>
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <span className="text-green-600 shrink-0">✓</span>
+                            <span>Water Bottle</span>
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <span className="text-green-600 shrink-0">✓</span>
+                            <span>Binoculars</span>
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <span className="text-green-600 shrink-0">✓</span>
+                            <span>Pick-Up & Drop-Off</span>
+                          </li>
+                        </ul>
 
-                      <div className="text-right">
-                        <div className="text-xl font-bold text-castleton">$ {pkg.price.toLocaleString()}</div>
-                        <div className="text-xs text-gray-500">per adult</div>
+                        {/* Price */}
+                        <div className="flex items-center justify-between border-t border-gray-100 dark:border-neutral-800 pt-4 mb-4">
+                          <span className="text-sm text-gray-500 dark:text-gray-400">Starting From</span>
+
+                          <div className="text-right">
+                            <div className="text-2xl font-bold text-castleton dark:text-emerald-400">$ {pkg.price.toLocaleString()}</div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400">per adult</div>
+                          </div>
+                        </div>
+
+                        {/* Buttons */}
+                        <div className="flex gap-3 mt-auto">
+                          <button
+                            onClick={() => handleBookNow(pkg)}
+                            className="flex-1 bg-[#2E7D32] text-white font-bold text-center py-3 rounded-xl shadow-md hover:bg-[#1B5E20] hover:shadow-lg transition-all duration-300 transform hover:-translate-y-[2px] cursor-pointer"
+                          >
+                            Book Now
+                          </button>
+
+                          <button
+                            onClick={() => handleAddToCart(pkg)}
+                            className="flex-1 border-2 border-sacramento text-sacramento dark:text-emerald-400 dark:border-emerald-500/40 py-3 rounded-xl font-semibold hover:bg-sacramento/10 transition-colors cursor-pointer"
+                          >
+                            Add to Cart
+                          </button>
+                        </div>
+
+                        {relatedSection && (
+                          <Link
+                            to={`/blog#${relatedSection}`}
+                            className="mt-3 inline-flex items-center justify-center gap-1 text-sacramento dark:text-emerald-400 font-bold hover:underline transition-colors"
+                          >
+                            Read More
+                            <span className="text-xs">→</span>
+                          </Link>
+                        )}
                       </div>
                     </div>
-
-                    {/* Buttons */}
-                    <div className="flex gap-3 mt-auto">
-                      <button
-                        onClick={() => handleBookNow(pkg)}
-                        className="flex-1 bg-[#2E7D32] text-white font-bold text-center py-2.5 rounded-xl shadow-md hover:bg-[#1B5E20] hover:shadow-lg transition-all duration-300 transform hover:-translate-y-[2px]"
-                      >
-                        Book Now
-                      </button>
-
-                      <button
-                        onClick={() => handleAddToCart(pkg)}
-                        className="flex-1 border-2 border-sacramento text-sacramento py-2.5 rounded-xl font-semibold hover:bg-sacramento/10 transition-colors"
-                      >
-                        Add to Cart
-                      </button>
-                    </div>
-                  </div>
+                  );
+                })
+              ) : (
+                <div className="py-12 text-center text-gray-500">
+                  No packages available at the moment.
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </section>
@@ -1329,7 +1573,11 @@ export default function App() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-6">
-                {tripadvisorVisibleReviews.length > 0 ? (
+                {tripadvisorLoading && tripadvisorVisibleReviews.length === 0 ? (
+                  Array.from({ length: 4 }).map((_, index) => (
+                    <ReviewCardSkeleton key={`ta-skeleton-${index}`} />
+                  ))
+                ) : tripadvisorVisibleReviews.length > 0 ? (
                   tripadvisorVisibleReviews.map((rev, index) =>
                     renderReviewCard(rev, index),
                   )
@@ -1376,6 +1624,7 @@ export default function App() {
               <PublicReviewSection
                 reviews={systemVisibleReviews}
                 renderReviewCard={renderReviewCard}
+                loading={reviewsLoading}
               />
             </div>
           </div>
@@ -1859,54 +2108,54 @@ export default function App() {
                 </ul>
               </div>
 
-            <div>
-              <h4 className="text-sm font-bold tracking-wider mb-6 uppercase text-gray-900">
-                Safari Parks
-              </h4>
-              <ul className="space-y-3 text-sm text-gray-500 font-medium">
-                {[
-                  "Minneriya Park",
-                  "Kaudulla Park",
-                  "Wasgamuwa Park",
-                  "Hurulu Eco Park",
-                ].map((park, idx) => (
-                  <li key={idx}>
-                    <button
-                      onClick={() => scrollToSection("packages")}
-                      className="hover:text-castleton hover:translate-x-1 transition-all duration-300 flex items-center gap-2"
-                    >
-                      <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-                      {park}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
+              <div>
+                <h4 className="text-sm font-bold tracking-wider mb-6 uppercase text-gray-900">
+                  Safari Parks
+                </h4>
+                <ul className="space-y-3 text-sm text-gray-500 font-medium">
+                  {[
+                    "Minneriya Park",
+                    "Kaudulla Park",
+                    "Wasgamuwa Park",
+                    "Hurulu Eco Park",
+                  ].map((park, idx) => (
+                    <li key={idx}>
+                      <button
+                        onClick={() => scrollToSection("packages")}
+                        className="hover:text-castleton hover:translate-x-1 transition-all duration-300 flex items-center gap-2"
+                      >
+                        <span className="w-1 h-1 rounded-full bg-gray-300"></span>
+                        {park}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-            <div className="rounded-2xl border border-[#dfe8dc] bg-[#f8faf5] p-5 shadow-[0_14px_30px_rgba(20,52,38,0.06)]">
-              <h4 className="mb-5 text-sm font-bold uppercase tracking-[0.18em] text-[#163c2c]">
-                Help
-              </h4>
-              <ul className="space-y-3 text-sm font-medium text-[#42584a]">
-                {[
-                  { label: "Frequently", path: "/help/frequently" },
-                  { label: "Privacy Policy", path: "/privacy-policy" },
-                  { label: "Terms and Conditions", path: "/terms-and-conditions" },
-                  { label: "Return & Refund Policy", path: "/return-refund-policy" },
-                ].map((item) => (
-                  <li key={item.path}>
-                    <Link
-                      to={item.path}
-                      className="group flex items-center gap-2 rounded-lg px-2 py-1.5 transition-all duration-300 hover:bg-[#e8f3eb] hover:text-[#1b5d3d]"
-                    >
-                      <span className="h-1.5 w-1.5 rounded-full bg-[#2a704d] transition-transform duration-300 group-hover:scale-125"></span>
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+              <div>
+                <h4 className="text-sm font-bold tracking-wider mb-6 uppercase text-gray-900">
+                  Help
+                </h4>
+                <ul className="space-y-3 text-sm text-gray-500 font-medium">
+                  {[
+                    { label: "Frequently", path: "/help/frequently" },
+                    { label: "Privacy Policy", path: "/privacy-policy" },
+                    { label: "Terms and Conditions", path: "/terms-and-conditions" },
+                    { label: "Return & Refund Policy", path: "/return-refund-policy" },
+                  ].map((item) => (
+                    <li key={item.path}>
+                      <Link
+                        to={item.path}
+                        className="group flex items-center gap-2 rounded-lg px-2 transition-all duration-300 hover:bg-[#e8f3eb] hover:text-[#1b5d3d]"
+                      >
+                        <span className="w-1 h-1 rounded-full bg-gray-300 transition-transform duration-300 group-hover:scale-125"></span>
+                        {item.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
-          </div>
           </div>
         </footer>
 

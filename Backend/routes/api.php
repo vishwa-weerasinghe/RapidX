@@ -21,13 +21,17 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-Route::post('/register', [AuthController::class, 'register']);
+Route::post('/register', [AuthController::class, 'register'])
+    ->middleware('throttle:6,1');
 
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login'])
+    ->middleware('throttle:6,1');
 
-Route::post('/forgot-password', [\App\Http\Controllers\PasswordResetController::class, 'sendResetLinkEmail']);
+Route::post('/forgot-password', [\App\Http\Controllers\PasswordResetController::class, 'sendResetLinkEmail'])
+    ->middleware('throttle:4,1');
 
-Route::post('/reset-password', [\App\Http\Controllers\PasswordResetController::class, 'reset']);
+Route::post('/reset-password', [\App\Http\Controllers\PasswordResetController::class, 'reset'])
+    ->middleware('throttle:6,1');
 
 Route::get('/reset-password/{token}', function () {
     return response()->json(['message' => 'This is a dummy route for generating URLs.']);
@@ -128,7 +132,8 @@ Route::post('/cart', [CartController::class, 'store']);
 Route::delete('/cart/{bookingId}', [CartController::class, 'destroy']);
 
 // PayHere Payment Gateway
-Route::post('/payhere/initiate', [PayHereController::class, 'initiate']);
+Route::post('/payhere/initiate', [PayHereController::class, 'initiate'])
+    ->middleware('throttle:15,1');
 Route::post('/payhere/confirm', [PayHereController::class, 'confirm']);
 Route::post('/payhere/notify', [PayHereController::class, 'notify']);
 Route::get('/payhere/status/{orderId}', [PayHereController::class, 'status']);
