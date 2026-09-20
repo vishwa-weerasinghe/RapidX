@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Bell, Menu, LogOut, ChevronDown, UserRound, FileText, ShieldCheck } from 'lucide-react'
+import { Bell, Menu, LogOut, ChevronDown, UserRound, FileText, ShieldCheck, Home } from 'lucide-react'
 import api from '../../axios'
 import { useTheme } from '../../context/ThemeContext'
 import ThemeModeIcon from '../ThemeModeIcon'
@@ -137,14 +137,8 @@ export function Header({ user, toggleSidebar }) {
           </div>
         </div>
 
-        {/* Center Nav - Home & Book Now */}
+        {/* Center Nav - Book Now */}
         <div className="hidden md:flex items-center gap-3">
-          <button
-            onClick={() => navigate('/')}
-            className="btn-primary rounded-full"
-          >
-            Home
-          </button>
           <button
             onClick={() => navigate('/user/packages')}
             className="btn-primary rounded-full"
@@ -155,6 +149,15 @@ export function Header({ user, toggleSidebar }) {
 
         {/* Right Nav */}
         <div className="flex items-center gap-4">
+          {/* Home */}
+          <button
+            onClick={() => navigate('/')}
+            className="p-2 text-muted hover:text-sacramento dark:text-gray-400 dark:hover:text-sacramento-300 transition-colors rounded-lg hover:bg-sacramento/10 dark:hover:bg-surface-2"
+            title="Go to Website Home"
+          >
+            <Home className="w-5 h-5" />
+          </button>
+
           {/* Dark/Light Mode Toggle */}
           <button
             onClick={toggleTheme}

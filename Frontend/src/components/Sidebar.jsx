@@ -62,7 +62,7 @@ export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
     };
 
     fetchUnreadBookings();
-    const interval = setInterval(fetchUnreadBookings, 5000);
+    const interval = setInterval(fetchUnreadBookings, 30000);
 
     return () => clearInterval(interval);
   }, [normalizedRole]);
@@ -83,7 +83,7 @@ export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
     };
 
     fetchUnreadReviews();
-    const interval = setInterval(fetchUnreadReviews, 5000);
+    const interval = setInterval(fetchUnreadReviews, 30000);
 
     return () => clearInterval(interval);
   }, [normalizedRole]);
@@ -109,7 +109,7 @@ export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
     };
 
     fetchUnreadAppointments();
-    const interval = setInterval(fetchUnreadAppointments, 5000);
+    const interval = setInterval(fetchUnreadAppointments, 30000);
 
     return () => clearInterval(interval);
   }, [normalizedRole]);

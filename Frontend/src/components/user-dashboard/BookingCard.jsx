@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { CalendarDays, MapPin, Clock, Users, Baby, Truck } from "lucide-react";
+import { CalendarDays, MapPin, Clock, Users, Baby, Truck, Star } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import api from "../../axios";
 import { useTheme } from "../../context/ThemeContext";
 
@@ -8,7 +9,9 @@ export function BookingCard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [customerId, setCustomerId] = useState(null);
+  const [activeTab, setActiveTab] = useState("upcoming");
   const { theme } = useTheme();
+  const navigate = useNavigate();
 
   useEffect(() => {
     try {
@@ -63,6 +66,18 @@ export function BookingCard() {
     ? "bg-border-dark text-gold"
     : "bg-amber-100 text-gold";
 
+  // Confirmed (not yet past) sorted soonest-first, Completed sorted most-recent-first
+  const upcomingBookings = bookings
+    .filter((b) => b.Status === "Confirmed")
+    .sort((a, b) => new Date(a.Booking_Date).getTime() - new Date(b.Booking_Date).getTime());
+  const pastBookings = bookings
+    .filter((b) => b.Status === "Completed")
+    .sort((a, b) => new Date(b.Booking_Date).getTime() - new Date(a.Booking_Date).getTime());
+
+  const tabBadgeClass = isDark
+    ? "inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-border-dark px-1.5 text-[11px] font-bold text-white"
+    : "inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-border-light px-1.5 text-[11px] font-bold text-sacramento";
+
   if (loading) {
     return (
       <div className={cardClass}>
@@ -107,43 +122,96 @@ export function BookingCard() {
           <p className={`mt-1 text-sm ${mutedTextClass}`}>Explore our packages and start your journey.</p>
         </div>
       ) : (
-        <div className="flex max-h-[400px] sm:max-h-[500px] flex-col gap-4 overflow-y-auto">
-          {bookings.map((booking) => {
-            const pkg = booking.package;
-            return (
-              <div key={booking.Booking_ID} className={isDark ? "rounded-2xl border border-border-dark bg-surface p-3 sm:p-4" : "rounded-2xl border border-border-light bg-surface-2 p-3 sm:p-4"}>
-                <div className="mb-3 flex items-start justify-between">
-                  <h4 className={`text-[16px] font-bold ${isDark ? "text-white" : "text-charcoal"}`}>{pkg?.Package_Name || "Unknown Safari"}</h4>
-                  <span className={booking.Status === "Completed" ? `ml-2 whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.5px] ${completedBadgeClass}` : `ml-2 whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.5px] ${confirmedBadgeClass}`}>
-                    {booking.Status === "Completed" ? "✓ Completed" : "● Confirmed"}
-                  </span>
-                </div>
+        <>
+          {/* Upcoming / Past Tabs */}
+          <div className={`mb-4 flex items-center gap-1 border-b ${borderLineClass}`}>
+            {[
+              { key: "upcoming", label: "Upcoming", count: upcomingBookings.length },
+              { key: "past", label: "Past", count: pastBookings.length },
+            ].map((tab) => (
+              <button
+                key={tab.key}
+                type="button"
+                onClick={() => setActiveTab(tab.key)}
+                className={`relative -mb-px flex items-center gap-1.5 border-b-2 px-3 py-2 text-sm font-semibold transition-colors ${
+                  activeTab === tab.key
+                    ? isDark
+                      ? "border-sacramento-300 text-sacramento-300"
+                      : "border-sacramento text-sacramento"
+                    : `border-transparent ${mutedTextClass} hover:bg-sacramento/5 dark:hover:bg-surface-2`
+                }`}
+              >
+                {tab.label}
+                <span className={tabBadgeClass}>{tab.count}</span>
+              </button>
+            ))}
+          </div>
 
-                <div className={`mb-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm ${fieldTextClass}`}>
-                  <DateField Icon={CalendarDays} value={booking.Booking_Date} dark={isDark} />
-                  <DateField Icon={Clock} value={booking.Pickup_Time} dark={isDark} />
-                  <div className="col-span-2 flex items-center gap-1.5">
-                    <MapPin size={14} className={isDark ? "text-sacramento-300" : "text-sacramento"} />
-                    <span className="truncate">{booking.Pickup_Location}</span>
-                  </div>
-                  <DateField Icon={Users} value={`${booking.No_of_adults} ${booking.No_of_adults === 1 ? "Adult" : "Adults"}`} dark={isDark} />
-                  <DateField Icon={Baby} value={`${booking.No_of_child} ${booking.No_of_child === 1 ? "Child" : "Children"}`} dark={isDark} />
-                </div>
-
-                <div className={`flex items-center justify-between border-t pt-3 ${borderLineClass}`}>
-                  <div className={`flex items-center gap-1.5 text-sm ${mutedTextClass}`}>
-                    <Truck size={14} className={isDark ? "text-sacramento-300" : "text-sacramento"} />
-                    <span>{booking.vehicle ? booking.vehicle.Registration_No || "Assigned" : "Awaiting vehicle"}</span>
-                  </div>
-                  <div className="text-right">
-                    <span className={`block text-[11px] ${mutedTextClass}`}>Total</span>
-                    <span className={`text-[16px] font-bold ${isDark ? "text-sacramento-300" : "text-sacramento-600"}`}>$ {Number(booking.Payment || 0).toLocaleString()}</span>
-                  </div>
-                </div>
+          {/* Active tab list */}
+          <div className="flex max-h-[400px] sm:max-h-[500px] flex-col gap-4 overflow-y-auto">
+            {(activeTab === "upcoming" ? upcomingBookings : pastBookings).length === 0 ? (
+              <div className="px-4 py-8 text-center">
+                <div className="mb-2 text-4xl">🗓️</div>
+                <p className={`text-sm font-medium ${mutedTextClass}`}>
+                  {activeTab === "upcoming"
+                    ? "No upcoming safaris yet. Book one and it will show up here!"
+                    : "No completed safaris yet. Your past adventures will appear here."}
+                </p>
               </div>
-            );
-          })}
-        </div>
+            ) : (
+              (activeTab === "upcoming" ? upcomingBookings : pastBookings).map((booking) => {
+                const pkg = booking.package;
+                return (
+                  <div key={booking.Booking_ID} className={isDark ? "rounded-2xl border border-border-dark bg-surface p-3 sm:p-4" : "rounded-2xl border border-border-light bg-surface-2 p-3 sm:p-4"}>
+                    <div className="mb-3 flex items-start justify-between">
+                      <h4 className={`text-[16px] font-bold ${isDark ? "text-white" : "text-charcoal"}`}>{pkg?.Package_Name || "Unknown Safari"}</h4>
+                      <span className={booking.Status === "Completed" ? `ml-2 whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.5px] ${completedBadgeClass}` : `ml-2 whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.5px] ${confirmedBadgeClass}`}>
+                        {booking.Status === "Completed" ? "✓ Completed" : "● Confirmed"}
+                      </span>
+                    </div>
+
+                    <div className={`mb-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm ${fieldTextClass}`}>
+                      <DateField Icon={CalendarDays} value={booking.Booking_Date} dark={isDark} />
+                      <DateField Icon={Clock} value={booking.Pickup_Time} dark={isDark} />
+                      <div className="col-span-2 flex items-center gap-1.5">
+                        <MapPin size={14} className={isDark ? "text-sacramento-300" : "text-sacramento"} />
+                        <span className="truncate">{booking.Pickup_Location}</span>
+                      </div>
+                      <DateField Icon={Users} value={`${booking.No_of_adults} ${booking.No_of_adults === 1 ? "Adult" : "Adults"}`} dark={isDark} />
+                      <DateField Icon={Baby} value={`${booking.No_of_child} ${booking.No_of_child === 1 ? "Child" : "Children"}`} dark={isDark} />
+                    </div>
+
+                    <div className={`flex items-center justify-between border-t pt-3 ${borderLineClass}`}>
+                      <div className={`flex items-center gap-1.5 text-sm ${mutedTextClass}`}>
+                        <Truck size={14} className={isDark ? "text-sacramento-300" : "text-sacramento"} />
+                        <span>{booking.vehicle ? booking.vehicle.Registration_No || "Assigned" : "Awaiting vehicle"}</span>
+                      </div>
+                      <div className="text-right">
+                        <span className={`block text-[11px] ${mutedTextClass}`}>Total</span>
+                        <span className={`text-[16px] font-bold ${isDark ? "text-sacramento-300" : "text-sacramento-600"}`}>$ {Number(booking.Payment || 0).toLocaleString()}</span>
+                      </div>
+                    </div>
+
+                    {booking.Status === "Completed" ? (
+                      <button
+                        type="button"
+                        onClick={() => navigate("/user/reviews")}
+                        className={`mt-3 flex w-full items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-[13px] font-semibold transition-colors ${
+                          isDark
+                            ? "border-sacramento-300/30 bg-sacramento/10 text-sacramento-300 hover:bg-sacramento/20"
+                            : "border-sacramento/30 bg-sacramento/10 text-sacramento hover:bg-sacramento/20"
+                        }`}
+                      >
+                        <Star size={15} className="shrink-0" />
+                        Tell us, How was your safari.
+                      </button>
+                    ) : null}
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </>
       )}
     </div>
   );

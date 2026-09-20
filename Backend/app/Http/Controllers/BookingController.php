@@ -280,7 +280,7 @@ class BookingController extends Controller
     {
         $booking = Booking::with(['package', 'vehicle.driver', 'vehicles.driver'])
             ->where('Customer_ID', $customerId)
-            ->where('Status', 'Pending')
+            ->whereIn('Status', ['Pending', 'Confirmed'])
             ->whereDate('Booking_Date', '>=', now()->toDateString())
             ->orderBy('Booking_Date', 'asc')
             ->orderBy('Pickup_Time', 'asc')
