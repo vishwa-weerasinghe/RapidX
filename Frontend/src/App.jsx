@@ -93,8 +93,6 @@ export default function App() {
 
   // --- STATE MANAGEMENT ---
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-
   const [isBlogMenuOpen, setIsBlogMenuOpen] = useState(false);
   const [isHelpMenuOpen, setIsHelpMenuOpen] = useState(false);
   const [isMobileBlogOpen, setIsMobileBlogOpen] = useState(false);
@@ -294,7 +292,7 @@ export default function App() {
       setShowScrollTop(window.scrollY > 300);
 
       const headerHeight =
-        document.querySelector("header")?.offsetHeight || 120;
+        document.querySelector("header")?.offsetHeight || 100;
 
       // Active Section Navigation Tracker Spying Logic
       const sections = [
@@ -307,29 +305,41 @@ export default function App() {
         "contact",
       ];
 
-      let nearestSection = "home";
-      let nearestDistance = Number.POSITIVE_INFINITY;
+      // If near the very top of the page, highlight home
+      if (window.scrollY < 120) {
+        setActiveSection("home");
+        return;
+      }
+
+      // If scrolled near bottom of page, highlight the last section (contact)
+      if (
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 100
+      ) {
+        setActiveSection("contact");
+        return;
+      }
+
+      const threshold = headerHeight + 120;
+      let matchedSection = null;
 
       for (const sectionId of sections) {
         const el = document.getElementById(sectionId);
         if (!el) continue;
 
         const rect = el.getBoundingClientRect();
-        const distance = Math.abs(rect.top - headerHeight);
-
-        if (rect.bottom > headerHeight && rect.top <= headerHeight + 160) {
-          if (distance < nearestDistance) {
-            nearestDistance = distance;
-            nearestSection = sectionId;
-          }
+        if (rect.top <= threshold) {
+          matchedSection = sectionId;
         }
       }
 
-      setActiveSection((prev) => (prev !== nearestSection ? nearestSection : prev));
+      if (matchedSection) {
+        setActiveSection((prev) => (prev !== matchedSection ? matchedSection : prev));
+      }
     };
 
     window.addEventListener("scroll", handleScroll);
-    handleScroll();
+
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -602,7 +612,7 @@ export default function App() {
   return (
     <>
       <SEO
-        title="Online Safari Booking Sri Lanka | Minneriya, Kaudulla & Wasgamuwa Jeep Safari Tours"
+        title="Online Safari Booking Sri Lanka | Minneriya, Kaudulla, Hurulu & Wasgamuwa Jeep Safari Tours"
         description="Book trusted Sri Lanka jeep safaris online. Experience the famous Minneriya Elephant Gathering, Kaudulla & Wasgamuwa with experienced local drivers. Instant booking & best rates."
         canonical="https://www.minneriyawildjeepsafari.com"
       />
@@ -644,7 +654,7 @@ export default function App() {
           <div
             className={`max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between transition-all duration-500 relative ${isScrolled
               ? "bg-[var(--page-bg)]/90 dark:bg-[var(--surface)]/90 backdrop-blur-xl rounded-full shadow-lg border border-[var(--border)]/40 py-2.5"
-              : "bg-[#0c2f1f]/90 backdrop-blur-lg py-5 border border-[#d6bb70]/60 shadow-[0_8px_22px_rgba(0,0,0,0.2)] rounded-full"
+              : "bg-transparent py-5 border-b border-white/10"
               }`}
           >
             {/* Logo & Brand Name */}
@@ -660,9 +670,9 @@ export default function App() {
                 />
               </div>
               <span
-                className={`text-base sm:text-lg md:text-xl font-bold tracking-tight transition-all duration-500 ${isScrolled
-                  ? "text-[#153827] dark:text-[#f5f0e8]"
-                  : "text-[#f8f4ee] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]"
+                className={`font-outfit text-lg sm:text-xl md:text-2xl font-extrabold tracking-tight transition-all duration-500 ${isScrolled
+                  ? "bg-clip-text text-transparent bg-gradient-to-r from-sacramento to-castleton dark:from-white dark:to-gray-400"
+                  : "text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)]"
                   }`}
               >
                 Wild Jeep Safari
@@ -670,8 +680,8 @@ export default function App() {
             </div>
 
             {/* Desktop Navigation Links */}
-            <nav className="hidden md:flex items-center gap-2">
-              <ul className="flex items-center gap-1 lg:gap-2">
+            <nav className="hidden md:flex items-center gap-1 lg:gap-1.5">
+              <ul className="flex items-center gap-0.5 lg:gap-1">
                 {[
                   "home",
                   "about",
@@ -684,11 +694,11 @@ export default function App() {
                   <li key={section}>
                     <button
                       onClick={() => scrollToSection(section)}
-                      className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 ${activeSection === section
-                        ? "bg-[#2E7D32] text-white shadow shadow-green-700/25"
+                      className={`px-2 lg:px-2.5 py-1 sm:py-1.5 rounded-full text-xs font-bold uppercase tracking-wide transition-all duration-300 ${activeSection === section
+                        ? "bg-sacramento text-white shadow shadow-sacramento/25"
                         : isScrolled
-                          ? "text-[#153827] dark:text-[#f5f0e8] hover:text-[#0b2419] dark:hover:text-white hover:bg-[#2e7d32]/15 dark:hover:bg-white/10"
-                          : "text-[#f8f4ee] hover:text-white hover:bg-white/10"
+                          ? "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-slate-800/50"
+                          : "text-white/80 hover:text-white hover:bg-white/10"
                         }`}
                     >
                       {section}
@@ -703,11 +713,11 @@ export default function App() {
                       setIsHelpMenuOpen((prev) => !prev);
                       setIsBlogMenuOpen(false);
                     }}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 ${isHelpMenuOpen
-                      ? "bg-[#2E7D32] text-white shadow shadow-green-700/25"
+                    className={`flex items-center gap-1 px-2 lg:px-2.5 py-1 sm:py-1.5 rounded-full text-xs font-bold uppercase tracking-wide transition-all duration-300 ${isHelpMenuOpen
+                      ? "bg-sacramento text-white shadow shadow-sacramento/25"
                       : isScrolled
-                        ? "text-[#153827] dark:text-[#f5f0e8] hover:text-[#0b2419] dark:hover:text-white hover:bg-[#2e7d32]/15 dark:hover:bg-white/10"
-                        : "text-[#f8f4ee] hover:text-white hover:bg-white/10"
+                        ? "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-slate-800/50"
+                        : "text-white/80 hover:text-white hover:bg-white/10"
                       }`}
                   >
                     Help
@@ -736,11 +746,11 @@ export default function App() {
                   <button
                     type="button"
                     onClick={() => setIsBlogMenuOpen((prev) => !prev)}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 ${isBlogMenuOpen
-                      ? "bg-[#2E7D32] text-white shadow shadow-green-700/25"
+                    className={`flex items-center gap-1 px-2 lg:px-2.5 py-1 sm:py-1.5 rounded-full text-xs font-bold uppercase tracking-wide transition-all duration-300 ${isBlogMenuOpen
+                      ? "bg-sacramento text-white shadow shadow-sacramento/25"
                       : isScrolled
                         ? "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-slate-800/50"
-                        : "text-[#f8f4ee] hover:text-white hover:bg-white/10"
+                        : "text-white/80 hover:text-white hover:bg-white/10"
                       }`}
                   >
                     Blog
@@ -806,9 +816,9 @@ export default function App() {
                 {user ? (
                   <Link
                     to={dashboardLink}
-                    className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-2 border rounded-full transition-all duration-300 ${isScrolled
-                      ? "text-[#153827] border-[#153827]/20 bg-white/85 hover:bg-[#f3f7f4] dark:text-slate-200 dark:border-slate-700 dark:bg-slate-900/70 dark:hover:bg-slate-800"
-                      : "text-[#153827] border-[#153827]/30 bg-white/85 hover:bg-[#f3f7f4]"
+                    className={`flex items-center gap-1.5 text-xs font-bold px-4 py-2 border rounded-full hover:shadow transition-all duration-300 ${isScrolled
+                      ? "text-sacramento border-sacramento/25 hover:bg-sacramento/5 dark:text-white dark:border-neutral-800 dark:hover:bg-neutral-800"
+                      : "text-white border-white/20 hover:bg-white/10"
                       }`}
                   >
                     <LayoutDashboard size={13} />
@@ -818,19 +828,16 @@ export default function App() {
                   <>
                     <Link
                       to="/login"
-                      className={`inline-flex items-center justify-center text-[11px] font-bold px-3 py-2 border rounded-full transition-all duration-300 ${isScrolled
-                        ? "text-[#153827] border-[#153827]/20 bg-white/80 hover:bg-[#f0f7f2] dark:text-slate-200 dark:border-slate-700 dark:bg-slate-900/70 dark:hover:bg-slate-800"
-                        : "text-[#f8f4ee] border-[#f8f4ee]/40 bg-[#1f4d3b]/60 hover:bg-[#1f4d3b]/80"
+                      className={`text-xs font-bold px-4 py-2 border rounded-full hover:shadow transition-all duration-300 ${isScrolled
+                        ? "text-slate-700 dark:text-slate-350 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-850"
+                        : "text-white border-white/20 hover:bg-white/10"
                         }`}
                     >
                       Log in
                     </Link>
                     <Link
                       to="/register"
-                      className={`inline-flex items-center justify-center text-[11px] font-bold px-3 py-2 rounded-full shadow transition-all duration-300 ${isScrolled
-                        ? "bg-[#2E7D32] text-white hover:bg-[#236a2a]"
-                        : "bg-[#2E7D32] text-white hover:bg-[#236a2a]"
-                        }`}
+                      className="text-xs font-bold px-4 py-2 bg-sacramento hover:bg-sacramento-600 text-white rounded-full shadow"
                     >
                       Register
                     </Link>
@@ -1033,7 +1040,7 @@ export default function App() {
         {/* --- HERO SECTION --- */}
         <section
           id="home"
-          className="relative min-h-[100svh] sm:h-screen sm:min-h-[650px] flex items-center overflow-hidden pt-28 sm:pt-32 md:pt-36"
+          className="relative min-h-[100svh] sm:h-screen sm:min-h-[650px] flex items-center overflow-hidden pt-16"
         >
           {/* Background Slides */}
           <div className="absolute inset-0 z-0 overflow-hidden">
@@ -1058,9 +1065,14 @@ export default function App() {
           {/* Content */}
           <div className="max-w-7xl mx-auto px-4 md:px-6 w-full relative z-20">
             <div className="max-w-2xl text-white ml-0 md:ml-8 lg:ml-12 mt-12 md:mt-0">
-                <span className="inline-block text-amber-400 font-semibold uppercase tracking-widest text-sm sm:text-base mb-3 drop-shadow-md dark:text-amber-200 dark:drop-shadow-[0_2px_8px_rgba(245,193,66,0.7)]">
-                Explore Sri Lanka's Wildlife
+              {/* Pill Badge */}
+              <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold uppercase tracking-widest mb-5 bg-black/40 border border-white/20 text-amber-300 dark:bg-amber-400/10 dark:border-amber-400/30 dark:text-amber-300 backdrop-blur-md shadow-lg">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-400"></span>
                 </span>
+                Explore Sri Lanka's Wildlife
+              </div>
 
               {/* Title */}
               <h1 className="font-serif text-[2.5rem] leading-[1.1] sm:text-5xl md:text-6xl font-bold mb-6 text-white drop-shadow-2xl">
@@ -1136,8 +1148,8 @@ export default function App() {
                     alt="Elephant Gathering"
                     className="w-full h-[400px] lg:h-[550px] object-cover hover:scale-105 transition-transform duration-700"
                   />
-                  <div className="absolute bottom-6 left-6 bg-[#fffaf0]/95 dark:bg-[#fffaf0]/95 backdrop-blur-sm px-6 py-4 rounded-xl shadow-[0_12px_30px_rgba(8,20,15,0.22)] border border-[#d4a017]/35 flex items-center gap-4">
-                    <div className="w-12 h-12 bg-[#0b2419] text-[#d4a017] rounded-full flex items-center justify-center font-bold text-xl">
+                  <div className="absolute bottom-6 left-6 bg-white/90 backdrop-blur-sm px-6 py-4 rounded-xl shadow-md border border-gray-100 flex items-center gap-4">
+                    <div className="w-12 h-12 bg-gray-50 text-castleton rounded-full flex items-center justify-center font-bold text-xl">
                       <svg
                         className="w-6 h-6"
                         fill="none"
@@ -1154,10 +1166,16 @@ export default function App() {
                       </svg>
                     </div>
                     <div>
-                      <span className="block !text-[#153827] font-bold text-lg leading-none">
-                        Since 2020
+                      <span
+                        className="block text-gray-800 font-bold text-lg leading-none trusted-badge-text-primary"
+                        style={{ color: '#1f2937' }}
+                      >
+                        Since 2016
                       </span>
-                      <span className="!text-[#2e7d32] text-sm font-semibold">
+                      <span
+                        className="text-gray-500 text-sm trusted-badge-text-secondary"
+                        style={{ color: '#6b7280' }}
+                      >
                         Trusted Safari
                       </span>
                     </div>

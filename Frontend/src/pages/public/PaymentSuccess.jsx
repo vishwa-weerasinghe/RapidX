@@ -70,14 +70,12 @@ export default function PaymentSuccess() {
     const isFailed = payment?.status === "Failed" || payment?.status === "Cancelled";
 
     return (
-        <div className={`min-h-screen py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center transition-colors duration-300 ${
-            isDark ? "bg-slate-950 text-slate-100" : "bg-gradient-to-br from-emerald-50 via-teal-50 to-slate-100 text-slate-900"
-        }`}>
-            <div className={`max-w-2xl w-full rounded-2xl p-8 sm:p-10 shadow-2xl border transition-all ${
-                isDark 
-                    ? "bg-slate-900/90 border-slate-800 backdrop-blur-xl" 
-                    : "bg-white/95 border-emerald-100 backdrop-blur-xl"
+        <div className={`min-h-screen py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center transition-colors duration-300 ${isDark ? "bg-slate-950 text-slate-100" : "bg-gradient-to-br from-emerald-50 via-teal-50 to-slate-100 text-slate-900"
             }`}>
+            <div className={`max-w-2xl w-full rounded-2xl p-8 sm:p-10 shadow-2xl border transition-all ${isDark
+                    ? "bg-slate-900/90 border-slate-800 backdrop-blur-xl"
+                    : "bg-white/95 border-emerald-100 backdrop-blur-xl"
+                }`}>
                 {/* Header based on status */}
                 <div className="text-center">
                     {isSuccess ? (
@@ -128,9 +126,8 @@ export default function PaymentSuccess() {
                 ) : (
                     <div className="mt-8 space-y-6">
                         {/* Transaction Summary Box */}
-                        <div className={`rounded-xl p-5 border ${
-                            isDark ? "bg-slate-800/60 border-slate-700/60" : "bg-emerald-50/50 border-emerald-100"
-                        }`}>
+                        <div className={`rounded-xl p-5 border ${isDark ? "bg-slate-800/60 border-slate-700/60" : "bg-emerald-50/50 border-emerald-100"
+                            }`}>
                             <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-700">
                                 <span className="text-xs uppercase font-semibold text-slate-500 tracking-wider flex items-center gap-1.5">
                                     <Receipt className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> Order Reference
@@ -150,13 +147,12 @@ export default function PaymentSuccess() {
                                 </div>
                                 <div>
                                     <span className="text-xs text-slate-500 block">Payment Status</span>
-                                    <span className={`font-bold text-xs px-2 py-0.5 rounded-full inline-block mt-0.5 ${
-                                        isSuccess 
+                                    <span className={`font-bold text-xs px-2 py-0.5 rounded-full inline-block mt-0.5 ${isSuccess
                                             ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
                                             : isPending
-                                            ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
-                                            : "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300"
-                                    }`}>
+                                                ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+                                                : "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300"
+                                        }`}>
                                         {payment?.status || "Unknown"}
                                     </span>
                                 </div>
@@ -176,16 +172,14 @@ export default function PaymentSuccess() {
                                     Safari Tour Details
                                 </h2>
                                 {payment.bookings.map((b, idx) => (
-                                    <div key={idx} className={`p-4 rounded-xl border flex flex-col gap-2 text-sm ${
-                                        isDark ? "bg-slate-800/40 border-slate-800" : "bg-white border-slate-200 shadow-sm"
-                                    }`}>
+                                    <div key={idx} className={`p-4 rounded-xl border flex flex-col gap-2 text-sm ${isDark ? "bg-slate-800/40 border-slate-800" : "bg-white border-slate-200 shadow-sm"
+                                        }`}>
                                         <div className="font-bold text-slate-900 dark:text-slate-100 flex items-center justify-between">
                                             <span>{b.package?.Package_Name || "Wild Safari Tour"}</span>
-                                            <span className={`text-xs px-2.5 py-0.5 rounded-full font-medium ${
-                                                b.Status === "Confirmed"
+                                            <span className={`text-xs px-2.5 py-0.5 rounded-full font-medium ${b.Status === "Confirmed"
                                                     ? "bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300"
                                                     : "bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300"
-                                            }`}>
+                                                }`}>
                                                 {b.Status || "Pending"}
                                             </span>
                                         </div>
@@ -235,13 +229,6 @@ export default function PaymentSuccess() {
                                 <RefreshCw className="w-4 h-4" />
                                 <span>Re-check Status</span>
                             </button>
-                            <Link
-                                to="/user/cart"
-                                className="w-full sm:w-auto px-6 py-3 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold flex items-center justify-center gap-2 transition"
-                            >
-                                <ShoppingBag className="w-4 h-4" />
-                                <span>Return to Cart</span>
-                            </Link>
                         </>
                     )}
 

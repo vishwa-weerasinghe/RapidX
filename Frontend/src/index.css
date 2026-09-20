@@ -484,3 +484,16 @@ body {
   border-color: rgba(255, 255, 255, 0.35) !important;
   transition: background-color 5000s ease-in-out 0s;
 }
+
+/* Preserve consistent light styling for overlay badges over photos */
+.trusted-badge-text-primary,
+html.dark .trusted-badge-text-primary,
+.dark .trusted-badge-text-primary {
+  color: #1f2937 !important;
+}
+
+.trusted-badge-text-secondary,
+html.dark .trusted-badge-text-secondary,
+.dark .trusted-badge-text-secondary {
+  color: #6b7280 !important;
+}

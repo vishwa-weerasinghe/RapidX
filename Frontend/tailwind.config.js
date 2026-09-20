@@ -83,6 +83,10 @@ export default {
           dark: '#2F4437',
         },
       },
+      fontFamily: {
+        outfit: ['Outfit', 'sans-serif'],
+        sans: ['Inter', 'sans-serif'],
+      },
     },
   },
   plugins: [],
