@@ -181,7 +181,7 @@
                                 The Wild Jeep Safari Team
                             </p>
                             <p style="margin: 4px 0 0 0; font-size: 13px; color: #6b8273;">
-                                Minneriya, Kaudulla & Wasgamuwa National Parks, Sri Lanka
+                                Minneriya, Kaudulla, Hurulu Eco & Wasgamuwa National Parks, Sri Lanka
                             </p>
                         </td>
                     </tr>
@@ -196,7 +196,7 @@
                                 Email: <a href="mailto:info@minneriyawildjeepsafari.com" style="color: #1e7e34; font-weight: 700; text-decoration: none;">info@minneriyawildjeepsafari.com</a>
                             </div>
                             <div style="color: #9ca3af; font-size: 11px;">
-                                © {{ date('Y') }} Minneriya, Kaudulla & Wasgamuwa Wild Jeep Safari. All rights reserved.
+                                © {{ date('Y') }} Minneriya Wild Jeep Safari. All rights reserved.
                             </div>
                         </td>
                     </tr>
