@@ -3,6 +3,7 @@ import { BookingCard } from "../../components/user-dashboard/BookingCard";
 import { CartCard } from '../../components/user-dashboard/CartCard'
 import { CancellationMessage } from '../../components/user-dashboard/Cancellation_Message'
 import { HeroCountdown } from '../../components/user-dashboard/Upcoming-safari'
+import SummaryStats from '../../components/user-dashboard/Summary-Card'
 
 export default function CustomerDashboard({ user: propUser }) {
   const [currentUser, setCurrentUser] = useState(() => {
@@ -28,8 +29,12 @@ export default function CustomerDashboard({ user: propUser }) {
       <div>
         <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">Customer Dashboard</h1>
         <p className="mt-4 sm:mt-6 text-muted dark:text-gray-400">
-          Welcome, <strong className="text-sacramento dark:text-amber-400">{currentUser?.User_Name || "Customer"}</strong>! Thank you for choosing us. We're delighted to be part of your safari journey. Explore exciting destinations, manage your bookings with ease, and create unforgettable memories in the wild
+          Welcome, <strong className="text-sacramento dark:text-amber-400">{currentUser?.User_Name || "Customer"}</strong>!  Explore exciting destinations and create unforgettable memories in the wild.
         </p>
+      </div>
+
+      <div>
+        <SummaryStats />
       </div>
 
       <div>

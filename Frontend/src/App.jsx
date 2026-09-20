@@ -538,7 +538,7 @@ export default function App() {
   useEffect(() => {
     fetchReviews();
 
-    const interval = setInterval(fetchReviews, 3000);
+    const interval = setInterval(fetchReviews, 30000);
     window.addEventListener("focus", fetchReviews);
     window.addEventListener("storage", fetchReviews);
 

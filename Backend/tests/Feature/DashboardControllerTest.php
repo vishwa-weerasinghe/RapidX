@@ -114,7 +114,7 @@ class DashboardControllerTest extends TestCase
 
         $this->assertEquals(2, $response->json('total_bookings'));
         $this->assertEquals(1, $response->json('total_reviews'));
-        $this->assertEquals(300.00, $response->json('total_revenue'));
+        $this->assertEquals(150.00, $response->json('total_revenue'));
         $this->assertEquals(4.0, $response->json('avg_rating'));
         $this->assertArrayHasKey('Pending', $response->json('bookings_by_status'));
         $this->assertArrayHasKey('Confirmed', $response->json('bookings_by_status'));
@@ -137,20 +137,21 @@ class DashboardControllerTest extends TestCase
         $this->assertEmpty($response->json('recent_reviews'));
     }
 
-    public function test_admin_stats_revenue_sums_all_booking_payments(): void
+    public function test_admin_stats_revenue_sums_only_confirmed_and_completed_booking_payments(): void
     {
         $customer = $this->createCustomer();
         $package  = $this->createPackage();
 
-        $this->createBooking($customer->Customer_ID, $package->id, ['Payment' => 200.00]);
-        $this->createBooking($customer->Customer_ID, $package->id, ['Payment' => 350.00]);
-        $this->createBooking($customer->Customer_ID, $package->id, ['Payment' => 100.00]);
+        $this->createBooking($customer->Customer_ID, $package->id, ['Status' => 'Confirmed', 'Payment' => 200.00]);
+        $this->createBooking($customer->Customer_ID, $package->id, ['Status' => 'Completed', 'Payment' => 350.00]);
+        $this->createBooking($customer->Customer_ID, $package->id, ['Status' => 'Pending', 'Payment' => 100.00]);
+        $this->createBooking($customer->Customer_ID, $package->id, ['Status' => 'Cancelled', 'Payment' => 150.00]);
 
         $response = $this->getJson('/api/admin/stats');
 
         $response->assertStatus(200);
-        $this->assertEquals(650.00, $response->json('total_revenue'));
-        $this->assertEquals(3, $response->json('total_bookings'));
+        $this->assertEquals(550.00, $response->json('total_revenue'));
+        $this->assertEquals(4, $response->json('total_bookings'));
     }
 
     public function test_admin_stats_avg_rating_is_rounded_to_one_decimal(): void

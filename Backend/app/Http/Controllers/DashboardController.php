@@ -18,8 +18,8 @@ class DashboardController extends Controller
         $totalBookings  = Booking::count();
         $totalReviews   = Review::count();
 
-        // ---- Revenue ----
-        $totalRevenue   = Booking::sum('Payment');
+        // ---- Revenue (only realized: Confirmed or Completed) ----
+        $totalRevenue   = Booking::whereIn('Status', ['Confirmed', 'Completed'])->sum('Payment');
 
         // ---- Average Rating ----
         $avgRating = Review::avg('Rate') ?? 0;
