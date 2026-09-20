@@ -74,4 +74,45 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'Logged out successfully'], 200);
     }
+
+    public function updateProfile(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user || !$user->Customer_ID) {
+            return response()->json(['message' => 'Customer profile not found.'], 404);
+        }
+
+        $validated = $request->validate([
+            'First_Name' => 'required|string|max:50',
+            'Last_Name' => 'required|string|max:50',
+            'Email' => 'required|email|unique:users,Email,' . $user->id,
+            'Phone_No' => 'required|string|max:20',
+            'NIC' => 'required|string|max:20',
+            'Country' => 'required|string|max:50',
+        ]);
+
+        $customer = Customer::findOrFail($user->Customer_ID);
+        $customer->update([
+            'First_Name' => $validated['First_Name'],
+            'Last_Name' => $validated['Last_Name'],
+            'Email' => $validated['Email'],
+            'Phone_No' => $validated['Phone_No'],
+            'NIC' => $validated['NIC'],
+            'Country' => $validated['Country'],
+        ]);
+
+        if ($user->Email !== $validated['Email']) {
+            $user->Email = $validated['Email'];
+        }
+
+        $user->User_Name = trim($validated['First_Name'] . ' ' . $validated['Last_Name']);
+        $user->save();
+
+        return response()->json([
+            'message' => 'Profile updated successfully.',
+            'customer' => $customer->fresh(),
+            'user' => $user->fresh(),
+        ]);
+    }
 }

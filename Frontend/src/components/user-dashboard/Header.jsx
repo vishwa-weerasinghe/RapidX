@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Bell, Menu, LogOut } from 'lucide-react'
+import { Bell, Menu, LogOut, ChevronDown, UserRound, FileText, ShieldCheck } from 'lucide-react'
 import api from '../../axios'
 import { useTheme } from '../../context/ThemeContext'
 import ThemeModeIcon from '../ThemeModeIcon'
@@ -13,8 +13,17 @@ export function Header({ user, toggleSidebar }) {
   const [unreadBookings, setUnreadBookings] = useState(0)
   const [bookingNotifications, setBookingNotifications] = useState([])
   const [showBookingNotifications, setShowBookingNotifications] = useState(false)
+  const [showAccountMenu, setShowAccountMenu] = useState(false)
+  const accountMenuRef = useRef(null)
 
-  const customerName = user?.User_Name || 'Customer'
+  const customerName = [user?.First_Name, user?.Last_Name].filter(Boolean).join(' ') || user?.User_Name || ''
+  const customerInitials = customerName
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((namePart) => namePart.charAt(0).toUpperCase())
+    .join('')
 
   const customerId = user?.Customer_ID
 
@@ -41,6 +50,17 @@ export function Header({ user, toggleSidebar }) {
   const interval = setInterval(fetchUnreadBookings, 5000);
   return () => clearInterval(interval);
 }, [customerId]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (accountMenuRef.current && !accountMenuRef.current.contains(event.target)) {
+        setShowAccountMenu(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   const handleBookingNotifications = async () => {
     const token = localStorage.getItem('token');
@@ -86,6 +106,11 @@ export function Header({ user, toggleSidebar }) {
       setLoading(false)
       navigate('/')
     }
+  }
+
+  const handleMenuAction = (path) => {
+    setShowAccountMenu(false)
+    navigate(path)
   }
 
   return (
@@ -160,16 +185,62 @@ export function Header({ user, toggleSidebar }) {
             </button>
           </div>
 
-          <button
-            onClick={handleLogout}
-            disabled={loading}
-            title="Logout"
-            aria-label="Logout"
-            className="btn-danger rounded-full px-2 sm:px-4"
-          >
-            <LogOut className="w-4 h-4" />
-            <span className="hidden sm:inline">{loading ? 'Logging out...' : 'Logout'}</span>
-          </button>
+          <div className="relative" ref={accountMenuRef}>
+            <button
+              type="button"
+              onClick={() => setShowAccountMenu((current) => !current)}
+              className="flex items-center gap-2 rounded-full border border-border-light bg-white px-2.5 py-2 text-sm font-semibold text-charcoal shadow-sm transition hover:bg-offwhite-100 dark:border-border-dark dark:bg-surface-2 dark:text-white dark:hover:bg-surface-3 sm:px-3"
+              aria-label="Account menu"
+            >
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-sacramento text-xs font-bold text-white dark:bg-sacramento-400">
+                {customerInitials}
+              </span>
+              <ChevronDown className="h-4 w-4" />
+            </button>
+
+            {showAccountMenu && (
+              <div className="absolute right-0 top-12 z-50 w-56 overflow-hidden rounded-2xl border border-border-light bg-white shadow-xl dark:border-border-dark dark:bg-bg-dark">
+                <button
+                  type="button"
+                  onClick={() => handleMenuAction('/user/profile/edit')}
+                  className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-charcoal transition hover:bg-offwhite-100 dark:text-white dark:hover:bg-surface-2"
+                >
+                  <UserRound className="h-4 w-4 text-sacramento dark:text-amber-400" />
+                  Edit Profile
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleMenuAction('/privacy-policy')}
+                  className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-charcoal transition hover:bg-offwhite-100 dark:text-white dark:hover:bg-surface-2"
+                >
+                  <ShieldCheck className="h-4 w-4 text-sacramento dark:text-amber-400" />
+                  Privacy Policy
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleMenuAction('/terms-and-conditions')}
+                  className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-charcoal transition hover:bg-offwhite-100 dark:text-white dark:hover:bg-surface-2"
+                >
+                  <FileText className="h-4 w-4 text-sacramento dark:text-amber-400" />
+                  Terms and Conditions
+                </button>
+
+                <div className="border-t border-border-light dark:border-border-dark">
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    disabled={loading}
+                    className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-semibold text-red-600 transition hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    {loading ? 'Logging out...' : 'Logout'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
