@@ -149,8 +149,6 @@ Route::middleware('auth:sanctum')->group(function () {
         );
     });
 
-    Route::put('/customer-profile', [AuthController::class, 'updateProfile']);
-
     Route::put('reviews/{review}', [ReviewController::class, 'update']);
 
     Route::patch('reviews/{review}', [ReviewController::class, 'update']);

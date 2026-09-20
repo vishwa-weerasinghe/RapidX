@@ -235,11 +235,6 @@ function RefundPolicyPage({ isDark }) {
 
 function FrequentlyPage({ content, isDark }) {
   const [openQuestion, setOpenQuestion] = useState(null);
-  const helpLinks = [
-    { label: "Privacy Policy", path: "/privacy-policy" },
-    { label: "Terms and Conditions", path: "/terms-and-conditions" },
-    { label: "Return & Refund Policy", path: "/return-refund-policy" },
-  ];
 
   return (
     <>
@@ -253,18 +248,6 @@ function FrequentlyPage({ content, isDark }) {
             <h1 className="text-center text-4xl font-extrabold tracking-tight text-white sm:text-6xl lg:text-7xl">
               Hello, what can we help you find?
             </h1>
-
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-              {helpLinks.map((item) => (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className="rounded-full border border-white/20 bg-white/8 px-4 py-2 text-sm font-bold text-white transition-all duration-300 hover:bg-white/15 hover:shadow-lg hover:shadow-emerald-900/20"
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </div>
           </div>
         </section>
 

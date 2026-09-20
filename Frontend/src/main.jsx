@@ -32,7 +32,6 @@ import PaymentSuccess from "./pages/public/PaymentSuccess.jsx";
 import PaymentCancel from "./pages/public/PaymentCancel.jsx";
 import AddToCart from "./pages/user/Addtocart.jsx";
 import Cart from "./pages/user/Cart.jsx";
-import ProfileEdit from "./pages/user/ProfileEdit.jsx";
 
 import Drivers from "./pages/admin/Drivers.jsx";
 import DriverForm from "./pages/admin/DriverForm.jsx";
@@ -91,7 +90,6 @@ createRoot(document.getElementById("root")).render(
             <Route path="/user/bookings" element={<MyBookings />} />
             <Route path="/user/bookings/:id/edit" element={<Cancellation />} />
             <Route path="/user/cart" element={<Cart />} />
-            <Route path="/user/profile/edit" element={<ProfileEdit />} />
             <Route
               path="/packages"
               element={<Navigate to="/user/packages" replace />}

@@ -96,20 +96,10 @@ export default function App() {
 
 
   const [isBlogMenuOpen, setIsBlogMenuOpen] = useState(false);
-  const [isHelpMenuOpen, setIsHelpMenuOpen] = useState(false);
   const [isMobileBlogOpen, setIsMobileBlogOpen] = useState(false);
-  const [isMobileHelpOpen, setIsMobileHelpOpen] = useState(false);
 
   const [isScrolled, setIsScrolled] = useState(false);
   const blogMenuRef = useRef(null);
-  const helpMenuRef = useRef(null);
-
-  const helpLinks = [
-    { label: "Frequently", path: "/help/frequently" },
-    { label: "Privacy Policy", path: "/privacy-policy" },
-    { label: "Terms and Conditions", path: "/terms-and-conditions" },
-    { label: "Return & Refund Policy", path: "/return-refund-policy" },
-  ];
 
   const blogLinks = [
     { label: "Minneriya National Park", path: "/blog#minneriya", description: "The Great Elephant Gathering" },
@@ -128,9 +118,6 @@ export default function App() {
     const handleClickOutside = (event) => {
       if (blogMenuRef.current && !blogMenuRef.current.contains(event.target)) {
         setIsBlogMenuOpen(false);
-      }
-      if (helpMenuRef.current && !helpMenuRef.current.contains(event.target)) {
-        setIsHelpMenuOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -306,30 +293,20 @@ export default function App() {
         "gallery",
         "contact",
       ];
-
-      let nearestSection = "home";
-      let nearestDistance = Number.POSITIVE_INFINITY;
-
       for (const sectionId of sections) {
         const el = document.getElementById(sectionId);
-        if (!el) continue;
-
-        const rect = el.getBoundingClientRect();
-        const distance = Math.abs(rect.top - headerHeight);
-
-        if (rect.bottom > headerHeight && rect.top <= headerHeight + 160) {
-          if (distance < nearestDistance) {
-            nearestDistance = distance;
-            nearestSection = sectionId;
+        if (el) {
+          const top = el.offsetTop - headerHeight;
+          const height = el.offsetHeight;
+          if (window.scrollY >= top && window.scrollY < top + height) {
+            setActiveSection(sectionId);
+            break;
           }
         }
       }
-
-      setActiveSection((prev) => (prev !== nearestSection ? nearestSection : prev));
     };
 
     window.addEventListener("scroll", handleScroll);
-    handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -387,13 +364,8 @@ export default function App() {
   };
 
   const scrollToSection = (id) => {
-    setActiveSection(id);
     setIsMobileMenuOpen(false);
     setIsMobileBlogOpen(false);
-    setIsMobileHelpOpen(false);
-    setIsHelpMenuOpen(false);
-    setIsBlogMenuOpen(false);
-
     const target = document.getElementById(id);
     if (target) {
       // Calculate accurate position regardless of parent positioning
@@ -644,25 +616,25 @@ export default function App() {
           <div
             className={`max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between transition-all duration-500 relative ${isScrolled
               ? "bg-[var(--page-bg)]/90 dark:bg-[var(--surface)]/90 backdrop-blur-xl rounded-full shadow-lg border border-[var(--border)]/40 py-2.5"
-              : "bg-[#0c2f1f]/90 backdrop-blur-lg py-5 border border-[#d6bb70]/60 shadow-[0_8px_22px_rgba(0,0,0,0.2)] rounded-full"
+              : "bg-[#0b2419]/88 dark:bg-[#06130d]/92 backdrop-blur-lg py-5 border-b border-[#d4a017]/35 shadow-[0_8px_24px_rgba(0,0,0,0.28)]"
               }`}
           >
             {/* Logo & Brand Name */}
             <div
-              className="cursor-pointer flex items-center gap-2 sm:gap-3 group"
+              className="cursor-pointer flex items-center gap-3 sm:gap-4 group"
               onClick={() => scrollToSection("home")}
             >
-              <div className="relative flex items-center justify-center transition-all duration-500 group-hover:scale-105 rounded-full">
+              <div className="relative flex items-center justify-center transition-all duration-500 group-hover:scale-105 group-hover:shadow-[0_8px_30px_-4px_rgba(46,125,50,0.3)] rounded-full">
                 <img
                   src={logoImg}
                   alt="Minneriya Wild Jeep Safari"
-                  className="h-11 w-11 sm:h-12 sm:w-12 md:h-14 md:w-14 object-cover rounded-full border border-white/15 shadow-sm"
+                  className="h-14 sm:h-16 md:h-20 w-auto object-contain rounded-full"
                 />
               </div>
               <span
-                className={`text-base sm:text-lg md:text-xl font-bold tracking-tight transition-all duration-500 ${isScrolled
+                className={`text-lg sm:text-xl md:text-2xl font-black tracking-tighter transition-all duration-500 ${isScrolled
                   ? "text-[#153827] dark:text-[#f5f0e8]"
-                  : "text-[#f8f4ee] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]"
+                  : "text-[#fffaf0] drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]"
                   }`}
               >
                 Wild Jeep Safari
@@ -685,10 +657,10 @@ export default function App() {
                     <button
                       onClick={() => scrollToSection(section)}
                       className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 ${activeSection === section
-                        ? "bg-[#2E7D32] text-white shadow shadow-green-700/25"
+                        ? "bg-sacramento text-white shadow shadow-sacramento/25"
                         : isScrolled
                           ? "text-[#153827] dark:text-[#f5f0e8] hover:text-[#0b2419] dark:hover:text-white hover:bg-[#2e7d32]/15 dark:hover:bg-white/10"
-                          : "text-[#f8f4ee] hover:text-white hover:bg-white/10"
+                          : "text-[#fffaf0] hover:text-white hover:bg-[#d4a017]/20 drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)]"
                         }`}
                     >
                       {section}
@@ -696,51 +668,16 @@ export default function App() {
                   </li>
                 ))}
 
-                <li className="relative" ref={helpMenuRef}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsHelpMenuOpen((prev) => !prev);
-                      setIsBlogMenuOpen(false);
-                    }}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 ${isHelpMenuOpen
-                      ? "bg-[#2E7D32] text-white shadow shadow-green-700/25"
-                      : isScrolled
-                        ? "text-[#153827] dark:text-[#f5f0e8] hover:text-[#0b2419] dark:hover:text-white hover:bg-[#2e7d32]/15 dark:hover:bg-white/10"
-                        : "text-[#f8f4ee] hover:text-white hover:bg-white/10"
-                      }`}
-                  >
-                    Help
-                    <span className={`text-[10px] transition-transform duration-200 ${isHelpMenuOpen ? "rotate-180" : ""}`}>
-                      ▾
-                    </span>
-                  </button>
-
-                  {isHelpMenuOpen && (
-                    <div className="absolute right-0 top-full z-50 mt-3 w-72 rounded-2xl border border-[#dfe8dc] bg-[#fffdf9] p-2.5 shadow-[0_20px_40px_rgba(20,52,38,0.15)] backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900 flex flex-col">
-                      {helpLinks.map((item) => (
-                        <Link
-                          key={item.path}
-                          to={item.path}
-                          onClick={() => setIsHelpMenuOpen(false)}
-                          className="rounded-xl px-3 py-2 text-left text-xs font-semibold text-slate-700 transition-all hover:bg-[#edf7ef] hover:text-[#1b5d3d] dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-white"
-                        >
-                          {item.label}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </li>
 
                 <li className="relative" ref={blogMenuRef}>
                   <button
                     type="button"
                     onClick={() => setIsBlogMenuOpen((prev) => !prev)}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 ${isBlogMenuOpen
-                      ? "bg-[#2E7D32] text-white shadow shadow-green-700/25"
+                      ? "bg-sacramento text-white shadow shadow-sacramento/25"
                       : isScrolled
                         ? "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-slate-800/50"
-                        : "text-[#f8f4ee] hover:text-white hover:bg-white/10"
+                        : "text-white/80 hover:text-white hover:bg-white/10"
                       }`}
                   >
                     Blog
@@ -801,36 +738,33 @@ export default function App() {
             </nav>
 
             {/* Auth & Theme Actions Panel */}
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="hidden sm:flex items-center gap-1.5">
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <div className="hidden sm:flex items-center gap-2">
                 {user ? (
                   <Link
                     to={dashboardLink}
-                    className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-2 border rounded-full transition-all duration-300 ${isScrolled
-                      ? "text-[#153827] border-[#153827]/20 bg-white/85 hover:bg-[#f3f7f4] dark:text-slate-200 dark:border-slate-700 dark:bg-slate-900/70 dark:hover:bg-slate-800"
-                      : "text-[#153827] border-[#153827]/30 bg-white/85 hover:bg-[#f3f7f4]"
+                    className={`flex items-center gap-1.5 text-xs font-bold px-4 py-2 border rounded-full hover:shadow transition-all duration-300 ${isScrolled
+                      ? "text-sacramento border-sacramento/25 hover:bg-sacramento/5 dark:text-white dark:border-neutral-800 dark:hover:bg-neutral-800"
+                      : "text-white border-white/20 hover:bg-white/10"
                       }`}
                   >
-                    <LayoutDashboard size={13} />
+                    <LayoutDashboard size={14} />
                     Dashboard
                   </Link>
                 ) : (
                   <>
                     <Link
                       to="/login"
-                      className={`inline-flex items-center justify-center text-[11px] font-bold px-3 py-2 border rounded-full transition-all duration-300 ${isScrolled
-                        ? "text-[#153827] border-[#153827]/20 bg-white/80 hover:bg-[#f0f7f2] dark:text-slate-200 dark:border-slate-700 dark:bg-slate-900/70 dark:hover:bg-slate-800"
-                        : "text-[#f8f4ee] border-[#f8f4ee]/40 bg-[#1f4d3b]/60 hover:bg-[#1f4d3b]/80"
+                      className={`text-xs font-bold px-4 py-2 border rounded-full hover:shadow transition-all duration-300 ${isScrolled
+                        ? "text-slate-700 dark:text-slate-350 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-850"
+                        : "text-white border-white/20 hover:bg-white/10"
                         }`}
                     >
                       Log in
                     </Link>
                     <Link
                       to="/register"
-                      className={`inline-flex items-center justify-center text-[11px] font-bold px-3 py-2 rounded-full shadow transition-all duration-300 ${isScrolled
-                        ? "bg-[#2E7D32] text-white hover:bg-[#236a2a]"
-                        : "bg-[#2E7D32] text-white hover:bg-[#236a2a]"
-                        }`}
+                      className="text-xs font-bold px-4 py-2 bg-sacramento hover:bg-sacramento-600 text-white rounded-full shadow"
                     >
                       Register
                     </Link>
@@ -847,7 +781,6 @@ export default function App() {
                 onClick={() => {
                   setIsMobileMenuOpen((prev) => !prev);
                   setIsMobileBlogOpen(false);
-                  setIsMobileHelpOpen(false);
                 }}
                 className={`md:hidden flex items-center justify-center p-2.5 rounded-full transition-all duration-300 active:scale-95 ${isMobileMenuOpen
                   ? "bg-sacramento text-white shadow-md"
@@ -886,45 +819,10 @@ export default function App() {
                     </button>
                   ))}
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsMobileHelpOpen((prev) => !prev);
-                      setIsMobileBlogOpen(false);
-                    }}
-                    className={`py-2.5 px-3 rounded-xl text-xs font-bold capitalize tracking-wide transition-all duration-200 text-left flex items-center justify-between ${isMobileHelpOpen
-                      ? "bg-sacramento text-white shadow-md shadow-sacramento/30"
-                      : "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-neutral-800"
-                      }`}
-                  >
-                    <span>Help</span>
-                    <span className={`text-[10px] transition-transform duration-200 ${isMobileHelpOpen ? "rotate-180" : ""}`}>
-                      ▾
-                    </span>
-                  </button>
-
-                  {isMobileHelpOpen && (
-                    <div className="rounded-2xl border border-[#dfe8dc] bg-[#fffdf9] p-2.5 shadow-lg backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900 flex flex-col gap-1">
-                      {helpLinks.map((item) => (
-                        <Link
-                          key={item.path}
-                          to={item.path}
-                          onClick={() => setIsMobileMenuOpen(false)}
-                          className="rounded-xl px-3 py-2 text-left text-xs font-semibold text-slate-700 transition-all hover:bg-[#edf7ef] hover:text-[#1b5d3d] dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-white"
-                        >
-                          {item.label}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-
                   {/* Blog Button in mobile nav grid just like desktop nav bar */}
                   <button
                     type="button"
-                    onClick={() => {
-                      setIsMobileBlogOpen((prev) => !prev);
-                      setIsMobileHelpOpen(false);
-                    }}
+                    onClick={() => setIsMobileBlogOpen((prev) => !prev)}
                     className={`py-2.5 px-3 rounded-xl text-xs font-bold capitalize tracking-wide transition-all duration-200 text-left flex items-center justify-between ${isMobileBlogOpen
                       ? "bg-sacramento text-white shadow-md shadow-sacramento/30"
                       : "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-neutral-800"
