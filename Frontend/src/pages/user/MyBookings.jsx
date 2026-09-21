@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   CalendarDays,
   MapPin,
+  Navigation,
   Users,
   Baby,
   CreditCard,
@@ -62,6 +63,21 @@ export default function MyBookings() {
     } finally {
       setCancellingId(null);
     }
+  };
+
+  // Booking statuses that can still be edited by the customer
+  const isEditableStatus = (status) =>
+    ["pending", "incart"].includes(
+      String(status || "").toLowerCase().replace(/\s+/g, "")
+    );
+
+  // Only open the edit form for bookings that can still be modified
+  const handleClickEdit = (booking) => {
+    if (!isEditableStatus(booking.Status)) {
+      alert("This booking cannot be modified.");
+      return;
+    }
+    navigate(`/user/bookings/${booking.Booking_ID}/edit`);
   };
 
   // Search / filter
@@ -172,7 +188,7 @@ export default function MyBookings() {
                     {/* Divider */}
                     <div className="my-5 border-t border-border-light dark:border-border-dark" />
 
-                    {/* Date & Pickup */}
+                    {/* Date, Area & Pickup */}
                     <div className="grid grid-cols-2 gap-3">
 
                       {/* Date */}
@@ -193,8 +209,26 @@ export default function MyBookings() {
                         </p>
                       </div>
 
-                      {/* Pickup */}
+                      {/* Area */}
                       <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-800/70">
+                        <div className="flex items-center gap-2">
+                          <Navigation
+                            size={16}
+                            className="text-sacramento"
+                          />
+
+                          <p className="text-[11px] font-semibold uppercase tracking-wide text-muted">
+                            Area
+                          </p>
+                        </div>
+
+                        <p className="mt-2 text-sm font-bold text-charcoal dark:text-white">
+                          {booking.Area || "—"}
+                        </p>
+                      </div>
+
+                      {/* Pickup */}
+                      <div className="col-span-2 rounded-xl bg-slate-50 p-3 dark:bg-slate-800/70">
                         <div className="flex items-center gap-2">
                           <MapPin
                             size={16}
@@ -280,13 +314,8 @@ export default function MyBookings() {
                       {/* Edit */}
                       <button
                         type="button"
-                        onClick={() =>
-                          navigate(
-                            `/user/bookings/${booking.Booking_ID}/edit`
-                          )
-                        }
-                        disabled={isCancelled}
-                        className="flex items-center justify-center gap-2 rounded-xl border border-sacramento px-4 py-2.5 text-sm font-bold text-sacramento transition-all duration-200 hover:bg-sacramento hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                        onClick={() => handleClickEdit(booking)}
+                        className="flex items-center justify-center gap-2 rounded-xl border border-sacramento px-4 py-2.5 text-sm font-bold text-sacramento transition-all duration-200 hover:bg-sacramento hover:text-white"
                       >
                         <Pencil size={16} />
                         Edit
@@ -340,6 +369,10 @@ export default function MyBookings() {
                   </th>
 
                   <th className="p-3 text-left">
+                    Pickup Area
+                  </th>
+
+                  <th className="p-3 text-left">
                     Pickup
                   </th>
 
@@ -389,6 +422,10 @@ export default function MyBookings() {
                       </td>
 
                       <td className="p-3 text-charcoal/80 dark:text-white/80">
+                        {booking.Area || "—"}
+                      </td>
+
+                      <td className="p-3 text-charcoal/80 dark:text-white/80">
                         {booking.Pickup_Location}
                       </td>
 
@@ -421,11 +458,7 @@ export default function MyBookings() {
                           isCancelling={
                             cancellingId === booking.Booking_ID
                           }
-                          onEdit={() =>
-                            navigate(
-                              `/user/bookings/${booking.Booking_ID}/edit`
-                            )
-                          }
+                          onEdit={() => handleClickEdit(booking)}
                           onCancel={() =>
                             handleCancelBooking(
                               booking.Booking_ID
@@ -466,8 +499,7 @@ function BookingActions({
         type="button"
         title="Reschedule this booking"
         onClick={onEdit}
-        disabled={isCancelled}
-        className="flex items-center gap-1 rounded-lg bg-sacramento px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-sacramento/90 disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex items-center gap-1 rounded-lg bg-sacramento px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-sacramento/90"
       >
         <Pencil size={14} />
         Edit

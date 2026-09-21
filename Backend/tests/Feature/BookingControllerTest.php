@@ -326,6 +326,114 @@ class BookingControllerTest extends TestCase
         ]);
     }
 
+    public function test_customer_can_update_pending_booking(): void
+    {
+        $customer = $this->createCustomer();
+        $booking = $this->createBooking($customer->Customer_ID);
+        $user = User::create([
+            'User_Name' => 'Test Customer',
+            'Email' => fake()->unique()->safeEmail(),
+            'Password' => bcrypt('Password123'),
+            'role' => 'user',
+            'Customer_ID' => $customer->Customer_ID,
+        ]);
+
+        $response = $this->actingAs($user, 'sanctum')->putJson('/api/user/bookings/' . $booking->Booking_ID, [
+            'Pickup_Location' => 'Matara',
+            'No_of_adults' => 3,
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('message', 'Booking updated successfully')
+            ->assertJsonPath('booking.Pickup_Location', 'Matara');
+
+        $this->assertDatabaseHas('bookings', [
+            'Booking_ID' => $booking->Booking_ID,
+            'Pickup_Location' => 'Matara',
+            'No_of_adults' => 3,
+        ]);
+    }
+
+    public function test_customer_cannot_change_booking_status(): void
+    {
+        $customer = $this->createCustomer();
+        $booking = $this->createBooking($customer->Customer_ID);
+        $user = User::create([
+            'User_Name' => 'Test Customer',
+            'Email' => fake()->unique()->safeEmail(),
+            'Password' => bcrypt('Password123'),
+            'role' => 'user',
+            'Customer_ID' => $customer->Customer_ID,
+        ]);
+
+        $response = $this->actingAs($user, 'sanctum')->putJson('/api/user/bookings/' . $booking->Booking_ID, [
+            'Pickup_Location' => 'Matara',
+            'Status' => 'Confirmed',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('booking.Pickup_Location', 'Matara');
+
+        // The customer's Status value must be ignored – status stays Pending.
+        $this->assertDatabaseHas('bookings', [
+            'Booking_ID' => $booking->Booking_ID,
+            'Pickup_Location' => 'Matara',
+            'Status' => 'Pending',
+        ]);
+    }
+
+    public function test_customer_cannot_update_confirmed_booking(): void
+    {
+        $customer = $this->createCustomer();
+        $booking = $this->createBooking($customer->Customer_ID);
+        $booking->update(['Status' => 'Confirmed']);
+        $user = User::create([
+            'User_Name' => 'Test Customer',
+            'Email' => fake()->unique()->safeEmail(),
+            'Password' => bcrypt('Password123'),
+            'role' => 'user',
+            'Customer_ID' => $customer->Customer_ID,
+        ]);
+
+        $response = $this->actingAs($user, 'sanctum')->putJson('/api/user/bookings/' . $booking->Booking_ID, [
+            'Pickup_Location' => 'Matara',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJson(['message' => 'This booking cannot be modified after it has been confirmed.']);
+
+        $this->assertDatabaseHas('bookings', [
+            'Booking_ID' => $booking->Booking_ID,
+            'Pickup_Location' => 'Colombo',
+        ]);
+    }
+
+    public function test_customer_cannot_update_another_customers_booking(): void
+    {
+        $owner = $this->createCustomer();
+        $intruder = $this->createCustomer();
+        $booking = $this->createBooking($owner->Customer_ID);
+        $intruderUser = User::create([
+            'User_Name' => 'Intruder Customer',
+            'Email' => fake()->unique()->safeEmail(),
+            'Password' => bcrypt('Password123'),
+            'role' => 'user',
+            'Customer_ID' => $intruder->Customer_ID,
+        ]);
+
+        $response = $this->actingAs($intruderUser, 'sanctum')->putJson('/api/user/bookings/' . $booking->Booking_ID, [
+            'Pickup_Location' => 'Matara',
+        ]);
+
+        $response->assertStatus(403)
+            ->assertJson(['message' => 'Unauthorized: You can only edit your own bookings.']);
+
+        $this->assertDatabaseHas('bookings', [
+            'Booking_ID' => $booking->Booking_ID,
+            'Pickup_Location' => 'Colombo',
+        ]);
+    }
+
     public function test_destroy_deletes_the_booking_from_the_database(): void
     {
         $admin = User::create([
