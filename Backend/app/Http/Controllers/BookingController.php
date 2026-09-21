@@ -142,7 +142,29 @@ class BookingController extends Controller
 
         $booking = Booking::findOrFail($id);
 
-        $booking->update($request->only([
+        $user = request()->user('sanctum') ?? auth('sanctum')->user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+
+        // Ownership: a customer may only edit their own booking (admins retain full control).
+        if (!$this->isAdmin($user) && (int) $user->Customer_ID !== (int) $booking->Customer_ID) {
+            return response()->json(['message' => 'Unauthorized: You can only edit your own bookings.'], 403);
+        }
+
+        // Status gate: customers may only modify bookings that are still editable
+        // (Pending / In Cart). Confirmed, cancelled, completed or failed bookings
+        // cannot be modified. Admins are exempt so they can manage any booking.
+        if (!$this->isAdmin($user) && !in_array($booking->Status, ['Pending', 'In Cart', 'InCart'])) {
+            return response()->json([
+                'message' => 'This booking cannot be modified.',
+            ], 422);
+        }
+
+        // Customers may only edit schedule/guest details; only admins can change
+        // the booking status directly (prevents a customer self-confirming a booking).
+        $allowedFields = [
             'Booking_Date',
             'Pickup_Time',
             'Area',
@@ -150,11 +172,15 @@ class BookingController extends Controller
             'No_of_adults',
             'No_of_child',
             'Payment',
-            'Status',
             'Package_ID',
-            'Area',
-            'Vehicle_ID'
-        ]));
+            'Vehicle_ID',
+        ];
+
+        if ($this->isAdmin($user)) {
+            $allowedFields[] = 'Status';
+        }
+
+        $booking->update($request->only($allowedFields));
 
         // Keep the multi-vehicle pivot in sync whenever the single Vehicle_ID
         // column is changed through this generic endpoint.

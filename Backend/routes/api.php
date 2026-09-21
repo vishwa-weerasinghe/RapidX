@@ -102,6 +102,12 @@ Route::get('/user-bookings/{customerId}', [BookingController::class, 'userBookin
 Route::patch('/user/bookings/{id}/cancel', [BookingController::class, 'cancel'])
     ->middleware('auth:sanctum');
 
+Route::get('/user/bookings/{id}', [BookingController::class, 'show'])
+    ->middleware('auth:sanctum');
+
+Route::put('/user/bookings/{id}', [BookingController::class, 'update'])
+    ->middleware('auth:sanctum');
+
 Route::get('/user-upcoming-booking/{customerId}', [BookingController::class, 'upcomingBooking']);
 
 // Admin Dashboard Stats

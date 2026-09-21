@@ -34,6 +34,10 @@ export default function Booking() {
     const [loadingPackages, setLoadingPackages] = useState(true);
     const [selectedPackageId, setSelectedPackageId] = useState(id || "");
     const [pkg, setPkg] = useState(null);
+    // When true, the booking form was opened from a specific package card
+    // ("Book Now"), so the package dropdown must show only that package and
+    // not allow switching to another one.
+    const [isPackageLocked, setIsPackageLocked] = useState(false);
 
     const [form, setForm] = useState({
         Booking_Date: "",
@@ -111,14 +115,28 @@ export default function Booking() {
                 });
             }
 
+            // Lock the package dropdown whenever the booking form was opened
+            // with an explicit package (e.g. "Book Now" from a package card,
+            // a package URL, or a specific park/blog page). Skip locking in
+            // edit mode so admins can still change the package when editing.
+            const explicitPackageRequested = Boolean(
+                targetId ||
+                statePkgName ||
+                queryPkgName ||
+                stateBlogId ||
+                stateSectionId
+            );
+
             if (foundPkg) {
                 const resolvedId = foundPkg.Package_ID || foundPkg.id;
                 setSelectedPackageId(resolvedId);
                 setPkg(foundPkg);
+                setIsPackageLocked(!isEditMode && explicitPackageRequested);
             } else {
                 // Do not auto-select any package when none was explicitly requested
                 setSelectedPackageId("");
                 setPkg(null);
+                setIsPackageLocked(false);
             }
 
             if (location.state?.pickupTime) {
@@ -372,40 +390,62 @@ export default function Booking() {
 
                                 <div className="flex flex-col gap-1.5">
                                     <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
-                                        Select Safari Tour Package <span className="text-red-500">*</span>
+                                        {isPackageLocked && pkg ? (
+                                            <>
+                                                Selected Safari Tour Package
+                                            </>
+                                        ) : (
+                                            <>
+                                                Select Safari Tour Package <span className="text-red-500">*</span>
+                                            </>
+                                        )}
                                     </label>
                                     <div className="relative">
                                         <select
                                             value={selectedPackageId}
                                             onChange={handlePackageChange}
-                                            className={`w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs sm:text-sm font-bold py-3 pl-3.5 sm:pl-4 pr-10 rounded-xl border transition-all appearance-none cursor-pointer truncate min-h-[44px] ${!selectedPackageId
+                                            disabled={isPackageLocked}
+                                            className={`w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs sm:text-sm font-bold py-3 pl-3.5 sm:pl-4 rounded-xl border transition-all appearance-none truncate min-h-[44px] ${!selectedPackageId
                                                 ? "border-amber-400/80 dark:border-amber-500/60 ring-2 ring-amber-400/20"
                                                 : "border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton"
-                                                }`}
+                                                } ${isPackageLocked ? "pr-3.5 cursor-not-allowed opacity-100" : "pr-10 cursor-pointer"}`}
                                             required
                                         >
-                                            <option value="" disabled className="text-slate-400 font-normal">
-                                                {loadingPackages ? "Loading packages..." : "-- Select a tour package --"}
-                                            </option>
-                                            {Array.isArray(packagesList) && packagesList.map((p) => (
+                                            {isPackageLocked && pkg ? (
                                                 <option
-                                                    key={p.Package_ID || p.id}
-                                                    value={p.Package_ID || p.id}
+                                                    value={selectedPackageId}
                                                     className="py-2 text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-900"
                                                 >
-                                                    {p.Package_Name} (1 Adult: ${p.price_one_adult} | 2+ Adults: ${p.price_more_adult} | Child: ${p.price_child})
+                                                    {pkg.Package_Name} (1 Adult: ${pkg.price_one_adult} | 2+ Adults: ${pkg.price_more_adult} | Child: ${pkg.price_child})
                                                 </option>
-                                            ))}
-                                        </select>
-                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400">
-                                            {loadingPackages ? (
-                                                <Loader2 size={16} className="animate-spin text-castleton dark:text-emerald-400" />
                                             ) : (
-                                                <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20">
-                                                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-                                                </svg>
+                                                <>
+                                                    <option value="" disabled className="text-slate-400 font-normal">
+                                                        {loadingPackages ? "Loading packages..." : "-- Select a tour package --"}
+                                                    </option>
+                                                    {Array.isArray(packagesList) && packagesList.map((p) => (
+                                                        <option
+                                                            key={p.Package_ID || p.id}
+                                                            value={p.Package_ID || p.id}
+                                                            className="py-2 text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-900"
+                                                        >
+                                                            {p.Package_Name} (1 Adult: ${p.price_one_adult} | 2+ Adults: ${p.price_more_adult} | Child: ${p.price_child})
+                                                        </option>
+                                                    ))}
+                                                </>
                                             )}
-                                        </div>
+                                        </select>
+                                        {!isPackageLocked && (
+                                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                                                {loadingPackages ? (
+                                                    <Loader2 size={16} className="animate-spin text-castleton dark:text-emerald-400" />
+                                                ) : (
+                                                    <svg className="h-4 w-4 fill-current text-slate-400" viewBox="0 0 20 20">
+                                                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                                                    </svg>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
