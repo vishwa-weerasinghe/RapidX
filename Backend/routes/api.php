@@ -70,6 +70,9 @@ Route::get('appointments/annual-report', [AppointmentController::class, 'annualR
 
 Route::get('reviews', [ReviewController::class, 'index']);
 
+// Rating analytics (registered before reviews/{review} so "analytics" is not captured as an ID)
+Route::get('reviews/analytics', [ReviewController::class, 'ratingAnalytics']);
+
 Route::get('/locations/{locationId}/reviews', [ReviewController::class, 'tripadvisorReviews']);
 Route::get('/tripadvisor-reviews', [ReviewController::class, 'tripadvisorReviews']);
 

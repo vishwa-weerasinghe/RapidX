@@ -95,7 +95,7 @@ export default function SummaryStats() {
           className={`absolute inset-0 ${
             isDark
               ? "bg-bg-dark/75"
-              : "bg-offwhite/75"
+              : "bg-offwhite/55"
           }`}
         />
       </div>
