@@ -44,6 +44,7 @@ import AdminReviews from "./pages/admin/Reviews.jsx";
 import PackageForm from "./pages/admin/PackageForm.jsx";
 import AdminVehicles from "./pages/admin/VehicleList.jsx";
 import VehicleFormPage from "./pages/admin/VehicleForm.jsx";
+import CustomerManagement from "./pages/admin/CustomerManagement.jsx";
 
 import { ThemeProvider } from "./context/ThemeContext.jsx";
 
@@ -107,6 +108,7 @@ createRoot(document.getElementById("root")).render(
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Navigate to="dashboard" />} />
             <Route path="dashboard" element={<AdminDashboard user={user} />} />
+            <Route path="customers" element={<CustomerManagement />} />
             <Route path="packages" element={<Packages />} />
             <Route path="drivers" element={<Drivers />} />
             <Route path="bookings" element={<Bookings />} />
@@ -149,25 +151,10 @@ createRoot(document.getElementById("root")).render(
             />
           </Route>
 
-          <Route path="/admin/Vehicles" element={<AdminVehicles />} />
-          <Route path="/admin/vehicle" element={<AdminVehicles />} />
-          <Route path="/admin/Vehicle" element={<AdminVehicles />} />
-          <Route
-            path="/admin/addVehicles"
-            element={<VehicleFormPage user={user} />}
-          />
-          <Route
-            path="/admin/addvehicles"
-            element={<VehicleFormPage user={user} />}
-          />
-          <Route
-            path="/admin/addVehicle"
-            element={<VehicleFormPage user={user} />}
-          />
-          <Route
-            path="/admin/addvehicle"
-            element={<VehicleFormPage user={user} />}
-          />
+          
+          
+         
+          
 
           {/* fallback */}
           <Route path="*" element={<Navigate to="/login" />} />
