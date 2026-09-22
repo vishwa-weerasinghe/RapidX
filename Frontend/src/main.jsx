@@ -11,6 +11,7 @@ import ForgotPassword from "./pages/public/ForgotPassword.jsx";
 import ResetPassword from "./pages/public/ResetPassword.jsx";
 import Dashboard from "./pages/dashboard.jsx";
 import Review from "./pages/user/Review.jsx";
+import GuestReviewPage from "./pages/public/Review.jsx";
 
 import AdminLayout from "./layouts/AdminLayout.jsx";
 import CustomerLayout from "./layouts/CustomerLayout.jsx";
@@ -75,6 +76,7 @@ createRoot(document.getElementById("root")).render(
           <Route path="/privacy-policy" element={<PolicyPage />} />
           <Route path="/terms-and-conditions" element={<PolicyPage />} />
           <Route path="/return-refund-policy" element={<PolicyPage />} />
+                <Route path="/write-review" element={<GuestReviewPage layout="standalone" />} />
           <Route path="/payment/success" element={<PaymentSuccess />} />
           <Route path="/payment/cancel" element={<PaymentCancel />} />
           <Route path="/addtocart/:id" element={<AddToCart />} />

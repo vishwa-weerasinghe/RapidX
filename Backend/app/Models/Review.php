@@ -14,6 +14,11 @@ class Review extends Model
         'Rate',
         'Description',
         'Customer_ID',
+        'Photos',
+    ];
+
+    protected $casts = [
+        'Photos' => 'array',
     ];
 
     public function customer()

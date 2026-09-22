@@ -14,7 +14,6 @@ import {
 import ThemeToggle from "./components/ThemeToggle";
 import { useTheme } from "./context/ThemeContext";
 import api from "./axios";
-import PublicReviewSection from "./pages/public/Review.jsx";
 import homepageImg from "./assets/homepage.png";
 import logoImg from "./assets/logo.jpg";
 import awordImg from "./assets/TA-Aword.jpg";
@@ -28,6 +27,171 @@ import {
   ReviewCardSkeleton,
 } from "./components/Skeletons";
 import { getStaticBlogPackageSection } from "./constants/staticBlogPackages";
+
+// Presentational review card used inside the auto-sliding carousel
+function ReviewCardContent({ rev }) {
+  return (
+    <div className="review-card h-full flex flex-col p-6 rounded-2xl shadow-md border border-neutral-100 bg-white">
+      <div className="flex justify-between items-start mb-4">
+        <div className="flex gap-3 items-center">
+          <div className="w-10 h-10 bg-gradient-to-br from-sacramento to-castleton text-white font-bold text-xs rounded-full flex items-center justify-center">
+            {rev.initials}
+          </div>
+          <div>
+            <h4 className="text-sm font-bold leading-tight">{rev.name}</h4>
+            <span className="text-amber-400 text-xs">
+              {"★".repeat(rev.rate || 5)}
+              {"☆".repeat(5 - (rev.rate || 5))}
+            </span>
+          </div>
+        </div>
+        <span className="text-neutral-400 text-xs">{rev.date}</span>
+      </div>
+      <h3 className="text-base font-bold mb-2 line-clamp-1">
+        "{rev.title}"
+      </h3>
+      <p className="text-neutral-400 text-xs sm:text-sm leading-relaxed mb-4 line-clamp-5">
+        {rev.text}
+      </p>
+      <span
+        className={`mt-auto self-start font-bold text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider ${rev.isGuest
+          ? "bg-amber-100 text-amber-800"
+          : rev.source === "TripAdvisor"
+            ? "bg-blue-50 text-blue-700"
+            : "bg-castleton-50 text-castleton"
+          }`}
+      >
+        {rev.source || (rev.isGuest ? "Guest" : "Verified")}
+      </span>
+    </div>
+  );
+}
+
+// Auto-sliding carousel that cycles through reviews automatically
+function ReviewCarousel({
+  reviews,
+  loading = false,
+  skeletonCount = 3,
+  emptyMessage = "No reviews yet.",
+  intervalMs = 4000,
+  fixedPerView = null,
+}) {
+  const [perViewState, setPerViewState] = useState(3);
+  const [index, setIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const perView = fixedPerView ?? perViewState;
+
+  // Responsive cards per view: 1 mobile, 2 tablet, 3 desktop
+  useEffect(() => {
+    if (fixedPerView != null) return undefined;
+    const compute = () => {
+      const w = window.innerWidth;
+      setPerViewState(w < 640 ? 1 : w < 1024 ? 2 : 3);
+    };
+    compute();
+    window.addEventListener("resize", compute);
+    return () => window.removeEventListener("resize", compute);
+  }, [fixedPerView]);
+
+  const maxIndex = Math.max(0, reviews.length - perView);
+
+  useEffect(() => {
+    setIndex((i) => Math.min(i, maxIndex));
+  }, [maxIndex]);
+
+  // Auto-slide (pauses on hover)
+  useEffect(() => {
+    if (paused || loading || reviews.length <= perView) return undefined;
+    const timer = setInterval(() => {
+      setIndex((i) => (i >= maxIndex ? 0 : i + 1));
+    }, intervalMs);
+    return () => clearInterval(timer);
+  }, [paused, loading, reviews.length, perView, maxIndex, intervalMs]);
+
+  if (loading && reviews.length === 0) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {Array.from({ length: skeletonCount }).map((_, i) => (
+          <ReviewCardSkeleton key={i} />
+        ))}
+      </div>
+    );
+  }
+
+  if (reviews.length === 0) {
+    return (
+      <div className="py-8 text-center text-gray-500 text-sm">
+        {emptyMessage}
+      </div>
+    );
+  }
+
+  const goPrev = () => setIndex((i) => (i <= 0 ? maxIndex : i - 1));
+  const goNext = () => setIndex((i) => (i >= maxIndex ? 0 : i + 1));
+
+  return (
+    <div
+      className="relative"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+    >
+      <button
+        type="button"
+        onClick={goPrev}
+        aria-label="Previous reviews"
+        className="absolute left-0 top-1/2 -translate-y-1/2 -ml-3 z-10 w-9 h-9 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center text-gray-500 hover:text-gray-900 hover:shadow-xl transition-all duration-200"
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+      <button
+        type="button"
+        onClick={goNext}
+        aria-label="Next reviews"
+        className="absolute right-0 top-1/2 -translate-y-1/2 -mr-3 z-10 w-9 h-9 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center text-gray-500 hover:text-gray-900 hover:shadow-xl transition-all duration-200"
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+
+      <div className="overflow-hidden py-1">
+        <div
+          className="flex items-stretch transition-transform duration-700 ease-in-out"
+          style={{ transform: `translateX(-${index * (100 / perView)}%)` }}
+        >
+          {reviews.map((rev, i) => (
+            <div
+              key={`${rev.source || "review"}-${i}`}
+              className="shrink-0 px-2.5"
+              style={{ width: `${100 / perView}%` }}
+            >
+              <ReviewCardContent rev={rev} />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {maxIndex > 0 && (
+        <div className="flex justify-center gap-2 mt-6">
+          {Array.from({ length: maxIndex + 1 }).map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setIndex(i)}
+              aria-label={`Go to slide ${i + 1}`}
+              className={`h-2 rounded-full transition-all duration-300 ${i === index
+                ? "w-6 bg-sacramento"
+                : "w-2 bg-gray-300 hover:bg-gray-400"
+                }`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function App() {
   // --- CONSUME SYSTEM THEME ---
@@ -426,9 +590,8 @@ export default function App() {
   const [tripadvisorReviews, setTripadvisorReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
   const [tripadvisorLoading, setTripadvisorLoading] = useState(true);
-  const [showAllTripadvisorReviews, setShowAllTripadvisorReviews] =
-    useState(false);
-  const [showAllReviews, setShowAllReviews] = useState(false);
+  const [guestVisibleCount, setGuestVisibleCount] = useState(6);
+  const [guestMenuOpen, setGuestMenuOpen] = useState(false);
 
   const tripadvisorUrl =
     "https://www.tripadvisor.com/Attraction_Review-g304133-d15640558-Reviews-Minneriya_Wild_Jeep_Safari-Dambulla_Central_Province.html";
@@ -462,19 +625,46 @@ export default function App() {
     }
   };
 
+  const getStoredTripadvisorCache = () => {
+    try {
+      const cached = JSON.parse(
+        localStorage.getItem("tripadvisorCache") || "[]",
+      );
+      return Array.isArray(cached) ? cached : [];
+    } catch (err) {
+      return [];
+    }
+  };
+
   const fetchReviews = () => {
     const storedGuestReviews = getStoredGuestReviews();
 
-    // Fetch TripAdvisor location reviews from API endpoint (Minneriya Location ID: 15640558)
+    // Fetch TripAdvisor reviews live from the backend (scrapes TripAdvisor online,
+    // cached server-side). Falls back to the last successfully fetched set.
     const tripadvisorLocationId = "15640558";
     api
       .get(`/locations/${tripadvisorLocationId}/reviews`)
       .then((res) => {
         if (res.data && Array.isArray(res.data) && res.data.length > 0) {
           setTripadvisorReviews(res.data);
+          try {
+            localStorage.setItem(
+              "tripadvisorCache",
+              JSON.stringify(res.data),
+            );
+          } catch (cacheErr) {
+            // ignore storage failures
+          }
+        } else {
+          const cached = getStoredTripadvisorCache();
+          if (cached.length > 0) setTripadvisorReviews(cached);
         }
       })
-      .catch((err) => console.error("Error loading TripAdvisor reviews:", err))
+      .catch((err) => {
+        console.error("Error loading TripAdvisor reviews:", err);
+        const cached = getStoredTripadvisorCache();
+        if (cached.length > 0) setTripadvisorReviews(cached);
+      })
       .finally(() => setTripadvisorLoading(false));
 
     api
@@ -547,68 +737,20 @@ export default function App() {
   };
 
   useEffect(() => {
+    // Fetch reviews once on mount. (No polling/focus listeners — avoids
+    // repeatedly hammering the reviews and TripAdvisor-scrape endpoints.)
     fetchReviews();
-
-    const interval = setInterval(fetchReviews, 30000);
-    window.addEventListener("focus", fetchReviews);
-    window.addEventListener("storage", fetchReviews);
-
-    return () => {
-      clearInterval(interval);
-      window.removeEventListener("focus", fetchReviews);
-      window.removeEventListener("storage", fetchReviews);
-    };
   }, []);
 
-  const tripadvisorVisibleReviews = showAllTripadvisorReviews
-    ? tripadvisorReviews
-    : tripadvisorReviews.slice(0, 6);
   const systemReviews = reviews
     .filter((review) => !isTripAdvisorReview(review))
     .sort((a, b) => (b.rate || 0) - (a.rate || 0));
-  const systemVisibleReviews = showAllReviews
-    ? systemReviews
-    : systemReviews.slice(0, 6);
-
-  const renderReviewCard = (rev, index) => (
-    <div
-      key={`${rev.source || "review"}-${index}`}
-      className={`review-card p-6 rounded-2xl shadow-md border hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ${theme === "dark"
-        ? "bg-neutral-900 border-neutral-800"
-        : "bg-white border-neutral-100"
-        }`}
-    >
-      <div className="flex justify-between items-start mb-4">
-        <div className="flex gap-3 items-center">
-          <div className="w-10 h-10 bg-gradient-to-br from-sacramento to-castleton text-white font-bold text-xs rounded-full flex items-center justify-center">
-            {rev.initials}
-          </div>
-          <div>
-            <h4 className="text-sm font-bold leading-tight">{rev.name}</h4>
-            <span className="text-amber-400 text-xs">
-              {"★".repeat(rev.rate || 5)}
-              {"☆".repeat(5 - (rev.rate || 5))}
-            </span>
-          </div>
-        </div>
-        <span className="text-neutral-400 text-xs">{rev.date}</span>
-      </div>
-      <h3 className="text-base font-bold mb-2 line-clamp-1">"{rev.title}"</h3>
-      <p className="text-neutral-400 text-xs sm:text-sm leading-relaxed mb-4 line-clamp-5">
-        {rev.text}
-      </p>
-      <span
-        className={`font-bold text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider ${rev.isGuest
-          ? "bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-400"
-          : rev.source === "TripAdvisor"
-            ? "bg-blue-50 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300"
-            : "bg-castleton-50 dark:bg-castleton-900/80 text-castleton dark:text-castleton-300"
-          }`}
-      >
-        {rev.source || (rev.isGuest ? "Guest" : "Verified")}
-      </span>
-    </div>
-  );
+  const systemAverageRating =
+    systemReviews.length > 0
+      ? systemReviews.reduce((sum, rev) => sum + (Number(rev.rate) || 0), 0) /
+        systemReviews.length
+      : 0;
+  const systemFullStars = Math.round(systemAverageRating);
 
   return (
     <>
@@ -1679,32 +1821,16 @@ export default function App() {
                   >
                     Explore in TripAdvisor
                   </a>
-                  {tripadvisorReviews.length > 6 && (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setShowAllTripadvisorReviews((prev) => !prev)
-                      }
-                      className="border border-gray-200 bg-white text-gray-700 font-semibold px-6 py-3 rounded-full hover:bg-gray-50 transition duration-300 text-sm"
-                    >
-                      {showAllTripadvisorReviews ? "Show Less" : "Show More"}
-                    </button>
-                  )}
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-6">
-                {tripadvisorLoading && tripadvisorVisibleReviews.length === 0 ? (
-                  Array.from({ length: 4 }).map((_, index) => (
-                    <ReviewCardSkeleton key={`ta-skeleton-${index}`} />
-                  ))
-                ) : tripadvisorVisibleReviews.length > 0 ? (
-                  tripadvisorVisibleReviews.map((rev, index) =>
-                    renderReviewCard(rev, index),
-                  )
-                ) : (
-                  <div className="col-span-full py-8 text-center text-gray-500 text-sm">
-                    Loading online TripAdvisor reviews... You can also{" "}
+              <ReviewCarousel
+                reviews={tripadvisorReviews}
+                loading={tripadvisorLoading}
+                skeletonCount={3}
+                emptyMessage={
+                  <>
+                    Couldn't load TripAdvisor reviews right now. You can also{" "}
                     <a
                       href={tripadvisorUrl}
                       target="_blank"
@@ -1714,9 +1840,9 @@ export default function App() {
                       explore all verified reviews directly on TripAdvisor
                     </a>
                     .
-                  </div>
-                )}
-              </div>
+                  </>
+                }
+              />
             </div>
 
             <div className="rounded-3xl border border-gray-100 bg-white p-6 md:p-8 shadow-sm">
@@ -1729,24 +1855,134 @@ export default function App() {
                     What our guests say
                   </h3>
                 </div>
-                <div className="flex flex-wrap gap-3">
-                  {systemReviews.length > 6 && (
+              </div>
+              {systemReviews.length > 0 && (
+                <div className="mb-8 flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-6">
+                  <div className="flex items-center gap-4 rounded-2xl border border-gray-100 bg-gray-50 px-5 py-3.5">
+                    <span className="font-outfit text-4xl font-bold text-gray-900 leading-none">
+                      {systemAverageRating.toFixed(1)}
+                    </span>
+                    <div>
+                      <div className="text-amber-400 text-sm leading-none tracking-widest">
+                        {"★".repeat(systemFullStars)}
+                        {"☆".repeat(5 - systemFullStars)}
+                      </div>
+                      <p className="mt-1.5 text-xs text-gray-500">
+                        Overall rating · based on {systemReviews.length}{" "}
+                        {systemReviews.length === 1 ? "review" : "reviews"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-3 self-start sm:self-center">
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setGuestMenuOpen((prev) => !prev)}
+                        className="border border-gray-200 bg-white text-gray-700 font-semibold px-5 py-2.5 rounded-full hover:bg-gray-50 transition duration-300 text-sm inline-flex items-center gap-2"
+                      >
+                        Show more review
+                        <svg
+                          className={`w-3.5 h-3.5 transition-transform duration-200 ${guestMenuOpen ? "rotate-180" : ""}`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2.5}
+                            d="M19 9l-7 7-7-7"
+                          />
+                        </svg>
+                      </button>
+
+                      {guestMenuOpen && (
+                        <>
+                          <div
+                            className="fixed inset-0 z-20"
+                            onClick={() => setGuestMenuOpen(false)}
+                          />
+                          <div className="absolute left-0 top-full mt-2 w-60 rounded-2xl border border-gray-100 bg-white shadow-xl overflow-hidden z-30">
+                            {[
+                              { label: "Show 20 recent reviews", value: 20 },
+                              { label: "Show 50 recent reviews", value: 50 },
+                              { label: "Show 100 recent reviews", value: 100 },
+                              { label: "Show all reviews", value: null },
+                            ].map((opt) => {
+                              const isActive =
+                                opt.value === null
+                                  ? guestVisibleCount >= systemReviews.length
+                                  : guestVisibleCount === opt.value;
+                              return (
+                                <button
+                                  key={opt.label}
+                                  type="button"
+                                  onClick={() => {
+                                    setGuestVisibleCount(
+                                      opt.value === null
+                                        ? systemReviews.length
+                                        : opt.value,
+                                    );
+                                    setGuestMenuOpen(false);
+                                  }}
+                                  className={`w-full text-left px-4 py-3 text-sm transition-colors hover:bg-gray-50 ${isActive
+                                    ? "bg-sacramento/10 text-sacramento font-semibold"
+                                    : "text-gray-700"
+                                    }`}
+                                >
+                                  {opt.label}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </>
+                      )}
+                    </div>
                     <button
                       type="button"
-                      onClick={() => setShowAllReviews((prev) => !prev)}
-                      className="border border-gray-200 bg-white text-gray-700 font-semibold px-6 py-3 rounded-full hover:bg-gray-50 transition duration-300 text-sm"
+                      onClick={() => navigate("/write-review")}
+                      className="bg-sacramento text-white font-semibold px-5 py-2.5 rounded-full hover:bg-opacity-90 shadow transition duration-300 text-sm"
                     >
-                      {showAllReviews ? "Show Less" : "More Reviews"}
+                      Write review
                     </button>
-                  )}
+                  </div>
                 </div>
-              </div>
+              )}
 
-              <PublicReviewSection
-                reviews={systemVisibleReviews}
-                renderReviewCard={renderReviewCard}
+              {/* Carousel always shows only the first 6 reviews */}
+              <ReviewCarousel
+                reviews={systemReviews.slice(0, 6)}
                 loading={reviewsLoading}
+                skeletonCount={3}
+                emptyMessage="No guest reviews yet — be the first to share your safari experience!"
+                fixedPerView={3}
               />
+
+              {/* "Show more" expands additional reviews into a grid below the carousel */}
+              {guestVisibleCount > 6 && systemReviews.length > 6 && (
+                <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {systemReviews.slice(6, guestVisibleCount).map((rev, i) => (
+                    <ReviewCardContent key={`guest-more-${i}`} rev={rev} />
+                  ))}
+                </div>
+              )}
+
+              {guestVisibleCount > 6 && systemReviews.length > 6 && (
+                <div className="mt-10 flex flex-col items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setGuestVisibleCount(6)}
+                    className="border border-gray-200 bg-white text-gray-700 font-semibold px-8 py-3 rounded-full hover:bg-gray-50 hover:border-gray-300 transition duration-300 text-sm cursor-pointer"
+                  >
+                    Show less review
+                  </button>
+                  <p className="text-xs text-gray-400">
+                    Showing {Math.min(guestVisibleCount, systemReviews.length)}{" "}
+                    of {systemReviews.length} reviews
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </section>

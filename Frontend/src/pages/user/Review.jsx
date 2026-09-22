@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
 import api from "../../axios";
+import { Camera, X } from "lucide-react";
+
+const MAX_REVIEW_PHOTOS = 5;
+const MAX_PHOTO_SIZE_BYTES = 10 * 1024 * 1024; // 10MB per photo
 
   export default function Review() {
     const [rate, setRate] = useState(5);
@@ -9,6 +13,8 @@ import api from "../../axios";
     const [loading, setLoading] = useState(false);
     const [reviews, setReviews] = useState([]);
     const [isLoggedIn, setIsLoggedIn] = useState(Boolean(localStorage.getItem("token")));
+    const [photos, setPhotos] = useState([]);
+    const [photoError, setPhotoError] = useState(null);
   
     const user = (() => {
       try {
@@ -36,6 +42,55 @@ import api from "../../axios";
       fetchReviews();
       setIsLoggedIn(Boolean(localStorage.getItem("token")));
     }, [customerId]);
+
+    const clearPhotos = () => {
+      setPhotos((prev) => {
+        prev.forEach((photo) => URL.revokeObjectURL(photo.preview));
+        return [];
+      });
+      setPhotoError(null);
+    };
+
+    // Revoke preview object URLs when the component unmounts
+    useEffect(() => clearPhotos, []);
+
+    const handlePhotoChange = (e) => {
+      const selected = Array.from(e.target.files || []);
+      e.target.value = "";
+
+      const accepted = [];
+      const errors = [];
+
+      for (const file of selected) {
+        if (photos.length + accepted.length >= MAX_REVIEW_PHOTOS) {
+          errors.push(`You can attach up to ${MAX_REVIEW_PHOTOS} photos.`);
+          break;
+        }
+        if (!file.type.startsWith("image/")) {
+          errors.push(`${file.name} is not an image file.`);
+          continue;
+        }
+        if (file.size > MAX_PHOTO_SIZE_BYTES) {
+          errors.push(`${file.name} exceeds the 10MB photo size limit.`);
+          continue;
+        }
+        accepted.push({ file, preview: URL.createObjectURL(file) });
+      }
+
+      if (accepted.length > 0) {
+        setPhotos((prev) => [...prev, ...accepted]);
+      }
+      setPhotoError(errors[0] || null);
+    };
+
+    const removePhoto = (index) => {
+      setPhotos((prev) => {
+        const next = [...prev];
+        const [removed] = next.splice(index, 1);
+        if (removed?.preview) URL.revokeObjectURL(removed.preview);
+        return next;
+      });
+    };
   
     const handleSubmit = async (e) => {
       e.preventDefault();
@@ -51,14 +106,19 @@ import api from "../../axios";
   
       try {
         const token = localStorage.getItem("token");
+
+        const formData = new FormData();
+        formData.append("Rate", String(Number(rate)));
+        formData.append("Description", description);
+        if (customerId) {
+          formData.append("Customer_ID", String(customerId));
+        }
+        formData.append("Email", user?.Email || user?.email || "");
+        photos.forEach((photo) => formData.append("Photos[]", photo.file));
+
         const response = await api.post(
           "/reviews",
-          {
-            Rate: Number(rate),
-            Description: description,
-            Customer_ID: customerId,
-            Email: user?.Email || user?.email || "",
-          },
+          formData,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -69,9 +129,14 @@ import api from "../../axios";
         setMessage(response.data?.message || "Thank you for your review!");
         setDescription("");
         setRate(5);
+        clearPhotos();
         fetchReviews();
       } catch (err) {
-        setError(err.response?.data?.message || "Unable to submit review right now.");
+        setError(
+          err.response?.status === 413
+            ? "The photos you attached are too large in total. Please try smaller images."
+            : err.response?.data?.message || "Unable to submit review right now."
+        );
       } finally {
         setLoading(false);
       }
@@ -111,6 +176,53 @@ import api from "../../axios";
                     className="form-input"
                     placeholder="Tell us what you liked or what we can improve..."
                   />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium">Photos (optional)</label>
+                  <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-border-light bg-white px-3 py-3 text-sm text-muted transition hover:bg-offwhite dark:border-border-dark dark:bg-surface-2 dark:hover:bg-surface-1">
+                    <Camera size={18} className="text-sacramento dark:text-amber-400" />
+                    <span>
+                      {photos.length > 0
+                        ? `${photos.length}/${MAX_REVIEW_PHOTOS} photos selected - click to add more`
+                        : "Add photos (up to 5, max 10MB each)"}
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      className="hidden"
+                      disabled={photos.length >= MAX_REVIEW_PHOTOS || loading || !isLoggedIn}
+                      onChange={handlePhotoChange}
+                    />
+                  </label>
+                  {photoError ? (
+                    <p className="mt-1 text-xs text-red-600 dark:text-red-400">{photoError}</p>
+                  ) : null}
+                  {photos.length > 0 ? (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {photos.map((photo, index) => (
+                        <div
+                          key={photo.preview}
+                          className="relative h-16 w-16 overflow-hidden rounded-lg border border-border-light dark:border-border-dark"
+                        >
+                          <img
+                            src={photo.preview}
+                            alt={`Selected photo ${index + 1}`}
+                            className="h-full w-full object-cover"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removePhoto(index)}
+                            className="absolute right-0.5 top-0.5 rounded-full bg-black/70 p-0.5 text-white transition hover:bg-red-600"
+                            aria-label={`Remove photo ${index + 1}`}
+                          >
+                            <X size={12} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
                 </div>
   
                 {message ? <p className="rounded-lg bg-sacramento/10 p-3 text-sacramento">{message}</p> : null}
@@ -157,6 +269,25 @@ import api from "../../axios";
                         </span>
                       </div>
                       <p className="mt-2 text-charcoal/80 dark:text-white/80">{review.Description}</p>
+                      {Array.isArray(review.Photos) && review.Photos.length > 0 ? (
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {review.Photos.map((photoUrl, photoIndex) => (
+                            <a
+                              key={photoUrl || photoIndex}
+                              href={photoUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="block h-14 w-14 overflow-hidden rounded-lg border border-border-light dark:border-border-dark"
+                            >
+                              <img
+                                src={photoUrl}
+                                alt={`Review photo ${photoIndex + 1}`}
+                                className="h-full w-full object-cover transition hover:scale-105"
+                              />
+                            </a>
+                          ))}
+                        </div>
+                      ) : null}
                     </div>
                   ))
                 )}
