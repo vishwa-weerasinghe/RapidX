@@ -56,8 +56,9 @@ export default function App() {
   })();
 
   useEffect(() => {
-    if (location.hash === "#packages") {
-      const element = document.getElementById("packages");
+    if (location.hash) {
+      const id = location.hash.replace("#", "");
+      const element = document.getElementById(id);
       if (element) {
         setTimeout(() => {
           window.scrollTo({ top: element.offsetTop - 80, behavior: "smooth" });

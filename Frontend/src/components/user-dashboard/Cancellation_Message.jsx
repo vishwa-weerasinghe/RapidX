@@ -1,10 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Ban, CalendarDays, Clock, MapPin } from "lucide-react";
-import api from "../../axios";
+import { useBookings } from "../../context/BookingContext";
 import { useTheme } from "../../context/ThemeContext";
 
-// Refund policy from the customer cancellation page (Frontend/src/pages/user/cancellation.jsx):
-// more than 7 days before the tour date: 100%, 3-7 days: 50%, less than 3 days: no refund.
 function getRefundPercentage(bookingDate) {
   if (!bookingDate) return 0;
   const today = new Date();
@@ -19,42 +17,12 @@ function getRefundPercentage(bookingDate) {
 }
 
 export function CancellationMessage() {
-  // Same customer lookup as BookingCard/CartCard, done lazily on mount.
-  const [customerId] = useState(() => {
-    try {
-      const userStr = localStorage.getItem("user");
-      const guestStr = localStorage.getItem("guest_customer");
-      const activeCustomer = JSON.parse(userStr) || JSON.parse(guestStr) || null;
-      return activeCustomer?.Customer_ID || null;
-    } catch {
-      return null;
-    }
-  });
-  const [cancelledBookings, setCancelledBookings] = useState([]);
-  const [loaded, setLoaded] = useState(false);
+  const { bookings, loading } = useBookings();
   const { theme } = useTheme();
 
-  useEffect(() => {
-    if (!customerId) return undefined;
-
-    let isSubscribed = true;
-    api.get(`/user-bookings/${customerId}`)
-      .then((res) => {
-        if (!isSubscribed) return;
-        setCancelledBookings(
-          res.data.filter((b) => b.Status === "Cancelled")
-        );
-        setLoaded(true);
-      })
-      .catch((err) => {
-        console.error("Cancelled bookings fetch error:", err);
-        if (isSubscribed) setLoaded(true);
-      });
-
-    return () => {
-      isSubscribed = false;
-    };
-  }, [customerId]);
+  const cancelledBookings = bookings.filter(
+    (b) => b.Status === "Cancelled",
+  );
 
   const isDark = theme === "dark";
 
@@ -79,8 +47,8 @@ export function CancellationMessage() {
     : "bg-red-100 text-red-600";
   const highlightTextClass = isDark ? "text-sacramento-300" : "text-sacramento-600";
 
-  // Hide the whole card while loading and when there are no cancelled bookings.
-  if (!loaded || cancelledBookings.length === 0) {
+      // Hide the whole card while loading and when there are no cancelled bookings
+  if (loading || cancelledBookings.length === 0) {
     return null;
   }
 
@@ -145,5 +113,3 @@ export function CancellationMessage() {
     </div>
   );
 }
-
-

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { differenceInDays, format } from 'date-fns'
-import { MapPin, Calendar, Compass, CalendarCheck } from 'lucide-react'
+import { MapPin, Calendar, Compass, Phone } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import api from '../../axios'
 import { useTheme } from '../../context/ThemeContext'
@@ -118,11 +118,11 @@ export function HeroCountdown({ user }) {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.3 }}
-                onClick={() => navigate('/user/packages')}
+                onClick={() => navigate('/#contact')}
                 className="btn-primary rounded-xl px-5 py-2.5 text-[14px] font-semibold whitespace-nowrap mt-6"
               >
-                <CalendarCheck size={18} />
-                Book Now
+                <Phone size={18} />
+                Contact Us
               </motion.button>
             </motion.div>
           </div>

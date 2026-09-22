@@ -1,8 +1,10 @@
 import { useEffect, useState, useRef } from "react";
 import api from "../../axios";
+import { Trash2 } from "lucide-react";
 
 export default function AdminReviews() {
   const [reviews, setReviews] = useState([]);
+  const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -44,8 +46,18 @@ export default function AdminReviews() {
     }
   };
 
+  const fetchAnalytics = async () => {
+    try {
+      const response = await api.get("/reviews/analytics");
+      setAnalytics(response.data);
+    } catch {
+      setAnalytics(null);
+    }
+  };
+
   useEffect(() => {
     fetchReviews();
+    fetchAnalytics();
   }, []);
 
   useEffect(() => {
@@ -90,6 +102,7 @@ export default function AdminReviews() {
 
       setReviews((prev) => prev.filter((review) => getReviewId(review) !== Number(reviewId)));
       setMessage("Review deleted successfully.");
+      fetchAnalytics();
     } catch (err) {
       setError(err.response?.data?.message || "Unable to delete review.");
     }
@@ -163,6 +176,87 @@ export default function AdminReviews() {
       {message ? <p className="rounded-lg bg-sacramento/10 p-3 text-sacramento">{message}</p> : null}
       {error ? <p className="rounded-lg bg-red-50 border border-red-200 p-3 text-red-700 dark:bg-red-950/30 dark:border-red-900/30 dark:text-red-400">{error}</p> : null}
 
+      {/* ── Rating Analytics ── */}
+      {analytics && (
+        <div className="card p-6 space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-bold text-charcoal dark:text-white">Rating Analytics</h2>
+              <p className="text-xs text-muted mt-0.5">Review feedback breakdown by rating</p>
+            </div>
+            <div className="flex items-center gap-1.5 rounded-full bg-sacramento/10 px-3 py-1.5 text-xs font-bold text-sacramento dark:text-castleton-300">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.958a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.367 2.446a1 1 0 00-.364 1.118l1.287 3.957c.3.922-.755 1.688-1.539 1.118l-3.366-2.445a1 1 0 00-1.176 0l-3.366 2.445c-.784.57-1.838-.196-1.539-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.98 9.385c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.951-.69l1.286-3.958z" />
+              </svg>
+              Live Insights
+            </div>
+          </div>
+
+          {/* Summary cards */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="rounded-xl bg-sacramento/10 dark:bg-sacramento-900/20 p-4 ring-1 ring-sacramento/20 dark:ring-sacramento-900/30">
+              <p className="text-2xl font-extrabold text-charcoal dark:text-white leading-none">
+                {analytics.average_rating} / 5
+              </p>
+              <p className="text-xs font-semibold text-muted mt-2">Average Rating</p>
+            </div>
+            <div className="rounded-xl bg-sacramento/10 dark:bg-sacramento-900/20 p-4 ring-1 ring-sacramento/20 dark:ring-sacramento-900/30">
+              <p className="text-2xl font-extrabold text-charcoal dark:text-white leading-none">
+                {analytics.total_reviews}
+              </p>
+              <p className="text-xs font-semibold text-muted mt-2">Total Reviews</p>
+            </div>
+            <div className="rounded-xl bg-green-50 dark:bg-green-950/20 p-4 ring-1 ring-green-100 dark:ring-green-900/30">
+              <p className="text-2xl font-extrabold text-green-700 dark:text-green-400 leading-none">
+                {analytics.positive_percentage}%
+              </p>
+              <p className="text-xs font-semibold text-muted mt-2">Positive (4-5 ★)</p>
+            </div>
+            <div className="rounded-xl bg-red-50 dark:bg-red-950/20 p-4 ring-1 ring-red-100 dark:ring-red-900/30">
+              <p className="text-2xl font-extrabold text-red-600 dark:text-red-400 leading-none">
+                {analytics.negative_reviews}
+              </p>
+              <p className="text-xs font-semibold text-muted mt-2">Negative (1-2 ★)</p>
+            </div>
+          </div>
+
+          {/* Per-rating distribution bars */}
+          <div className="space-y-2.5">
+            {(analytics.rating_distribution || []).map((row) => {
+              const maxCount = Math.max(
+                ...(analytics.rating_distribution || []).map((r) => r.count),
+                1
+              );
+              const barWidth = row.count > 0 ? (row.count / maxCount) * 100 : 0;
+              return (
+                <div key={row.rating} className="flex items-center gap-3">
+                  <span className="w-12 flex items-center justify-end gap-0.5 text-sm font-bold text-charcoal dark:text-white shrink-0">
+                    {row.rating}
+                    <span className="text-amber-400">★</span>
+                  </span>
+                  <div className="flex-1 h-2.5 rounded-full bg-offwhite-200 dark:bg-surface-2 overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-sacramento dark:bg-castleton-300 transition-all duration-500"
+                      style={{ width: `${barWidth}%` }}
+                    />
+                  </div>
+                  <span className="w-20 text-right text-xs font-semibold text-muted shrink-0">
+                    {row.count} ({row.percentage}%)
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="flex flex-wrap gap-4 pt-1 text-xs font-semibold text-muted border-t border-[var(--border)]">
+            <span>Neutral (3 ★): {analytics.neutral_reviews}</span>
+            <span>Highest: {analytics.highest_rating || "—"} ★</span>
+            <span>Lowest: {analytics.lowest_rating || "—"} ★</span>
+            <span>Most common: {analytics.most_common_rating || "—"} ★</span>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center gap-3">
         <div className="flex w-full md:w-1/2">
           <input
@@ -214,8 +308,10 @@ export default function AdminReviews() {
                   <button
                     onClick={() => handleDelete(review.Review_ID)}
                     className="btn-danger"
+                    title="Delete review"
+                    aria-label="Delete review"
                   >
-                    Delete
+                    <Trash2 size={16} />
                   </button>
                 </div>
               </div>

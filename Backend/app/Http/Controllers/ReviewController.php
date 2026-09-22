@@ -13,6 +13,49 @@ class ReviewController extends Controller
         return response()->json(Review::with('customer')->orderByDesc('Review_ID')->get());
     }
 
+    public function ratingAnalytics()
+    {
+        $totalReviews = Review::count();
+        $averageRating = (float) (Review::avg('Rate') ?? 0);
+
+        // Reviews grouped by rating value (1-5 stars)
+        $countsByRating = Review::query()
+            ->selectRaw('Rate, count(*) as total')
+            ->groupBy('Rate')
+            ->pluck('total', 'Rate');
+
+        $distribution = [];
+        for ($rating = 5; $rating >= 1; $rating--) {
+            $count = (int) ($countsByRating[$rating] ?? 0);
+            $distribution[] = [
+                'rating' => $rating,
+                'count' => $count,
+                'percentage' => $totalReviews > 0 ? round(($count / $totalReviews) * 100, 1) : 0,
+            ];
+        }
+
+        $positive = (int) ($countsByRating[4] ?? 0) + (int) ($countsByRating[5] ?? 0);
+        $neutral = (int) ($countsByRating[3] ?? 0);
+        $negative = (int) ($countsByRating[1] ?? 0) + (int) ($countsByRating[2] ?? 0);
+
+        $mostCommonRating = $totalReviews > 0
+            ? (int) $countsByRating->sortDesc()->keys()->first()
+            : 0;
+
+        return response()->json([
+            'total_reviews' => $totalReviews,
+            'average_rating' => round($averageRating, 1),
+            'positive_reviews' => $positive,
+            'neutral_reviews' => $neutral,
+            'negative_reviews' => $negative,
+            'positive_percentage' => $totalReviews > 0 ? round(($positive / $totalReviews) * 100, 1) : 0,
+            'highest_rating' => $totalReviews > 0 ? (int) Review::max('Rate') : 0,
+            'lowest_rating' => $totalReviews > 0 ? (int) Review::min('Rate') : 0,
+            'most_common_rating' => $mostCommonRating,
+            'rating_distribution' => $distribution,
+        ]);
+    }
+
     public function store(Request $request)
     {
         $user = $request->user();

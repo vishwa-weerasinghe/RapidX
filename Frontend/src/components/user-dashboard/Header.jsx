@@ -44,12 +44,12 @@ export function Header({ user, toggleSidebar }) {
   };
 
   useEffect(() => {
-  const token = localStorage.getItem('token');
-  if (!customerId || !token) return;
-  fetchUnreadBookings();
-  const interval = setInterval(fetchUnreadBookings, 5000);
-  return () => clearInterval(interval);
-}, [customerId]);
+    const token = localStorage.getItem('token');
+    if (!customerId || !token) return;
+    fetchUnreadBookings();
+    const interval = setInterval(fetchUnreadBookings, 30000);
+    return () => clearInterval(interval);
+  }, [customerId]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
