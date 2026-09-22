@@ -53,6 +53,24 @@ function ReviewCardContent({ rev }) {
       <p className="text-neutral-400 text-xs sm:text-sm leading-relaxed mb-4 line-clamp-5">
         {rev.text}
       </p>
+      {Array.isArray(rev.photos) && rev.photos.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-4">
+          {rev.photos.slice(0, 3).map((photo, i) => (
+            <img
+              key={`${rev.initials}-photo-${i}`}
+              src={photo}
+              alt={`${rev.name}'s review photo ${i + 1}`}
+              loading="lazy"
+              className="w-16 h-16 object-cover rounded-lg border border-neutral-200"
+            />
+          ))}
+          {rev.photos.length > 3 && (
+            <span className="w-16 h-16 rounded-lg border border-neutral-200 bg-neutral-50 flex items-center justify-center text-xs font-bold text-neutral-500">
+              +{rev.photos.length - 3}
+            </span>
+          )}
+        </div>
+      )}
       <span
         className={`mt-auto self-start font-bold text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider ${rev.isGuest
           ? "bg-amber-100 text-amber-800"
@@ -639,6 +657,16 @@ export default function App() {
   const fetchReviews = () => {
     const storedGuestReviews = getStoredGuestReviews();
 
+    // Resolve backend base URL so relative photo paths (e.g. /uploads/reviews/x.jpg)
+    // point to the API server, mirroring the package image handling.
+    const backendUrl = import.meta.env.VITE_API_URL
+      ? import.meta.env.VITE_API_URL.replace("/api", "")
+      : "http://127.0.0.1:8000";
+    const toPhotoUrl = (photo) =>
+      typeof photo === "string" && photo.startsWith("http")
+        ? photo
+        : `${backendUrl}${photo}`;
+
     // Fetch TripAdvisor reviews live from the backend (scrapes TripAdvisor online,
     // cached server-side). Falls back to the last successfully fetched set.
     const tripadvisorLocationId = "15640558";
@@ -694,6 +722,9 @@ export default function App() {
               text: rev.Description,
               rate: rev.Rate || 5,
               source: rev.Source || rev.source || "Verified",
+              photos: Array.isArray(rev.Photos)
+                ? rev.Photos.map(toPhotoUrl)
+                : [],
             };
 
             if (isTripAdvisorReview(rev) || isTripAdvisorReview(formatted)) {
@@ -732,7 +763,13 @@ export default function App() {
           setReviews([]);
         }
       })
-      .catch((err) => console.error("Error loading reviews:", err))
+      .catch((err) => {
+        console.error("Error loading reviews:", err);
+        // Keep locally stored guest reviews visible even when the API is down.
+        setReviews(
+          storedGuestReviews.filter((review) => !isTripAdvisorReview(review)),
+        );
+      })
       .finally(() => setReviewsLoading(false));
   };
 
@@ -742,9 +779,7 @@ export default function App() {
     fetchReviews();
   }, []);
 
-  const systemReviews = reviews
-    .filter((review) => !isTripAdvisorReview(review))
-    .sort((a, b) => (b.rate || 0) - (a.rate || 0));
+  const systemReviews = reviews;
   const systemAverageRating =
     systemReviews.length > 0
       ? systemReviews.reduce((sum, rev) => sum + (Number(rev.rate) || 0), 0) /
