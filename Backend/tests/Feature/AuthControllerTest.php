@@ -68,6 +68,7 @@ class AuthControllerTest extends TestCase
             ->assertJsonStructure(['message', 'user' => ['Member_ID', 'Email'], 'token']);
 
         $this->assertDatabaseHas('customers', ['Email' => 'newuser@example.com']);
+        $this->assertDatabaseHas('customers', ['Phone_No' => '+94771234567']);
         $this->assertDatabaseHas('users', ['Email' => 'newuser@example.com']);
         $this->assertDatabaseCount('personal_access_tokens', 1);
 
@@ -90,6 +91,55 @@ class AuthControllerTest extends TestCase
         ])->assertStatus(201);
 
         $this->assertDatabaseHas('users', ['User_Name' => 'John Doe']);
+    }
+
+    public function test_registration_rejects_names_containing_numbers(): void
+    {
+        $response = $this->postJson('/api/register', [
+            'Email'                 => 'invalid-name@example.com',
+            'Password'              => 'Password@123',
+            'Password_confirmation' => 'Password@123',
+            'First_Name'            => 'John123',
+            'Last_Name'             => 'Doe',
+            'Phone_No'              => '0771234567',
+            'NIC'                   => '200012345678',
+            'Country'               => 'Sri Lanka',
+        ]);
+
+        $response->assertStatus(422)->assertJsonValidationErrors(['First_Name']);
+    }
+
+    public function test_registration_rejects_invalid_phone_for_selected_country(): void
+    {
+        $response = $this->postJson('/api/register', [
+            'Email'                 => 'invalid-phone@example.com',
+            'Password'              => 'Password@123',
+            'Password_confirmation' => 'Password@123',
+            'First_Name'            => 'John',
+            'Last_Name'             => 'Doe',
+            'Phone_No'              => '12345',
+            'Country_Code'          => 'LK',
+            'NIC'                   => '200012345678',
+            'Country'               => 'Sri Lanka',
+        ]);
+
+        $response->assertStatus(422)->assertJsonValidationErrors(['Phone_No']);
+    }
+
+    public function test_registration_rejects_password_without_required_character_types(): void
+    {
+        $response = $this->postJson('/api/register', [
+            'Email'                 => 'weak-password@example.com',
+            'Password'              => 'password1',
+            'Password_confirmation' => 'password1',
+            'First_Name'            => 'John',
+            'Last_Name'             => 'Doe',
+            'Phone_No'              => '0771234567',
+            'NIC'                   => '200012345678',
+            'Country'               => 'Sri Lanka',
+        ]);
+
+        $response->assertStatus(422)->assertJsonValidationErrors(['Password']);
     }
 
     public function test_registration_returns_validation_errors_for_missing_fields(): void

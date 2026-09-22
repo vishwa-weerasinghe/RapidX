@@ -2,8 +2,25 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
+import { getCountries, getCountryCallingCode, parsePhoneNumberFromString } from "libphonenumber-js";
 import SEO from "../../components/SEO";
 import loginBg from "../../assets/login_register.png";
+
+const countryDisplayNames = new Intl.DisplayNames(["en"], { type: "region" });
+const countryOptions = getCountries()
+  .map((code) => ({
+    code,
+    name: countryDisplayNames.of(code) || code,
+    callingCode: getCountryCallingCode(code),
+  }))
+  .sort((a, b) => a.name.localeCompare(b.name));
+
+const namePattern = /^[\p{L}]+(?:[ '\-\u2019][\p{L}]+)*$/u;
+
+const flagForCountry = (code) => code
+  .split("")
+  .map((letter) => String.fromCodePoint(letter.charCodeAt(0) + 127397))
+  .join("");
 
 export default function Register() {
   const [First_Name, setFirstName] = useState("");
@@ -14,6 +31,9 @@ export default function Register() {
   const [Phone_No, setPhone_No] = useState("");
   const [NIC, setNIC] = useState("");
   const [Country, setCountry] = useState("");
+  const [countryCode, setCountryCode] = useState("");
+  const [countryQuery, setCountryQuery] = useState("");
+  const [showCountryMenu, setShowCountryMenu] = useState(false);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -29,17 +49,54 @@ export default function Register() {
         if (prefill.First_Name) setFirstName(prefill.First_Name);
         if (prefill.Last_Name) setLastName(prefill.Last_Name);
         if (prefill.Email) setEmail(prefill.Email);
-        if (prefill.Phone_No) setPhone_No(prefill.Phone_No);
+        if (prefill.Phone_No) {
+          const prefilledPhone = parsePhoneNumberFromString(prefill.Phone_No);
+          setPhone_No(prefilledPhone?.nationalNumber || prefill.Phone_No);
+          if (prefilledPhone?.country) setCountryCode(prefilledPhone.country);
+        }
         if (prefill.NIC) setNIC(prefill.NIC);
-        if (prefill.Country) setCountry(prefill.Country);
+        if (prefill.Country) {
+          const prefilledCountry = countryOptions.find((country) => country.name === prefill.Country);
+          if (prefilledCountry) setCountryCode(prefilledCountry.code);
+          setCountry(prefill.Country);
+        }
       } catch (err) {
         console.error("Failed to parse prefill guest profile details", err);
       }
     }
   }, []);
 
+  const selectedCountry = countryOptions.find((country) => country.code === countryCode);
+
+  const validateForm = () => {
+    const nextErrors = {};
+    if (!namePattern.test(First_Name.trim())) {
+      nextErrors.First_Name = ["Use letters only; spaces, hyphens, and apostrophes are allowed."];
+    }
+    if (!namePattern.test(Last_Name.trim())) {
+      nextErrors.Last_Name = ["Use letters only; spaces, hyphens, and apostrophes are allowed."];
+    }
+    if (!Country || !countryCode) nextErrors.Country = ["Please select a country."];
+    const phoneNumber = parsePhoneNumberFromString(Phone_No, countryCode);
+    if (!phoneNumber || !phoneNumber.isValid()) {
+      nextErrors.Phone_No = ["Enter a valid phone number for the selected country."];
+    }
+    if (Password.length < 8 || !/[A-Z]/.test(Password) || !/[a-z]/.test(Password) || !/[0-9]/.test(Password) || !/[^A-Za-z0-9]/.test(Password)) {
+      nextErrors.Password = ["Use 8+ characters with uppercase, lowercase, a number, and a special character."];
+    }
+    if (Password !== Password_Confirmation) {
+      nextErrors.Password_Confirmation = ["Passwords must match."];
+    }
+    return { nextErrors, phoneNumber };
+  };
+
   const handleRegister = async (e) => {
     e.preventDefault();
+    const { nextErrors, phoneNumber } = validateForm();
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors);
+      return;
+    }
     setErrors({});
     setLoading(true);
 
@@ -48,9 +105,10 @@ export default function Register() {
         First_Name: First_Name,
         Last_Name: Last_Name,
         Email: Email,
-        Phone_No: Phone_No,
+        Phone_No: phoneNumber.number,
         NIC: NIC,
         Country: Country,
+        Country_Code: countryCode,
         Password: Password,
         Password_confirmation: Password_Confirmation,
       });
@@ -253,34 +311,25 @@ export default function Register() {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider">
-                  Phone No
+                  Phone Number
                 </label>
                 <div className="relative mt-1">
-                  <span className="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-3 text-gray-300">
-                    {/* SVG Phone Icon */}
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                    </svg>
+                  <span className="absolute inset-y-0 left-0 z-10 flex items-center border-r border-white/20 px-3 text-sm font-semibold text-white">
+                    {selectedCountry ? `+${selectedCountry.callingCode}` : "--"}
                   </span>
                   <input
                     type="tel"
                     name="Phone_No"
                     autoComplete="tel"
                     required
-                    className="auth-glass-input block w-full min-h-[44px] rounded-lg border border-white/20 bg-white/10 py-2.5 pl-10 pr-3 text-white placeholder-gray-400 backdrop-blur-sm transition focus:border-castleton-300 focus:outline-none focus:ring-1 focus:ring-castleton-300 text-base sm:text-sm"
-                    placeholder="+94 77 123 4567"
+                    disabled={!countryCode}
+                    className="auth-glass-input block w-full min-h-[44px] rounded-lg border border-white/20 bg-white/10 py-2.5 pl-16 pr-3 text-white placeholder-gray-400 backdrop-blur-sm transition focus:border-castleton-300 focus:outline-none focus:ring-1 focus:ring-castleton-300 text-base sm:text-sm"
+                    placeholder={countryCode === "LK" ? "77 123 4567" : "Select a country first"}
                     value={Phone_No}
-                    onChange={(e) => setPhone_No(e.target.value)}
+                    onChange={(e) => {
+                      setPhone_No(e.target.value);
+                      setErrors((current) => ({ ...current, Phone_No: undefined }));
+                    }}
                   />
                 </div>
                 {errors.Phone_No && (
@@ -295,34 +344,53 @@ export default function Register() {
                   Country
                 </label>
                 <div className="relative mt-1">
-                  <span className="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-3 text-gray-300">
-                    {/* SVG Globe Icon */}
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <circle cx="12" cy="12" r="10" />
-                      <line x1="2" y1="12" x2="22" y2="12" />
-                      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                    </svg>
-                  </span>
-                  <input
-                    type="text"
-                    name="Country"
-                    autoComplete="country-name"
-                    required
-                    className="auth-glass-input block w-full min-h-[44px] rounded-lg border border-white/20 bg-white/10 py-2.5 pl-10 pr-3 text-white placeholder-gray-400 backdrop-blur-sm transition focus:border-castleton-300 focus:outline-none focus:ring-1 focus:ring-castleton-300 text-base sm:text-sm"
-                    placeholder="Sri Lanka"
-                    value={Country}
-                    onChange={(e) => setCountry(e.target.value)}
-                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCountryMenu((open) => !open)}
+                    className="auth-glass-input flex min-h-[44px] w-full items-center justify-between rounded-lg border border-white/20 bg-white/10 px-3 text-left text-white backdrop-blur-sm transition focus:border-castleton-300 focus:outline-none focus:ring-1 focus:ring-castleton-300"
+                    aria-expanded={showCountryMenu}
+                    aria-haspopup="listbox"
+                  >
+                    <span>{selectedCountry ? `${flagForCountry(selectedCountry.code)} ${selectedCountry.name}` : "Select a country"}</span>
+                    <span className="text-xs text-gray-300">{selectedCountry ? `+${selectedCountry.callingCode}` : "Required"}</span>
+                  </button>
+                  {showCountryMenu && (
+                    <div className="absolute z-30 mt-2 w-full rounded-lg border border-white/20 bg-gray-900 p-2 shadow-2xl">
+                      <input
+                        type="search"
+                        aria-label="Search countries"
+                        autoFocus
+                        placeholder="Search countries"
+                        value={countryQuery}
+                        onChange={(e) => setCountryQuery(e.target.value)}
+                        className="mb-2 w-full rounded-md border border-white/20 bg-white/10 px-3 py-2 text-sm text-white outline-none placeholder:text-gray-400 focus:border-castleton-300"
+                      />
+                      <div className="max-h-52 overflow-y-auto" role="listbox">
+                        {countryOptions
+                          .filter((country) => country.name.toLowerCase().includes(countryQuery.toLowerCase()) || country.callingCode.includes(countryQuery))
+                          .map((country) => (
+                            <button
+                              type="button"
+                              role="option"
+                              aria-selected={country.code === countryCode}
+                              key={country.code}
+                              onClick={() => {
+                                setCountryCode(country.code);
+                                setCountry(country.name);
+                                setPhone_No("");
+                                setCountryQuery("");
+                                setShowCountryMenu(false);
+                                setErrors((current) => ({ ...current, Country: undefined, Phone_No: undefined }));
+                              }}
+                              className="flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm text-white hover:bg-white/10"
+                            >
+                              <span>{flagForCountry(country.code)} {country.name}</span>
+                              <span className="text-gray-400">+{country.callingCode}</span>
+                            </button>
+                          ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
                 {errors.Country && (
                   <p className="mt-1 text-xs text-red-300 font-medium">
@@ -476,6 +544,11 @@ export default function Register() {
                     )}
                   </button>
                 </div>
+                {errors.Password_Confirmation && (
+                  <p className="mt-1 text-xs text-red-300 font-medium">
+                    {errors.Password_Confirmation[0]}
+                  </p>
+                )}
               </div>
             </div>
 

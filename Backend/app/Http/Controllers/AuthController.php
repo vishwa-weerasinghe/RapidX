@@ -8,20 +8,64 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Customer;
 use App\Models\User;
+use Closure;
+use libphonenumber\PhoneNumberUtil;
 
 class AuthController extends Controller
 {
     public function register(Request $request)
     {
+        $phoneUtil = PhoneNumberUtil::getInstance();
+        $supportedRegions = $phoneUtil->getSupportedRegions();
+
         $validatedData = $request->validate([
             'Email' => 'required|email|unique:users,Email',
-            'Password' => 'required|string|min:8|confirmed',
-            'First_Name' => 'required|string|max:50',
-            'Last_Name' => 'required|string|max:50',
-            'Phone_No' => 'required|string|max:20',
+            'Password' => [
+                'required',
+                'string',
+                'min:8',
+                'confirmed',
+                'regex:/[A-Z]/',
+                'regex:/[a-z]/',
+                'regex:/[0-9]/',
+                'regex:/[^A-Za-z0-9]/',
+            ],
+            'First_Name' => ['required', 'string', 'max:50', 'regex:/^[\p{L}]+(?:[ \-\'\x{2019}][\p{L}]+)*$/u'],
+            'Last_Name' => ['required', 'string', 'max:50', 'regex:/^[\p{L}]+(?:[ \-\'\x{2019}][\p{L}]+)*$/u'],
+            'Phone_No' => [
+                'required',
+                'string',
+                'max:25',
+                function (string $attribute, mixed $value, Closure $fail) use ($request, $phoneUtil): void {
+                    $region = strtoupper($request->input('Country_Code', ''));
+                    if ($region === '' && strcasecmp($request->input('Country', ''), 'Sri Lanka') === 0) {
+                        $region = 'LK';
+                    }
+
+                    try {
+                        $number = $phoneUtil->parse($value, $region ?: null);
+                        $isValid = $region !== ''
+                            ? $phoneUtil->isValidNumberForRegion($number, $region)
+                            : $phoneUtil->isValidNumber($number);
+                        if (!$isValid) {
+                            $fail('Enter a valid phone number for the selected country.');
+                        }
+                    } catch (\Throwable) {
+                        $fail('Enter a valid phone number for the selected country.');
+                    }
+                },
+            ],
             'NIC' => 'required|string|max:20',
             'Country' => 'required|string|max:50',
+            'Country_Code' => ['nullable', 'string', 'size:2', 'in:' . implode(',', $supportedRegions)],
         ]);
+
+        $region = strtoupper($validatedData['Country_Code'] ?? '');
+        if ($region === '' && strcasecmp($validatedData['Country'], 'Sri Lanka') === 0) {
+            $region = 'LK';
+        }
+        $phoneNumber = $phoneUtil->parse($validatedData['Phone_No'], $region ?: null);
+        $validatedData['Phone_No'] = $phoneUtil->format($phoneNumber, \libphonenumber\PhoneNumberFormat::E164);
 
         $customer = Customer::create([
             'First_Name' => $validatedData['First_Name'],
