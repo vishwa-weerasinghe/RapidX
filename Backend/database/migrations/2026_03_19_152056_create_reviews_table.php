@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id('Review_ID');   
             $table->unsignedInteger('Rate');
             $table->text('Description');
+            // Stores up to 5 review photo URLs (each photo max 10MB, enforced at validation).
+            $table->json('Photos')->nullable();
             $table->unsignedBigInteger('Customer_ID');
 
             $table->foreign('Customer_ID')
