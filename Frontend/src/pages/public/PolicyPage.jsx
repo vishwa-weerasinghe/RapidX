@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { ArrowLeft, ChevronDown, Mail, Phone } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
+import ThemeToggle from "../../components/ThemeToggle";
 import logoImg from "../../assets/logo.jpg";
 
 const policyContent = {
@@ -79,33 +80,55 @@ const policyContent = {
 };
 
 function HelpPageHeader() {
-  return (
-    <header className="sticky top-0 z-40 border-b border-white/10 bg-[radial-gradient(circle_at_top,_rgba(18,40,31,0.92),_rgba(8,20,17,0.98)_58%)] shadow-[0_10px_25px_rgba(0,0,0,0.18)] backdrop-blur-xl">
-      <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border border-white/20 bg-white shadow-md sm:h-16 sm:w-16">
-              <img src={logoImg} alt="Logo" className="h-full w-full object-cover" />
-            </div>
-            <span className="text-xl font-black tracking-tight text-white sm:text-3xl">
-              Wild Jeep Safari
-            </span>
-          </div>
+  const { theme } = useTheme();
+  const navigationLinks = [
+    { label: "Home", path: "/" },
+    { label: "About", path: "/#about" },
+    { label: "Safaris", path: "/#safaris" },
+    { label: "Packages", path: "/#packages" },
+    { label: "Reviews", path: "/#reviews" },
+    { label: "Gallery", path: "/#gallery" },
+    { label: "Contact", path: "/#contact" },
+  ];
 
-          <div className="flex items-center gap-2 sm:gap-3">
-            <Link
-              to="/login"
-              className="rounded-full border border-white/25 bg-white/5 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-white/10 sm:px-5"
-            >
-              Log in
-            </Link>
-            <Link
-              to="/register"
-              className="rounded-full bg-[#2E7D32] px-4 py-2 text-sm font-bold text-white shadow-lg shadow-green-900/20 transition-colors hover:bg-[#1B5E20] sm:px-5"
-            >
-              Register
-            </Link>
+  return (
+    <header className={`sticky top-0 z-40 border-b shadow-[0_10px_25px_rgba(0,0,0,0.18)] backdrop-blur-xl ${theme === "dark" ? "border-white/10 bg-[#101813]/95" : "border-[var(--border)] bg-[var(--page-bg)]/95"}`}>
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+        <Link to="/" className="flex shrink-0 items-center gap-2 sm:gap-3">
+          <div className="relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-black/10 bg-white shadow-sm sm:h-12 sm:w-12">
+              <img src={logoImg} alt="Logo" className="h-full w-full object-cover" />
           </div>
+          <span className="font-outfit text-lg font-extrabold tracking-tight text-[#163c2c] sm:text-xl dark:text-white">
+            Wild Jeep Safari
+          </span>
+        </Link>
+
+        <nav className="hidden items-center gap-0.5 lg:flex">
+          {navigationLinks.map((item) => (
+            <Link
+              key={item.path}
+              to={item.path}
+              className="rounded-full px-2.5 py-1.5 text-xs font-bold uppercase tracking-wide text-slate-700 transition-colors hover:bg-slate-100/70 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/70 dark:hover:text-white"
+            >
+              {item.label}
+            </Link>
+          ))}
+          <Link to="/blog" className="rounded-full px-2.5 py-1.5 text-xs font-bold uppercase tracking-wide text-slate-700 transition-colors hover:bg-slate-100/70 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/70 dark:hover:text-white">
+            Blog
+          </Link>
+          <Link to="/help/frequently" className="rounded-full bg-sacramento px-2.5 py-1.5 text-xs font-bold uppercase tracking-wide text-white shadow shadow-sacramento/25">
+            Help
+          </Link>
+        </nav>
+
+        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+          <Link to="/login" className="rounded-full border border-[#2d6a4f]/30 bg-white/60 px-3 py-2 text-xs font-bold text-[#1b3b2c] transition-colors hover:bg-white sm:px-4 sm:text-sm dark:border-white/25 dark:bg-white/5 dark:text-white dark:hover:bg-white/10">
+            Log in
+          </Link>
+          <Link to="/register" className="rounded-full bg-[#2E7D32] px-3 py-2 text-xs font-bold text-white shadow-lg shadow-green-900/20 transition-colors hover:bg-[#1B5E20] sm:px-4 sm:text-sm">
+            Register
+          </Link>
+          <ThemeToggle />
         </div>
       </div>
     </header>
@@ -114,9 +137,9 @@ function HelpPageHeader() {
 
 function ContactDetails() {
   return (
-    <div className="mt-10 border-t border-[#d9e4d5] pt-8 dark:border-slate-700">
+    <div className="mt-10 border-t border-[#d9e4d5] pt-8 dark:border-[#2f4437]">
       <h2 className="text-xl font-bold text-[#1b3b2c] dark:text-white">Contact Us</h2>
-      <div className="mt-3 space-y-2 text-[#42584a] dark:text-slate-300">
+      <div className="mt-3 space-y-2 text-[#42584a] dark:text-[#b7c9b8]">
         <a className="flex items-center gap-2 transition-colors hover:text-[#2d6a4f]" href="mailto:info@minneriyawildjeepsafari.com"><Mail size={16} /> info@minneriyawildjeepsafari.com</a>
         <a className="flex items-center gap-2 transition-colors hover:text-[#2d6a4f]" href="tel:+94778902811"><Phone size={16} /> +94 77 890 2811</a>
       </div>
@@ -132,13 +155,13 @@ function PrivacyPolicyPage({ isDark }) {
   return (
     <>
       <HelpPageHeader />
-      <main className={`min-h-screen px-4 py-10 sm:px-6 lg:px-8 ${isDark ? "bg-slate-950" : "bg-[#f3efe5]"}`}>
-        <article className="mx-auto max-w-4xl rounded-[28px] border border-[#dfe8dc] bg-[#fffdf9] px-6 py-8 shadow-[0_18px_45px_rgba(20,52,38,0.08)] sm:px-10 sm:py-12 dark:border-slate-700 dark:bg-slate-900">
+      <main className={`min-h-screen px-4 py-10 sm:px-6 lg:px-8 ${isDark ? "bg-[#101813]" : "bg-[#f3efe5]"}`}>
+        <article className="mx-auto max-w-4xl rounded-[28px] border border-[#dfe8dc] bg-[#fffdf9] px-6 py-8 shadow-[0_18px_45px_rgba(20,52,38,0.08)] sm:px-10 sm:py-12 dark:border-[#2f4437] dark:bg-[#1d2b22]">
         <Link to="/" className="mb-8 inline-flex items-center gap-2 text-sm font-semibold text-[#2d6a4f] transition-colors hover:text-[#1f513b] dark:text-green-400 dark:hover:text-green-300">
           <ArrowLeft size={17} /> Back to home
         </Link>
         <h1 className="text-3xl font-extrabold tracking-tight text-[#153827] sm:text-4xl dark:text-white">Privacy Policy</h1>
-        <p className="mt-3 text-sm text-[#66806d] dark:text-slate-400">Effective date: 19 August 2025</p>
+        <p className="mt-3 text-sm text-[#66806d] dark:text-[#9fb5a2]">Effective date: 19 August 2025</p>
         <p className={bodyClass}>
           We value your trust and are committed to protecting your privacy. This Privacy Policy explains what information we collect when you browse our website or book our safari tour packages, how we use it, and the choices you have.
         </p>
@@ -156,7 +179,7 @@ function PrivacyPolicyPage({ isDark }) {
           <section><h2 className={headingClass}>10) Your Rights &amp; Choices</h2><p className={bodyClass}>You may have rights to:</p><ul className={listClass}><li>Request access to, or a copy of, the personal data we hold about you.</li><li>Request correction or deletion of your data, or restriction of certain processing.</li><li>Object to processing in certain situations, and withdraw marketing consent at any time.</li><li>Lodge a complaint with your local data protection authority where applicable.</li></ul><p className={bodyClass}>To exercise these rights, contact us using the details below. We may need to verify your identity before fulfilling requests.</p></section>
           <section><h2 className={headingClass}>11) Children’s Privacy</h2><p className={bodyClass}>Our services are not directed to children under 13. We do not knowingly collect personal information from children. If you believe a child has provided us personal data, please contact us to request deletion.</p></section>
           <section><h2 className={headingClass}>12) Updates to This Policy</h2><p className={bodyClass}>We may update this Privacy Policy from time to time. Changes will be posted on this page with a revised effective date. Your continued use of the website after updates constitutes acceptance of the revised policy.</p></section>
-          <section><h2 className={headingClass}>13) Contact Us</h2><p className={bodyClass}>If you have questions about this Privacy Policy or your personal data, please contact:</p><p className="mt-4 leading-7 text-gray-600 dark:text-slate-300">Email: <a className="text-green-700 hover:underline" href="mailto:info@minneriyawildjeepsafari.com">info@minneriyawildjeepsafari.com</a><br />Phone/WhatsApp: <code>+94 77 890 2811</code></p></section>
+          <section><h2 className={headingClass}>13) Contact Us</h2><p className={bodyClass}>If you have questions about this Privacy Policy or your personal data, please contact:</p><p className="mt-4 leading-7 text-gray-600 dark:text-[#b7c9b8]">Email: <a className="text-green-700 hover:underline" href="mailto:info@minneriyawildjeepsafari.com">info@minneriyawildjeepsafari.com</a><br />Phone/WhatsApp: <code>+94 77 890 2811</code></p></section>
         </div>
         </article>
       </main>
@@ -166,19 +189,19 @@ function PrivacyPolicyPage({ isDark }) {
 
 function TermsPolicyPage({ isDark }) {
   const headingClass = "text-xl font-bold text-[#1b3b2c] dark:text-white";
-  const bodyClass = "mt-2 leading-7 text-[#42584a] dark:text-slate-300";
-  const listClass = "mt-3 list-disc space-y-2 pl-6 leading-7 text-[#42584a] dark:text-slate-300";
+  const bodyClass = "mt-2 leading-7 text-[#42584a] dark:text-[#b7c9b8]";
+  const listClass = "mt-3 list-disc space-y-2 pl-6 leading-7 text-[#42584a] dark:text-[#b7c9b8]";
 
   return (
     <>
       <HelpPageHeader />
-      <main className={`min-h-screen px-4 py-10 sm:px-6 lg:px-8 ${isDark ? "bg-slate-950" : "bg-[#f3efe5]"}`}>
-        <article className="mx-auto max-w-4xl rounded-[28px] border border-[#dfe8dc] bg-[#fffdf9] px-6 py-8 shadow-[0_18px_45px_rgba(20,52,38,0.08)] sm:px-10 sm:py-12 dark:border-slate-700 dark:bg-slate-900">
+      <main className={`min-h-screen px-4 py-10 sm:px-6 lg:px-8 ${isDark ? "bg-[#101813]" : "bg-[#f3efe5]"}`}>
+        <article className="mx-auto max-w-4xl rounded-[28px] border border-[#dfe8dc] bg-[#fffdf9] px-6 py-8 shadow-[0_18px_45px_rgba(20,52,38,0.08)] sm:px-10 sm:py-12 dark:border-[#2f4437] dark:bg-[#1d2b22]">
         <Link to="/" className="mb-8 inline-flex items-center gap-2 text-sm font-semibold text-[#2d6a4f] transition-colors hover:text-[#1f513b] dark:text-green-400 dark:hover:text-green-300">
           <ArrowLeft size={17} /> Back to home
         </Link>
         <h1 className="text-3xl font-extrabold tracking-tight text-[#153827] sm:text-4xl dark:text-white">Terms &amp; Conditions</h1>
-        <p className="mt-3 text-sm text-[#66806d] dark:text-slate-400">Effective date: 19 August 2025</p>
+        <p className="mt-3 text-sm text-[#66806d] dark:text-[#9fb5a2]">Effective date: 19 August 2025</p>
         <p className={bodyClass}>By accessing and booking through our website, you agree to be bound by the following Terms &amp; Conditions. Please read them carefully before making a reservation.</p>
 
         <div className="mt-8 space-y-8">
@@ -193,7 +216,7 @@ function TermsPolicyPage({ isDark }) {
           <section><h2 className={headingClass}>9) Privacy</h2><p className={bodyClass}>Your use of our website and services is also governed by our <Link className="text-green-700 hover:underline" to="/privacy-policy">Privacy Policy</Link>.</p></section>
           <section><h2 className={headingClass}>10) Governing Law</h2><p className={bodyClass}>These Terms &amp; Conditions are governed by the laws of Sri Lanka. Any disputes shall be subject to the exclusive jurisdiction of Sri Lankan courts.</p></section>
           <section><h2 className={headingClass}>11) Changes to Terms</h2><p className={bodyClass}>We reserve the right to update these Terms &amp; Conditions at any time. Updates will be posted on this page with a revised effective date.</p></section>
-          <section><h2 className={headingClass}>12) Contact Us</h2><p className={bodyClass}>For any questions about these Terms &amp; Conditions, please contact:</p><p className="mt-4 leading-7 text-gray-600 dark:text-slate-300">Email: <a className="text-green-700 hover:underline" href="mailto:info@minneriyawildjeepsafari.com">info@minneriyawildjeepsafari.com</a><br />Phone/WhatsApp: <code>+94 77 890 2811</code></p></section>
+          <section><h2 className={headingClass}>12) Contact Us</h2><p className={bodyClass}>For any questions about these Terms &amp; Conditions, please contact:</p><p className="mt-4 leading-7 text-gray-600 dark:text-[#b7c9b8]">Email: <a className="text-green-700 hover:underline" href="mailto:info@minneriyawildjeepsafari.com">info@minneriyawildjeepsafari.com</a><br />Phone/WhatsApp: <code>+94 77 890 2811</code></p></section>
         </div>
         </article>
       </main>
@@ -203,19 +226,19 @@ function TermsPolicyPage({ isDark }) {
 
 function RefundPolicyPage({ isDark }) {
   const headingClass = "text-xl font-bold text-[#1b3b2c] dark:text-white";
-  const bodyClass = "mt-2 leading-7 text-[#42584a] dark:text-slate-300";
-  const listClass = "mt-3 list-disc space-y-2 pl-6 leading-7 text-[#42584a] dark:text-slate-300";
+  const bodyClass = "mt-2 leading-7 text-[#42584a] dark:text-[#b7c9b8]";
+  const listClass = "mt-3 list-disc space-y-2 pl-6 leading-7 text-[#42584a] dark:text-[#b7c9b8]";
 
   return (
     <>
       <HelpPageHeader />
-      <main className={`min-h-screen px-4 py-10 sm:px-6 lg:px-8 ${isDark ? "bg-slate-950" : "bg-[#f3efe5]"}`}>
-        <article className="mx-auto max-w-4xl rounded-[28px] border border-[#dfe8dc] bg-[#fffdf9] px-6 py-8 shadow-[0_18px_45px_rgba(20,52,38,0.08)] sm:px-10 sm:py-12 dark:border-slate-700 dark:bg-slate-900">
+      <main className={`min-h-screen px-4 py-10 sm:px-6 lg:px-8 ${isDark ? "bg-[#101813]" : "bg-[#f3efe5]"}`}>
+        <article className="mx-auto max-w-4xl rounded-[28px] border border-[#dfe8dc] bg-[#fffdf9] px-6 py-8 shadow-[0_18px_45px_rgba(20,52,38,0.08)] sm:px-10 sm:py-12 dark:border-[#2f4437] dark:bg-[#1d2b22]">
         <Link to="/" className="mb-8 inline-flex items-center gap-2 text-sm font-semibold text-[#2d6a4f] transition-colors hover:text-[#1f513b] dark:text-green-400 dark:hover:text-green-300">
           <ArrowLeft size={17} /> Back to home
         </Link>
         <h1 className="text-3xl font-extrabold tracking-tight text-[#153827] sm:text-4xl dark:text-white">Return &amp; Refund Policy</h1>
-        <p className="mt-3 text-sm text-[#66806d] dark:text-slate-400">Effective date: 19 August 2025</p>
+        <p className="mt-3 text-sm text-[#66806d] dark:text-[#9fb5a2]">Effective date: 19 August 2025</p>
         <p className={bodyClass}>We aim to provide memorable safari experiences. This Return &amp; Refund Policy explains how cancellations, changes, and refunds are handled when booking safari tours through our website.</p>
 
         <div className="mt-8 space-y-8">
@@ -225,7 +248,7 @@ function RefundPolicyPage({ isDark }) {
           <section><h2 className={headingClass}>4) Partial Cancellations (Group Bookings)</h2><p className={bodyClass}>For group bookings, partial cancellations may be accepted with revised pricing. Refunds will be calculated based on the updated group size and cancellation notice period.</p></section>
           <section><h2 className={headingClass}>5) Refund Processing</h2><ul className={listClass}><li>Refunds are issued to the original payment method used for booking.</li><li>Processing times depend on your bank or payment provider (typically 7–14 business days).</li><li>We are not responsible for delays caused by third-party payment processors.</li></ul></section>
           <section><h2 className={headingClass}>6) Non-Refundable Items</h2><p className={bodyClass}>The following are <strong>non-refundable</strong>:</p><ul className={listClass}><li>Entrance tickets to national parks (once purchased).</li><li>Last-minute add-ons or services confirmed on the day of safari.</li><li>No-shows or late arrivals beyond 30 minutes of the agreed pickup time.</li></ul></section>
-          <section><h2 className={headingClass}>7) Contact Us</h2><p className={bodyClass}>If you have any questions about our Return &amp; Refund Policy, please contact:</p><p className="mt-4 leading-7 text-gray-600 dark:text-slate-300">Email: <a className="text-green-700 hover:underline" href="mailto:info@minneriyawildjeepsafari.com">info@minneriyawildjeepsafari.com</a><br />Phone/WhatsApp: <code>+94 77 890 2811</code></p></section>
+          <section><h2 className={headingClass}>7) Contact Us</h2><p className={bodyClass}>If you have any questions about our Return &amp; Refund Policy, please contact:</p><p className="mt-4 leading-7 text-gray-600 dark:text-[#b7c9b8]">Email: <a className="text-green-700 hover:underline" href="mailto:info@minneriyawildjeepsafari.com">info@minneriyawildjeepsafari.com</a><br />Phone/WhatsApp: <code>+94 77 890 2811</code></p></section>
         </div>
         </article>
       </main>
@@ -244,7 +267,7 @@ function FrequentlyPage({ content, isDark }) {
   return (
     <>
       <HelpPageHeader />
-      <main className={isDark ? "min-h-screen bg-slate-950" : "min-h-screen bg-[#f3efe5]"}>
+      <main className={isDark ? "min-h-screen bg-[#101813]" : "min-h-screen bg-[#f3efe5]"}>
         <section className={isDark ? "bg-[radial-gradient(circle_at_top,_rgba(26,82,60,0.7),_rgba(9,20,18,1)_60%)] px-4 py-10 sm:py-16" : "bg-[radial-gradient(circle_at_top,_#2c6e4a,_#173d2f_55%,_#112b22)] px-4 py-10 sm:py-16"}>
           <div className="mx-auto max-w-7xl">
             <Link to="/" className="mb-8 inline-flex items-center gap-2 text-sm font-semibold text-white/90 transition-colors hover:text-[#dfeecf]">
@@ -273,7 +296,7 @@ function FrequentlyPage({ content, isDark }) {
           {content.sections.map((section, index) => {
             const isOpen = openQuestion === index;
             return (
-              <div key={section.question} className={`relative overflow-hidden rounded-[24px] border ${isDark ? "border-slate-700 bg-slate-900/80" : "border-[#dfe8dc] bg-[#fffdf9] shadow-[0_16px_35px_rgba(18,36,26,0.08)]"}`}>
+              <div key={section.question} className={`relative overflow-hidden rounded-[24px] border ${isDark ? "border-[#2f4437] bg-[#1d2b22]/80" : "border-[#dfe8dc] bg-[#fffdf9] shadow-[0_16px_35px_rgba(18,36,26,0.08)]"}`}>
                 <button
                   type="button"
                   onClick={() => setOpenQuestion(isOpen ? null : index)}
@@ -285,7 +308,7 @@ function FrequentlyPage({ content, isDark }) {
                 </button>
                 {isOpen && (
                   <>
-                    <div className="border-t border-[#dfe8dc] bg-[#f8faf5] px-7 pb-7 pt-5 text-base leading-7 text-[#42584a] sm:px-11 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-300">
+                    <div className="border-t border-[#dfe8dc] bg-[#f8faf5] px-7 pb-7 pt-5 text-base leading-7 text-[#42584a] sm:px-11 dark:border-[#2f4437] dark:bg-[#24382b]/80 dark:text-[#b7c9b8]">
                       {section.answer}
                     </div>
                     <span className="absolute bottom-0 right-0 h-14 w-14 bg-[#2a704d] [clip-path:polygon(100%_0,100%_100%,0_100%)]" aria-hidden="true" />

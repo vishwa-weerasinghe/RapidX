@@ -16,6 +16,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\PayHereController;
+use App\Http\Controllers\CustomerController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -115,6 +116,9 @@ Route::get('/user-upcoming-booking/{customerId}', [BookingController::class, 'up
 
 // Admin Dashboard Stats
 Route::get('/admin/stats', [DashboardController::class, 'stats']);
+
+Route::get('/admin/customers', [CustomerController::class, 'index'])
+    ->middleware('auth:sanctum');
 
 Route::get('/admin/bookings/unread-count', [BookingController::class, 'unreadCount']);
 

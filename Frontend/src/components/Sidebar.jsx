@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   Package,
   Users,
+  UserRound,
   Car,
   CalendarCheck,
   Image,
@@ -25,6 +26,7 @@ const adminLinks = [
   { to: "/admin/bookings", label: "Bookings", icon: CalendarCheck },
   { to: "/admin/media", label: "Media Gallery", icon: Image },
   { to: "/admin/reviews", label: "Reviews", icon: Star },
+  { to: "/admin/customers", label: "Customer Management", icon: UserRound },
   {
     to: "/admin/appointments",
     label: "Appointments",
