@@ -25,7 +25,7 @@ const adminLinks = [
   { to: "/admin/drivers", label: "Drivers", icon: Users },
   { to: "/admin/vehicles", label: "Vehicles", icon: Car },
   { to: "/admin/bookings", label: "Bookings", icon: CalendarCheck },
-  { to: "/admin/media", label: "Media Gallery", icon: Image },
+  { to: "/admin/media", label: "Media", icon: Image },
   { to: "/admin/reviews", label: "Reviews", icon: Star },
   { to: "/admin/customers", label: "Customer Management", icon: UserRound },
   {
