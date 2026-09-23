@@ -69,17 +69,8 @@ export function PackageCardSkeleton() {
           </div>
         </div>
 
-        {/* Price Row */}
-        <div className="flex items-center justify-between border-t border-gray-100 dark:border-[#2F4437] pt-4 mb-4">
-          <div className="space-y-1.5">
-            <div className="h-2.5 w-16 skeleton-shimmer rounded" />
-            <div className="h-3 w-20 skeleton-shimmer rounded" />
-          </div>
-          <div className="h-6 w-16 skeleton-shimmer rounded-lg" />
-        </div>
-
         {/* Action Button */}
-        <div className="h-11 w-full skeleton-shimmer rounded-full mt-1" />
+        <div className="h-11 w-full skeleton-shimmer rounded-full mt-4" />
       </div>
     </div>
   );
