@@ -309,36 +309,7 @@ export default function Register() {
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider">
-                  Phone Number
-                </label>
-                <div className="relative mt-1">
-                  <span className="absolute inset-y-0 left-0 z-10 flex items-center border-r border-white/20 px-3 text-sm font-semibold text-white">
-                    {selectedCountry ? `+${selectedCountry.callingCode}` : "--"}
-                  </span>
-                  <input
-                    type="tel"
-                    name="Phone_No"
-                    autoComplete="tel"
-                    required
-                    disabled={!countryCode}
-                    className="auth-glass-input block w-full min-h-[44px] rounded-lg border border-white/20 bg-white/10 py-2.5 pl-16 pr-3 text-white placeholder-gray-400 backdrop-blur-sm transition focus:border-castleton-300 focus:outline-none focus:ring-1 focus:ring-castleton-300 text-base sm:text-sm"
-                    placeholder={countryCode === "LK" ? "77 123 4567" : "Select a country first"}
-                    value={Phone_No}
-                    onChange={(e) => {
-                      setPhone_No(e.target.value);
-                      setErrors((current) => ({ ...current, Phone_No: undefined }));
-                    }}
-                  />
-                </div>
-                {errors.Phone_No && (
-                  <p className="mt-1 text-xs text-red-300 font-medium">
-                    {errors.Phone_No[0]}
-                  </p>
-                )}
-              </div>
-
+              {/* Country Selection */}
               <div>
                 <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider">
                   Country
@@ -395,6 +366,37 @@ export default function Register() {
                 {errors.Country && (
                   <p className="mt-1 text-xs text-red-300 font-medium">
                     {errors.Country[0]}
+                  </p>
+                )}
+              </div>
+
+              {/* Phone Number Input */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                  Phone Number
+                </label>
+                <div className="relative mt-1">
+                  <span className="absolute inset-y-0 left-0 z-10 flex items-center border-r border-white/20 px-3 text-sm font-semibold text-white">
+                    {selectedCountry ? `+${selectedCountry.callingCode}` : "--"}
+                  </span>
+                  <input
+                    type="tel"
+                    name="Phone_No"
+                    autoComplete="tel"
+                    required
+                    disabled={!countryCode}
+                    className="auth-glass-input block w-full min-h-[44px] rounded-lg border border-white/20 bg-white/10 py-2.5 pl-16 pr-3 text-white placeholder-gray-400 backdrop-blur-sm transition focus:border-castleton-300 focus:outline-none focus:ring-1 focus:ring-castleton-300 text-base sm:text-sm disabled:cursor-not-allowed disabled:opacity-60"
+                    placeholder={countryCode === "LK" ? "77 123 4567" : "Select a country first"}
+                    value={Phone_No}
+                    onChange={(e) => {
+                      setPhone_No(e.target.value);
+                      setErrors((current) => ({ ...current, Phone_No: undefined }));
+                    }}
+                  />
+                </div>
+                {errors.Phone_No && (
+                  <p className="mt-1 text-xs text-red-300 font-medium">
+                    {errors.Phone_No[0]}
                   </p>
                 )}
               </div>
