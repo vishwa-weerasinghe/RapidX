@@ -362,6 +362,7 @@ export default function App() {
     subject: "",
     message: "",
   });
+  const [otherSubject, setOtherSubject] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // --- REFS & DATA ---
@@ -480,9 +481,9 @@ export default function App() {
       // Active Section Navigation Tracker Spying Logic
       const sections = [
         "home",
+        "packages",
         "about",
         "safaris",
-        "packages",
         "reviews",
         "gallery",
         "contact",
@@ -556,7 +557,15 @@ export default function App() {
     setIsSubmitting(true);
 
     try {
-      const response = await api.post("/contact", formData);
+      const finalSubject =
+        formData.subject === "Other" && otherSubject.trim()
+          ? `Other: ${otherSubject.trim()}`.slice(0, 100)
+          : formData.subject;
+
+      const response = await api.post("/contact", {
+        ...formData,
+        subject: finalSubject,
+      });
       setNotification({
         text:
           response.data.message ||
@@ -564,6 +573,7 @@ export default function App() {
         type: "success",
       });
       setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
+      setOtherSubject("");
     } catch (err) {
       console.error(err);
       const errMsg =
@@ -783,7 +793,7 @@ export default function App() {
   const systemAverageRating =
     systemReviews.length > 0
       ? systemReviews.reduce((sum, rev) => sum + (Number(rev.rate) || 0), 0) /
-        systemReviews.length
+      systemReviews.length
       : 0;
   const systemFullStars = Math.round(systemAverageRating);
 
@@ -862,9 +872,9 @@ export default function App() {
               <ul className="flex items-center gap-0.5 lg:gap-1">
                 {[
                   "home",
+                  "packages",
                   "about",
                   "safaris",
-                  "packages",
                   "reviews",
                   "gallery",
                   "contact",
@@ -1052,9 +1062,9 @@ export default function App() {
                 <div className="grid grid-cols-2 gap-1.5">
                   {[
                     "home",
+                    "packages",
                     "about",
                     "safaris",
-                    "packages",
                     "reviews",
                     "gallery",
                     "contact",
@@ -1313,8 +1323,149 @@ export default function App() {
           </div>
         </section>
 
+        {/* --- TOUR PACKAGES --- */}
+        <section
+          id="packages"
+          className="py-20 bg-white border-t border-gray-100"
+        >
+          <div className="max-w-7xl mx-auto px-4 md:px-6">
+            {/* Section Header */}
+            <div className="text-center max-w-xl mx-auto mb-14">
+              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-50 text-castleton text-xs font-bold uppercase tracking-widest border border-gray-100">
+                <span className="w-2 h-2 rounded-full bg-castleton"></span>
+                Tour Packages
+              </span>
+
+              <h2 className="mt-5 font-outfit text-3xl sm:text-5xl font-bold text-gray-900">
+                Choose Your Adventure
+              </h2>
+
+              <p className="mt-4 text-gray-500">
+                Discover unforgettable safari experiences with expert guides,
+                comfortable jeeps, and affordable prices.
+              </p>
+            </div>
+
+            {/* Cards Grid: 2 per row */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10 max-w-5xl mx-auto">
+              {packagesLoading && packages.length === 0 ? (
+                Array.from({ length: 4 }).map((_, idx) => (
+                  <PackageCardSkeleton key={`pkg-skeleton-${idx}`} />
+                ))
+              ) : packages.length > 0 ? (
+                packages.map((pkg, idx) => {
+                  const relatedSection = getStaticBlogPackageSection(
+                    pkg.related_package
+                  );
+
+                  return (
+                    <div
+                      key={idx}
+                      className="w-full bg-white dark:bg-neutral-900 rounded-3xl overflow-hidden border border-gray-200 dark:border-neutral-800 shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col"
+                    >
+                      {/* Image */}
+                      <div className="relative h-64 sm:h-72 overflow-hidden bg-gray-50 dark:bg-neutral-800">
+                        <img
+                          src={pkg.img}
+                          alt={pkg.title}
+                          loading="lazy"
+                          className="w-full h-full object-cover object-center transition-transform duration-500 hover:scale-105"
+                        />
+
+                        {pkg.popular && (
+                          <span className="absolute top-4 right-4 bg-pink-600 text-white text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full border border-pink-500 shadow-md hover:scale-105 transition-all duration-300">
+                            Popular
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Content */}
+                      <div className="p-6 sm:p-7 flex flex-col flex-grow">
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                          {pkg.title}
+                        </h3>
+
+                        <div className="mb-4 max-h-32 overflow-auto">
+                          <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed whitespace-pre-line break-words">
+                            {pkg.desc}
+                          </p>
+                        </div>
+
+                        {/* Features */}
+                        <ul className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-600 dark:text-gray-300 mb-4">
+                          <li className="flex items-center gap-2">
+                            <span className="text-green-600 shrink-0">✓</span>
+                            <span>Professional Driver</span>
+                          </li>
+
+                          <li className="flex items-center gap-2">
+                            <span className="text-green-600 shrink-0">✓</span>
+                            <span>Comfortable Jeep</span>
+                          </li>
+
+                          <li className="flex items-center gap-2">
+                            <span className="text-green-600 shrink-0">✓</span>
+                            <span>Reasonable Prices</span>
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <span className="text-green-600 shrink-0">✓</span>
+                            <span>Entrance Ticket</span>
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <span className="text-green-600 shrink-0">✓</span>
+                            <span>Water Bottle</span>
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <span className="text-green-600 shrink-0">✓</span>
+                            <span>Binoculars</span>
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <span className="text-green-600 shrink-0">✓</span>
+                            <span>Pick-Up & Drop-Off</span>
+                          </li>
+                        </ul>
+
+                        {/* Buttons */}
+                        <div className="flex gap-3 mt-auto pt-4 border-t border-gray-100 dark:border-neutral-800">
+                          <button
+                            onClick={() => handleBookNow(pkg)}
+                            className="flex-1 bg-[#2E7D32] text-white font-bold text-center py-3 rounded-xl shadow-md hover:bg-[#1B5E20] hover:shadow-lg transition-all duration-300 transform hover:-translate-y-[2px] cursor-pointer"
+                          >
+                            Book Now
+                          </button>
+
+                          <button
+                            onClick={() => handleAddToCart(pkg)}
+                            className="flex-1 border-2 border-sacramento text-sacramento dark:text-emerald-400 dark:border-emerald-500/40 py-3 rounded-xl font-semibold hover:bg-sacramento/10 transition-colors cursor-pointer"
+                          >
+                            Add to Cart
+                          </button>
+                        </div>
+
+                        {relatedSection && (
+                          <Link
+                            to={`/blog#${relatedSection}`}
+                            className="mt-3 inline-flex items-center justify-center gap-1 text-sacramento dark:text-emerald-400 font-bold hover:underline transition-colors"
+                          >
+                            Read More
+                            <span className="text-xs">→</span>
+                          </Link>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="py-12 text-center text-gray-500">
+                  No packages available at the moment.
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
         {/* --- ABOUT SECTION --- */}
-        <section id="about" className="py-20 md:py-32 overflow-hidden bg-white">
+        <section id="about" className="py-20 md:py-32 overflow-hidden bg-white border-t border-gray-100">
           <div className="max-w-7xl mx-auto px-4 md:px-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
               {/* Image Side with Modern Overlap effect */}
@@ -1657,157 +1808,6 @@ export default function App() {
                   </div>
                 </div>
               ))}
-            </div>
-          </div>
-        </section>
-
-        {/* --- TOUR PACKAGES --- */}
-        <section
-          id="packages"
-          className="py-20 bg-white border-t border-gray-100"
-        >
-          <div className="max-w-7xl mx-auto px-4 md:px-6">
-            {/* Section Header */}
-            <div className="text-center max-w-xl mx-auto mb-14">
-              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-50 text-castleton text-xs font-bold uppercase tracking-widest border border-gray-100">
-                <span className="w-2 h-2 rounded-full bg-castleton"></span>
-                Tour Packages
-              </span>
-
-              <h2 className="mt-5 font-outfit text-3xl sm:text-5xl font-bold text-gray-900">
-                Choose Your Adventure
-              </h2>
-
-              <p className="mt-4 text-gray-500">
-                Discover unforgettable safari experiences with expert guides,
-                comfortable jeeps, and affordable prices.
-              </p>
-            </div>
-
-            {/* Cards Grid: 2 per row */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10 max-w-5xl mx-auto">
-              {packagesLoading && packages.length === 0 ? (
-                Array.from({ length: 4 }).map((_, idx) => (
-                  <PackageCardSkeleton key={`pkg-skeleton-${idx}`} />
-                ))
-              ) : packages.length > 0 ? (
-                packages.map((pkg, idx) => {
-                  const relatedSection = getStaticBlogPackageSection(
-                    pkg.related_package
-                  );
-
-                  return (
-                    <div
-                      key={idx}
-                      className="w-full bg-white dark:bg-neutral-900 rounded-3xl overflow-hidden border border-gray-200 dark:border-neutral-800 shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col"
-                    >
-                      {/* Image */}
-                      <div className="relative h-64 sm:h-72 overflow-hidden bg-gray-50 dark:bg-neutral-800">
-                        <img
-                          src={pkg.img}
-                          alt={pkg.title}
-                          loading="lazy"
-                          className="w-full h-full object-cover object-center transition-transform duration-500 hover:scale-105"
-                        />
-
-                        {pkg.popular && (
-                          <span className="absolute top-4 right-4 bg-pink-600 text-white text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full border border-pink-500 shadow-md hover:scale-105 transition-all duration-300">
-                            Popular
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Content */}
-                      <div className="p-6 sm:p-7 flex flex-col flex-grow">
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                          {pkg.title}
-                        </h3>
-
-                        <div className="mb-4 max-h-32 overflow-auto">
-                          <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed whitespace-pre-line break-words">
-                            {pkg.desc}
-                          </p>
-                        </div>
-
-                        {/* Features */}
-                        <ul className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-600 dark:text-gray-300 mb-4">
-                          <li className="flex items-center gap-2">
-                            <span className="text-green-600 shrink-0">✓</span>
-                            <span>Professional Driver</span>
-                          </li>
-
-                          <li className="flex items-center gap-2">
-                            <span className="text-green-600 shrink-0">✓</span>
-                            <span>Comfortable Jeep</span>
-                          </li>
-
-                          <li className="flex items-center gap-2">
-                            <span className="text-green-600 shrink-0">✓</span>
-                            <span>Reasonable Prices</span>
-                          </li>
-                          <li className="flex items-center gap-2">
-                            <span className="text-green-600 shrink-0">✓</span>
-                            <span>Entrance Ticket</span>
-                          </li>
-                          <li className="flex items-center gap-2">
-                            <span className="text-green-600 shrink-0">✓</span>
-                            <span>Water Bottle</span>
-                          </li>
-                          <li className="flex items-center gap-2">
-                            <span className="text-green-600 shrink-0">✓</span>
-                            <span>Binoculars</span>
-                          </li>
-                          <li className="flex items-center gap-2">
-                            <span className="text-green-600 shrink-0">✓</span>
-                            <span>Pick-Up & Drop-Off</span>
-                          </li>
-                        </ul>
-
-                        {/* Price */}
-                        <div className="flex items-center justify-between border-t border-gray-100 dark:border-neutral-800 pt-4 mb-4">
-                          <span className="text-sm text-gray-500 dark:text-gray-400">Starting From</span>
-
-                          <div className="text-right">
-                            <div className="text-2xl font-bold text-castleton dark:text-emerald-400">$ {pkg.price.toLocaleString()}</div>
-                            <div className="text-xs text-gray-500 dark:text-gray-400">per adult</div>
-                          </div>
-                        </div>
-
-                        {/* Buttons */}
-                        <div className="flex gap-3 mt-auto">
-                          <button
-                            onClick={() => handleBookNow(pkg)}
-                            className="flex-1 bg-[#2E7D32] text-white font-bold text-center py-3 rounded-xl shadow-md hover:bg-[#1B5E20] hover:shadow-lg transition-all duration-300 transform hover:-translate-y-[2px] cursor-pointer"
-                          >
-                            Book Now
-                          </button>
-
-                          <button
-                            onClick={() => handleAddToCart(pkg)}
-                            className="flex-1 border-2 border-sacramento text-sacramento dark:text-emerald-400 dark:border-emerald-500/40 py-3 rounded-xl font-semibold hover:bg-sacramento/10 transition-colors cursor-pointer"
-                          >
-                            Add to Cart
-                          </button>
-                        </div>
-
-                        {relatedSection && (
-                          <Link
-                            to={`/blog#${relatedSection}`}
-                            className="mt-3 inline-flex items-center justify-center gap-1 text-sacramento dark:text-emerald-400 font-bold hover:underline transition-colors"
-                          >
-                            Read More
-                            <span className="text-xs">→</span>
-                          </Link>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })
-              ) : (
-                <div className="py-12 text-center text-gray-500">
-                  No packages available at the moment.
-                </div>
-              )}
             </div>
           </div>
         </section>
@@ -2343,13 +2343,18 @@ export default function App() {
                       </div>
                       <div className="space-y-1">
                         <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wide ml-1">
-                          Safari Type
+                          Safari Package / Inquiry
                         </label>
                         <div className="relative">
                           <select
                             name="subject"
                             value={formData.subject}
-                            onChange={handleFormChange}
+                            onChange={(e) => {
+                              handleFormChange(e);
+                              if (e.target.value !== "Other") {
+                                setOtherSubject("");
+                              }
+                            }}
                             required
                             className="w-full px-5 py-4 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-castleton/50 transition-all appearance-none cursor-pointer bg-gray-50 border border-gray-200 text-gray-900 focus:bg-white"
                           >
@@ -2358,12 +2363,52 @@ export default function App() {
                               disabled
                               className="text-neutral-400"
                             >
-                              Select Destination...
+                              Select Package or Topic...
                             </option>
-                            <option value="minneriya">Minneriya Safari</option>
-                            <option value="kaudulla">Kaudulla Safari</option>
-                            <option value="wasgamuwa">Wasgamuwa Safari</option>
-                            <option value="hurulu">Hurulu Eco Park</option>
+                            <option value="All Packages">
+                              All Packages (Multiple / Combined Tour)
+                            </option>
+                            {packages && packages.length > 0 ? (
+                              packages.map((pkg) => {
+                                const pkgName = pkg.title || pkg.Package_Name;
+                                return (
+                                  <option
+                                    key={pkg.id || pkgName}
+                                    value={pkgName}
+                                  >
+                                    {pkgName}
+                                  </option>
+                                );
+                              })
+                            ) : (
+                              <>
+                                <option value="Minneriya National Park Safari">
+                                  Minneriya National Park Safari
+                                </option>
+                                <option value="Kaudulla National Park Safari">
+                                  Kaudulla National Park Safari
+                                </option>
+                                <option value="Wasgamuwa National Park Safari">
+                                  Wasgamuwa National Park Safari
+                                </option>
+                                <option value="Hurulu Eco Park Safari">
+                                  Hurulu Eco Park Safari
+                                </option>
+                                <option value="Full Day Safari Experience">
+                                  Full Day Safari Experience
+                                </option>
+                                <option value="Sigiriya / Pidurangala & Safari Tour">
+                                  Sigiriya / Pidurangala & Safari Tour
+                                </option>
+                                <option value="Dambulla Cultural & Safari Tour">
+                                  Dambulla Cultural & Safari Tour
+                                </option>
+                                <option value="Village Tour">
+                                  Village Tour
+                                </option>
+                              </>
+                            )}
+                            <option value="Other">Other / Custom Inquiry</option>
                           </select>
                           <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-castleton">
                             <svg
@@ -2383,6 +2428,22 @@ export default function App() {
                         </div>
                       </div>
                     </div>
+
+                    {formData.subject === "Other" && (
+                      <div className="space-y-1 transition-all duration-300">
+                        <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wide ml-1">
+                          Specify Other Package or Topic
+                        </label>
+                        <input
+                          type="text"
+                          value={otherSubject}
+                          onChange={(e) => setOtherSubject(e.target.value)}
+                          placeholder="e.g. Custom Photography Tour, Camping & Safari, Airport Transfer..."
+                          maxLength={80}
+                          className="w-full px-5 py-4 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-castleton/50 transition-all bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 focus:bg-white"
+                        />
+                      </div>
+                    )}
 
                     <div className="space-y-1">
                       <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wide ml-1">
