@@ -17,6 +17,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\PayHereController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\PromotionCodeController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -143,6 +144,14 @@ Route::get('/cart/{customerId}', [CartController::class, 'index']);
 Route::post('/cart', [CartController::class, 'store']);
 
 Route::delete('/cart/{bookingId}', [CartController::class, 'destroy']);
+
+// Promotion Codes (Public validation)
+Route::post('/promotion-codes/validate', [PromotionCodeController::class, 'validateCode']);
+
+// Promotion Codes (Admin)
+Route::apiResource('promotion-codes', PromotionCodeController::class)
+    ->only(['index', 'store', 'update', 'destroy'])
+    ->middleware('auth:sanctum');
 
 // PayHere Payment Gateway
 Route::post('/payhere/initiate', [PayHereController::class, 'initiate'])

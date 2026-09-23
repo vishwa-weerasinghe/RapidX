@@ -26,6 +26,11 @@ export default function Cart() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [checkingOut, setCheckingOut] = useState(false);
+  const [promoCode, setPromoCode] = useState("");
+  const [promoDiscount, setPromoDiscount] = useState(null);
+  const [promoError, setPromoError] = useState("");
+  const [validPromoCode, setValidPromoCode] = useState("");
+  const [validatingPromo, setValidatingPromo] = useState(false);
 
   useEffect(() => {
     if (!activeCustomer) {
@@ -72,6 +77,7 @@ export default function Cart() {
       const res = await api.post("/payhere/initiate", {
         checkout_type: "cart",
         Customer_ID: activeCustomer.Customer_ID,
+        promotion_code: validPromoCode || undefined,
       });
 
       const { payhere_params } = res.data;
@@ -99,12 +105,34 @@ export default function Cart() {
     }
   };
 
-  // Calculate overall cart total
   const getCartTotal = () => {
-    return cartItems.reduce((sum, item) => {
+    const total = cartItems.reduce((sum, item) => {
       // payment column contains cost
       return sum + Number(item.booking?.Payment || 0);
     }, 0);
+
+    if (promoDiscount) {
+      return Math.max(0, total - (total * (promoDiscount.discount_value / 100)));
+    }
+    return total;
+  };
+
+  const validatePromoCode = async () => {
+    if (!promoCode.trim()) return;
+    try {
+      setValidatingPromo(true);
+      setPromoError("");
+      const res = await api.post("/promotion-codes/validate", { code: promoCode });
+      setPromoDiscount(res.data.promotion);
+      setValidPromoCode(promoCode);
+    } catch (err) {
+      console.error(err);
+      setPromoError(err.response?.data?.message || "Invalid promotion code");
+      setPromoDiscount(null);
+      setValidPromoCode("");
+    } finally {
+      setValidatingPromo(false);
+    }
   };
 
   if (loading) {
@@ -255,10 +283,37 @@ export default function Cart() {
                   <span>Taxes & Service Fees</span>
                   <span className={`font-semibold ${theme === "dark" ? "text-castleton-300" : "text-sacramento"}`}>Included</span>
                 </div>
+                
+                {/* Promo Code Input */}
+                <div className="pt-2">
+                  <div className="flex gap-2">
+                    <input 
+                      type="text" 
+                      placeholder="Promo Code" 
+                      className={`flex-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sacramento/50 ${theme === "dark" ? "bg-bg-dark border-border-dark text-white" : "bg-white border-border-light text-charcoal"}`}
+                      value={promoCode}
+                      onChange={(e) => setPromoCode(e.target.value)}
+                    />
+                    <button 
+                      onClick={validatePromoCode}
+                      disabled={validatingPromo || !promoCode.trim()}
+                      className="px-4 py-2 bg-sacramento text-white text-sm font-semibold rounded-lg disabled:opacity-50"
+                    >
+                      {validatingPromo ? "..." : "Apply"}
+                    </button>
+                  </div>
+                  {promoError && <p className="text-red-500 text-xs mt-1">{promoError}</p>}
+                  {promoDiscount && (
+                    <p className="text-green-500 text-xs mt-1">
+                      Code applied! {promoDiscount.discount_value}% off
+                    </p>
+                  )}
+                </div>
+
                 <div className={`flex justify-between items-center pt-3 border-t font-bold text-base border-border-light dark:border-border-dark ${theme === "dark" ? "text-white" : "text-charcoal"}`}>
                   <span>Total Amount</span>
                   <span className={`text-xl ${theme === "dark" ? "text-castleton-300" : "text-sacramento"}`}>
-                    $ {getCartTotal().toLocaleString()}
+                    $ {getCartTotal().toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                   </span>
                 </div>
               </div>

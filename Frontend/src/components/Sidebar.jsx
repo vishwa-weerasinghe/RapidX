@@ -16,6 +16,7 @@ import {
   LogOut,
   ArrowLeft,
   Home,
+  Tag,
 } from "lucide-react";
 
 const adminLinks = [
@@ -32,6 +33,7 @@ const adminLinks = [
     label: "Appointments",
     icon: CalendarCheck,
   },
+  { to: "/admin/promotion-codes", label: "Promotion Codes", icon: Tag },
 ];
 
 const customerLinks = [
