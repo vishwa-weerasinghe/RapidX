@@ -1,4 +1,17 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  endOfMonth,
+  endOfWeek,
+  endOfYear,
+  format,
+  isValid,
+  parseISO,
+  startOfMonth,
+  startOfWeek,
+  startOfYear,
+  subMonths,
+  subYears,
+} from "date-fns";
 import api from "../../axios";
 import { useNavigate } from "react-router-dom";
 import { pickupTimeOptions } from "../../constants/pickupTimeOptions";
@@ -47,11 +60,78 @@ const getAssignedVehicles = (booking) => {
 const isUnseenAdminBooking = (booking) =>
   booking?.Admin_Seen === false || booking?.Admin_Seen === 0 || booking?.Admin_Seen === "0";
 
+// Booking IDs come back from the API as numbers (or numeric strings), so every
+// comparison and lookup goes through this normaliser.
+const getBookingId = (booking) => Number(booking?.Booking_ID || 0);
+
+// `parseISO()` throws on null/undefined, so empty inputs are filtered out first.
+const parseDateInput = (value) => {
+  if (!value) return null;
+
+  const parsed = parseISO(value);
+  return isValid(parsed) ? parsed : null;
+};
+
+// Mirrors the period boundaries the backend applies (Monday -> Sunday weeks,
+// calendar months/years) so the summary shown to the admin is exactly the
+// range the server queried rather than a second, possibly different guess.
+const periodRange = (period, fromDate, toDate) => {
+  const today = new Date();
+
+  switch (period) {
+    case "this_week":
+      return [
+        startOfWeek(today, { weekStartsOn: 1 }),
+        endOfWeek(today, { weekStartsOn: 1 }),
+      ];
+    case "this_month":
+      return [startOfMonth(today), endOfMonth(today)];
+    case "last_month": {
+      const lastMonth = subMonths(today, 1);
+      return [startOfMonth(lastMonth), endOfMonth(lastMonth)];
+    }
+    case "this_year":
+      return [startOfYear(today), endOfYear(today)];
+    case "last_year": {
+      const lastYear = subYears(today, 1);
+      return [startOfYear(lastYear), endOfYear(lastYear)];
+    }
+    case "custom":
+      return [parseDateInput(fromDate), parseDateInput(toDate)];
+    default:
+      return [null, null];
+  }
+};
+
+const formatPeriodRange = ([from, to]) => {
+  const fmt = (date) => (date ? format(date, "d MMM yyyy") : null);
+
+  if (from && to) return `${fmt(from)} to ${fmt(to)}`;
+  if (from) return `from ${fmt(from)}`;
+  if (to) return `up to ${fmt(to)}`;
+  return "";
+};
+
+// A "<select>" value is always a string, so the same period list is reused for
+// both the dropdown options and the summary label.
+const PERIOD_OPTIONS = [
+  { value: "this_week", label: "This Week" },
+  { value: "this_month", label: "This Month" },
+  { value: "last_month", label: "Last Month" },
+  { value: "this_year", label: "This Year" },
+  { value: "last_year", label: "Last Year" },
+  { value: "all_time", label: "All Time" },
+  { value: "custom", label: "Custom Date Range" },
+];
+
 export default function Bookings() {
   const [bookings, setBookings] = useState([]);
   const [vehicles, setVehicles] = useState([]);
   const [packages, setPackages] = useState([]);
   const [search, setSearch] = useState("");
+  const [period, setPeriod] = useState("this_month");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -59,44 +139,57 @@ export default function Bookings() {
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [newBookingIds, setNewBookingIds] = useState(new Set());
   const [notificationBookingIds, setNotificationBookingIds] = useState(new Set());
-  const [showNewOnly, setShowNewOnly] = useState(false);
+  // The "new bookings only" view has no UI toggle yet, so it stays off and the
+  // table always shows every booking the API returned for the current filter.
+  const showNewOnly = false;
   const [showNotifications, setShowNotifications] = useState(false);
   const [assignmentModal, setAssignmentModal] = useState(null);
   const [savingAssignment, setSavingAssignment] = useState(false);
   const bookingsRef = useRef(bookings);
+  const periodRef = useRef(period);
+  const searchRef = useRef(search);
+  const fromDateRef = useRef(fromDate);
+  const toDateRef = useRef(toDate);
+  const filterDebounceRef = useRef(null);
+  const filterEffectInitialized = useRef(false);
 
   const navigate = useNavigate();
 
-  const getBookingId = (booking) => Number(booking?.Booking_ID || 0);
+  // Query parameters shared by every list request (initial load, filter change
+  // and the auto-refresh poll) so period + search are always applied together
+  // on the server instead of being filtered in the browser.
+  const buildBookingParams = useCallback(() => {
+    const params = { period: periodRef.current };
+    const trimmedSearch = searchRef.current.trim();
 
-  useEffect(() => {
-    bookingsRef.current = bookings;
-  }, [bookings]);
+    if (trimmedSearch) {
+      params.search = trimmedSearch;
+    }
 
-  useEffect(() => {
-    fetchData();
-    fetchPackages();
+    if (periodRef.current === "custom" && (fromDateRef.current || toDateRef.current)) {
+      if (fromDateRef.current) params.from_date = fromDateRef.current;
+      if (toDateRef.current) params.to_date = toDateRef.current;
+    }
+
+    // A custom range with no dates yet must not accidentally load everything,
+    // and an inverted range would silently render an empty table.
+    if (periodRef.current === "custom") {
+      const from = fromDateRef.current;
+      const to = toDateRef.current;
+
+      if (!from && !to) return null;
+      if (from && to && from > to) return null;
+    }
+
+    return params;
   }, []);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      api.get("/bookings").then((response) => {
-        const latest = response.data || [];
-        setBookings(latest);
-        setNewBookingIds(new Set(
-          latest.filter(isUnseenAdminBooking).map(getBookingId)
-        ));
-      }).catch(() => { });
-
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
+      const params = buildBookingParams();
+
       const [bookingsResponse, vehiclesResponse] = await Promise.all([
-        api.get("/bookings"),
+        params ? api.get("/bookings", { params }) : Promise.resolve({ data: [] }),
         api.get("/vehicles"),
       ]);
 
@@ -113,9 +206,9 @@ export default function Bookings() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [buildBookingParams]);
 
-  const fetchPackages = async () => {
+  const fetchPackages = useCallback(async () => {
     try {
       const res = await api.get("/packages");
       setPackages(res.data);
@@ -127,7 +220,76 @@ export default function Bookings() {
     } catch (err) {
       console.error(err);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    bookingsRef.current = bookings;
+  }, [bookings]);
+
+  useEffect(() => {
+    periodRef.current = period;
+  }, [period]);
+
+  useEffect(() => {
+    searchRef.current = search;
+  }, [search]);
+
+  useEffect(() => {
+    fromDateRef.current = fromDate;
+  }, [fromDate]);
+
+  useEffect(() => {
+    toDateRef.current = toDate;
+  }, [toDate]);
+
+  useEffect(() => {
+    fetchData();
+    fetchPackages();
+  }, [fetchData, fetchPackages]);
+
+  // Single value that changes whenever any filter input changes, so the effect
+  // below can re-query without listing each source of state separately.
+  const filterKey = `${period}|${search}|${fromDate}|${toDate}`;
+
+  // Keep the list scoped to the selected booking period + search on the server.
+  useEffect(() => {
+    if (!filterEffectInitialized.current) {
+      filterEffectInitialized.current = true;
+      return;
+    }
+
+    if (filterDebounceRef.current) {
+      window.clearTimeout(filterDebounceRef.current);
+    }
+
+    filterDebounceRef.current = window.setTimeout(() => {
+      fetchData();
+    }, 450);
+
+    return () => {
+      if (filterDebounceRef.current) {
+        window.clearTimeout(filterDebounceRef.current);
+      }
+    };
+  }, [fetchData, filterKey]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const params = buildBookingParams();
+      if (!params) return;
+
+      api.get("/bookings", { params }).then((response) => {
+        const latest = response.data || [];
+        setBookings(latest);
+        setNewBookingIds(new Set(
+          latest.filter(isUnseenAdminBooking).map(getBookingId)
+        ));
+      }).catch(() => { });
+
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [buildBookingParams]);
 
   const openAssignModal = (booking) => {
     const required = calculateRequiredVehicles(booking);
@@ -291,23 +453,41 @@ export default function Bookings() {
     }
   };
 
+  const handlePeriodChange = (event) => {
+    const value = event.target.value;
+    setPeriod(value);
+
+    // Leaving the custom picker clears the range so it does not leak into
+    // another period (or force a reload with stale dates).
+    if (period === "custom" && value !== "custom") {
+      setFromDate("");
+      setToDate("");
+    }
+  };
+
+  const handleSearchChange = (event) => {
+    setSearch(event.target.value);
+  };
+
+  // Search + date period filtering happen on the backend (`/bookings`), so the
+  // list returned by the API is already scoped. Only the "new bookings" toggle
+  // still narrows things down client-side.
   const filteredBookings = bookings.filter((booking) => {
-    const query = search.trim().toLowerCase();
-    const customerName = `${booking.customer?.First_Name ?? ""} ${booking.customer?.Last_Name ?? ""}`;
-
-    const matchesSearch = (
-      String(booking.Booking_ID ?? "").toLowerCase().includes(query) ||
-      customerName.toLowerCase().includes(query) ||
-      booking.package?.Package_Name?.toLowerCase().includes(query) ||
-      booking.Booking_Date?.toLowerCase().includes(query) ||
-      booking.Pickup_Time?.toLowerCase().includes(query) ||
-      booking.Pickup_Location?.toLowerCase().includes(query) ||
-      booking.Status?.toLowerCase().includes(query)
-    );
-
-    if (!showNewOnly) return matchesSearch;
-    return matchesSearch && notificationBookingIds.has(getBookingId(booking));
+    if (!showNewOnly) return true;
+    return notificationBookingIds.has(getBookingId(booking));
   });
+
+  const hasNoCustomDates = period === "custom" && !fromDate && !toDate;
+  const hasInvertedCustomRange =
+    period === "custom" && Boolean(fromDate) && Boolean(toDate) && fromDate > toDate;
+
+  // ISO date strings ("YYYY-MM-DD") compare correctly as plain strings.
+  const activeRangeLabel = period === "all_time"
+    ? ""
+    : formatPeriodRange(periodRange(period, fromDate, toDate));
+
+  const activePeriodLabel =
+    PERIOD_OPTIONS.find((option) => option.value === period)?.label || "This Month";
 
   if (loading) {
     return (
@@ -392,16 +572,103 @@ export default function Bookings() {
         <p className="mb-6 text-sm text-muted">No new bookings to show.</p>
       )}
 
-      <div className="flex flex-col gap-4 md:flex-row md:items-center mb-6">
+      {/* Search + Booking Period are stacked vertically: the period dropdown
+          sits directly under the search bar, and the table follows below. */}
+      <div className="mb-6 flex flex-col items-start gap-4">
         <input
           type="search"
           value={search}
-          onChange={(event) => setSearch(event.target.value)}
+          onChange={handleSearchChange}
           placeholder="Search ID, customer, package, date, location, or status..."
           aria-label="Search bookings"
           className="form-input w-full max-w-xl"
         />
+
+        <div className="flex w-full max-w-xl flex-col gap-1">
+          <label
+            htmlFor="booking-period"
+            className="text-xs font-semibold text-charcoal dark:text-white"
+          >
+            Booking Period
+          </label>
+          <select
+            id="booking-period"
+            value={period}
+            onChange={handlePeriodChange}
+            className="form-input"
+            aria-label="Booking period"
+          >
+            {PERIOD_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {period === "custom" && (
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-col gap-1">
+              <label
+                htmlFor="booking-from-date"
+                className="text-xs font-semibold text-charcoal dark:text-white"
+              >
+                From Date
+              </label>
+              <input
+                id="booking-from-date"
+                type="date"
+                value={fromDate}
+                onChange={(event) => setFromDate(event.target.value)}
+                className="form-input"
+              />
+            </div>
+            <span className="text-sm text-muted">to</span>
+            <div className="flex flex-col gap-1">
+              <label
+                htmlFor="booking-to-date"
+                className="text-xs font-semibold text-charcoal dark:text-white"
+              >
+                To Date
+              </label>
+              <input
+                id="booking-to-date"
+                type="date"
+                value={toDate}
+                onChange={(event) => setToDate(event.target.value)}
+                className="form-input"
+              />
+            </div>
+          </div>
+        )}
       </div>
+
+      {hasNoCustomDates && (
+        <p className="mb-6 text-sm text-muted">
+          Select a From Date and To Date to view bookings in that range.
+        </p>
+      )}
+
+      {hasInvertedCustomRange && (
+        <p className="mb-6 text-sm font-semibold text-red-600 dark:text-red-400" role="alert">
+          The From Date must be on or before the To Date.
+        </p>
+      )}
+
+      {!hasNoCustomDates && !hasInvertedCustomRange && (
+        <p className="mb-6 text-sm text-muted">
+          Showing{" "}
+          <span className="font-semibold text-charcoal dark:text-white">
+            {filteredBookings.length}
+          </span>{" "}
+          booking{filteredBookings.length === 1 ? "" : "s"} for{" "}
+          <span className="font-semibold text-charcoal dark:text-white">
+            {activePeriodLabel}
+          </span>
+          {activeRangeLabel ? ` (${activeRangeLabel})` : ""}
+          {search.trim() ? ` matching “${search.trim()}”` : ""}.
+        </p>
+      )}
 
       {assignmentModal && (() => {
         const modalBooking = assignmentModal.booking;
@@ -724,10 +991,14 @@ export default function Bookings() {
           <tbody>
             {filteredBookings.length === 0 ? (
               <tr>
-                <td colSpan="13" className="py-6 text-center text-muted">
-                  {bookings.length === 0
-                    ? "No bookings found."
-                    : "No bookings match your search."}
+                <td colSpan="14" className="py-6 text-center text-muted">
+                  {hasNoCustomDates
+                    ? "Select From and To dates to view bookings in this range."
+                    : hasInvertedCustomRange
+                      ? "The From Date must be on or before the To Date."
+                      : search.trim()
+                        ? `No bookings match “${search.trim()}” in ${activePeriodLabel}${activeRangeLabel ? ` (${activeRangeLabel})` : ""}.`
+                        : `No bookings found for ${activePeriodLabel}${activeRangeLabel ? ` (${activeRangeLabel})` : ""}. Try another booking period or All Time.`}
                 </td>
               </tr>
             ) : (

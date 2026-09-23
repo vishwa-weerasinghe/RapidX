@@ -1,0 +1,24 @@
+{
+  // Gives VS Code's TypeScript/JS language service an explicit project rooted
+  // at Frontend/ instead of the fragile "inferred project" it falls back to
+  // when no config exists. Without this, stale in-memory paths survive case
+  // changes and VS Code reports false TS1149 "differs only in casing" errors.
+  "compilerOptions": {
+    "target": "ESNext",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "allowJs": true,
+    "checkJs": false,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    // Provides the `import.meta.env` typing used in src/axios.js.
+    "types": ["vite/client"]
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
+}
