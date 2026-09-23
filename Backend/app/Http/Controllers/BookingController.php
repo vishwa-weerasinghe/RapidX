@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
+use Carbon\WeekDay;
 use Illuminate\Http\Request;
 
 class BookingController extends Controller
@@ -18,11 +19,126 @@ class BookingController extends Controller
     // =========================
     // GET ALL BOOKINGS (ADMIN)
     // =========================
-    public function index()
+    // Supports optional query params so the admin screen never has to load
+    // every booking into the browser:
+    //   period     -> this_week | this_month | last_month | this_year |
+    //                 last_year | all_time | custom
+    //   from_date  -> inclusive range start (only used when period=custom)
+    //   to_date    -> inclusive range end (only used when period=custom)
+    //   search     -> free-text across ID, customer, package, date, time,
+    //                 pickup location, area and status
+    public function index(Request $request)
     {
+        $query = Booking::with(['customer', 'package', 'vehicle.driver', 'vehicles.driver']);
+
+        $this->applyPeriodFilter($query, $request);
+        $this->applySearchFilter($query, $request);
+
+        // Order by the column the period filter works on so the filtered list
+        // reads chronologically (newest safari date first) instead of looking
+        // like an unrelated pile of rows. Booking_ID breaks date ties.
         return response()->json(
-            Booking::with(['customer', 'package', 'vehicle.driver', 'vehicles.driver'])->latest()->get()
+            $query->orderByDesc('Booking_Date')->orderByDesc('Booking_ID')->get()
         );
+    }
+
+    /**
+     * Restrict the query to a booking date period.
+     *
+     * When no `period` is supplied (or the value is `all_time`) the query is
+     * left untouched so existing API consumers keep getting all bookings.
+     */
+    private function applyPeriodFilter($query, Request $request): void
+    {
+        $period = trim((string) ($request->query('period') ?? ''));
+
+        $from = null;
+        $to = null;
+
+        switch ($period) {
+            case 'this_week':
+                // Monday -> Sunday of the current week.
+                // Carbon instances are mutable, so `addDays()` must run on a
+                // copy: `$from->addDays(6)` would move $from forward by 6 days
+                // and collapse the range into a single Sunday.
+                $from = now()->startOfWeek(WeekDay::Monday);
+                $to = $from->copy()->addDays(6);
+                break;
+            case 'this_month':
+                $from = now()->startOfMonth();
+                $to = now()->endOfMonth();
+                break;
+            case 'last_month':
+                $from = now()->subMonth()->startOfMonth();
+                $to = now()->subMonth()->endOfMonth();
+                break;
+            case 'this_year':
+                $from = now()->startOfYear();
+                $to = now()->endOfYear();
+                break;
+            case 'last_year':
+                $from = now()->subYear()->startOfYear();
+                $to = now()->subYear()->endOfYear();
+                break;
+            case 'custom':
+                $from = trim((string) ($request->query('from_date') ?? ''));
+                $to = trim((string) ($request->query('to_date') ?? ''));
+                break;
+            default:
+                // all_time (or an unknown value) => no date restriction
+                return;
+        }
+
+        if ($from !== '') {
+            $query->whereDate('Booking_Date', '>=', $this->formatDate($from));
+        }
+
+        if ($to !== '') {
+            $query->whereDate('Booking_Date', '<=', $this->formatDate($to));
+        }
+    }
+
+    /**
+     * Free-text search across the columns and relations that the admin
+     * booking table exposes. Combined with the period filter it only ever
+     * matches bookings inside the selected date range.
+     */
+    private function applySearchFilter($query, Request $request): void
+    {
+        $search = trim((string) ($request->query('search') ?? ''));
+
+        if ($search === '') {
+            return;
+        }
+
+        $like = "%{$search}%";
+
+        $query->where(function ($q) use ($like) {
+            $q
+                ->where('Booking_ID', 'like', $like)
+                ->orWhere('Booking_Date', 'like', $like)
+                ->orWhere('Pickup_Time', 'like', $like)
+                ->orWhere('Pickup_Location', 'like', $like)
+                ->orWhere('Area', 'like', $like)
+                ->orWhere('Status', 'like', $like)
+                ->orWhereHas('customer', function ($customer) use ($like) {
+                    $customer
+                        ->where('First_Name', 'like', $like)
+                        ->orWhere('Last_Name', 'like', $like);
+                })
+                ->orWhereHas('package', function ($package) use ($like) {
+                    $package->where('Package_Name', 'like', $like);
+                });
+        });
+    }
+
+    private function formatDate($value): string
+    {
+        if ($value instanceof \Carbon\CarbonInterface) {
+            return $value->toDateString();
+        }
+
+        return trim((string) $value);
     }
 
     // =========================

@@ -72,6 +72,47 @@ class BookingControllerTest extends TestCase
         ]);
     }
 
+    protected function createAdmin(): User
+    {
+        return User::create([
+            'User_Name' => 'Admin User',
+            'Email' => fake()->unique()->safeEmail(),
+            'Password' => bcrypt('Password123'),
+            'role' => 'admin',
+        ]);
+    }
+
+    protected function createNamedPackage(string $name): Package
+    {
+        $package = Package::create([
+            'Package_Name' => $name,
+            'Description' => 'A sample package',
+            'price_one_adult' => 1000,
+            'price_more_adult' => 1000,
+            'price_child' => 500,
+        ]);
+
+        DB::table('packages')->where('id', $package->id)->update(['Package_ID' => $package->id]);
+
+        return $package;
+    }
+
+    protected function createBookingOnDate(string $date, array $overrides = []): Booking
+    {
+        return Booking::create(array_merge([
+            'Booking_Date' => $date,
+            'Pickup_Time' => '10:00:00',
+            'Pickup_Location' => 'Colombo',
+            'No_of_adults' => 2,
+            'No_of_child' => 0,
+            'Payment' => 1000,
+            'Status' => 'Pending',
+            'Customer_ID' => $this->createCustomer()->Customer_ID,
+            'Package_ID' => $this->createPackage()->id,
+            'Vehicle_ID' => null,
+        ], $overrides));
+    }
+
     public function test_index_returns_bookings_successfully(): void
     {
         $customer = $this->createCustomer();
@@ -561,5 +602,221 @@ class BookingControllerTest extends TestCase
         $response->assertJsonMissing([
             'Booking_ID' => $seenBooking->Booking_ID,
         ]);
+    }
+
+    // ── Booking period + search filtering ───────────────────────────────
+
+    public function test_index_filters_bookings_by_custom_date_range(): void
+    {
+        $inRange = $this->createBookingOnDate('2026-07-15');
+        $beforeRange = $this->createBookingOnDate('2026-07-01');
+        $afterRange = $this->createBookingOnDate('2026-07-31');
+
+        $response = $this->actingAs($this->createAdmin(), 'sanctum')
+            ->getJson('/api/bookings?period=custom&from_date=2026-07-10&to_date=2026-07-20');
+
+        $response->assertStatus(200)
+            ->assertJsonCount(1)
+            ->assertJsonFragment(['Booking_ID' => $inRange->Booking_ID])
+            ->assertJsonMissing(['Booking_ID' => $beforeRange->Booking_ID])
+            ->assertJsonMissing(['Booking_ID' => $afterRange->Booking_ID]);
+    }
+
+    public function test_index_filter_by_search_matches_customer_name(): void
+    {
+        $matchingCustomer = Customer::create([
+            'First_Name' => 'Nimal',
+            'Last_Name' => 'Perera',
+            'Email' => fake()->unique()->safeEmail(),
+            'Phone_No' => '0771234567',
+            'NIC' => '123456789V',
+            'Country' => 'Sri Lanka',
+        ]);
+        $matching = $this->createBookingOnDate('2026-07-15', ['Customer_ID' => $matchingCustomer->Customer_ID]);
+        $other = $this->createBookingOnDate('2026-07-16');
+
+        $response = $this->actingAs($this->createAdmin(), 'sanctum')
+            ->getJson('/api/bookings?search=Nimal');
+
+        $response->assertStatus(200)
+            ->assertJsonCount(1)
+            ->assertJsonFragment(['Booking_ID' => $matching->Booking_ID])
+            ->assertJsonMissing(['Booking_ID' => $other->Booking_ID]);
+    }
+
+    public function test_index_filter_by_search_matches_package_name(): void
+    {
+        $package = $this->createNamedPackage('Elephant Safari Deluxe');
+        $matching = $this->createBookingOnDate('2026-07-15', ['Package_ID' => $package->id]);
+        $other = $this->createBookingOnDate('2026-07-16');
+
+        $response = $this->actingAs($this->createAdmin(), 'sanctum')
+            ->getJson('/api/bookings?search=Safari%20Deluxe');
+
+        $response->assertStatus(200)
+            ->assertJsonCount(1)
+            ->assertJsonFragment(['Booking_ID' => $matching->Booking_ID])
+            ->assertJsonMissing(['Booking_ID' => $other->Booking_ID]);
+    }
+
+    public function test_index_search_is_scoped_to_the_selected_period(): void
+    {
+        $customer = Customer::create([
+            'First_Name' => 'Kasun',
+            'Last_Name' => 'Silva',
+            'Email' => fake()->unique()->safeEmail(),
+            'Phone_No' => '0771234567',
+            'NIC' => '123456789V',
+            'Country' => 'Sri Lanka',
+        ]);
+        $inPeriod = $this->createBookingOnDate('2026-07-15', ['Customer_ID' => $customer->Customer_ID]);
+        $outsidePeriod = $this->createBookingOnDate('2026-06-15', [
+            'Customer_ID' => $customer->Customer_ID,
+            'Pickup_Location' => 'Jaffna',
+        ]);
+
+        $response = $this->actingAs($this->createAdmin(), 'sanctum')
+            ->getJson('/api/bookings?period=custom&from_date=2026-07-01&to_date=2026-07-31&search=Kasun');
+
+        $response->assertStatus(200)
+            ->assertJsonCount(1)
+            ->assertJsonFragment(['Booking_ID' => $inPeriod->Booking_ID])
+            ->assertJsonMissing(['Booking_ID' => $outsidePeriod->Booking_ID]);
+    }
+
+    public function test_index_filters_bookings_for_this_week(): void
+    {
+        try {
+            // 2026-08-15 is a Saturday, so the Monday->Sunday week is
+            // 2026-08-10 .. 2026-08-16.
+            \Illuminate\Support\Carbon::setTestNow(\Carbon\Carbon::parse('2026-08-15'));
+
+            $weekStart = $this->createBookingOnDate('2026-08-10');
+            $weekEnd = $this->createBookingOnDate('2026-08-16');
+            $beforeWeek = $this->createBookingOnDate('2026-08-09');
+            $afterWeek = $this->createBookingOnDate('2026-08-17');
+
+            $response = $this->actingAs($this->createAdmin(), 'sanctum')
+                ->getJson('/api/bookings?period=this_week');
+
+            $response->assertStatus(200)
+                ->assertJsonCount(2)
+                ->assertJsonFragment(['Booking_ID' => $weekStart->Booking_ID])
+                ->assertJsonFragment(['Booking_ID' => $weekEnd->Booking_ID])
+                ->assertJsonMissing(['Booking_ID' => $beforeWeek->Booking_ID])
+                ->assertJsonMissing(['Booking_ID' => $afterWeek->Booking_ID]);
+        } finally {
+            \Illuminate\Support\Carbon::setTestNow(null);
+        }
+    }
+
+    public function test_index_filters_bookings_for_last_month(): void
+    {
+        try {
+            \Illuminate\Support\Carbon::setTestNow(\Carbon\Carbon::parse('2026-08-15'));
+
+            $lastMonth = $this->createBookingOnDate('2026-07-15');
+            $monthStart = $this->createBookingOnDate('2026-07-01');
+            $monthEnd = $this->createBookingOnDate('2026-07-31');
+            $beforeMonth = $this->createBookingOnDate('2026-06-30');
+            $currentMonth = $this->createBookingOnDate('2026-08-01');
+
+            $response = $this->actingAs($this->createAdmin(), 'sanctum')
+                ->getJson('/api/bookings?period=last_month');
+
+            $response->assertStatus(200)
+                ->assertJsonCount(3)
+                ->assertJsonFragment(['Booking_ID' => $lastMonth->Booking_ID])
+                ->assertJsonFragment(['Booking_ID' => $monthStart->Booking_ID])
+                ->assertJsonFragment(['Booking_ID' => $monthEnd->Booking_ID])
+                ->assertJsonMissing(['Booking_ID' => $beforeMonth->Booking_ID])
+                ->assertJsonMissing(['Booking_ID' => $currentMonth->Booking_ID]);
+        } finally {
+            \Illuminate\Support\Carbon::setTestNow(null);
+        }
+    }
+
+    public function test_index_filters_bookings_for_this_year(): void
+    {
+        try {
+            \Illuminate\Support\Carbon::setTestNow(\Carbon\Carbon::parse('2026-08-15'));
+
+            $yearStart = $this->createBookingOnDate('2026-01-01');
+            $yearEnd = $this->createBookingOnDate('2026-12-31');
+            $previousYear = $this->createBookingOnDate('2025-12-31');
+            $nextYear = $this->createBookingOnDate('2027-01-01');
+
+            $response = $this->actingAs($this->createAdmin(), 'sanctum')
+                ->getJson('/api/bookings?period=this_year');
+
+            $response->assertStatus(200)
+                ->assertJsonCount(2)
+                ->assertJsonFragment(['Booking_ID' => $yearStart->Booking_ID])
+                ->assertJsonFragment(['Booking_ID' => $yearEnd->Booking_ID])
+                ->assertJsonMissing(['Booking_ID' => $previousYear->Booking_ID])
+                ->assertJsonMissing(['Booking_ID' => $nextYear->Booking_ID]);
+        } finally {
+            \Illuminate\Support\Carbon::setTestNow(null);
+        }
+    }
+
+    public function test_index_filters_bookings_for_last_year(): void
+    {
+        try {
+            \Illuminate\Support\Carbon::setTestNow(\Carbon\Carbon::parse('2026-08-15'));
+
+            $lastYear = $this->createBookingOnDate('2025-06-15');
+            $lastYearStart = $this->createBookingOnDate('2025-01-01');
+            $lastYearEnd = $this->createBookingOnDate('2025-12-31');
+            $previousYear = $this->createBookingOnDate('2024-12-31');
+            $currentYear = $this->createBookingOnDate('2026-01-01');
+
+            $response = $this->actingAs($this->createAdmin(), 'sanctum')
+                ->getJson('/api/bookings?period=last_year');
+
+            $response->assertStatus(200)
+                ->assertJsonCount(3)
+                ->assertJsonFragment(['Booking_ID' => $lastYear->Booking_ID])
+                ->assertJsonFragment(['Booking_ID' => $lastYearStart->Booking_ID])
+                ->assertJsonFragment(['Booking_ID' => $lastYearEnd->Booking_ID])
+                ->assertJsonMissing(['Booking_ID' => $previousYear->Booking_ID])
+                ->assertJsonMissing(['Booking_ID' => $currentYear->Booking_ID]);
+        } finally {
+            \Illuminate\Support\Carbon::setTestNow(null);
+        }
+    }
+
+    public function test_index_filters_bookings_for_this_month(): void
+    {
+        try {
+            \Illuminate\Support\Carbon::setTestNow(\Carbon\Carbon::parse('2026-08-15'));
+
+            $thisMonth = $this->createBookingOnDate('2026-08-10');
+            $otherMonth = $this->createBookingOnDate('2026-07-10');
+
+            $response = $this->actingAs($this->createAdmin(), 'sanctum')
+                ->getJson('/api/bookings?period=this_month');
+
+            $response->assertStatus(200)
+                ->assertJsonCount(1)
+                ->assertJsonFragment(['Booking_ID' => $thisMonth->Booking_ID])
+                ->assertJsonMissing(['Booking_ID' => $otherMonth->Booking_ID]);
+        } finally {
+            \Illuminate\Support\Carbon::setTestNow(null);
+        }
+    }
+
+    public function test_index_returns_all_bookings_for_all_time_period(): void
+    {
+        $first = $this->createBookingOnDate('2026-07-10');
+        $second = $this->createBookingOnDate('2026-08-20');
+
+        $response = $this->actingAs($this->createAdmin(), 'sanctum')
+            ->getJson('/api/bookings?period=all_time');
+
+        $response->assertStatus(200)
+            ->assertJsonCount(2)
+            ->assertJsonFragment(['Booking_ID' => $first->Booking_ID])
+            ->assertJsonFragment(['Booking_ID' => $second->Booking_ID]);
     }
 }
