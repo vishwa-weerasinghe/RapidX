@@ -641,18 +641,6 @@ export default function App() {
     return searchable.includes("tripadvisor");
   };
 
-  const getStoredGuestReviews = () => {
-    try {
-      const storedReviews = localStorage.getItem("guestReviews");
-      if (!storedReviews) return [];
-      const parsedReviews = JSON.parse(storedReviews);
-      return Array.isArray(parsedReviews) ? parsedReviews : [];
-    } catch (err) {
-      console.error("Error loading guest reviews:", err);
-      return [];
-    }
-  };
-
   const getStoredTripadvisorCache = () => {
     try {
       const cached = JSON.parse(
@@ -665,7 +653,12 @@ export default function App() {
   };
 
   const fetchReviews = () => {
-    const storedGuestReviews = getStoredGuestReviews();
+    // Purge any legacy simulated guest reviews stored locally in browser
+    try {
+      localStorage.removeItem("guestReviews");
+    } catch {
+      // ignore
+    }
 
     // Resolve backend base URL so relative photo paths (e.g. /uploads/reviews/x.jpg)
     // point to the API server, mirroring the package image handling.
@@ -759,13 +752,7 @@ export default function App() {
           }
 
           setReviews(
-            [...storedGuestReviews, ...fetchedSystemReviews].filter(
-              (review) => !isTripAdvisorReview(review),
-            ),
-          );
-        } else if (storedGuestReviews.length > 0) {
-          setReviews(
-            [...storedGuestReviews].filter(
+            fetchedSystemReviews.filter(
               (review) => !isTripAdvisorReview(review),
             ),
           );
@@ -775,10 +762,7 @@ export default function App() {
       })
       .catch((err) => {
         console.error("Error loading reviews:", err);
-        // Keep locally stored guest reviews visible even when the API is down.
-        setReviews(
-          storedGuestReviews.filter((review) => !isTripAdvisorReview(review)),
-        );
+        setReviews([]);
       })
       .finally(() => setReviewsLoading(false));
   };
