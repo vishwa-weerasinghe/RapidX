@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../../axios";
+import { getApiErrorMessage } from "../../utils/apiErrorMessage";
 import { ReviewCardSkeleton } from "../../components/Skeletons";
 import { Camera, X } from "lucide-react";
 
@@ -206,11 +207,15 @@ export default function Review({
       setReviewForm(defaultReviewForm);
       clearPhotos();
     } catch (err) {
+      console.error(err);
       setTimedNotification({
         text:
           err.response?.status === 413
             ? "The photos you attached are too large in total. Please try smaller images."
-            : err.response?.data?.message || "Your email has not been used for booking.",
+            : getApiErrorMessage(
+              err,
+              "Unable to submit your review right now. Please try again.",
+            ),
         type: "error",
       });
     } finally {
