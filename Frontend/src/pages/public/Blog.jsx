@@ -10,6 +10,7 @@ import kaudullaImg from "../../assets/kaudulla.jpg";
 import wasgamuwaImg from "../../assets/wasgamuwa.jpg";
 import huruluImg from "../../assets/hurulu.jpg";
 import { STATIC_BLOGS } from "../../constants/staticBlogs";
+import PublicHeader from "../../components/PublicHeader";
 
 const blogSections = [
   {
@@ -1149,6 +1150,8 @@ export default function Blog() {
         description="Explore our safari tours and travel guides for Minneriya, Kaudulla, Wasgamuwa, Hurulu Eco Park, and cultural tours across Sri Lanka."
       />
 
+      <PublicHeader />
+
       <div
         className={`min-h-screen transition-colors duration-300 ${
           isDark ? "bg-neutral-950 text-neutral-100" : "bg-neutral-50/60 text-neutral-900"
@@ -1156,7 +1159,7 @@ export default function Blog() {
       >
         {/* Modern Blog Header Banner */}
         <div className="relative border-b border-neutral-200/80 dark:border-neutral-800/80 bg-gradient-to-b from-sacramento/5 via-transparent to-transparent">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-8 sm:pt-14 sm:pb-10">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-32 pb-8 sm:pt-40 sm:pb-10">
             <div className="max-w-3xl">
               <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-sacramento/10 text-sacramento border border-sacramento/20">
                 <Compass size={14} /> Expedition Guides & Wildlife Stories
