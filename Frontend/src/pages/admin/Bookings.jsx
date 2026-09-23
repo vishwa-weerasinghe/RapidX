@@ -572,7 +572,9 @@ export default function Bookings() {
         <p className="mb-6 text-sm text-muted">No new bookings to show.</p>
       )}
 
-      <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:flex-wrap">
+      {/* Search + Booking Period are stacked vertically: the period dropdown
+          sits directly under the search bar, and the table follows below. */}
+      <div className="mb-6 flex flex-col items-start gap-4">
         <input
           type="search"
           value={search}
@@ -582,7 +584,7 @@ export default function Bookings() {
           className="form-input w-full max-w-xl"
         />
 
-        <div className="flex flex-col gap-1">
+        <div className="flex w-full max-w-xl flex-col gap-1">
           <label
             htmlFor="booking-period"
             className="text-xs font-semibold text-charcoal dark:text-white"
@@ -605,7 +607,7 @@ export default function Bookings() {
         </div>
 
         {period === "custom" && (
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <div className="flex flex-col gap-1">
               <label
                 htmlFor="booking-from-date"
