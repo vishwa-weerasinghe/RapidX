@@ -17,11 +17,6 @@ const countryOptions = getCountries()
 
 const namePattern = /^[\p{L}]+(?:[ '\-\u2019][\p{L}]+)*$/u;
 
-const flagForCountry = (code) => code
-  .split("")
-  .map((letter) => String.fromCodePoint(letter.charCodeAt(0) + 127397))
-  .join("");
-
 export default function Register() {
   const [First_Name, setFirstName] = useState("");
   const [Last_Name, setLastName] = useState("");
@@ -322,7 +317,22 @@ export default function Register() {
                     aria-expanded={showCountryMenu}
                     aria-haspopup="listbox"
                   >
-                    <span>{selectedCountry ? `${flagForCountry(selectedCountry.code)} ${selectedCountry.name}` : "Select a country"}</span>
+                    <span className="flex items-center gap-2">
+                      {selectedCountry ? (
+                        <>
+                          <img
+                            src={`https://flagcdn.com/w20/${selectedCountry.code.toLowerCase()}.png`}
+                            srcSet={`https://flagcdn.com/w40/${selectedCountry.code.toLowerCase()}.png 2x`}
+                            width="20"
+                            alt={selectedCountry.name}
+                            className="rounded-[2px] shadow-sm"
+                          />
+                          <span>{selectedCountry.name}</span>
+                        </>
+                      ) : (
+                        "Select a country"
+                      )}
+                    </span>
                     <span className="text-xs text-gray-300">{selectedCountry ? `+${selectedCountry.callingCode}` : "Required"}</span>
                   </button>
                   {showCountryMenu && (
@@ -355,7 +365,16 @@ export default function Register() {
                               }}
                               className="flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm text-white hover:bg-white/10"
                             >
-                              <span>{flagForCountry(country.code)} {country.name}</span>
+                              <span className="flex items-center gap-2">
+                                <img
+                                  src={`https://flagcdn.com/w20/${country.code.toLowerCase()}.png`}
+                                  srcSet={`https://flagcdn.com/w40/${country.code.toLowerCase()}.png 2x`}
+                                  width="20"
+                                  alt={country.name}
+                                  className="rounded-[2px] shadow-sm"
+                                />
+                                <span>{country.name}</span>
+                              </span>
                               <span className="text-gray-400">+{country.callingCode}</span>
                             </button>
                           ))}
