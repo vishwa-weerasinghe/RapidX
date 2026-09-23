@@ -2516,101 +2516,84 @@ export default function App() {
         </section>
 
         {/* --- FOOTER --- */}
-        <footer className="bg-gray-50 pt-16 pb-8 border-t border-gray-100">
-          <div className="max-w-7xl mx-auto px-4 md:px-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
-              <div>
-                <div className="flex items-center gap-2 mb-6">
-                  <div
-                    className="cursor-pointer flex items-center gap-2 sm:gap-3"
-                    onClick={() => scrollToSection("home")}
-                  >
-                    <div className="relative flex items-center justify-center transition-all duration-500 group-hover:scale-105 group-hover:shadow-[0_8px_30px_-4px_rgba(46,125,50,0.3)] rounded-full">
-                      <img
-                        src={logoImg}
-                        alt="Minneriya Wild Jeep Safari"
-                        className="h-14 sm:h-16 md:h-20 w-auto object-contain rounded-full"
-                      />
-                    </div>
-                  </div>
-                  <span className="font-outfit font-bold text-xl text-gray-900 tracking-wide">
+        <footer className="bg-white dark:bg-neutral-950 pt-16 pb-8 border-t border-neutral-200/60 dark:border-neutral-800/60 transition-colors duration-300">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col lg:flex-row justify-between items-start gap-12 lg:gap-8 mb-16">
+              {/* Brand & Description */}
+              <div className="max-w-sm">
+                <div className="flex items-center gap-3 mb-6 cursor-pointer" onClick={() => scrollToSection("home")}>
+                  <img
+                    src={logoImg}
+                    alt="Wild Jeep Safari"
+                    className="h-12 w-12 object-contain rounded-full shadow-sm ring-1 ring-neutral-200 dark:ring-neutral-800"
+                  />
+                  <span className="font-outfit font-extrabold text-2xl text-neutral-900 dark:text-white tracking-wide">
                     Wild Jeep Safari
                   </span>
                 </div>
-                <p className="text-gray-500 text-sm leading-relaxed">
-                  We offer unforgettable wildlife experiences in Sri Lanka with
-                  expert-guided jeep safaris and memorable adventures.
+                <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">
+                  Curating unforgettable wildlife experiences and adventures across Sri Lanka's most breathtaking national parks.
                 </p>
               </div>
 
-              <div>
-                <h4 className="text-sm font-bold tracking-wider mb-6 uppercase text-gray-900">
-                  Quick Links
-                </h4>
-                <ul className="space-y-3 text-sm text-gray-500 font-medium">
-                  {["home", "about", "safaris", "packages", "reviews"].map(
-                    (sect) => (
-                      <li key={sect}>
-                        <button
-                          onClick={() => scrollToSection(sect)}
-                          className="hover:text-castleton hover:translate-x-1 transition-all duration-300 capitalize flex items-center gap-2"
-                        >
-                          <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-                          {sect}
-                        </button>
-                      </li>
-                    ),
-                  )}
-                </ul>
-              </div>
-
-              <div>
-                <h4 className="text-sm font-bold tracking-wider mb-6 uppercase text-gray-900">
-                  Safari Parks
-                </h4>
-                <ul className="space-y-3 text-sm text-gray-500 font-medium">
+              {/* Links Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-x-12 gap-y-10 w-full lg:w-auto">
+                <div className="flex flex-col gap-4">
+                  <h4 className="font-bold text-neutral-900 dark:text-white text-sm uppercase tracking-wider">Explore</h4>
+                  {["home", "about", "packages", "gallery", "contact"].map((sect) => (
+                    <button
+                      key={sect}
+                      onClick={() => scrollToSection(sect)}
+                      className="text-left text-sm text-neutral-500 hover:text-sacramento dark:text-neutral-400 dark:hover:text-emerald-400 transition-colors capitalize font-medium"
+                    >
+                      {sect}
+                    </button>
+                  ))}
+                </div>
+                
+                <div className="flex flex-col gap-4">
+                  <h4 className="font-bold text-neutral-900 dark:text-white text-sm uppercase tracking-wider">Destinations</h4>
                   {[
-                    "Minneriya Park",
-                    "Kaudulla Park",
-                    "Wasgamuwa Park",
+                    "Minneriya",
+                    "Kaudulla",
+                    "Wasgamuwa",
                     "Hurulu Eco Park",
                   ].map((park, idx) => (
-                    <li key={idx}>
-                      <button
-                        onClick={() => scrollToSection("packages")}
-                        className="hover:text-castleton hover:translate-x-1 transition-all duration-300 flex items-center gap-2"
-                      >
-                        <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-                        {park}
-                      </button>
-                    </li>
+                    <button
+                      key={idx}
+                      onClick={() => scrollToSection("packages")}
+                      className="text-left text-sm text-neutral-500 hover:text-sacramento dark:text-neutral-400 dark:hover:text-emerald-400 transition-colors font-medium"
+                    >
+                      {park}
+                    </button>
                   ))}
-                </ul>
-              </div>
+                </div>
 
-              <div>
-                <h4 className="text-sm font-bold tracking-wider mb-6 uppercase text-gray-900">
-                  Help
-                </h4>
-                <ul className="space-y-3 text-sm text-gray-500 font-medium">
+                <div className="flex flex-col gap-4 col-span-2 md:col-span-1">
+                  <h4 className="font-bold text-neutral-900 dark:text-white text-sm uppercase tracking-wider">Legal</h4>
                   {[
-                    { label: "Frequently", path: "/help/frequently" },
+                    { label: "FAQ & Help", path: "/help/frequently" },
                     { label: "Privacy Policy", path: "/privacy-policy" },
-                    { label: "Terms and Conditions", path: "/terms-and-conditions" },
-                    { label: "Return & Refund Policy", path: "/return-refund-policy" },
+                    { label: "Terms of Service", path: "/terms-and-conditions" },
+                    { label: "Refund Policy", path: "/return-refund-policy" },
                   ].map((item) => (
-                    <li key={item.path}>
-                      <Link
-                        to={item.path}
-                        className="group flex items-center gap-2 rounded-lg px-2 transition-all duration-300 hover:bg-[#e8f3eb] hover:text-[#1b5d3d]"
-                      >
-                        <span className="w-1 h-1 rounded-full bg-gray-300 transition-transform duration-300 group-hover:scale-125"></span>
-                        {item.label}
-                      </Link>
-                    </li>
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      className="text-left text-sm text-neutral-500 hover:text-sacramento dark:text-neutral-400 dark:hover:text-emerald-400 transition-colors font-medium"
+                    >
+                      {item.label}
+                    </Link>
                   ))}
-                </ul>
+                </div>
               </div>
+            </div>
+
+            {/* Bottom Bar */}
+            <div className="pt-8 border-t border-neutral-200/60 dark:border-neutral-800/60 flex justify-center items-center">
+              <p className="text-xs text-neutral-400 font-medium text-center">
+                &copy; {new Date().getFullYear()} Wild Jeep Safari. All rights reserved.
+              </p>
             </div>
           </div>
         </footer>
