@@ -1891,8 +1891,8 @@ export default function App() {
                   </h3>
                 </div>
               </div>
-              {systemReviews.length > 0 && (
-                <div className="mb-8 flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-6">
+              <div className="mb-8 flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-6">
+                {systemReviews.length > 0 && (
                   <div className="flex items-center gap-4 rounded-2xl border border-gray-100 bg-gray-50 px-5 py-3.5">
                     <span className="font-outfit text-4xl font-bold text-gray-900 leading-none">
                       {systemAverageRating.toFixed(1)}
@@ -1908,8 +1908,10 @@ export default function App() {
                       </p>
                     </div>
                   </div>
+                )}
 
-                  <div className="flex flex-wrap items-center gap-3 self-start sm:self-center">
+                <div className="flex flex-wrap items-center gap-3 self-start sm:self-center">
+                  {systemReviews.length > 0 && (
                     <div className="relative">
                       <button
                         type="button"
@@ -1974,16 +1976,17 @@ export default function App() {
                         </>
                       )}
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => navigate("/write-review")}
-                      className="bg-sacramento text-white font-semibold px-5 py-2.5 rounded-full hover:bg-opacity-90 shadow transition duration-300 text-sm"
-                    >
-                      Write review
-                    </button>
-                  </div>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => navigate("/write-review")}
+                    className="bg-sacramento text-white font-semibold px-5 py-2.5 rounded-full hover:bg-opacity-90 shadow transition duration-300 text-sm"
+                  >
+                    Write review
+                  </button>
                 </div>
-              )}
+              </div>
 
               {/* Carousel always shows only the first 6 reviews */}
               <ReviewCarousel
