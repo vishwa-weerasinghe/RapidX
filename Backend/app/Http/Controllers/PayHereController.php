@@ -159,10 +159,19 @@ class PayHereController extends Controller
     {
         $request->validate([
             'Customer_ID' => 'required|exists:customers,Customer_ID',
+            'promotion_code' => 'nullable|string',
         ]);
 
         $customerId = $request->Customer_ID;
         $customer = Customer::findOrFail($customerId);
+
+        $promo = null;
+        if ($request->filled('promotion_code')) {
+            $promo = \App\Models\PromotionCode::where('code', $request->promotion_code)->first();
+            if (!$promo || $promo->is_hidden || ($promo->valid_until && now()->startOfDay()->greaterThan($promo->valid_until)) || ($promo->usage_limit !== null && $promo->usage_count >= $promo->usage_limit)) {
+                return response()->json(['message' => 'Invalid or expired promotion code'], 400);
+            }
+        }
 
         $cartEntries = Cart::with(['booking.package'])
             ->where('Customer_ID', $customerId)
@@ -187,6 +196,13 @@ class PayHereController extends Controller
             }
             return (float) $b->Payment;
         });
+
+        if ($promo) {
+            $discount = $totalAmount * ($promo->discount_value / 100);
+            $totalAmount = max(0, $totalAmount - $discount);
+            // Increment usage count
+            $promo->increment('usage_count');
+        }
 
         $currency = config('payhere.currency', 'USD');
 

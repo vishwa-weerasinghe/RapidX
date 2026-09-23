@@ -41,6 +41,7 @@ import DriverForm from "./pages/admin/DriverForm.jsx";
 import MediaList from "./pages/admin/MediaList.jsx";
 import MediaForm from "./pages/admin/MediaForm.jsx";
 import AdminReviews from "./pages/admin/Reviews.jsx";
+import PromotionCodes from "./pages/admin/PromotionCodes.jsx";
 
 import PackageForm from "./pages/admin/PackageForm.jsx";
 import AdminVehicles from "./pages/admin/VehicleList.jsx";
@@ -117,6 +118,7 @@ createRoot(document.getElementById("root")).render(
             <Route path="appointments" element={<Appointments />} />
             <Route path="media" element={<MediaList />} />
             <Route path="reviews" element={<AdminReviews />} />
+            <Route path="promotion-codes" element={<PromotionCodes />} />
             <Route path="vehicles" element={<AdminVehicles />} />
             <Route
               path="packages/create"
