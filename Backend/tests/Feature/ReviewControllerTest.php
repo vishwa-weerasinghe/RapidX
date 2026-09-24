@@ -8,11 +8,42 @@ use App\Models\Review;
 use App\Models\Package;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 class ReviewControllerTest extends TestCase
 {
     use RefreshDatabase;
+
+    /**
+     * Review photos that already existed before a test ran, so tearDown only
+     * removes the files written by the local upload fallback during the test.
+     */
+    protected array $preExistingReviewPhotos = [];
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->preExistingReviewPhotos = glob($this->reviewPhotoDirectory() . '/*') ?: [];
+    }
+
+    protected function tearDown(): void
+    {
+        foreach (glob($this->reviewPhotoDirectory() . '/*') ?: [] as $file) {
+            if (!in_array($file, $this->preExistingReviewPhotos, true)) {
+                @unlink($file);
+            }
+        }
+
+        parent::tearDown();
+    }
+
+    protected function reviewPhotoDirectory(): string
+    {
+        return public_path('uploads/reviews');
+    }
 
     protected function createCustomer(array $overrides = []): Customer
     {
@@ -152,6 +183,76 @@ class ReviewControllerTest extends TestCase
             'Customer_ID' => $customer->getKey(),
         ]);
         $this->assertDatabaseCount('reviews', 1);
+    }
+
+    public function test_reviews_table_exposes_the_photos_column(): void
+    {
+        // Regression guard: the column was missing on databases where the
+        // original create_reviews_table migration had already been executed.
+        $this->assertTrue(
+            Schema::hasColumn('reviews', 'Photos'),
+            'The reviews table must have a Photos column so review photos can be stored.'
+        );
+    }
+
+    public function test_authenticated_user_can_create_review_with_photos(): void
+    {
+        $customer = $this->createCustomer();
+        $user = $this->createUser($customer->getKey());
+        $this->createBookingForCustomer($customer->getKey());
+
+        $response = $this->actingAs($user, 'sanctum')
+            ->post('/api/reviews', [
+                'Rate' => 5,
+                'Description' => 'Sharing the photos from our safari',
+                'Photos' => [
+                    UploadedFile::fake()->create('safari-1.jpg', 100, 'image/jpeg'),
+                    UploadedFile::fake()->create('safari-2.jpg', 100, 'image/jpeg'),
+                ],
+            ]);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('Rate', 5)
+            ->assertJsonPath('Description', 'Sharing the photos from our safari')
+            ->assertJsonCount(2, 'Photos');
+
+        $photos = $response->json('Photos');
+        $this->assertIsArray($photos);
+
+        foreach ($photos as $photoUrl) {
+            $this->assertIsString($photoUrl);
+            $this->assertStringStartsWith('/uploads/reviews/', $photoUrl);
+            $this->assertFileExists(public_path($photoUrl));
+        }
+
+        $storedReview = Review::where('Customer_ID', $customer->getKey())->first();
+        $this->assertNotNull($storedReview);
+        $this->assertSame($photos, $storedReview->Photos);
+        $this->assertDatabaseCount('reviews', 1);
+    }
+
+    public function test_review_photos_are_limited_to_five(): void
+    {
+        $customer = $this->createCustomer();
+        $user = $this->createUser($customer->getKey());
+        $this->createBookingForCustomer($customer->getKey());
+
+        $photos = [];
+        for ($i = 1; $i <= 6; $i++) {
+            $photos[] = UploadedFile::fake()->create("safari-{$i}.jpg", 100, 'image/jpeg');
+        }
+
+        $response = $this->actingAs($user, 'sanctum')
+            ->post('/api/reviews', [
+                'Rate' => 4,
+                'Description' => 'Too many photos',
+                'Photos' => $photos,
+            ], ['Accept' => 'application/json']);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['Photos']);
+
+        $this->assertDatabaseCount('reviews', 0);
     }
 
     public function test_authenticated_user_without_booking_cannot_create_review(): void

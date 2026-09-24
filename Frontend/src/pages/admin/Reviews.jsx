@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import api from "../../axios";
+import { getApiErrorMessage } from "../../utils/apiErrorMessage";
 import { Trash2 } from "lucide-react";
 
 export default function AdminReviews() {
@@ -104,7 +105,8 @@ export default function AdminReviews() {
       setMessage("Review deleted successfully.");
       fetchAnalytics();
     } catch (err) {
-      setError(err.response?.data?.message || "Unable to delete review.");
+      console.error(err);
+      setError(getApiErrorMessage(err, "Unable to delete review."));
     }
   };
 

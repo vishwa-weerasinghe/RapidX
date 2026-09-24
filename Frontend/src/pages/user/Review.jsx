@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../../axios";
+import { getApiErrorMessage } from "../../utils/apiErrorMessage";
 import { Camera, X } from "lucide-react";
 
 const MAX_REVIEW_PHOTOS = 5;
@@ -132,10 +133,11 @@ const MAX_PHOTO_SIZE_BYTES = 10 * 1024 * 1024; // 10MB per photo
         clearPhotos();
         fetchReviews();
       } catch (err) {
+        console.error(err);
         setError(
           err.response?.status === 413
             ? "The photos you attached are too large in total. Please try smaller images."
-            : err.response?.data?.message || "Unable to submit review right now."
+            : getApiErrorMessage(err, "Unable to submit review right now.")
         );
       } finally {
         setLoading(false);
