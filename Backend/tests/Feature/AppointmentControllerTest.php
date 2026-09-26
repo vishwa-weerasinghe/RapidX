@@ -266,6 +266,7 @@ class AppointmentControllerTest extends TestCase
         // 2 in-cart / unconfirmed bookings in the current month
         $this->createBookingForDate(now()->format('Y-m-05'), 'Pending', 700);
         $this->createBookingForDate(now()->format('Y-m-28'), 'In cart', 800);
+        $this->createBookingForDate(now()->format('Y-m-29'), 'Cancelled', 400);
 
         $response = $this->actingAs($this->adminUser(), 'sanctum')
             ->getJson('/api/appointments/summary?month=' . $month);
@@ -277,6 +278,7 @@ class AppointmentControllerTest extends TestCase
                 'total_earnings' => 3500,
                 'total_earnings_confirmed' => 3500,
                 'total_earnings_unconfirmed' => 1500,
+                'total_refunds' => 400,
             ]);
     }
 
