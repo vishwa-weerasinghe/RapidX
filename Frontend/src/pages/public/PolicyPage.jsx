@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { ArrowLeft, ChevronDown, Mail, Phone } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
@@ -81,15 +81,50 @@ const policyContent = {
 
 function HelpPageHeader() {
   const { theme } = useTheme();
+  const [isHelpMenuOpen, setIsHelpMenuOpen] = useState(false);
+  const [isBlogMenuOpen, setIsBlogMenuOpen] = useState(false);
+  const helpMenuRef = useRef(null);
+  const blogMenuRef = useRef(null);
   const navigationLinks = [
     { label: "Home", path: "/" },
+    { label: "Packages", path: "/#packages" },
     { label: "About", path: "/#about" },
     { label: "Safaris", path: "/#safaris" },
-    { label: "Packages", path: "/#packages" },
     { label: "Reviews", path: "/#reviews" },
     { label: "Gallery", path: "/#gallery" },
     { label: "Contact", path: "/#contact" },
   ];
+  const helpLinks = [
+    { label: "Frequently", path: "/help/frequently" },
+    { label: "Privacy Policy", path: "/privacy-policy" },
+    { label: "Terms and Conditions", path: "/terms-and-conditions" },
+    { label: "Return & Refund Policy", path: "/return-refund-policy" },
+  ];
+  const blogLinks = [
+    { label: "Minneriya National Park", path: "/blog#minneriya", description: "The Great Elephant Gathering" },
+    { label: "Kaudulla National Park", path: "/blog#kaudulla", description: "The Pristine Wildlife Corridor" },
+    { label: "Wasgamuwa National Park", path: "/blog#wasgamuwa", description: "The Gathering Place of Bears" },
+    { label: "Hurulu Eco Park", path: "/blog#hurulu", description: "The Vital Elephant Corridor" },
+    { label: "Full Day Safari Experience", path: "/blog#full-day-safari", description: "Hurulu Eco Park & Minneriya or Kaudulla" },
+    { label: "Dambulla Cultural & Safari Tour", path: "/blog#dambulla-safari", description: "Cave Temple, Economic Center & Evening Safari" },
+    { label: "Village Tour", path: "/blog#hiriwadunna-village-tour", description: "Experience Authentic Sri Lankan Rural Life" },
+    { label: "Polonnaruwa Ruins & Safari Tour", path: "/blog#polonnaruwa-safari", description: "Medieval Capital & Evening Safari" },
+    { label: "Sigiriya / Pidurangala & Safari Tour", path: "/blog#sigiriya-pidurangala-safari", description: "Majestic Rock Hiking & Evening Safari" },
+    { label: "Sigiriya Village Tour", path: "/blog#sigiriya-village-tour", description: "Experience Authentic Sri Lankan Rural Life" },
+  ];
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (helpMenuRef.current && !helpMenuRef.current.contains(event.target)) {
+        setIsHelpMenuOpen(false);
+      }
+      if (blogMenuRef.current && !blogMenuRef.current.contains(event.target)) {
+        setIsBlogMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <header className={`sticky top-0 z-40 border-b shadow-[0_10px_25px_rgba(0,0,0,0.18)] backdrop-blur-xl ${theme === "dark" ? "border-white/10 bg-[#101813]/95" : "border-[var(--border)] bg-[var(--page-bg)]/95"}`}>
@@ -113,12 +148,57 @@ function HelpPageHeader() {
               {item.label}
             </Link>
           ))}
-          <Link to="/blog" className="rounded-full px-2.5 py-1.5 text-xs font-bold uppercase tracking-wide text-slate-700 transition-colors hover:bg-slate-100/70 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/70 dark:hover:text-white">
-            Blog
-          </Link>
-          <Link to="/help/frequently" className="rounded-full bg-sacramento px-2.5 py-1.5 text-xs font-bold uppercase tracking-wide text-white shadow shadow-sacramento/25">
-            Help
-          </Link>
+          <div className="relative" ref={helpMenuRef}>
+            <button
+              type="button"
+              onClick={() => {
+                setIsHelpMenuOpen((prev) => !prev);
+                setIsBlogMenuOpen(false);
+              }}
+              className={`flex items-center gap-1 rounded-full px-2.5 py-1.5 text-xs font-bold uppercase tracking-wide transition-colors ${isHelpMenuOpen ? "bg-sacramento text-white shadow shadow-sacramento/25" : "text-slate-700 hover:bg-slate-100/70 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/70 dark:hover:text-white"}`}
+            >
+              Help
+              <ChevronDown size={13} className={`transition-transform duration-200 ${isHelpMenuOpen ? "rotate-180" : ""}`} />
+            </button>
+            {isHelpMenuOpen && (
+              <div className="absolute right-0 top-full z-50 mt-3 flex w-72 flex-col rounded-2xl border border-[#dfe8dc] bg-[#fffdf9] p-2.5 shadow-[0_20px_40px_rgba(20,52,38,0.15)] dark:border-slate-800 dark:bg-slate-900">
+                {helpLinks.map((item) => (
+                  <Link key={item.path} to={item.path} onClick={() => setIsHelpMenuOpen(false)} className="rounded-xl px-3 py-2 text-left text-xs font-semibold text-slate-700 transition-all hover:bg-[#edf7ef] hover:text-[#1b5d3d] dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-white">
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="relative" ref={blogMenuRef}>
+            <button
+              type="button"
+              onClick={() => {
+                setIsBlogMenuOpen((prev) => !prev);
+                setIsHelpMenuOpen(false);
+              }}
+              className={`flex items-center gap-1 rounded-full px-2.5 py-1.5 text-xs font-bold uppercase tracking-wide transition-colors ${isBlogMenuOpen ? "bg-sacramento text-white shadow shadow-sacramento/25" : "text-slate-700 hover:bg-slate-100/70 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/70 dark:hover:text-white"}`}
+            >
+              Blog
+              <ChevronDown size={13} className={`transition-transform duration-200 ${isBlogMenuOpen ? "rotate-180" : ""}`} />
+            </button>
+            {isBlogMenuOpen && (
+              <div className="absolute right-0 top-full z-50 mt-3 flex max-h-[75vh] w-80 flex-col rounded-2xl border border-[#dfe8dc] bg-[#fffdf9] p-2.5 shadow-[0_20px_40px_rgba(20,52,38,0.15)] dark:border-slate-800 dark:bg-slate-900">
+                <div className="mb-1 flex shrink-0 items-center justify-between border-b border-slate-100 px-3 py-2 dark:border-slate-800">
+                  <p className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500">Safari Travel Guides</p>
+                  <Link to="/blog" onClick={() => setIsBlogMenuOpen(false)} className="text-[11px] font-bold text-sacramento hover:underline dark:text-castleton-300">View All</Link>
+                </div>
+                <div className="space-y-0.5 overflow-y-auto pr-1">
+                  {blogLinks.map((item) => (
+                    <Link key={item.path} to={item.path} onClick={() => setIsBlogMenuOpen(false)} className="group flex flex-col rounded-xl px-3 py-2 text-left transition-all hover:bg-[#edf7ef] dark:hover:bg-slate-800">
+                      <span className="flex items-center justify-between text-xs font-bold text-[#1d4334] group-hover:text-[#1b5d3d] dark:text-slate-200 dark:group-hover:text-white">{item.label}<span className="text-xs text-castleton opacity-0 transition-opacity group-hover:opacity-100">→</span></span>
+                      <span className="line-clamp-1 text-[11px] text-slate-400 dark:text-slate-500">{item.description}</span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </nav>
 
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
