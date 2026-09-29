@@ -7,15 +7,22 @@ use Illuminate\Http\Request;
 
 class PromotionCodeController extends Controller
 {
-    // List all codes (Admin)
+    // List codes: admins manage every code, other registered users see only the visible ones
     public function index(Request $request)
     {
         $user = $request->user('sanctum');
-        if (!$user || !in_array(strtolower($user->role ?? ''), ['admin', 'administrator', 'superadmin'])) {
+        if (!$user) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        return response()->json(PromotionCode::latest()->get());
+        $isAdmin = in_array(strtolower($user->role ?? ''), ['admin', 'administrator', 'superadmin']);
+
+        $query = PromotionCode::query();
+        if (!$isAdmin) {
+            $query->where('is_hidden', false);
+        }
+
+        return response()->json($query->latest()->get());
     }
 
     // Create a new code (Admin)
