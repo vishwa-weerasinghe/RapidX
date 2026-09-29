@@ -27,6 +27,8 @@ import {
   ReviewCardSkeleton,
 } from "./components/Skeletons";
 import { getStaticBlogPackageSection } from "./constants/staticBlogPackages";
+import TripAdvisorWidget from "./components/TripAdvisorWidget";
+import { STATIC_TRIPADVISOR_REVIEWS } from "./constants/staticTripadvisorReviews";
 
 // Presentational review card used inside the auto-sliding carousel
 function ReviewCardContent({ rev }) {
@@ -615,9 +617,9 @@ export default function App() {
   };
 
   const [reviews, setReviews] = useState([]);
-  const [tripadvisorReviews, setTripadvisorReviews] = useState([]);
+  const [tripadvisorReviews, setTripadvisorReviews] = useState(STATIC_TRIPADVISOR_REVIEWS);
   const [reviewsLoading, setReviewsLoading] = useState(true);
-  const [tripadvisorLoading, setTripadvisorLoading] = useState(true);
+  const [tripadvisorLoading, setTripadvisorLoading] = useState(false);
   const [guestVisibleCount, setGuestVisibleCount] = useState(6);
   const [guestMenuOpen, setGuestMenuOpen] = useState(false);
 
@@ -669,34 +671,6 @@ export default function App() {
       typeof photo === "string" && photo.startsWith("http")
         ? photo
         : `${backendUrl}${photo}`;
-
-    // Fetch TripAdvisor reviews live from the backend (scrapes TripAdvisor online,
-    // cached server-side). Falls back to the last successfully fetched set.
-    const tripadvisorLocationId = "15640558";
-    api
-      .get(`/locations/${tripadvisorLocationId}/reviews`)
-      .then((res) => {
-        if (res.data && Array.isArray(res.data) && res.data.length > 0) {
-          setTripadvisorReviews(res.data);
-          try {
-            localStorage.setItem(
-              "tripadvisorCache",
-              JSON.stringify(res.data),
-            );
-          } catch (cacheErr) {
-            // ignore storage failures
-          }
-        } else {
-          const cached = getStoredTripadvisorCache();
-          if (cached.length > 0) setTripadvisorReviews(cached);
-        }
-      })
-      .catch((err) => {
-        console.error("Error loading TripAdvisor reviews:", err);
-        const cached = getStoredTripadvisorCache();
-        if (cached.length > 0) setTripadvisorReviews(cached);
-      })
-      .finally(() => setTripadvisorLoading(false));
 
     api
       .get("/reviews")
@@ -1814,11 +1788,7 @@ export default function App() {
                 Explore genuine guest experiences and trusted TripAdvisor reviews
                 from travelers who chose us.
               </p>
-              <img
-                src={awordImg}
-                alt="TripAdvisor"
-                className="h-24 sm:h-32 mx-auto object-contain"
-              />
+              <TripAdvisorWidget />
             </div>
 
             <div className="mb-14 rounded-3xl border border-gray-100 bg-white p-6 md:p-8 shadow-sm">
