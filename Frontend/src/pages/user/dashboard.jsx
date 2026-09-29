@@ -3,6 +3,7 @@ import { BookingProvider } from '../../context/BookingContext'
 import { BookingCard } from "../../components/user-dashboard/BookingCard";
 import { CartCard } from '../../components/user-dashboard/CartCard'
 import { CancellationMessage } from '../../components/user-dashboard/Cancellation_Message'
+import { PromoCode } from '../../components/user-dashboard/Promo-code'
 import { HeroCountdown } from '../../components/user-dashboard/Upcoming-safari'
 import SummaryStats from '../../components/user-dashboard/Summary-Card'
 import { CompletedSafari } from '../../components/user-dashboard/Completed_safari'
@@ -54,6 +55,7 @@ export default function CustomerDashboard({ user: propUser }) {
           <BookingCard user={currentUser} />
           <CartCard user={currentUser} />
           <CancellationMessage user={currentUser} />
+          <PromoCode />
         </div>
       </div>
     </BookingProvider>

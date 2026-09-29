@@ -231,7 +231,36 @@ class ReviewControllerTest extends TestCase
         $this->assertDatabaseCount('reviews', 1);
     }
 
-    public function test_review_photos_are_limited_to_five(): void
+    public function test_user_can_upload_maximum_five_photos_with_a_review(): void
+    {
+        $customer = $this->createCustomer();
+        $user = $this->createUser($customer->getKey());
+        $this->createBookingForCustomer($customer->getKey());
+
+        $photos = [];
+        for ($i = 1; $i <= 5; $i++) {
+            $photos[] = UploadedFile::fake()->create("safari-{$i}.jpg", 100, 'image/jpeg');
+        }
+
+        $response = $this->actingAs($user, 'sanctum')
+            ->post('/api/reviews', [
+                'Rate' => 4,
+                'Description' => 'Uploading the maximum allowed photos',
+                'Photos' => $photos,
+            ], ['Accept' => 'application/json']);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('Rate', 4)
+            ->assertJsonPath('Description', 'Uploading the maximum allowed photos')
+            ->assertJsonCount(5, 'Photos');
+
+        $storedReview = Review::where('Customer_ID', $customer->getKey())->first();
+        $this->assertNotNull($storedReview);
+        $this->assertCount(5, $storedReview->Photos ?? []);
+        $this->assertDatabaseCount('reviews', 1);
+    }
+
+    public function test_user_cannot_upload_more_than_five_photos_with_a_review(): void
     {
         $customer = $this->createCustomer();
         $user = $this->createUser($customer->getKey());

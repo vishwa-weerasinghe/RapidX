@@ -198,8 +198,11 @@ class AppointmentControllerTest extends TestCase
         $response->assertStatus(200)
             ->assertJsonCount(1)
             ->assertJsonFragment(['Booking_ID' => $booking->Booking_ID])
-            ->assertJsonFragment(['Payment' => 2500])
             ->assertJsonFragment(['Status' => 'Confirmed']);
+
+        // Payment is a decimal column: MySQL returns "2500.00" while SQLite
+        // returns the integer 2500, so compare numerically instead of strictly.
+        $this->assertEquals(2500, $response->json()[0]['Payment']);
     }
 
     public function test_index_filters_appointments_by_month_parameter(): void
@@ -265,7 +268,7 @@ class AppointmentControllerTest extends TestCase
 
         // 2 in-cart / unconfirmed bookings in the current month
         $this->createBookingForDate(now()->format('Y-m-05'), 'Pending', 700);
-        $this->createBookingForDate(now()->format('Y-m-28'), 'In cart', 800);
+        $this->createBookingForDate(now()->format('Y-m-28'), 'In Cart', 800);
         $this->createBookingForDate(now()->format('Y-m-29'), 'Cancelled', 400);
 
         $response = $this->actingAs($this->adminUser(), 'sanctum')
