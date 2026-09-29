@@ -235,23 +235,14 @@ class ReviewController extends Controller
 
     public function tripadvisorReviews($locationId = '15640558')
     {
-        $cacheKey = 'tripadvisor_reviews_' . $locationId;
-
-        // 1) Return cached reviews immediately if available (avoids blocking single-threaded server)
-        $cached = \Illuminate\Support\Facades\Cache::get($cacheKey);
-        if ($cached && is_array($cached) && !empty($cached)) {
-            return response()->json(array_values($cached));
-        }
-
         $apiKey = env('TRIPADVISOR_API_KEY');
 
         if ($apiKey) {
             try {
-                $response = \Illuminate\Support\Facades\Http::timeout(3)
-                    ->get("https://api.content.tripadvisor.com/api/v1/location/{$locationId}/reviews", [
-                        'key' => $apiKey,
-                        'language' => 'en',
-                    ]);
+                $response = \Illuminate\Support\Facades\Http::get("https://api.content.tripadvisor.com/api/v1/location/{$locationId}/reviews", [
+                    'key' => $apiKey,
+                    'language' => 'en',
+                ]);
 
                 if ($response->successful() && isset($response->json()['data'])) {
                     $data = $response->json()['data'];
@@ -270,7 +261,6 @@ class ReviewController extends Controller
                     }, $data);
 
                     if (!empty($mapped)) {
-                        \Illuminate\Support\Facades\Cache::put($cacheKey, $mapped, now()->addHours(24));
                         return response()->json($mapped);
                     }
                 }
@@ -279,27 +269,25 @@ class ReviewController extends Controller
             }
         }
 
-        // 2) Scrape the live public TripAdvisor page with fast timeout
+        // 2) Scrape the live public TripAdvisor page (cached to avoid hammering the site)
         try {
-            $reviews = $this->scrapeTripadvisorReviews($locationId);
+            $reviews = \Illuminate\Support\Facades\Cache::remember(
+                'tripadvisor_reviews_' . $locationId,
+                now()->addMinutes(30),
+                function () use ($locationId) {
+                    return $this->scrapeTripadvisorReviews($locationId);
+                }
+            );
 
             if (!empty($reviews)) {
-                \Illuminate\Support\Facades\Cache::put($cacheKey, $reviews, now()->addHours(24));
                 return response()->json(array_values($reviews));
             }
         } catch (\Exception $e) {
             // Fall through to default reviews
         }
 
-        // 3) Default reviews (used when TripAdvisor cannot be reached) - cached for 6 hours so requests stay fast
-        $defaultReviews = $this->getDefaultTripadvisorReviews();
-        \Illuminate\Support\Facades\Cache::put($cacheKey, $defaultReviews, now()->addHours(6));
-        return response()->json($defaultReviews);
-    }
-
-    private function getDefaultTripadvisorReviews(): array
-    {
-        return [
+        // 3) Default reviews (used when TripAdvisor cannot be reached)
+        return response()->json([
             [
                 'initials' => 'TA',
                 'name' => 'TripAdvisor Traveler',
@@ -363,7 +351,7 @@ class ReviewController extends Controller
                 'rate' => 5,
                 'source' => 'TripAdvisor',
             ],
-        ];
+        ]);
     }
 
     /**
@@ -482,7 +470,7 @@ class ReviewController extends Controller
         // Route 1: direct request
         try {
             $response = \Illuminate\Support\Facades\Http::withHeaders($browserHeaders)
-                ->timeout(3)
+                ->timeout(20)
                 ->get($url);
 
             if ($response->successful() && strlen($response->body()) > 5000) {
@@ -494,7 +482,7 @@ class ReviewController extends Controller
 
         // Route 2: codetabs proxy (plain HTML passthrough)
         try {
-            $response = \Illuminate\Support\Facades\Http::timeout(4)
+            $response = \Illuminate\Support\Facades\Http::timeout(30)
                 ->get('https://api.codetabs.com/v1/proxy', ['quest' => $url]);
 
             if ($response->successful() && strlen($response->body()) > 5000) {
@@ -506,7 +494,7 @@ class ReviewController extends Controller
 
         // Route 3: allorigins proxy
         try {
-            $response = \Illuminate\Support\Facades\Http::timeout(4)
+            $response = \Illuminate\Support\Facades\Http::timeout(30)
                 ->get('https://api.allorigins.win/raw', ['url' => $url]);
 
             if ($response->successful() && strlen($response->body()) > 5000) {
@@ -518,7 +506,7 @@ class ReviewController extends Controller
 
         // Route 4: r.jina.ai reader (returns plain text; parse reviews from text)
         try {
-            $reader = \Illuminate\Support\Facades\Http::timeout(5)
+            $reader = \Illuminate\Support\Facades\Http::timeout(45)
                 ->get('https://r.jina.ai/' . $url);
 
             if ($reader->successful() && strlen($reader->body()) > 500) {

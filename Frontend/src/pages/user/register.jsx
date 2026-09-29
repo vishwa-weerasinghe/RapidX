@@ -4,7 +4,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import { getCountries, getCountryCallingCode, parsePhoneNumberFromString } from "libphonenumber-js";
 import SEO from "../../components/SEO";
-import loginBg from "../../assets/login_register.jpg";
+import loginBg from "../../assets/login_register.png";
 
 const countryDisplayNames = new Intl.DisplayNames(["en"], { type: "region" });
 const countryOptions = getCountries()

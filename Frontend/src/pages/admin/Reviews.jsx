@@ -286,8 +286,8 @@ export default function AdminReviews() {
               <div
                 key={reviewId}
                 className={`card p-4 ${isNew
-                  ? "border-sacramento ring-1 ring-sacramento/30"
-                  : ""
+                    ? "border-sacramento ring-1 ring-sacramento/30"
+                    : ""
                   }`}
               >
                 <div className="flex items-start justify-between gap-4">
