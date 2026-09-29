@@ -14,10 +14,10 @@ import {
 import ThemeToggle from "./components/ThemeToggle";
 import { useTheme } from "./context/ThemeContext";
 import api from "./axios";
-import homepageImg from "./assets/homepage.png";
+import homepageImg from "./assets/homepage.jpg";
 import logoImg from "./assets/logo.jpg";
 import awordImg from "./assets/TA-Aword.jpg";
-import aboutUsImg from "./assets/aboutUs.png";
+import aboutUsImg from "./assets/aboutUs.jpg";
 import minneriyaImg from "./assets/minneriya.jpg";
 import kaudullaImg from "./assets/kaudulla.jpg";
 import wasgamuwaImg from "./assets/wasgamuwa.jpg";
@@ -471,58 +471,69 @@ export default function App() {
 
   // --- WINDOW LIFECYCLE LISTENERS ---
   useEffect(() => {
+    let ticking = false;
+
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 100);
-      setShowScrollTop(window.scrollY > 300);
+      if (ticking) return;
+      ticking = true;
 
-      const headerHeight =
-        document.querySelector("header")?.offsetHeight || 100;
+      window.requestAnimationFrame(() => {
+        setIsScrolled(window.scrollY > 100);
+        setShowScrollTop(window.scrollY > 300);
 
-      // Active Section Navigation Tracker Spying Logic
-      const sections = [
-        "home",
-        "packages",
-        "about",
-        "safaris",
-        "reviews",
-        "gallery",
-        "contact",
-      ];
+        const headerHeight =
+          document.querySelector("header")?.offsetHeight || 100;
 
-      // If near the very top of the page, highlight home
-      if (window.scrollY < 120) {
-        setActiveSection("home");
-        return;
-      }
+        // Active Section Navigation Tracker Spying Logic
+        const sections = [
+          "home",
+          "packages",
+          "about",
+          "safaris",
+          "reviews",
+          "gallery",
+          "contact",
+        ];
 
-      // If scrolled near bottom of page, highlight the last section (contact)
-      if (
-        window.innerHeight + window.scrollY >=
-        document.documentElement.scrollHeight - 100
-      ) {
-        setActiveSection("contact");
-        return;
-      }
-
-      const threshold = headerHeight + 120;
-      let matchedSection = null;
-
-      for (const sectionId of sections) {
-        const el = document.getElementById(sectionId);
-        if (!el) continue;
-
-        const rect = el.getBoundingClientRect();
-        if (rect.top <= threshold) {
-          matchedSection = sectionId;
+        // If near the very top of the page, highlight home
+        if (window.scrollY < 120) {
+          setActiveSection("home");
+          ticking = false;
+          return;
         }
-      }
 
-      if (matchedSection) {
-        setActiveSection((prev) => (prev !== matchedSection ? matchedSection : prev));
-      }
+        // If scrolled near bottom of page, highlight the last section (contact)
+        if (
+          window.innerHeight + window.scrollY >=
+          document.documentElement.scrollHeight - 100
+        ) {
+          setActiveSection("contact");
+          ticking = false;
+          return;
+        }
+
+        const threshold = headerHeight + 120;
+        let matchedSection = null;
+
+        for (const sectionId of sections) {
+          const el = document.getElementById(sectionId);
+          if (!el) continue;
+
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= threshold) {
+            matchedSection = sectionId;
+          }
+        }
+
+        if (matchedSection) {
+          setActiveSection((prev) => (prev !== matchedSection ? matchedSection : prev));
+        }
+
+        ticking = false;
+      });
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);

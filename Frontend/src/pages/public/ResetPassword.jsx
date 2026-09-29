@@ -3,7 +3,7 @@ import api from "../../axios";
 import { Link, useParams, useSearchParams, useNavigate } from "react-router-dom";
 import SEO from "../../components/SEO";
 import { Lock, Eye, EyeOff, Loader2, CheckCircle2, AlertCircle, ArrowRight, ShieldCheck } from "lucide-react";
-import loginBg from "../../assets/login_register.png";
+import loginBg from "../../assets/login_register.jpg";
 
 export default function ResetPassword() {
   const { token } = useParams();
