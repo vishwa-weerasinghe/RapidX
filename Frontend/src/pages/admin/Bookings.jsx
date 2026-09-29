@@ -500,9 +500,9 @@ export default function Bookings() {
   return (
     <div className="p-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
-        <h1 className="text-3xl md:text-4xl font-black text-[#29AB87] dark:text-white tracking-tight">
+       <h1 className="text-3xl md:text-4xl font-black text-[#29AB87] dark:text-white tracking-tight">
           Booking Management
-        </h1>
+      </h1>
         <div className="flex items-center gap-3">
           <button
             type="button"
@@ -1045,10 +1045,11 @@ export default function Bookings() {
                               ))
                             )}
                             <span
-                              className={`text-xs font-bold ${fullyAssigned
+                              className={`text-xs font-bold ${
+                                fullyAssigned
                                   ? "text-emerald-600 dark:text-emerald-400"
                                   : "text-amber-600 dark:text-amber-400"
-                                }`}
+                              }`}
                             >
                               {assigned.length}/{required}
                             </span>

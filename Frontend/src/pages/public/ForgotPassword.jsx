@@ -3,7 +3,7 @@ import api from "../../axios";
 import { Link } from "react-router-dom";
 import SEO from "../../components/SEO";
 import { Mail, ArrowRight, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
-import loginBg from "../../assets/login_register.jpg";
+import loginBg from "../../assets/login_register.png";
 
 export default function ForgotPassword() {
   const [Email, setEmail] = useState("");
