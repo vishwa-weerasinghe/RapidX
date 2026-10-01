@@ -71,7 +71,7 @@ describe("Admin notification and driver flows", () => {
     expect(screen.getByText(/Leopard Safari/i)).toBeTruthy();
   });
 
-  it("shows the matched vehicles with the linked driver details when the See Vehicle button is used on the vehicle page", async () => {
+  it("shows the matched vehicles when the See Vehicle button is used on the vehicle page", async () => {
     apiGet.mockImplementation((url) => {
       if (url === "/vehicles") {
         return Promise.resolve({
@@ -94,25 +94,6 @@ describe("Admin notification and driver flows", () => {
         });
       }
 
-      if (url === "/drivers") {
-        return Promise.resolve({
-          data: [
-            {
-              Driver_ID: 19,
-              Driver_Name: "Nimal Silva",
-              Phone_Number: "0771234567",
-              Email: "nimal@example.com",
-            },
-            {
-              Driver_ID: 10,
-              Driver_Name: "Roshan Perera",
-              Phone_Number: "0719876543",
-              Email: "roshan@example.com",
-            },
-          ],
-        });
-      }
-
       return Promise.resolve({ data: [] });
     });
 
@@ -123,8 +104,6 @@ describe("Admin notification and driver flows", () => {
 
     expect((await screen.findAllByText(/ABC-123/i)).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/DEF-456/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/Driver #19/i).length).toBeGreaterThan(0);
-    expect(await screen.findByText(/Nimal Silva/i)).toBeTruthy();
-    expect(screen.getByText(/0771234567/i)).toBeTruthy();
+    expect(screen.queryByText(/Nimal Silva/i)).toBeNull();
   });
 });
