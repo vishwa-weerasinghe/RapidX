@@ -45,7 +45,13 @@ export default function Vehicles() {
         drivers.map((driver) => [Number(driver.Driver_ID), driver]),
       );
 
-      const matches = filteredVehicles.map((vehicle) => ({
+      const uniqueVehicles = Array.from(
+        new Map(
+          filteredVehicles.map((vehicle) => [Number(vehicle.Vehicle_ID), vehicle]),
+        ).values(),
+      );
+
+      const matches = uniqueVehicles.map((vehicle) => ({
         ...vehicle,
         driver: driverMap.get(Number(vehicle.Driver_ID)) || null,
       }));
@@ -54,7 +60,12 @@ export default function Vehicles() {
       setShowVehicleResults(true);
     } catch (err) {
       console.error(err);
-      setVehicleResults(filteredVehicles);
+      const uniqueVehicles = Array.from(
+        new Map(
+          filteredVehicles.map((vehicle) => [Number(vehicle.Vehicle_ID), vehicle]),
+        ).values(),
+      );
+      setVehicleResults(uniqueVehicles);
       setShowVehicleResults(true);
     }
   };
@@ -113,13 +124,13 @@ export default function Vehicles() {
       </div>
 
       {showVehicleResults && (
-        <div className="mb-6 rounded-xl border border-border-light bg-white p-4 shadow-sm dark:border-border-dark dark:bg-bg-dark">
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <h2 className="text-sm font-bold text-charcoal dark:text-white">Matched vehicles</h2>
+        <div className="mb-6 rounded-[18px] border border-[#d9e8df] bg-[#f7f3eb] p-4 shadow-[0_8px_18px_rgba(0,0,0,0.05)] dark:border-border-dark dark:bg-bg-dark">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <h2 className="text-[15px] font-black text-[#1f3d36] dark:text-white">Matched vehicles</h2>
             <button
               type="button"
               onClick={() => setShowVehicleResults(false)}
-              className="rounded-md px-2 py-1 text-lg leading-none text-muted hover:bg-offwhite-100 dark:hover:bg-surface-2"
+              className="rounded-md px-2 py-1 text-lg leading-none text-[#3d4c44] hover:bg-[#e9e1d3] dark:text-white dark:hover:bg-surface-2"
               aria-label="Close vehicle results"
             >
               ×
@@ -129,36 +140,20 @@ export default function Vehicles() {
           {vehicleResults.length === 0 ? (
             <p className="text-sm text-muted">No vehicles found for the current search.</p>
           ) : (
-            <div className="grid gap-3 md:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-2">
               {vehicleResults.map((vehicle) => (
                 <div
                   key={vehicle.Vehicle_ID}
-                  className="rounded-lg border border-border-light bg-offwhite-100 p-3 dark:border-border-dark dark:bg-surface-2"
+                  className="rounded-[14px] border border-[#d6e4d9] bg-[#edf6f0] p-4 shadow-sm"
                 >
-                  <p className="text-xs font-bold uppercase tracking-wide text-sacramento">
+                  <p className="text-[12px] font-black uppercase tracking-wide text-[#2f7a6d]">
                     Vehicle #{vehicle.Vehicle_ID}
                   </p>
-                  <p className="mt-2 text-base font-bold text-charcoal dark:text-white">
+                  <p className="mt-2 text-[22px] font-extrabold leading-tight text-[#1f3d36]">
                     {vehicle.Vehicle_No}
                   </p>
-                  <p className="mt-1 text-sm text-muted">Type: {vehicle.Vehicle_Type}</p>
-                  <p className="text-sm text-muted">Seats: {vehicle.No_of_Seats}</p>
-
-                  {vehicle.driver && (
-                    <>
-                      <p className="mt-2 text-sm text-muted">Driver #{vehicle.Driver_ID || "N/A"}</p>
-                      <div className="mt-2 rounded-md border border-border-light bg-white p-2 dark:border-border-dark dark:bg-surface-2">
-                        <p className="text-[11px] font-bold uppercase tracking-wide text-sacramento">
-                          Driver details
-                        </p>
-                        <p className="mt-1 text-sm font-semibold text-charcoal dark:text-white">
-                          {vehicle.driver.Driver_Name}
-                        </p>
-                        <p className="text-sm text-muted">Phone: {vehicle.driver.Phone_Number}</p>
-                        <p className="text-sm text-muted">Email: {vehicle.driver.Email}</p>
-                      </div>
-                    </>
-                  )}
+                  <p className="mt-2 text-[15px] text-[#33463f]">Type: {vehicle.Vehicle_Type}</p>
+                  <p className="text-[15px] text-[#33463f]">Seats: {vehicle.No_of_Seats}</p>
                 </div>
               ))}
             </div>

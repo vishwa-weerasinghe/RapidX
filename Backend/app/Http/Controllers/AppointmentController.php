@@ -22,6 +22,7 @@ class AppointmentController extends Controller
             'bookings.Pickup_Location',
             'bookings.Customer_ID',
             'bookings.Vehicle_ID',
+            'bookings.Payment_ID',
             'bookings.Payment',
             'bookings.Status',
             'customers.First_Name',
@@ -32,7 +33,9 @@ class AppointmentController extends Controller
             'packages.Package_Name'
         )
         ->join('customers', 'bookings.Customer_ID', '=', 'customers.Customer_ID')
-        ->leftJoin('packages', 'bookings.Package_ID', '=', 'packages.id');
+        ->leftJoin('packages', 'bookings.Package_ID', '=', 'packages.id')
+        ->leftJoin('payments', 'bookings.Payment_ID', '=', 'payments.Payment_ID')
+        ->addSelect('payments.status as Payment_Status');
 
         // Optional monthly filter: ?month=YYYY-MM
         if ($request->has('month') && $request->month) {
@@ -75,13 +78,18 @@ class AppointmentController extends Controller
 
         $totalConfirmed = (clone $query)->where('Status', 'Confirmed')->count();
         $totalUnconfirmed = (clone $query)->whereIn('Status', ['In Cart', 'Pending'])->count();
+        $totalCancelled = (clone $query)->where('Status', 'Cancelled')->count();
         $totalEarningsConfirmed = (clone $query)->where('Status', 'Confirmed')->sum('Payment');
         $totalEarningsUnconfirmed = (clone $query)->whereIn('Status', ['In Cart', 'Pending'])->sum('Payment');
-        $totalRefunds = (clone $query)->where('Status', 'Cancelled')->sum('Payment');
+        $totalRefunds = (clone $query)
+            ->where('Status', 'Cancelled')
+            ->whereHas('payment', fn ($paymentQuery) => $paymentQuery->where('status', 'Success'))
+            ->sum('Payment');
 
         return response()->json([
             'total_confirmed' => $totalConfirmed,
             'total_unconfirmed' => $totalUnconfirmed,
+            'total_cancelled' => $totalCancelled,
             'total_earnings' => $totalEarningsConfirmed,
             'total_earnings_confirmed' => $totalEarningsConfirmed,
             'total_earnings_unconfirmed' => $totalEarningsUnconfirmed,
@@ -116,7 +124,7 @@ class AppointmentController extends Controller
             ->selectRaw("SUM(CASE WHEN Status = 'Cancelled' THEN 1 ELSE 0 END) as total_cancelled")
             ->selectRaw("SUM(CASE WHEN Status = 'Confirmed' THEN Payment ELSE 0 END) as earnings_confirmed")
             ->selectRaw("SUM(CASE WHEN Status IN ('In Cart', 'Pending') THEN Payment ELSE 0 END) as earnings_unconfirmed")
-            ->selectRaw("SUM(CASE WHEN Status = 'Cancelled' THEN Payment ELSE 0 END) as refunds")
+            ->selectRaw("SUM(CASE WHEN Status = 'Cancelled' AND Payment_ID IN (SELECT Payment_ID FROM payments WHERE status = 'Success') THEN Payment ELSE 0 END) as refunds")
             ->whereYear('Booking_Date', $year)
             ->groupBy('month')
             ->get()
