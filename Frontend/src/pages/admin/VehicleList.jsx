@@ -124,7 +124,7 @@ export default function Vehicles() {
       </div>
 
       {showVehicleResults && (
-        <div className="mb-6 rounded-[18px] border border-[#d6cab9] bg-[#f3efe7] p-4 shadow-[0_8px_18px_rgba(0,0,0,0.06)] dark:border-border-dark dark:bg-bg-dark">
+        <div className="mb-6 rounded-[18px] border border-[#d9e8df] bg-[#f7f3eb] p-4 shadow-[0_8px_18px_rgba(0,0,0,0.05)] dark:border-border-dark dark:bg-bg-dark">
           <div className="mb-4 flex items-center justify-between gap-3">
             <h2 className="text-[15px] font-black text-[#1f3d36] dark:text-white">Matched vehicles</h2>
             <button
@@ -144,7 +144,7 @@ export default function Vehicles() {
               {vehicleResults.map((vehicle) => (
                 <div
                   key={vehicle.Vehicle_ID}
-                  className="rounded-[14px] border border-[#d6cab9] bg-transparent p-4"
+                  className="rounded-[14px] border border-[#d6e4d9] bg-[#edf6f0] p-4 shadow-sm"
                 >
                   <p className="text-[12px] font-black uppercase tracking-wide text-[#2f7a6d]">
                     Vehicle #{vehicle.Vehicle_ID}
