@@ -6,6 +6,8 @@ export default function Vehicles() {
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [vehicleResults, setVehicleResults] = useState([]);
+  const [showVehicleResults, setShowVehicleResults] = useState(false);
   const navigate = useNavigate();
 
   const fetchVehicles = async () => {
@@ -35,6 +37,28 @@ export default function Vehicles() {
     }
   };
 
+  const handleSeeVehicle = async () => {
+    try {
+      const driverResponse = await api.get("/drivers");
+      const drivers = driverResponse.data || [];
+      const driverMap = new Map(
+        drivers.map((driver) => [Number(driver.Driver_ID), driver]),
+      );
+
+      const matches = filteredVehicles.map((vehicle) => ({
+        ...vehicle,
+        driver: driverMap.get(Number(vehicle.Driver_ID)) || null,
+      }));
+
+      setVehicleResults(matches);
+      setShowVehicleResults(true);
+    } catch (err) {
+      console.error(err);
+      setVehicleResults(filteredVehicles);
+      setShowVehicleResults(true);
+    }
+  };
+
   const filteredVehicles = vehicles.filter((vehicle) => {
     const q = search.trim().toLowerCase();
     if (!q) return true;
@@ -50,33 +74,97 @@ export default function Vehicles() {
       <div className="mb-6">
         <h1 className="text-3xl md:text-4xl font-black text-[#29AB87] dark:text-white tracking-tight">Vehicles</h1>
         <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="relative">
-            <svg
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M21 21l-4.35-4.35m1.35-5.4a6.75 6.75 0 11-13.5 0 6.75 6.75 0 0113.5 0z"
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="relative">
+              <svg
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M21 21l-4.35-4.35m1.35-5.4a6.75 6.75 0 11-13.5 0 6.75 6.75 0 0113.5 0z"
+                />
+              </svg>
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search by number or type..."
+                className="form-input w-full sm:w-64 pl-9"
               />
-            </svg>
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by number or type..."
-              className="form-input w-full sm:w-64 pl-9"
-            />
+            </div>
+            <button
+              type="button"
+              onClick={handleSeeVehicle}
+              className="btn-secondary"
+              aria-label="See vehicle"
+            >
+              {filteredVehicles.length > 0 ? `See Vehicle (${filteredVehicles.length})` : "See Vehicle"}
+            </button>
           </div>
           <button onClick={() => navigate("/admin/vehicles/create")} className="btn-primary">
             + Add Vehicle
           </button>
         </div>
       </div>
+
+      {showVehicleResults && (
+        <div className="mb-6 rounded-xl border border-border-light bg-white p-4 shadow-sm dark:border-border-dark dark:bg-bg-dark">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <h2 className="text-sm font-bold text-charcoal dark:text-white">Matched vehicles</h2>
+            <button
+              type="button"
+              onClick={() => setShowVehicleResults(false)}
+              className="rounded-md px-2 py-1 text-lg leading-none text-muted hover:bg-offwhite-100 dark:hover:bg-surface-2"
+              aria-label="Close vehicle results"
+            >
+              ×
+            </button>
+          </div>
+
+          {vehicleResults.length === 0 ? (
+            <p className="text-sm text-muted">No vehicles found for the current search.</p>
+          ) : (
+            <div className="grid gap-3 md:grid-cols-2">
+              {vehicleResults.map((vehicle) => (
+                <div
+                  key={vehicle.Vehicle_ID}
+                  className="rounded-lg border border-border-light bg-offwhite-100 p-3 dark:border-border-dark dark:bg-surface-2"
+                >
+                  <p className="text-xs font-bold uppercase tracking-wide text-sacramento">
+                    Vehicle #{vehicle.Vehicle_ID}
+                  </p>
+                  <p className="mt-2 text-base font-bold text-charcoal dark:text-white">
+                    {vehicle.Vehicle_No}
+                  </p>
+                  <p className="mt-1 text-sm text-muted">Type: {vehicle.Vehicle_Type}</p>
+                  <p className="text-sm text-muted">Seats: {vehicle.No_of_Seats}</p>
+
+                  {vehicle.driver && (
+                    <>
+                      <p className="mt-2 text-sm text-muted">Driver #{vehicle.Driver_ID || "N/A"}</p>
+                      <div className="mt-2 rounded-md border border-border-light bg-white p-2 dark:border-border-dark dark:bg-surface-2">
+                        <p className="text-[11px] font-bold uppercase tracking-wide text-sacramento">
+                          Driver details
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-charcoal dark:text-white">
+                          {vehicle.driver.Driver_Name}
+                        </p>
+                        <p className="text-sm text-muted">Phone: {vehicle.driver.Phone_Number}</p>
+                        <p className="text-sm text-muted">Email: {vehicle.driver.Email}</p>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {loading ? (
         <p className="text-muted">Loading...</p>

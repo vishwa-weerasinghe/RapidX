@@ -23,6 +23,10 @@ export default function Appointments() {
 
   const getAppointmentId = (a) => Number(a?.Booking_ID || 0);
 
+  const notificationAppointments = appointments.filter((appointment) =>
+    notificationAppointmentIds.has(getAppointmentId(appointment)),
+  );
+
   useEffect(() => {
     appointmentsRef.current = appointments;
   }, [appointments]);
@@ -152,6 +156,47 @@ export default function Appointments() {
           </button>
         </div>
       </div>
+
+      {showNewOnly && (
+        <div className="mb-6 rounded-xl border border-border-light bg-white p-4 shadow-sm dark:border-border-dark dark:bg-bg-dark">
+          <div className="mb-2 flex items-center justify-between">
+            <h2 className="text-sm font-bold text-charcoal dark:text-white">New appointments</h2>
+            <button
+              type="button"
+              onClick={() => {
+                setShowNewOnly(false);
+                setNotificationAppointmentIds(new Set());
+              }}
+              className="rounded-md px-2 py-1 text-lg leading-none text-muted hover:bg-offwhite-100 dark:hover:bg-surface-2"
+              aria-label="Close new appointments"
+            >
+              ×
+            </button>
+          </div>
+          {notificationAppointmentIds.size === 0 ? (
+            <p className="text-sm text-muted">No new appointments.</p>
+          ) : (
+            <div className="space-y-2">
+              {notificationAppointments.map((appointment) => (
+                <div
+                  key={getAppointmentId(appointment)}
+                  className="rounded-lg border border-border-light bg-offwhite-100 p-3 dark:border-border-dark dark:bg-surface-2"
+                >
+                  <p className="text-xs font-bold text-sacramento">
+                    {appointment?.Package_Name || "Safari package"}
+                  </p>
+                  <p className="mt-1 text-sm text-charcoal dark:text-white">
+                    {appointment?.Status || "Pending review"}
+                  </p>
+                  <p className="mt-1 text-xs text-muted">
+                    Booking ID: {getAppointmentId(appointment)}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Summary Cards */}
       {!loading && !error && (
