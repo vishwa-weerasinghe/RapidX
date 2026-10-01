@@ -66,7 +66,49 @@ export function CompletedSafari() {
   }
 
   if (completedBookings.length === 0) {
-    return null;
+    return (
+      <section className={`${cardClass} min-h-[380px] sm:min-h-[420px]`}>
+        <div className="absolute inset-0 z-0 h-full w-full">
+          <img
+            src={completedImg}
+            alt=""
+            aria-hidden="true"
+            className="h-full w-full object-cover object-center"
+          />
+          <div className={`absolute inset-0 ${overlayTint}`} />
+        </div>
+
+        <div className="relative z-10 p-6 sm:p-10 lg:p-12 flex flex-col gap-6">
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className={`text-2xl sm:text-3xl lg:text-4xl font-serif leading-tight ${
+              isDark ? "text-white" : "text-charcoal"
+            }`}
+          >
+            Completed Safaris
+          </motion.h1>
+
+          <p className={`text-lg font-medium ${labelClass}`}>
+            So far you have no completed safaris. If you want , you can share
+            ideas about our service regarding your incart and pending bookings
+          </p>
+
+          <motion.button
+            type="button"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            onClick={() => navigate("/user/reviews")}
+            className="btn-primary w-full sm:w-auto self-start rounded-xl px-6 py-3 text-sm font-semibold"
+          >
+            <Star size={16} className="shrink-0" />
+            Write a review
+          </motion.button>
+        </div>
+      </section>
+    );
   }
 
   return (

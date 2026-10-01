@@ -95,7 +95,7 @@ export function CartCard() {
       <div className={cardClass}>
         <div className="mb-5 flex items-center gap-2.5">
           <div className={iconBoxClass}><ShoppingCart size={18} /></div>
-          <h2 className={titleClass}>Your Cart</h2>
+          <h2 className={titleClass}>My Cart</h2>
         </div>
         <p className="text-center text-sm text-red-600">{error}</p>
       </div>
@@ -107,7 +107,7 @@ export function CartCard() {
       <div className="mb-5 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className={iconBoxClass}><ShoppingCart size={18} /></div>
-          <h2 className={titleClass}>Your Cart</h2>
+          <h2 className={titleClass}>My Cart</h2>
         </div>
         <div className={counterClass}>{cartItems.length}</div>
       </div>

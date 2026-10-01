@@ -19,6 +19,10 @@ use App\Http\Controllers\PayHereController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\PromotionCodeController;
 
+Route::get('/health', function () {
+    return response()->json(['status' => 'ok', 'timestamp' => now()->toIso8601String()]);
+});
+
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');

@@ -199,8 +199,11 @@ class AppointmentControllerTest extends TestCase
         $response->assertStatus(200)
             ->assertJsonCount(1)
             ->assertJsonFragment(['Booking_ID' => $booking->Booking_ID])
-            ->assertJsonFragment(['Payment' => 2500])
             ->assertJsonFragment(['Status' => 'Confirmed']);
+
+        // Payment is a decimal column: MySQL returns "2500.00" while SQLite
+        // returns the integer 2500, so compare numerically instead of strictly.
+        $this->assertEquals(2500, $response->json()[0]['Payment']);
     }
 
     public function test_index_filters_appointments_by_month_parameter(): void

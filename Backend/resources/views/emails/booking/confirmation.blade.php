@@ -19,9 +19,7 @@
                             <div style="font-size: 11px; font-weight: 700; color: #86efac; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px;">
                                 SRI LANKA WILDLIFE EXPEDITIONS
                             </div>
-                            <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 800; letter-spacing: 0.5px; line-height: 1.3;">
-                                MINNERIYA, KAUDULLA & WASGAMUWA
-                            </h1>
+
                             <div style="font-size: 14px; font-weight: 600; color: #d1fae5; margin-top: 4px; letter-spacing: 1px;">
                                 WILD JEEP SAFARI
                             </div>
@@ -86,37 +84,6 @@
                                 </tr>
                             </table>
 
-                            @if($isAdminCopy && $payment->customer)
-                                <!-- Customer Info Card (Admin Copy Only) -->
-                                <div style="margin-bottom: 28px;">
-                                    <h3 style="margin: 0 0 10px 0; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #153825;">
-                                        Customer Contact Details
-                                    </h3>
-                                    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f7faf8; border: 1px solid #e1eade; border-radius: 10px; font-size: 14px;">
-                                        <tr>
-                                            <td style="padding: 10px 16px; border-bottom: 1px solid #e1eade; font-weight: 600; color: #5a6e60; width: 130px;">Name:</td>
-                                            <td style="padding: 10px 16px; border-bottom: 1px solid #e1eade; color: #153825; font-weight: 700;">{{ $payment->customer->First_Name ?? '' }} {{ $payment->customer->Last_Name ?? '' }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td style="padding: 10px 16px; border-bottom: 1px solid #e1eade; font-weight: 600; color: #5a6e60;">Email:</td>
-                                            <td style="padding: 10px 16px; border-bottom: 1px solid #e1eade; color: #153825;"><a href="mailto:{{ $payment->customer->Email }}" style="color: #1e7e34; text-decoration: none; font-weight: 600;">{{ $payment->customer->Email }}</a></td>
-                                        </tr>
-                                        @if(!empty($payment->customer->Phone_No))
-                                        <tr>
-                                            <td style="padding: 10px 16px; border-bottom: 1px solid #e1eade; font-weight: 600; color: #5a6e60;">Phone / WhatsApp:</td>
-                                            <td style="padding: 10px 16px; border-bottom: 1px solid #e1eade; color: #153825;"><a href="tel:{{ $payment->customer->Phone_No }}" style="color: #153825; text-decoration: none; font-weight: 600;">{{ $payment->customer->Phone_No }}</a></td>
-                                        </tr>
-                                        @endif
-                                        @if(!empty($payment->customer->NIC))
-                                        <tr>
-                                            <td style="padding: 10px 16px; font-weight: 600; color: #5a6e60;">Passport / NIC:</td>
-                                            <td style="padding: 10px 16px; color: #153825;">{{ $payment->customer->NIC }}</td>
-                                        </tr>
-                                        @endif
-                                    </table>
-                                </div>
-                            @endif
-
                             <!-- Safari Itinerary Table -->
                             <h3 style="margin: 0 0 12px 0; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #153825;">
                                 Safari Tour Itinerary
@@ -158,6 +125,37 @@
                                     @endforeach
                                 </tbody>
                             </table>
+
+                            @if($isAdminCopy && $payment->customer)
+                                <!-- Customer Info Card (Admin Copy Only) -->
+                                <div style="margin-bottom: 28px;">
+                                    <h3 style="margin: 0 0 10px 0; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #153825;">
+                                        Customer Contact Details
+                                    </h3>
+                                    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f7faf8; border: 1px solid #e1eade; border-radius: 10px; font-size: 14px;">
+                                        <tr>
+                                            <td style="padding: 10px 16px; border-bottom: 1px solid #e1eade; font-weight: 600; color: #5a6e60; width: 130px;">Name:</td>
+                                            <td style="padding: 10px 16px; border-bottom: 1px solid #e1eade; color: #153825; font-weight: 700;">{{ $payment->customer->First_Name ?? '' }} {{ $payment->customer->Last_Name ?? '' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 10px 16px; border-bottom: 1px solid #e1eade; font-weight: 600; color: #5a6e60;">Email:</td>
+                                            <td style="padding: 10px 16px; border-bottom: 1px solid #e1eade; color: #153825;"><a href="mailto:{{ $payment->customer->Email }}" style="color: #1e7e34; text-decoration: none; font-weight: 600;">{{ $payment->customer->Email }}</a></td>
+                                        </tr>
+                                        @if(!empty($payment->customer->Phone_No))
+                                        <tr>
+                                            <td style="padding: 10px 16px; border-bottom: 1px solid #e1eade; font-weight: 600; color: #5a6e60;">Phone / WhatsApp:</td>
+                                            <td style="padding: 10px 16px; border-bottom: 1px solid #e1eade; color: #153825;"><a href="tel:{{ $payment->customer->Phone_No }}" style="color: #153825; text-decoration: none; font-weight: 600;">{{ $payment->customer->Phone_No }}</a></td>
+                                        </tr>
+                                        @endif
+                                        @if(!empty($payment->customer->NIC))
+                                        <tr>
+                                            <td style="padding: 10px 16px; font-weight: 600; color: #5a6e60;">Passport / NIC:</td>
+                                            <td style="padding: 10px 16px; color: #153825;">{{ $payment->customer->NIC }}</td>
+                                        </tr>
+                                        @endif
+                                    </table>
+                                </div>
+                            @endif
 
                             @if(!$isAdminCopy)
                                 <!-- Important Safari Tips (Customer Copy Only) -->
