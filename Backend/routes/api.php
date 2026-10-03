@@ -125,12 +125,14 @@ Route::get('/admin/stats', [DashboardController::class, 'stats']);
 Route::get('/admin/customers', [CustomerController::class, 'index'])
     ->middleware('auth:sanctum');
 
-Route::get('/admin/bookings/unread-count', [BookingController::class, 'unreadCount']);
+Route::get('/admin/bookings/unread-count', [BookingController::class, 'unreadCount'])
+    ->middleware('auth:sanctum');
 
 Route::get('/admin/bookings/notifications', [BookingController::class, 'adminNotifications'])
     ->middleware('auth:sanctum');
 
-Route::post('/admin/bookings/mark-seen', [BookingController::class, 'markAllAsSeen']);
+Route::post('/admin/bookings/mark-seen', [BookingController::class, 'markAllAsSeen'])
+    ->middleware('auth:sanctum');
 
 Route::get('/customer/{customerId}/booking-notifications/unread-count', [BookingController::class, 'customerUnreadCount'])
     ->middleware('auth:sanctum');

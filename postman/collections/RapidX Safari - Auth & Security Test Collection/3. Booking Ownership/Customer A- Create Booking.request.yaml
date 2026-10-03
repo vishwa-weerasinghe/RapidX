@@ -1,0 +1,36 @@
+$kind: http-request
+name: "Customer A: Create Booking"
+url: "{{base_url}}/bookings"
+method: POST
+headers:
+  Authorization: Bearer {{customer_a_token}}
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: text
+  content: |-
+    {
+        "Booking_Date": "2026-11-15",
+        "Pickup_Time": "06:00 AM",
+        "Area": "Habarana",
+        "Pickup_Location": "Cinnamon Lodge Habarana",
+        "No_of_adults": 2,
+        "No_of_child": 0,
+        "Package_ID": 3,
+        "Customer_ID": "{{customer_a_id}}"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      if (pm.response.code === 200 || pm.response.code === 201) {
+          var data = pm.response.json();
+          var bookingId = data.id || data.Booking_ID || (data.booking && (data.booking.id || data.booking.Booking_ID));
+          if (bookingId) {
+              pm.collectionVariables.set('booking_id_a', bookingId);
+          }
+          pm.test('Customer A booking created successfully', function () {
+              pm.expect(pm.response.code).to.be.oneOf([200, 201]);
+          });
+      }
+    language: text/javascript
+order: 1000
