@@ -2504,7 +2504,7 @@ export default function App() {
                     </button>
                   ))}
                 </div>
-                
+
                 <div className="flex flex-col gap-4">
                   <h4 className="font-bold text-neutral-900 dark:text-white text-sm uppercase tracking-wider">Destinations</h4>
                   {[
