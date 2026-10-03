@@ -1,0 +1,10 @@
+$kind: collection
+description: Postman test suite for RapidX Safari API focusing on Authentication, Session Management, IDOR / Ownership Protection, and Admin Route Security.
+variables:
+  base_url: http://127.0.0.1:8000/api
+  customer_a_token: ""
+  customer_a_id: "47"
+  customer_b_token: ""
+  customer_b_id: ""
+  booking_id_a: "115"
+  package_id: "3"

@@ -1,0 +1,30 @@
+$kind: http-request
+url: "{{base_url}}/login"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: text
+  content: |-
+    {
+        "Email": "customerb@example.com",
+        "Password": "StrongPass@123"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      if (pm.response.code === 200) {
+          var data = pm.response.json();
+          if (data.token) {
+              pm.collectionVariables.set('customer_b_token', data.token);
+          }
+          if (data.user && data.user.Customer_ID) {
+              pm.collectionVariables.set('customer_b_id', data.user.Customer_ID);
+          }
+          pm.test('Customer B Login Success (200)', function () {
+              pm.response.to.have.status(200);
+          });
+      }
+    language: text/javascript
+order: 4000

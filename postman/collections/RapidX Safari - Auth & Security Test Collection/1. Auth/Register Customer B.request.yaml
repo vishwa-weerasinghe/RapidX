@@ -1,0 +1,37 @@
+$kind: http-request
+url: "{{base_url}}/register"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: text
+  content: |-
+    {
+        "Email": "customerb@example.com",
+        "Password": "StrongPass@123",
+        "Password_confirmation": "StrongPass@123",
+        "First_Name": "Bob",
+        "Last_Name": "Traveler",
+        "Phone_No": "0779876543",
+        "Country": "Sri Lanka",
+        "Country_Code": "LK",
+        "NIC": "199898765432"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      if (pm.response.code === 201 || pm.response.code === 200) {
+          var data = pm.response.json();
+          if (data.token) {
+              pm.collectionVariables.set('customer_b_token', data.token);
+          }
+          if (data.user && data.user.Customer_ID) {
+              pm.collectionVariables.set('customer_b_id', data.user.Customer_ID);
+          }
+          pm.test('Register Customer B Success', function () {
+              pm.expect(pm.response.code).to.be.oneOf([200, 201]);
+          });
+      }
+    language: text/javascript
+order: 3000
