@@ -4,7 +4,6 @@ use App\Http\Controllers\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-// Packages
 use App\Http\Controllers\PackageController;
 use App\Http\Controllers\DriverController;
 use App\Http\Controllers\MediaController;
