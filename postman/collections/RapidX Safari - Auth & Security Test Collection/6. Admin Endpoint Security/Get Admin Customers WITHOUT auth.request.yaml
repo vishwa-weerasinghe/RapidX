@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{base_url}}/admin/customers"
+method: GET
+headers:
+  Accept: application/json
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Admin customers requires auth (401 Unauthorized)', function () {
+          pm.response.to.have.status(401);
+      });
+    language: text/javascript
+order: 3000

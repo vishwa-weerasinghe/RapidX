@@ -47,18 +47,34 @@ export function CancellationMessage() {
     : "bg-red-100 text-red-600";
   const highlightTextClass = isDark ? "text-sacramento-300" : "text-sacramento-600";
 
-      // Hide the whole card while loading and when there are no cancelled bookings
-  if (loading || cancelledBookings.length === 0) {
+  const header = (
+    <div className="mb-5 flex items-center gap-2.5">
+      <div className={iconBoxClass}><Ban size={18} /></div>
+      <h2 className={titleClass}>Booking Cancellation</h2>
+      <div className={counterClass}>{cancelledBookings.length}</div>
+    </div>
+  );
+
+  // Hide the whole card while the bookings are loading
+  if (loading) {
     return null;
+  }
+
+  // No cancelled bookings — show the card with an empty-state message
+  if (cancelledBookings.length === 0) {
+    return (
+      <div className={cardClass}>
+        {header}
+        <p className={`px-4 py-6 text-center text-[15px] font-medium ${mutedTextClass}`}>
+          You have no cancelled bookings
+        </p>
+      </div>
+    );
   }
 
   return (
     <div className={cardClass}>
-      <div className="mb-5 flex items-center gap-2.5">
-        <div className={iconBoxClass}><Ban size={18} /></div>
-        <h2 className={titleClass}>Booking Cancellation</h2>
-        <div className={counterClass}>{cancelledBookings.length}</div>
-      </div>
+      {header}
 
       <div className="flex max-h-[400px] sm:max-h-[500px] flex-col gap-4 overflow-y-auto">
         {cancelledBookings.map((booking) => {

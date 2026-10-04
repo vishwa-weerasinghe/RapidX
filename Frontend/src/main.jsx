@@ -27,6 +27,8 @@ import MyBookings from "./pages/user/MyBookings";
 import Cancellation from "./pages/user/cancellation.jsx";
 
 import Appointments from "./pages/admin/appointment.jsx";
+import EarningReports from "./pages/admin/EarningReports.jsx";
+import BookingSummary from "./pages/admin/BookingSummary.jsx";
 import GuestBooking from "./pages/public/booking.jsx";
 import PolicyPage from "./pages/public/PolicyPage.jsx";
 import PaymentSuccess from "./pages/public/PaymentSuccess.jsx";
@@ -115,7 +117,10 @@ createRoot(document.getElementById("root")).render(
             <Route path="packages" element={<Packages />} />
             <Route path="drivers" element={<Drivers />} />
             <Route path="bookings" element={<Bookings />} />
-            <Route path="appointments" element={<Appointments />} />
+            <Route path="earnings-and-reports" element={<Appointments />} />
+            <Route path="appointments" element={<Navigate to="/admin/earnings-and-reports" replace />} />
+            <Route path="earning-reports" element={<EarningReports />} />
+            <Route path="booking-summary" element={<BookingSummary />} />
             <Route path="media" element={<MediaList />} />
             <Route path="reviews" element={<AdminReviews />} />
             <Route path="promotion-codes" element={<PromotionCodes />} />

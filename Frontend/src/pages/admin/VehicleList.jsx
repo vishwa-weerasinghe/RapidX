@@ -6,6 +6,8 @@ export default function Vehicles() {
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [vehicleResults, setVehicleResults] = useState([]);
+  const [showVehicleResults, setShowVehicleResults] = useState(false);
   const navigate = useNavigate();
 
   const fetchVehicles = async () => {
@@ -35,6 +37,39 @@ export default function Vehicles() {
     }
   };
 
+  const handleSeeVehicle = async () => {
+    try {
+      const driverResponse = await api.get("/drivers");
+      const drivers = driverResponse.data || [];
+      const driverMap = new Map(
+        drivers.map((driver) => [Number(driver.Driver_ID), driver]),
+      );
+
+      const uniqueVehicles = Array.from(
+        new Map(
+          filteredVehicles.map((vehicle) => [Number(vehicle.Vehicle_ID), vehicle]),
+        ).values(),
+      );
+
+      const matches = uniqueVehicles.map((vehicle) => ({
+        ...vehicle,
+        driver: driverMap.get(Number(vehicle.Driver_ID)) || null,
+      }));
+
+      setVehicleResults(matches);
+      setShowVehicleResults(true);
+    } catch (err) {
+      console.error(err);
+      const uniqueVehicles = Array.from(
+        new Map(
+          filteredVehicles.map((vehicle) => [Number(vehicle.Vehicle_ID), vehicle]),
+        ).values(),
+      );
+      setVehicleResults(uniqueVehicles);
+      setShowVehicleResults(true);
+    }
+  };
+
   const filteredVehicles = vehicles.filter((vehicle) => {
     const q = search.trim().toLowerCase();
     if (!q) return true;
@@ -50,33 +85,81 @@ export default function Vehicles() {
       <div className="mb-6">
         <h1 className="text-3xl md:text-4xl font-black text-[#29AB87] dark:text-white tracking-tight">Vehicles</h1>
         <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="relative">
-            <svg
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M21 21l-4.35-4.35m1.35-5.4a6.75 6.75 0 11-13.5 0 6.75 6.75 0 0113.5 0z"
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="relative">
+              <svg
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M21 21l-4.35-4.35m1.35-5.4a6.75 6.75 0 11-13.5 0 6.75 6.75 0 0113.5 0z"
+                />
+              </svg>
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search by number or type..."
+                className="form-input w-full sm:w-64 pl-9"
               />
-            </svg>
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by number or type..."
-              className="form-input w-full sm:w-64 pl-9"
-            />
+            </div>
+            <button
+              type="button"
+              onClick={handleSeeVehicle}
+              className="btn-secondary"
+              aria-label="See vehicle"
+            >
+              {filteredVehicles.length > 0 ? `See Vehicle (${filteredVehicles.length})` : "See Vehicle"}
+            </button>
           </div>
           <button onClick={() => navigate("/admin/vehicles/create")} className="btn-primary">
             + Add Vehicle
           </button>
         </div>
       </div>
+
+      {showVehicleResults && (
+        <div className="mb-6 rounded-[18px] border border-[#d9e8df] bg-[#f7f3eb] p-4 shadow-[0_8px_18px_rgba(0,0,0,0.05)] dark:border-border-dark dark:bg-bg-dark">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <h2 className="text-[15px] font-black text-[#1f3d36] dark:text-white">Matched vehicles</h2>
+            <button
+              type="button"
+              onClick={() => setShowVehicleResults(false)}
+              className="rounded-md px-2 py-1 text-lg leading-none text-[#3d4c44] hover:bg-[#e9e1d3] dark:text-white dark:hover:bg-surface-2"
+              aria-label="Close vehicle results"
+            >
+              ×
+            </button>
+          </div>
+
+          {vehicleResults.length === 0 ? (
+            <p className="text-sm text-muted">No vehicles found for the current search.</p>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2">
+              {vehicleResults.map((vehicle) => (
+                <div
+                  key={vehicle.Vehicle_ID}
+                  className="rounded-[14px] border border-[#d6e4d9] bg-[#edf6f0] p-4 shadow-sm"
+                >
+                  <p className="text-[12px] font-black uppercase tracking-wide text-[#2f7a6d]">
+                    Vehicle #{vehicle.Vehicle_ID}
+                  </p>
+                  <p className="mt-2 text-[22px] font-extrabold leading-tight text-[#1f3d36]">
+                    {vehicle.Vehicle_No}
+                  </p>
+                  <p className="mt-2 text-[15px] text-[#33463f]">Type: {vehicle.Vehicle_Type}</p>
+                  <p className="text-[15px] text-[#33463f]">Seats: {vehicle.No_of_Seats}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {loading ? (
         <p className="text-muted">Loading...</p>

@@ -441,7 +441,7 @@ class BookingControllerTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-            ->assertJson(['message' => 'This booking cannot be modified after it has been confirmed.']);
+            ->assertJson(['message' => 'This booking cannot be modified.']);
 
         $this->assertDatabaseHas('bookings', [
             'Booking_ID' => $booking->Booking_ID,

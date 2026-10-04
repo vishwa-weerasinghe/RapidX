@@ -1,0 +1,24 @@
+$kind: http-request
+name: "Customer B: Update Customer A's Booking (SEC-04 - Should Fail 403)"
+url: "{{base_url}}/user/bookings/{{booking_id_a}}"
+method: PUT
+headers:
+  Authorization: Bearer {{customer_b_token}}
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: text
+  content: |-
+    {
+        "Area": "Sigiriya",
+        "Pickup_Location": "Malicious Hotel",
+        "No_of_adults": 5
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('SEC-04: Customer B blocked from editing Customer A booking (403 Forbidden)', function () {
+          pm.response.to.have.status(403);
+      });
+    language: text/javascript
+order: 3000

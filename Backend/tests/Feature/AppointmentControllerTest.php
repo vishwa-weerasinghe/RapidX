@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Booking;
 use App\Models\Customer;
+use App\Models\Payment;
 use App\Models\Package;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -198,8 +199,11 @@ class AppointmentControllerTest extends TestCase
         $response->assertStatus(200)
             ->assertJsonCount(1)
             ->assertJsonFragment(['Booking_ID' => $booking->Booking_ID])
-            ->assertJsonFragment(['Payment' => 2500])
             ->assertJsonFragment(['Status' => 'Confirmed']);
+
+        // Payment is a decimal column: MySQL returns "2500.00" while SQLite
+        // returns the integer 2500, so compare numerically instead of strictly.
+        $this->assertEquals(2500, $response->json()[0]['Payment']);
     }
 
     public function test_index_filters_appointments_by_month_parameter(): void
@@ -265,7 +269,17 @@ class AppointmentControllerTest extends TestCase
 
         // 2 in-cart / unconfirmed bookings in the current month
         $this->createBookingForDate(now()->format('Y-m-05'), 'Pending', 700);
-        $this->createBookingForDate(now()->format('Y-m-28'), 'In cart', 800);
+        $this->createBookingForDate(now()->format('Y-m-28'), 'In Cart', 800);
+        $confirmedCancelled = $this->createBookingForDate(now()->format('Y-m-29'), 'Cancelled', 400);
+        $successfulPayment = Payment::create([
+            'order_id' => 'refund-order-' . $confirmedCancelled->Booking_ID,
+            'Customer_ID' => $confirmedCancelled->Customer_ID,
+            'amount' => 400,
+            'currency' => 'USD',
+            'status' => 'Success',
+        ]);
+        $confirmedCancelled->update(['Payment_ID' => $successfulPayment->Payment_ID]);
+        $this->createBookingForDate(now()->format('Y-m-30'), 'Cancelled', 900);
 
         $response = $this->actingAs($this->adminUser(), 'sanctum')
             ->getJson('/api/appointments/summary?month=' . $month);
@@ -274,9 +288,11 @@ class AppointmentControllerTest extends TestCase
             ->assertJson([
                 'total_confirmed' => 3,
                 'total_unconfirmed' => 2,
+                'total_cancelled' => 2,
                 'total_earnings' => 3500,
                 'total_earnings_confirmed' => 3500,
                 'total_earnings_unconfirmed' => 1500,
+                'total_refunds' => 400,
             ]);
     }
 

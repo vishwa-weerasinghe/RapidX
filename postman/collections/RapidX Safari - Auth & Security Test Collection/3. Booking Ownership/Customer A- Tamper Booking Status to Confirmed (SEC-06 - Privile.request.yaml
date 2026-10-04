@@ -1,0 +1,23 @@
+$kind: http-request
+name: "Customer A: Tamper Booking Status to Confirmed (SEC-06 - Privilege Escalation)"
+url: "{{base_url}}/user/bookings/{{booking_id_a}}"
+method: PUT
+headers:
+  Authorization: Bearer {{customer_a_token}}
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: text
+  content: |-
+    {
+        "Status": "Confirmed"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      var data = pm.response.json();
+      pm.test('SEC-06: Customer cannot self-confirm booking (Status stays unchanged)', function () {
+          pm.expect(data.Status).to.not.equal('Confirmed');
+      });
+    language: text/javascript
+order: 4000

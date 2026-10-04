@@ -1,0 +1,15 @@
+# Use this workspace to collaborate
+workspace:
+  id: e43e6e77-9a51-464d-840f-2f9ac2269bb4
+
+# Each entry here maps a local resource to one or more corresponding objects in Postman Cloud
+
+cloudResources:
+  collections:
+    ../postman/collections/RapidX Safari - Auth & Security Test Collection: 34dc3b72-1aa7-4d1a-97d3-737a90685d71
+
+# All resources in the `postman/` folder are automatically registered in Local View.
+# Point to additional files outside the `postman/` folder to register them individually. Example:
+#localResources:
+#  collections:
+#    - ../tests/E2E Test Collection/

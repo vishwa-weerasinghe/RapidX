@@ -12,6 +12,25 @@ class MediaControllerTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected array $preExistingMediaFiles = [];
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->preExistingMediaFiles = glob(public_path('uploads/*.*')) ?: [];
+    }
+
+    protected function tearDown(): void
+    {
+        foreach (glob(public_path('uploads/*.*')) ?: [] as $file) {
+            if (!in_array($file, $this->preExistingMediaFiles, true)) {
+                @unlink($file);
+            }
+        }
+
+        parent::tearDown();
+    }
+
     protected function createUser(): User
     {
         return User::create([

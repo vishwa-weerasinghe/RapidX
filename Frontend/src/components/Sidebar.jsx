@@ -29,8 +29,8 @@ const adminLinks = [
   { to: "/admin/reviews", label: "Reviews", icon: Star },
   { to: "/admin/customers", label: "Customer Management", icon: UserRound },
   {
-    to: "/admin/appointments",
-    label: "Appointments",
+    to: "/admin/earnings-and-reports",
+    label: "Earnings and Reports",
     icon: CalendarCheck,
   },
   { to: "/admin/promotion-codes", label: "Promotion Codes", icon: Tag },
@@ -310,7 +310,7 @@ export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
                   </span>
                 )}
 
-                {link.label === "Appointments" && normalizedRole === "admin" && unreadAppointments > 0 && (
+                {link.label === "Earnings and Reports" && normalizedRole === "admin" && unreadAppointments > 0 && (
                   <span className="ml-auto min-w-5 rounded-full bg-red-500 px-1.5 py-0.5 text-center text-xs font-bold text-white">
                     {unreadAppointments}
                   </span>

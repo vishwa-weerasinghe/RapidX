@@ -19,21 +19,12 @@ export default function VehicleForm() {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState(false);
-  const [search, setSearch] = useState("");
-  const [existingVehicles, setExistingVehicles] = useState([]);
 
   useEffect(() => {
     api
       .get("/drivers")
       .then((res) => setDrivers(res.data))
       .catch((err) => console.error("Failed to fetch drivers:", err));
-  }, []);
-
-  useEffect(() => {
-    api
-      .get("/vehicles")
-      .then((res) => setExistingVehicles(res.data || []))
-      .catch((err) => console.error("Failed to fetch vehicles:", err));
   }, []);
 
   useEffect(() => {
@@ -72,16 +63,6 @@ export default function VehicleForm() {
     }
   };
 
-  const filteredVehicles = existingVehicles.filter((vehicle) => {
-    const q = search.trim().toLowerCase();
-    if (!q) return false;
-    return (
-      String(vehicle.Vehicle_No || "").toLowerCase().includes(q) ||
-      String(vehicle.Vehicle_Type || "").toLowerCase().includes(q) ||
-      String(vehicle.Vehicle_ID || "").includes(q)
-    );
-  });
-
   if (loading) return <div className="p-6 text-muted">Loading...</div>;
 
   return (
@@ -89,65 +70,6 @@ export default function VehicleForm() {
       <h1 className="text-2xl font-bold text-charcoal dark:text-white mb-6">
         {isEdit ? "Edit Vehicle" : "Add Vehicle"}
       </h1>
-
-      <div className="mb-6">
-        <label className="block text-sm font-semibold text-charcoal dark:text-white mb-2">
-          Search Existing Vehicles
-        </label>
-        <div className="relative">
-          <svg
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M21 21l-4.35-4.35m1.35-5.4a6.75 6.75 0 11-13.5 0 6.75 6.75 0 0113.5 0z"
-            />
-          </svg>
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by vehicle number or type..."
-            className="form-input pl-9"
-          />
-        </div>
-
-        {search.trim() !== "" && (
-          <div className="mt-3 rounded-lg border border-border-light bg-surface-2 max-h-64 overflow-y-auto dark:border-border-dark">
-            {filteredVehicles.length === 0 ? (
-              <p className="px-4 py-3 text-sm text-muted">
-                No existing vehicles match your search.
-              </p>
-            ) : (
-              <ul className="divide-y divide-border-light dark:divide-border-dark">
-                {filteredVehicles.map((vehicle) => (
-                  <li
-                    key={vehicle.Vehicle_ID}
-                    className="flex items-center justify-between px-4 py-3 hover:bg-offwhite-100 dark:hover:bg-surface transition"
-                  >
-                    <div>
-                      <p className="text-sm font-medium text-charcoal dark:text-white">
-                        {vehicle.Vehicle_No}
-                      </p>
-                      <p className="text-xs text-muted">
-                        {vehicle.Vehicle_Type} · {vehicle.No_of_Seats} seats
-                      </p>
-                    </div>
-                    <span className="text-xs text-muted/70">
-                      #{vehicle.Vehicle_ID}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        )}
-      </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
