@@ -103,18 +103,6 @@ export default function Booking() {
                 }
             }
 
-            if (!foundPkg && stateBlogId) {
-                foundPkg = packages.find((p) => String(p.blog_id) === String(stateBlogId));
-            }
-
-            if (!foundPkg && stateSectionId) {
-                const secLower = String(stateSectionId).toLowerCase().trim();
-                foundPkg = packages.find((p) => {
-                    const pName = (p.Package_Name || p.title || "").toLowerCase();
-                    return pName.includes(secLower);
-                });
-            }
-
             // Lock the package dropdown whenever the booking form was opened
             // with an explicit package (e.g. "Book Now" from a package card,
             // a package URL, or a specific park/blog page). Skip locking in
@@ -122,9 +110,7 @@ export default function Booking() {
             const explicitPackageRequested = Boolean(
                 targetId ||
                 statePkgName ||
-                queryPkgName ||
-                stateBlogId ||
-                stateSectionId
+                queryPkgName
             );
 
             if (foundPkg) {
