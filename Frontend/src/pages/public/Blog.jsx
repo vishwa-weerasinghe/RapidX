@@ -10,6 +10,7 @@ import kaudullaImg from "../../assets/kaudulla.jpg";
 import wasgamuwaImg from "../../assets/wasgamuwa.jpg";
 import huruluImg from "../../assets/hurulu.jpg";
 import { STATIC_BLOGS } from "../../constants/staticBlogs";
+import { getStaticBlogPackage } from "../../constants/staticBlogPackages";
 import PublicHeader from "../../components/PublicHeader";
 
 const blogSections = [
@@ -1029,65 +1030,22 @@ export default function Blog() {
       .catch((err) => console.error("Error loading media in blog:", err));
   }, []);
 
+  const getDbPackage = (pkg) => {
+    if (!dbPackages || dbPackages.length === 0) return null;
+
+    const staticPkg = getStaticBlogPackage(pkg?.name);
+    if (!staticPkg || !staticPkg.id) return null;
+
+    // Strict ID match based on the unique blog_id assigned to this specific package in staticBlogPackages
+    return dbPackages.find((p) => String(p.blog_id || p.blogId) === String(staticPkg.id)) || null;
+  };
+
   const handleBookSafari = (pkg, section) => {
     let matchedId = null;
-
-    if (dbPackages.length > 0) {
-      const pkgNameLower = (pkg?.name || "").toLowerCase().trim();
-      const sectionIdLower = (section?.id || "").toLowerCase().trim();
-      const blogId = section?.blogId;
-
-      // 1. Exact name match
-      let found = dbPackages.find(
-        (p) => (p.Package_Name || p.title || "").toLowerCase().trim() === pkgNameLower
-      );
-
-      // 2. Match by blog_id
-      if (!found && blogId) {
-        const blogMatches = dbPackages.filter((p) => String(p.blog_id) === String(blogId));
-        if (blogMatches.length === 1) {
-          found = blogMatches[0];
-        } else if (blogMatches.length > 1) {
-          found =
-            blogMatches.find((p) => {
-              const dbName = (p.Package_Name || p.title || "").toLowerCase();
-              if (pkgNameLower.includes("morning") && dbName.includes("morning")) return true;
-              if (pkgNameLower.includes("evening") && dbName.includes("evening")) return true;
-              if (pkgNameLower.includes("half day") && dbName.includes("half day")) return true;
-              return false;
-            }) || blogMatches[0];
-        }
-      }
-
-      // 3. Match by section slug or keyword in package name
-      if (!found) {
-        const sectionMatches = dbPackages.filter((p) => {
-          const dbName = (p.Package_Name || p.title || "").toLowerCase();
-          return dbName.includes(sectionIdLower);
-        });
-        if (sectionMatches.length > 0) {
-          found =
-            sectionMatches.find((p) => {
-              const dbName = (p.Package_Name || p.title || "").toLowerCase();
-              if (pkgNameLower.includes("morning") && dbName.includes("morning")) return true;
-              if (pkgNameLower.includes("evening") && dbName.includes("evening")) return true;
-              if (pkgNameLower.includes("half day") && dbName.includes("half day")) return true;
-              return false;
-            }) || sectionMatches[0];
-        }
-      }
-
-      // 4. Substring name match
-      if (!found) {
-        found = dbPackages.find((p) => {
-          const dbName = (p.Package_Name || p.title || "").toLowerCase();
-          return dbName && (pkgNameLower.includes(dbName) || dbName.includes(pkgNameLower));
-        });
-      }
-
-      if (found) {
-        matchedId = found.Package_ID || found.id;
-      }
+    const found = getDbPackage(pkg);
+    
+    if (found) {
+      matchedId = found.Package_ID || found.id;
     }
 
     let recommendedTime = undefined;
@@ -1344,25 +1302,28 @@ export default function Blog() {
                   </div>
 
                   {/* Tour Package Cards */}
-                  {section.tourPackages && (
-                    <div className="mt-6 sm:mt-8 space-y-4">
-                      <div className="flex items-center justify-between px-1">
-                        <h3
-                          className={`text-base sm:text-lg font-bold flex items-center gap-2 ${
-                            isDark ? "text-neutral-200" : "text-neutral-800"
-                          }`}
-                        >
-                          <DollarSign size={18} className="text-sacramento" />
-                          Available Safari Packages ({section.tourPackages.length})
-                        </h3>
-                      </div>
+                  {(() => {
+                    const availablePackages = section.tourPackages || [];
+                    
+                    return availablePackages.length > 0 && (
+                      <div className="mt-6 sm:mt-8 space-y-4">
+                        <div className="flex items-center justify-between px-1">
+                          <h3
+                            className={`text-base sm:text-lg font-bold flex items-center gap-2 ${
+                              isDark ? "text-neutral-200" : "text-neutral-800"
+                            }`}
+                          >
+                            <DollarSign size={18} className="text-sacramento" />
+                            Available Safari Packages ({availablePackages.length})
+                          </h3>
+                        </div>
 
-                      {section.tourPackages.map((pkg, idx) => {
-                        const isOpen = expandedPkg[`${section.id}-${idx}`];
-                        return (
-                          <div
-                            key={idx}
-                            className={`rounded-2xl border overflow-hidden transition-all duration-200 ${
+                        {availablePackages.map((pkg, idx) => {
+                          const isOpen = expandedPkg[`${section.id}-${idx}`];
+                          return (
+                            <div
+                              key={idx}
+                              className={`rounded-2xl border overflow-hidden transition-all duration-200 ${
                               isOpen
                                 ? "shadow-md ring-1 ring-sacramento/30"
                                 : "shadow-xs hover:border-sacramento/40"
@@ -1386,22 +1347,50 @@ export default function Blog() {
                                   <h4 className="text-base sm:text-lg font-bold text-neutral-900 dark:text-white truncate">
                                     {pkg.name}
                                   </h4>
-                                  {pkg.price.includes("|") ? (
-                                    <div className="flex flex-wrap items-center gap-1.5">
-                                      {pkg.price.split("|").map((pPart, i) => (
-                                        <span
-                                          key={i}
-                                          className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-sacramento/10 text-sacramento text-xs sm:text-sm font-bold border border-sacramento/20 whitespace-nowrap"
-                                        >
-                                          {pPart.trim()}
-                                        </span>
-                                      ))}
-                                    </div>
-                                  ) : (
-                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-sacramento/10 text-sacramento text-xs sm:text-sm font-bold border border-sacramento/20 whitespace-nowrap">
-                                      {pkg.price}
-                                    </span>
-                                  )}
+                                  {(() => {
+                                    const dbPkg = getDbPackage(pkg);
+                                    let priceDisplay = null;
+                                    
+                                    if (dbPkg && (dbPkg.price_one_adult || dbPkg.price_more_adult || dbPkg.price_child)) {
+                                      let adultsDisplay = "";
+                                      if (dbPkg.price_one_adult && dbPkg.price_more_adult && Number(dbPkg.price_one_adult) !== Number(dbPkg.price_more_adult)) {
+                                        const minAdult = Math.min(Number(dbPkg.price_one_adult), Number(dbPkg.price_more_adult));
+                                        const maxAdult = Math.max(Number(dbPkg.price_one_adult), Number(dbPkg.price_more_adult));
+                                        adultsDisplay = `$${minAdult} - $${maxAdult}`;
+                                      } else if (dbPkg.price_one_adult || dbPkg.price_more_adult) {
+                                        adultsDisplay = `$${dbPkg.price_one_adult || dbPkg.price_more_adult}`;
+                                      }
+
+                                      const child = dbPkg.price_child;
+                                      
+                                      if (adultsDisplay && child) {
+                                        priceDisplay = `Adult ${adultsDisplay} | Child $${child}`;
+                                      } else if (adultsDisplay) {
+                                        priceDisplay = `Adult ${adultsDisplay}`;
+                                      } else if (child) {
+                                        priceDisplay = `Child $${child}`;
+                                      }
+                                    }
+
+                                    if (!priceDisplay) return null;
+
+                                    return priceDisplay.includes("|") ? (
+                                      <div className="flex flex-wrap items-center gap-1.5">
+                                        {priceDisplay.split("|").map((pPart, i) => (
+                                          <span
+                                            key={i}
+                                            className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-sacramento/10 text-sacramento text-xs sm:text-sm font-bold border border-sacramento/20 whitespace-nowrap"
+                                          >
+                                            {pPart.trim()}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    ) : (
+                                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-sacramento/10 text-sacramento text-xs sm:text-sm font-bold border border-sacramento/20 whitespace-nowrap">
+                                        {priceDisplay}
+                                      </span>
+                                    );
+                                  })()}
                                 </div>
                                 <div
                                   className={`flex flex-wrap items-center gap-x-4 gap-y-1 text-xs ${
@@ -1643,7 +1632,8 @@ export default function Blog() {
                         );
                       })}
                     </div>
-                  )}
+                  );
+                  })()}
                 </section>
               );
             })}

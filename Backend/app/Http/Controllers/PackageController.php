@@ -42,6 +42,7 @@ class PackageController extends Controller
             'price_child'      => 'required|numeric|min:0',
             'Image' => 'nullable|image|mimes:jpeg,png,jpg,webp',
             'related_package' => 'nullable|string|max:255',
+            'blog_id' => 'nullable|integer',
         ]);
         if ($request->hasFile('Image')) {
             try {
@@ -82,7 +83,7 @@ class PackageController extends Controller
             'price_child'      => 'sometimes|required|numeric|min:0',
             'Image' => 'nullable|image|mimes:jpeg,png,jpg,webp',
             'related_package' => 'sometimes|nullable|string|max:255',
-
+            'blog_id' => 'sometimes|nullable|integer',
         ]);
         if ($request->hasFile('Image')) {
             if ($package->Image) {

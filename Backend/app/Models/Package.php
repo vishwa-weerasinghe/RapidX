@@ -17,6 +17,7 @@ class Package extends Model
         'price_child',
         'Image',
         'related_package',
+        'blog_id',
     ];
 
     /**

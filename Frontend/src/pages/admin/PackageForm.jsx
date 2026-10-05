@@ -10,7 +10,7 @@ const initialState = {
   price_more_adult: "",
   price_child: "",
   Image: null,
-  related_package: "",
+  blog_id: "",
 };
 
 export default function PackageForm() {
@@ -43,7 +43,7 @@ export default function PackageForm() {
           price_more_adult: res.data.price_more_adult || "",
           price_child: res.data.price_child || "",
           Image: res.data.Image || "",
-          related_package: res.data.related_package || "",
+          blog_id: res.data.blog_id || "",
         });
       })
       .catch((err) => console.error(err))
@@ -68,7 +68,7 @@ export default function PackageForm() {
     formData.append("price_one_adult", form.price_one_adult);
     formData.append("price_more_adult", form.price_more_adult);
     formData.append("price_child", form.price_child);
-    formData.append("related_package", form.related_package || "");
+    formData.append("blog_id", form.blog_id || "");
 
     if (form.Image instanceof File) {
       formData.append("Image", form.Image);
@@ -214,22 +214,22 @@ export default function PackageForm() {
           </label>
 
           <select
-            name="related_package"
-            value={form.related_package}
+            name="blog_id"
+            value={form.blog_id}
             onChange={handleChange}
             className="form-input"
           >
             <option value="">None</option>
-            {STATIC_BLOG_PACKAGES.map((packageName) => (
-              <option key={packageName} value={packageName}>
-                {packageName}
+            {STATIC_BLOG_PACKAGES.map((pkg) => (
+              <option key={pkg.id} value={pkg.id}>
+                {pkg.name}
               </option>
             ))}
           </select>
 
-          {errors.related_package && (
+          {errors.blog_id && (
             <p className="text-red-500 text-xs mt-1">
-              {errors.related_package[0]}
+              {errors.blog_id[0]}
             </p>
           )}
         </div>

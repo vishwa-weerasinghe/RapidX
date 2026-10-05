@@ -6,25 +6,25 @@
  * the static blog offers.
  */
 export const STATIC_BLOG_PACKAGES = [
-  "Minneriya Morning Safari",
-  "Minneriya Evening Safari",
-  "Minneriya Half Day Safari (Morning or Evening)",
-  "Kaudulla Morning Safari",
-  "Kaudulla Evening Safari",
-  "Kaudulla Half Day Safari (Morning or Evening)",
-  "Wasgamuwa Safari (Morning or Evening)",
-  "Hurulu Eco Park Safari (Morning or Evening)",
-  "Hurulu Eco Park Half Day Safari",
-  "Full Day Safari (Hurulu + Minneriya/Kaudulla)",
-  "Dambulla Tour & Evening Safari",
-  "Village Tour",
-  "Polonnaruwa Ruins & Evening Safari",
-  "Sigiriya or Pidurangala & Evening Safari",
-  "Sigiriya Village Safari",
+  { id: 101, name: "Minneriya Morning Safari" },
+  { id: 102, name: "Minneriya Evening Safari" },
+  { id: 103, name: "Minneriya Half Day Safari (Morning or Evening)" },
+  { id: 201, name: "Kaudulla Morning Safari" },
+  { id: 202, name: "Kaudulla Evening Safari" },
+  { id: 203, name: "Kaudulla Half Day Safari (Morning or Evening)" },
+  { id: 301, name: "Wasgamuwa Safari (Morning or Evening)" },
+  { id: 401, name: "Hurulu Eco Park Safari (Morning or Evening)" },
+  { id: 402, name: "Hurulu Eco Park Half Day Safari" },
+  { id: 501, name: "Full Day Safari (Hurulu + Minneriya/Kaudulla)" },
+  { id: 601, name: "Dambulla Tour & Evening Safari" },
+  { id: 701, name: "Village Tour" },
+  { id: 801, name: "Polonnaruwa Ruins & Evening Safari" },
+  { id: 901, name: "Sigiriya or Pidurangala & Evening Safari" },
+  { id: 1001, name: "Sigiriya Village Safari" },
 ];
 
 export function getStaticBlogPackage(name) {
-  return STATIC_BLOG_PACKAGES.find((pkgName) => pkgName === name) || null;
+  return STATIC_BLOG_PACKAGES.find((pkg) => pkg.name === name) || null;
 }
 
 /**
