@@ -81,6 +81,8 @@ describe("Annual earning totals", () => {
     const totalCells = await screen.findAllByText("$ 90");
     expect(totalCells).toHaveLength(3);
     expect(screen.getAllByText("$ 50")).toHaveLength(3);
+    expect(screen.getByText("NET EARNINGS")).toBeTruthy();
+    expect(screen.getByRole("columnheader", { name: "Net Earnings" })).toBeTruthy();
 
     const annualTotalCells = totalCells.filter((cell) => cell.tagName === "TD");
     expect(annualTotalCells).toHaveLength(2);

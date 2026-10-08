@@ -24,7 +24,7 @@ export function generateAnnualEarningsPdf(report) {
 
   autoTable(doc, {
     startY: 40,
-    head: [["Month", "Confirmed Earnings", "Unconfirmed Earnings", "Refund", "Total"]],
+    head: [["Month", "Confirmed Earnings", "Unconfirmed Earnings", "Refund", "Net Earnings"]],
     body: report.rows.map((row) => [
       row.label,
       `$ ${Number(row.earnings_confirmed || 0).toLocaleString()}`,
