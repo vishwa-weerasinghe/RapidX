@@ -124,13 +124,13 @@ export default function Vehicles() {
       </div>
 
       {showVehicleResults && (
-        <div className="mb-6 rounded-[18px] border border-[#d9e8df] bg-[#f7f3eb] p-4 shadow-[0_8px_18px_rgba(0,0,0,0.05)] dark:border-border-dark dark:bg-bg-dark">
+        <div className="mb-6 rounded-[18px] border border-[#d8c9a7] bg-[#fffdf7] p-4 shadow-sm dark:border-[#385b48] dark:bg-[#101f19]">
           <div className="mb-4 flex items-center justify-between gap-3">
-            <h2 className="text-[15px] font-black text-[#1f3d36] dark:text-white">Matched vehicles</h2>
+            <h2 className="text-[15px] font-black text-[#183b2d] dark:text-[#fff8e7]">Matched vehicles</h2>
             <button
               type="button"
               onClick={() => setShowVehicleResults(false)}
-              className="rounded-md px-2 py-1 text-lg leading-none text-[#3d4c44] hover:bg-[#e9e1d3] dark:text-white dark:hover:bg-surface-2"
+              className="rounded-md px-2 py-1 text-lg leading-none text-[#4c5a4e] hover:bg-[#f3ead8] dark:text-[#e2e8df] dark:hover:bg-[#20392e]"
               aria-label="Close vehicle results"
             >
               ×
@@ -144,16 +144,16 @@ export default function Vehicles() {
               {vehicleResults.map((vehicle) => (
                 <div
                   key={vehicle.Vehicle_ID}
-                  className="rounded-[14px] border border-[#d6e4d9] bg-[#edf6f0] p-4 shadow-sm"
+                  className="rounded-[14px] border border-[#d8c9a7] border-l-4 border-l-[#9a7628] bg-[#f3ead8] p-4 shadow-sm dark:border-[#385b48] dark:border-l-[#e6c15a] dark:bg-[#17352b]"
                 >
-                  <p className="text-[12px] font-black uppercase tracking-wide text-[#2f7a6d]">
+                  <p className="text-[12px] font-black uppercase tracking-wide text-[#765719] dark:text-[#e6c15a]">
                     Vehicle #{vehicle.Vehicle_ID}
                   </p>
-                  <p className="mt-2 text-[22px] font-extrabold leading-tight text-[#1f3d36]">
+                  <p className="mt-2 text-[22px] font-extrabold leading-tight text-[#183b2d] dark:text-[#fff8e7]">
                     {vehicle.Vehicle_No}
                   </p>
-                  <p className="mt-2 text-[15px] text-[#33463f]">Type: {vehicle.Vehicle_Type}</p>
-                  <p className="text-[15px] text-[#33463f]">Seats: {vehicle.No_of_Seats}</p>
+                  <p className="mt-2 text-[15px] font-medium text-[#334b3e] dark:text-[#d7e4d8]">Type: {vehicle.Vehicle_Type}</p>
+                  <p className="text-[15px] font-medium text-[#334b3e] dark:text-[#d7e4d8]">Seats: {vehicle.No_of_Seats}</p>
                 </div>
               ))}
             </div>

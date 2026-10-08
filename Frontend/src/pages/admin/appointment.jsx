@@ -203,27 +203,27 @@ export default function Appointments() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
           <div className="card flex flex-col p-4">
             <p className="text-xs uppercase tracking-wide text-muted">Total Confirmed Appointments</p>
-            <p className="mt-auto pt-2 text-2xl font-bold text-charcoal dark:text-white">{summary.total_confirmed}</p>
+            <p className="mt-auto w-full self-start pt-2 text-left text-2xl font-bold text-charcoal dark:text-white">{summary.total_confirmed}</p>
           </div>
           <div className="card flex flex-col p-4">
             <p className="text-xs uppercase tracking-wide text-muted">Total Unconfirmed (In Cart, Pendings) Appointments</p>
-            <p className="mt-auto pt-2 text-2xl font-bold text-charcoal dark:text-white">{summary.total_unconfirmed}</p>
+            <p className="mt-auto w-full self-start pt-2 text-left text-2xl font-bold text-charcoal dark:text-white">{summary.total_unconfirmed}</p>
           </div>
           <div className="card flex flex-col p-4">
             <p className="text-xs uppercase tracking-wide text-muted">Total Earnings (Confirmed)</p>
-            <p className="mt-auto pt-2 text-2xl font-bold text-sacramento">$ {Number(summary.total_earnings_confirmed).toLocaleString()}</p>
+            <p className="mt-auto w-full self-start pt-2 text-left text-2xl font-bold text-sacramento dark:text-[#e6c15a]">$ {Number(summary.total_earnings_confirmed).toLocaleString()}</p>
           </div>
           <div className="card flex flex-col p-4">
             <p className="text-xs uppercase tracking-wide text-muted">Total Earnings (Unconfirmed)</p>
-            <p className="mt-auto pt-2 text-2xl font-bold text-muted">$ {Number(summary.total_earnings_unconfirmed).toLocaleString()}</p>
+            <p className="mt-auto w-full self-start pt-2 text-left text-2xl font-bold text-muted">$ {Number(summary.total_earnings_unconfirmed).toLocaleString()}</p>
           </div>
           <div className="card flex flex-col p-4">
             <p className="text-xs uppercase tracking-wide text-muted">Total Refunds</p>
-            <p className="mt-auto pt-2 text-2xl font-bold text-muted">$ {Number(summary.total_refunds || 0).toLocaleString()}</p>
+            <p className="mt-auto w-full self-start pt-2 text-left text-2xl font-bold text-muted">$ {Number(summary.total_refunds || 0).toLocaleString()}</p>
           </div>
           <div className="card flex flex-col p-4">
             <p className="text-xs uppercase tracking-wide text-muted">Total Estimated Earnings</p>
-            <p className="mt-auto pt-2 text-2xl font-bold text-sacramento">
+            <p className="mt-auto w-full self-start pt-2 text-left text-2xl font-bold text-sacramento dark:text-[#e6c15a]">
               $ {Number(Number(summary.total_earnings_confirmed) + Number(summary.total_earnings_unconfirmed)).toLocaleString()}
             </p>
           </div>

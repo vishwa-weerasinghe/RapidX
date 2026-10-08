@@ -16,6 +16,11 @@ export default function BookingSummary() {
   const [monthlyBookings, setMonthlyBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const selectedMonthLabel = month
+    ? new Intl.DateTimeFormat("en", { month: "long", year: "numeric" }).format(
+        new Date(`${month}-01T00:00:00`),
+      )
+    : "Selected month";
 
   useEffect(() => {
     setLoading(true);
@@ -55,13 +60,35 @@ export default function BookingSummary() {
       {loading ? <p className="text-muted">Loading booking summary...</p> : error ? <p className="text-red-500">{error}</p> : report && (
         <>
           {reportView === "monthly" && <section className="space-y-5">
-            <div className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-xl font-bold text-charcoal dark:text-white">Monthly</h2><p className="text-sm text-muted">Booking counts for the selected month.</p></div><input type="month" value={month} onChange={(event) => setMonth(event.target.value)} className="form-input py-2 text-sm" /></div>
+            <div><h2 className="text-xl font-bold text-charcoal dark:text-white">Monthly</h2><p className="text-sm text-muted">Booking counts for the selected month.</p></div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div className="card p-5"><p className="text-xs uppercase text-muted">Confirmed Bookings</p><p className="mt-1 text-2xl font-bold text-sacramento">{Number(monthlySummary?.total_confirmed || 0).toLocaleString()}</p></div>
               <div className="card p-5"><p className="text-xs uppercase text-muted">Unconfirmed Bookings</p><p className="mt-1 text-2xl font-bold">{Number(monthlySummary?.total_unconfirmed || 0).toLocaleString()}</p></div>
               <div className="card p-5"><p className="text-xs uppercase text-muted">Cancelled Bookings</p><p className="mt-1 text-2xl font-bold text-red-600">{Number(monthlySummary?.total_cancelled || 0).toLocaleString()}</p></div>
             </div>
-            <div className="overflow-x-auto rounded-lg border border-border-light dark:border-border-dark"><table className="min-w-full bg-surface text-sm"><thead className="bg-[#29AB87] text-xs uppercase text-white"><tr><th className="px-4 py-3 text-left">Booking ID</th><th className="px-4 py-3 text-left">Name</th><th className="px-4 py-3 text-left">Package</th><th className="px-4 py-3 text-left">Date</th><th className="px-4 py-3 text-right">Price</th></tr></thead><tbody className="divide-y divide-border-light dark:divide-border-dark">{monthlyBookings.length === 0 ? <tr><td colSpan="5" className="px-4 py-6 text-center text-muted">No bookings for this month.</td></tr> : monthlyBookings.map((booking) => <tr key={booking.Booking_ID}><td className="px-4 py-3 font-mono">#{booking.Booking_ID}</td><td className="px-4 py-3 font-medium">{booking.First_Name} {booking.Last_Name}</td><td className="px-4 py-3">{booking.Package_Name || "Booking"}</td><td className="px-4 py-3">{booking.Booking_Date}</td><td className="px-4 py-3 text-right font-mono">$ {Number(booking.Payment || 0).toLocaleString()}</td></tr>)}</tbody></table></div>
+            <div className="overflow-hidden rounded-lg border border-border-light dark:border-border-dark">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-light bg-surface px-4 py-3 dark:border-border-dark">
+                <h3 className="font-bold text-charcoal dark:text-white">Bookings for {selectedMonthLabel}</h3>
+                <label className="flex items-center gap-2 text-xs font-semibold text-muted">
+                  Month
+                  <input
+                    type="month"
+                    value={month}
+                    onChange={(event) => setMonth(event.target.value)}
+                    className="form-input py-2 text-sm"
+                    title="Select booking month"
+                  />
+                </label>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="min-w-full bg-surface text-sm">
+                  <thead className="bg-[#29AB87] text-xs uppercase text-white"><tr><th className="px-4 py-3 text-left">Booking ID</th><th className="px-4 py-3 text-left">Name</th><th className="px-4 py-3 text-left">Package</th><th className="px-4 py-3 text-left">Date</th><th className="px-4 py-3 text-right">Price</th></tr></thead>
+                  <tbody className="divide-y divide-border-light dark:divide-border-dark">
+                    {monthlyBookings.length === 0 ? <tr><td colSpan="5" className="px-4 py-6 text-center text-muted">No bookings for this month.</td></tr> : monthlyBookings.map((booking) => <tr key={booking.Booking_ID}><td className="px-4 py-3 font-mono">#{booking.Booking_ID}</td><td className="px-4 py-3 font-medium">{booking.First_Name} {booking.Last_Name}</td><td className="px-4 py-3">{booking.Package_Name || "Booking"}</td><td className="px-4 py-3">{booking.Booking_Date}</td><td className="px-4 py-3 text-right font-mono">$ {Number(booking.Payment || 0).toLocaleString()}</td></tr>)}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </section>}
 
           {reportView === "annual" && <section className="space-y-5">
@@ -72,7 +99,45 @@ export default function BookingSummary() {
               <div className="card p-5"><p className="text-xs uppercase tracking-wide text-muted">Cancelled Bookings</p><p className="mt-1 text-2xl font-bold text-red-600">{Number(report.totals.total_cancelled || 0).toLocaleString()}</p></div>
               <div className="card p-5"><p className="text-xs uppercase tracking-wide text-muted">Total Bookings</p><p className="mt-1 text-2xl font-bold text-sacramento">{(Number(report.totals.total_confirmed || 0) + Number(report.totals.total_in_cart || 0) + Number(report.totals.total_pending || 0) + Number(report.totals.total_cancelled || 0)).toLocaleString()}</p></div>
             </div>
-            <div className="card p-4"><h2 className="mb-4 text-xl font-bold text-charcoal dark:text-white">Annual Booking Summary</h2><div className="overflow-x-auto rounded-lg border border-border-light dark:border-border-dark"><table className="min-w-full bg-surface text-sm"><thead className="bg-[#29AB87] text-xs uppercase text-white"><tr><th className="px-4 py-3 text-left">Month</th><th className="px-4 py-3 text-center">Confirmed</th><th className="px-4 py-3 text-center">In Cart</th><th className="px-4 py-3 text-center">Pending</th><th className="px-4 py-3 text-center">Cancel</th><th className="px-4 py-3 text-right">Total</th></tr></thead><tbody className="divide-y divide-border-light dark:divide-border-dark">{report.rows.map((row) => <tr key={row.month}><td className="px-4 py-2 font-medium">{row.label}</td><td className="px-4 py-2 text-center">{row.total_confirmed}</td><td className="px-4 py-2 text-center">{row.total_in_cart}</td><td className="px-4 py-2 text-center">{row.total_pending}</td><td className="px-4 py-2 text-center">{row.total_cancelled}</td><td className="px-4 py-2 text-right font-bold">{row.total_confirmed + row.total_in_cart + row.total_pending + row.total_cancelled}</td></tr>)}</tbody><tfoot className="bg-offwhite-100 font-bold dark:bg-surface-2"><tr><td className="px-4 py-3">Entire Year ({report.year})</td><td className="px-4 py-3 text-center">{report.totals.total_confirmed}</td><td className="px-4 py-3 text-center">{report.totals.total_in_cart}</td><td className="px-4 py-3 text-center">{report.totals.total_pending}</td><td className="px-4 py-3 text-center">{report.totals.total_cancelled}</td><td className="px-4 py-3 text-right">{report.totals.total_confirmed + report.totals.total_in_cart + report.totals.total_pending + report.totals.total_cancelled}</td></tr></tfoot></table></div></div>
+            <div className="card p-4">
+              <h2 className="mb-4 text-xl font-bold text-charcoal dark:text-white">Annual Booking Summary</h2>
+              <div className="overflow-x-auto rounded-lg border border-border-light dark:border-border-dark">
+                <table className="min-w-full bg-surface text-sm">
+                  <thead className="bg-[#29AB87] text-xs uppercase text-white">
+                    <tr>
+                      <th className="px-4 py-3 text-left">Month</th>
+                      <th className="px-4 py-3 text-center">Confirmed</th>
+                      <th className="px-4 py-3 text-center">In Cart</th>
+                      <th className="px-4 py-3 text-center">Pending</th>
+                      <th className="px-4 py-3 text-center">Cancel</th>
+                      <th className="px-4 py-3 text-right">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border-light dark:divide-border-dark">
+                    {report.rows.map((row) => (
+                      <tr key={row.month}>
+                        <td className="px-4 py-2 font-medium">{row.label}</td>
+                        <td className="px-4 py-2 text-center">{row.total_confirmed}</td>
+                        <td className="px-4 py-2 text-center">{row.total_in_cart}</td>
+                        <td className="px-4 py-2 text-center">{row.total_pending}</td>
+                        <td className="px-4 py-2 text-center">{row.total_cancelled}</td>
+                        <td className="px-4 py-2 text-right font-bold dark:text-white" style={{ color: "var(--page-text)" }}>{row.total_confirmed + row.total_in_cart + row.total_pending + row.total_cancelled}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot className="bg-offwhite-100 font-bold dark:bg-surface-2" style={{ backgroundColor: "var(--surface-2)" }}>
+                    <tr>
+                      <td className="px-4 py-3" style={{ color: "var(--page-text)" }}>Entire Year ({report.year})</td>
+                      <td className="px-4 py-3 text-center" style={{ color: "var(--page-text)" }}>{report.totals.total_confirmed}</td>
+                      <td className="px-4 py-3 text-center" style={{ color: "var(--page-text)" }}>{report.totals.total_in_cart}</td>
+                      <td className="px-4 py-3 text-center" style={{ color: "var(--page-text)" }}>{report.totals.total_pending}</td>
+                      <td className="px-4 py-3 text-center" style={{ color: "var(--page-text)" }}>{report.totals.total_cancelled}</td>
+                      <td className="px-4 py-3 text-right" style={{ color: "var(--gold)" }}>{report.totals.total_confirmed + report.totals.total_in_cart + report.totals.total_pending + report.totals.total_cancelled}</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
           </section>}
         </>
       )}

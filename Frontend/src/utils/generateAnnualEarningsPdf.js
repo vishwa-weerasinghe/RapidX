@@ -6,6 +6,8 @@ export function generateAnnualEarningsPdf(report) {
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 14;
   const totals = report.totals;
+  const calculateTotal = (item) =>
+    Number(item.earnings_confirmed || 0) - Number(item.refunds || 0);
 
   doc.setFillColor(41, 171, 135);
   doc.rect(0, 0, pageWidth, 32, "F");
@@ -28,14 +30,14 @@ export function generateAnnualEarningsPdf(report) {
       `$ ${Number(row.earnings_confirmed || 0).toLocaleString()}`,
       `$ ${Number(row.earnings_unconfirmed || 0).toLocaleString()}`,
       `$ ${Number(row.refunds || 0).toLocaleString()}`,
-      `$ ${Number(row.total || 0).toLocaleString()}`,
+      `$ ${calculateTotal(row).toLocaleString()}`,
     ]),
     foot: [[
       `Entire Year (${report.year})`,
       `$ ${Number(totals.earnings_confirmed || 0).toLocaleString()}`,
       `$ ${Number(totals.earnings_unconfirmed || 0).toLocaleString()}`,
       `$ ${Number(totals.refunds || 0).toLocaleString()}`,
-      `$ ${Number(totals.total || 0).toLocaleString()}`,
+      `$ ${calculateTotal(totals).toLocaleString()}`,
     ]],
     theme: "grid",
     headStyles: { fillColor: [41, 171, 135], textColor: 255, fontSize: 9, fontStyle: "bold" },
