@@ -3,15 +3,17 @@ import autoTable from "jspdf-autotable";
 
 /**
  * Generates a monthly summary PDF from appointment data.
- * @param {object}   summary      - { total_confirmed, total_unconfirmed,
- *                                   total_earnings_confirmed, total_earnings_unconfirmed }
  * @param {Array}    appointments - sorted confirmed appointment rows
  * @param {string}   month        - "YYYY-MM"
  */
-export function generateMonthlySummaryPdf(summary, appointments, month) {
+export function generateMonthlySummaryPdf(appointments, month) {
   const doc = new jsPDF({ orientation: "landscape" });
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 14;
+  const totalPayments = appointments.reduce(
+    (total, appointment) => total + Number(appointment.Payment || 0),
+    0,
+  );
 
   // ---------- Header band ----------
   doc.setFillColor(41, 171, 135);
@@ -19,7 +21,7 @@ export function generateMonthlySummaryPdf(summary, appointments, month) {
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(18);
-  doc.text("Appointment Monthly Summary", margin, 15);
+  doc.text("Monthly Booking Report", margin, 15);
   doc.setFontSize(11);
   doc.setFont("helvetica", "normal");
   doc.text(`Month: ${formatMonthLabel(month)}`, margin, 23);
@@ -30,49 +32,9 @@ export function generateMonthlySummaryPdf(summary, appointments, month) {
     { align: "right" }
   );
 
-  // ---------- Summary cards ----------
-  const totalAll =
-    Number(summary.total_earnings_confirmed) +
-    Number(summary.total_earnings_unconfirmed);
-
-  const cards = [
-    { label: "Confirmed", value: summary.total_confirmed, highlight: false },
-    { label: "Unconfirmed (Cart)", value: summary.total_unconfirmed, highlight: false },
-    { label: "Earnings (Confirmed)", value: `$ ${Number(summary.total_earnings_confirmed).toLocaleString()}`, highlight: false },
-    { label: "Earnings (Unconfirmed)", value: `$ ${Number(summary.total_earnings_unconfirmed).toLocaleString()}`, highlight: false },
-    { label: "Total Earnings", value: `$ ${totalAll.toLocaleString()}`, highlight: true },
-  ];
-
-  let y = 44;
-  const cardW = (pageWidth - margin * 2) / cards.length;
-
-  cards.forEach((card, i) => {
-    const x = margin + i * cardW;
-
-    if (card.highlight) {
-      doc.setFillColor(41, 171, 135);
-      doc.setTextColor(255, 255, 255);
-    } else {
-      doc.setFillColor(245, 245, 245);
-      doc.setTextColor(50, 50, 50);
-    }
-
-    doc.roundedRect(x, y, cardW - 4, 22, 2, 2, "F");
-
-    doc.setFontSize(8);
-    doc.setFont("helvetica", "bold");
-    doc.text(card.label.toUpperCase(), x + 4, y + 8);
-
-    doc.setFontSize(13);
-    doc.setFont("helvetica", "bold");
-    doc.text(String(card.value), x + 4, y + 17);
-
-    doc.setFont("helvetica", "normal");
-  });
-
   // ---------- Appointments table ----------
   autoTable(doc, {
-    startY: y + 32,
+    startY: 40,
     head: [["Booking ID", "Customer", "Date", "Package", "Payment", "Status"]],
     body: appointments.map((a) => [
       `#${a.Booking_ID}`,
@@ -82,6 +44,14 @@ export function generateMonthlySummaryPdf(summary, appointments, month) {
       `$ ${Number(a.Payment || 0).toLocaleString()}`,
       a.Status || "Unconfirmed",
     ]),
+    foot: [[
+      "",
+      "",
+      "",
+      "",
+      `$ ${totalPayments.toLocaleString()}`,
+      `Total (${appointments.length} bookings)`,
+    ]],
     theme: "grid",
     headStyles: {
       fillColor: [41, 171, 135],
@@ -90,7 +60,12 @@ export function generateMonthlySummaryPdf(summary, appointments, month) {
       fontStyle: "bold",
     },
     bodyStyles: { fontSize: 9, textColor: 50 },
+    footStyles: { fillColor: [214, 235, 224], textColor: 30, fontSize: 9, fontStyle: "bold" },
     alternateRowStyles: { fillColor: [240, 250, 245] },
+    columnStyles: {
+      4: { halign: "right" },
+      5: { halign: "right" },
+    },
     margin: { left: margin, right: margin },
   });
 

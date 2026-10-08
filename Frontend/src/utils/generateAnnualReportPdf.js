@@ -31,44 +31,9 @@ export function generateAnnualReportPdf(report) {
     { align: "right" }
   );
 
-  // ---------- Yearly overview cards ----------
-  const cards = [
-    { label: "Confirmed Bookings", value: report.totals.total_confirmed, highlight: false },
-    { label: "In Cart Bookings", value: report.totals.total_in_cart, highlight: false },
-    { label: "Pending Bookings", value: report.totals.total_pending, highlight: false },
-    { label: "Cancelled Bookings", value: report.totals.total_cancelled, highlight: false },
-    { label: "Earnings (Confirmed)", value: `$ ${Number(report.totals.earnings_confirmed).toLocaleString()}`, highlight: true },
-  ];
-
-  let y = 44;
-  const cardW = (pageWidth - margin * 2) / cards.length;
-
-  cards.forEach((card, i) => {
-    const x = margin + i * cardW;
-
-    if (card.highlight) {
-      doc.setFillColor(green[0], green[1], green[2]);
-      doc.setTextColor(255, 255, 255);
-    } else {
-      doc.setFillColor(245, 245, 245);
-      doc.setTextColor(50, 50, 50);
-    }
-
-    doc.roundedRect(x, y, cardW - 4, 22, 2, 2, "F");
-
-    doc.setFontSize(8);
-    doc.setFont("helvetica", "bold");
-    doc.text(card.label.toUpperCase(), x + 4, y + 8);
-
-    doc.setFontSize(13);
-    doc.text(String(card.value), x + 4, y + 17);
-
-    doc.setFont("helvetica", "normal");
-  });
-
   // ---------- Monthly table ----------
   autoTable(doc, {
-    startY: y + 32,
+    startY: 40,
     head: [[
       "Month",
       "Total Confirmed Bookings",
@@ -114,6 +79,11 @@ export function generateAnnualReportPdf(report) {
       3: { halign: "center" },
       4: { halign: "center" },
       5: { halign: "right" },
+    },
+    didParseCell: (data) => {
+      if (data.section === "foot" && data.column.index === 0) {
+        data.cell.styles.halign = "right";
+      }
     },
     margin: { left: margin, right: margin },
   });

@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Download } from "lucide-react";
 import api from "../../axios";
-import { generateAnnualReportPdf } from "../../utils/generateAnnualReportPdf";
-import { generateMonthlySummaryPdf } from "../../utils/generateMonthlySummaryPdf";
+import { generateAnnualEarningsPdf } from "../../utils/generateAnnualEarningsPdf";
+import { generateMonthlyEarningsPdf } from "../../utils/generateMonthlyEarningsPdf";
 
 export default function EarningReports() {
   const [year, setYear] = useState(String(new Date().getFullYear()));
@@ -87,10 +87,10 @@ export default function EarningReports() {
           <select value={year} onChange={(event) => handleYearChange(event.target.value)} className="form-input w-24 py-2 text-sm" title="Select report year">
             {years.map((item) => <option key={item} value={item}>{item}</option>)}
           </select>
-          <button type="button" onClick={() => report && generateAnnualReportPdf(report)} disabled={!report} className="inline-flex items-center gap-2 rounded-full card px-4 py-2 text-sm font-semibold disabled:opacity-50" title="Download annual earnings report as PDF">
+          <button type="button" onClick={() => report && generateAnnualEarningsPdf(report)} disabled={!report} className="inline-flex items-center gap-2 rounded-full card px-4 py-2 text-sm font-semibold disabled:opacity-50" title="Download annual earnings report as PDF">
             <Download size={16} /> Download Annual PDF
           </button>
-          <button type="button" onClick={() => monthlySummary && generateMonthlySummaryPdf(monthlySummary, bookings, month)} disabled={!monthlySummary} className="inline-flex items-center gap-2 rounded-full card px-4 py-2 text-sm font-semibold disabled:opacity-50" title="Download monthly earnings report as PDF">
+          <button type="button" onClick={() => monthlySummary && generateMonthlyEarningsPdf(packageRows, month)} disabled={!monthlySummary} className="inline-flex items-center gap-2 rounded-full card px-4 py-2 text-sm font-semibold disabled:opacity-50" title="Download monthly earnings report as PDF">
             <Download size={16} /> Download Monthly PDF
           </button>
         </div>
@@ -98,12 +98,11 @@ export default function EarningReports() {
 
       {loading ? <p className="text-muted">Loading earnings...</p> : error ? <p className="text-red-500">{error}</p> : (
         <>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
-            <div className="card p-5"><p className="text-xs uppercase tracking-wide text-muted">Confirmed Earnings</p><p className="mt-2 text-2xl font-bold text-sacramento">$ {Number(report?.totals?.earnings_confirmed || 0).toLocaleString()}</p></div>
-            <div className="card p-5"><p className="text-xs uppercase tracking-wide text-muted">Unconfirmed Earnings</p><p className="mt-2 text-2xl font-bold">$ {Number(report?.totals?.earnings_unconfirmed || 0).toLocaleString()}</p></div>
-            <div className="card p-5"><p className="text-xs uppercase tracking-wide text-muted">Refund</p><p className="mt-2 text-2xl font-bold text-red-600">$ {Number(report?.totals?.refunds || 0).toLocaleString()}</p></div>
-            <div className="card p-5"><p className="text-xs uppercase tracking-wide text-muted">Cancelled</p><p className="mt-2 text-2xl font-bold text-red-600">{Number(report?.totals?.total_cancelled || 0).toLocaleString()}</p></div>
-            <div className="card p-5"><p className="text-xs uppercase tracking-wide text-muted">Total Earnings</p><p className="mt-2 text-2xl font-bold text-sacramento">$ {Number((Number(report?.totals?.earnings_confirmed || 0) - Number(report?.totals?.refunds || 0))).toLocaleString()}</p></div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="card flex flex-col p-5"><p className="text-xs uppercase tracking-wide text-muted">Confirmed Earnings</p><p className="mt-auto pt-2 text-2xl font-bold text-sacramento">$ {Number(report?.totals?.earnings_confirmed || 0).toLocaleString()}</p></div>
+            <div className="card flex flex-col p-5"><p className="text-xs uppercase tracking-wide text-muted">Unconfirmed Earnings</p><p className="mt-auto pt-2 text-2xl font-bold">$ {Number(report?.totals?.earnings_unconfirmed || 0).toLocaleString()}</p></div>
+            <div className="card flex flex-col p-5"><p className="text-xs uppercase tracking-wide text-muted">Refund</p><p className="mt-auto pt-2 text-2xl font-bold text-red-600">$ {Number(report?.totals?.refunds || 0).toLocaleString()}</p></div>
+            <div className="card flex flex-col p-5"><p className="text-xs uppercase tracking-wide text-muted">Total Earnings</p><p className="mt-auto pt-2 text-2xl font-bold text-sacramento">$ {Number((Number(report?.totals?.earnings_confirmed || 0) - Number(report?.totals?.refunds || 0))).toLocaleString()}</p></div>
           </div>
 
           {reportView === "monthly" && <div className="card p-4">
