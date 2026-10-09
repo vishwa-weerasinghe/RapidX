@@ -5,23 +5,29 @@ export default function ThemeToggle() {
 
   return (
     <button
-        onClick={toggleTheme}
+      onClick={toggleTheme}
+      type="button"
+      aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+      className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-castleton/50"
+    >
+      <span
         className={`
-            w-16 h-8
-            rounded-full
-            flex items-center
-            p-1
-            transition-all duration-300
-            ${
+          w-14 h-7
+          rounded-full
+          flex items-center
+          p-1
+          transition-all duration-300
+          ${
             theme === "dark"
-                 ? "bg-[var(--primary)] justify-end"
-                 : "bg-[var(--primary)]/40 justify-start"
-            }
+              ? "bg-[var(--primary)] justify-end"
+              : "bg-[var(--primary)]/40 justify-start"
+          }
         `}
-        >
-        <div className="w-6 h-6 bg-white rounded-full shadow-md flex items-center justify-center">
-            {theme === "dark" ? "🌙" : "☀️"}
-        </div>
+      >
+        <span className="w-5 h-5 bg-white rounded-full shadow-md flex items-center justify-center text-xs select-none">
+          {theme === "dark" ? "🌙" : "☀️"}
+        </span>
+      </span>
     </button>
   );
 }

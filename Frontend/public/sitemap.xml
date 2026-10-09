@@ -36,4 +36,40 @@
     <priority>0.3</priority>
   </url>
 
+  <!-- Blog & Safari Guides -->
+  <url>
+    <loc>https://www.minneriyawildjeepsafari.com/blog</loc>
+    <lastmod>2026-10-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Help & FAQs -->
+  <url>
+    <loc>https://www.minneriyawildjeepsafari.com/help/frequently</loc>
+    <lastmod>2026-10-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Legal & Policies -->
+  <url>
+    <loc>https://www.minneriyawildjeepsafari.com/privacy-policy</loc>
+    <lastmod>2026-10-09</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://www.minneriyawildjeepsafari.com/terms-and-conditions</loc>
+    <lastmod>2026-10-09</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://www.minneriyawildjeepsafari.com/return-refund-policy</loc>
+    <lastmod>2026-10-09</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
 </urlset>

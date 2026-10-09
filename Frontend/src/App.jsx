@@ -2556,7 +2556,7 @@ export default function App() {
         {/* Floating Action Buttons */}
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className={`fixed bottom-6 right-6 w-11 h-11 bg-sacramento hover:bg-sacramento-600 text-white rounded-full flex items-center justify-center transition-all duration-300 shadow-xl z-50 transform ${showScrollTop ? "scale-100 opacity-100" : "scale-75 opacity-0 pointer-events-none"}`}
+          className={`fixed bottom-6 right-6 w-12 h-12 min-w-[48px] min-h-[48px] bg-sacramento hover:bg-sacramento-600 text-white rounded-full flex items-center justify-center transition-all duration-300 shadow-xl z-50 transform ${showScrollTop ? "scale-100 opacity-100" : "scale-75 opacity-0 pointer-events-none"}`}
           aria-label="Scroll back up to top"
         >
           ↑
