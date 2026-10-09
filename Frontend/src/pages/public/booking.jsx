@@ -3,8 +3,8 @@ import SEO from "../../components/SEO";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import api from "../../axios";
 import { useTheme } from "../../context/ThemeContext";
-import { pickupTimeOptions } from "../../constants/pickupTimeOptions";
 import { startPayHerePayment } from "../../utils/payhere";
+import { pickupTimeOptions, getPickupTimeOptions, getDefaultPickupTime } from "../../constants/pickupTimeOptions";
 import {
     Calendar,
     Clock,
@@ -118,18 +118,19 @@ export default function Booking() {
                 setSelectedPackageId(resolvedId);
                 setPkg(foundPkg);
                 setIsPackageLocked(!isEditMode && explicitPackageRequested);
+
+                const available = getPickupTimeOptions(foundPkg);
+                const requestedTime = location.state?.pickupTime;
+                if (requestedTime && available.some((opt) => opt.value === requestedTime)) {
+                    setForm((prev) => ({ ...prev, Pickup_Time: requestedTime }));
+                } else if (!available.some((opt) => opt.value === form.Pickup_Time)) {
+                    setForm((prev) => ({ ...prev, Pickup_Time: getDefaultPickupTime(foundPkg) }));
+                }
             } else {
                 // Do not auto-select any package when none was explicitly requested
                 setSelectedPackageId("");
                 setPkg(null);
                 setIsPackageLocked(false);
-            }
-
-            if (location.state?.pickupTime) {
-                setForm((prev) => ({
-                    ...prev,
-                    Pickup_Time: location.state.pickupTime,
-                }));
             }
         } catch (err) {
             console.log(err);
@@ -207,6 +208,16 @@ export default function Booking() {
             (p) => String(p.Package_ID || p.id) === String(pkgId)
         );
         setPkg(foundPkg || null);
+
+        if (foundPkg) {
+            const available = getPickupTimeOptions(foundPkg);
+            if (!available.some((opt) => opt.value === form.Pickup_Time)) {
+                setForm((prev) => ({
+                    ...prev,
+                    Pickup_Time: getDefaultPickupTime(foundPkg),
+                }));
+            }
+        }
     };
 
     // handle input change
@@ -473,7 +484,7 @@ export default function Booking() {
                                                 className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs sm:text-sm font-bold py-3 pl-3.5 sm:pl-4 pr-10 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all min-h-[44px] appearance-none cursor-pointer"
                                                 required
                                             >
-                                                {pickupTimeOptions.map((option) => (
+                                                {getPickupTimeOptions(pkg).map((option) => (
                                                     <option key={option.value} value={option.value}>
                                                         {option.label}
                                                     </option>

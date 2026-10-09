@@ -50,6 +50,21 @@ const STATIC_BLOG_PACKAGE_SECTIONS = {
   "Sigiriya Village Safari": "sigiriya-village-tour",
 };
 
-export function getStaticBlogPackageSection(name) {
-  return STATIC_BLOG_PACKAGE_SECTIONS[name] || null;
+export function getStaticBlogPackageSection(blogIdOrName) {
+  if (!blogIdOrName) return null;
+
+  // 1. If blog_id is passed (e.g. 101 or "101")
+  const pkgById = STATIC_BLOG_PACKAGES.find(
+    (p) => String(p.id) === String(blogIdOrName)
+  );
+  if (pkgById && STATIC_BLOG_PACKAGE_SECTIONS[pkgById.name]) {
+    return STATIC_BLOG_PACKAGE_SECTIONS[pkgById.name];
+  }
+
+  // 2. If package name string is passed (e.g. "Minneriya Morning Safari")
+  if (STATIC_BLOG_PACKAGE_SECTIONS[blogIdOrName]) {
+    return STATIC_BLOG_PACKAGE_SECTIONS[blogIdOrName];
+  }
+
+  return null;
 }

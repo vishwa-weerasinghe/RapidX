@@ -14,7 +14,7 @@ import {
 } from "date-fns";
 import api from "../../axios";
 import { useNavigate } from "react-router-dom";
-import { pickupTimeOptions } from "../../constants/pickupTimeOptions";
+import { pickupTimeOptions, getPickupTimeOptions, getDefaultPickupTime } from "../../constants/pickupTimeOptions";
 
 const emptyCreateForm = {
   Booking_Date: "",
@@ -369,6 +369,12 @@ export default function Bookings() {
       if (name === "Package_ID") {
         const pkg = packages.find((item) => String(item.Package_ID || item.id) === String(value));
         setSelectedPackage(pkg || null);
+        if (pkg) {
+          const available = getPickupTimeOptions(pkg);
+          if (!available.some((opt) => opt.value === prev.Pickup_Time)) {
+            updated.Pickup_Time = getDefaultPickupTime(pkg);
+          }
+        }
       }
 
       return updated;
@@ -788,7 +794,7 @@ export default function Bookings() {
                     className="form-input"
                     required
                   >
-                    {pickupTimeOptions.map((option) => (
+                    {getPickupTimeOptions(selectedPackage).map((option) => (
                       <option key={option.value} value={option.value}>
                         {option.label}
                       </option>

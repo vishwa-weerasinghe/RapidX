@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { pickupTimeOptions } from "../../constants/pickupTimeOptions";
+import { pickupTimeOptions, getPickupTimeOptions, getDefaultPickupTime } from "../../constants/pickupTimeOptions";
 import {
     Calendar,
     Clock,
@@ -56,6 +56,15 @@ export default function Booking() {
     try {
       const res = await api.get(`/packages/${id}`);
       setPkg(res.data);
+      if (res.data) {
+        const available = getPickupTimeOptions(res.data);
+        if (!available.some((opt) => opt.value === form.Pickup_Time)) {
+          setForm((prev) => ({
+            ...prev,
+            Pickup_Time: getDefaultPickupTime(res.data),
+          }));
+        }
+      }
     } catch (err) {
       console.log(err);
     }
@@ -272,7 +281,7 @@ export default function Booking() {
                       className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 px-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all"
                       required
                     >
-                      {pickupTimeOptions.map((option) => (
+                      {getPickupTimeOptions(pkg).map((option) => (
                         <option key={option.value} value={option.value}>
                           {option.label}
                         </option>
