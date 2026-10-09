@@ -497,3 +497,10 @@ html.dark .trusted-badge-text-secondary,
 .dark .trusted-badge-text-secondary {
   color: #6b7280 !important;
 }
+
+/* Hide native browser password reveal & clear icons (e.g., Microsoft Edge) since custom toggle buttons are provided */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}
+
