@@ -1,10 +1,20 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import SEO from "../../components/SEO";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import api from "../../axios";
 import { useTheme } from "../../context/ThemeContext";
 import { startPayHerePayment } from "../../utils/payhere";
 import { pickupTimeOptions, getPickupTimeOptions, getDefaultPickupTime } from "../../constants/pickupTimeOptions";
+import { getCountries, getCountryCallingCode, parsePhoneNumberFromString } from "libphonenumber-js";
+
+const countryDisplayNames = new Intl.DisplayNames(["en"], { type: "region" });
+const countryOptions = getCountries()
+  .map((code) => ({
+    code,
+    name: countryDisplayNames.of(code) || code,
+    callingCode: getCountryCallingCode(code),
+  }))
+  .sort((a, b) => a.name.localeCompare(b.name));
 import {
     Calendar,
     Clock,
@@ -58,6 +68,26 @@ export default function Booking() {
     const bookingId = location.state?.bookingId;
     const isEditMode = Boolean(bookingId);
     const [originalForm, setOriginalForm] = useState(null);
+
+    // Country and phone number states matching register form
+    const [countryCode, setCountryCode] = useState("");
+    const [countryQuery, setCountryQuery] = useState("");
+    const [showCountryMenu, setShowCountryMenu] = useState(false);
+    const [phoneError, setPhoneError] = useState("");
+    const [countryError, setCountryError] = useState("");
+    const countryMenuRef = useRef(null);
+
+    const selectedCountry = countryOptions.find((c) => c.code === countryCode);
+
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (countryMenuRef.current && !countryMenuRef.current.contains(e.target)) {
+                setShowCountryMenu(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     // Load packages and set initial selected package
     useEffect(() => {
@@ -145,6 +175,21 @@ export default function Booking() {
         api.get(`/bookings/${bookingId}`)
             .then((res) => {
                 const data = res.data;
+                const rawCountry = data.customer?.Country || "";
+                const prefilledCountry = countryOptions.find(
+                    (c) => c.name.toLowerCase() === rawCountry.toLowerCase() || c.code.toLowerCase() === rawCountry.toLowerCase()
+                );
+                if (prefilledCountry) {
+                    setCountryCode(prefilledCountry.code);
+                }
+                let rawPhone = data.customer?.Phone_No || "";
+                if (rawPhone && prefilledCountry) {
+                    const parsed = parsePhoneNumberFromString(rawPhone, prefilledCountry.code);
+                    if (parsed?.nationalNumber) {
+                        rawPhone = parsed.nationalNumber;
+                    }
+                }
+
                 const bookingForm = {
                     Booking_Date: data.Booking_Date || "",
                     Pickup_Time: data.Pickup_Time || "13:00",
@@ -155,9 +200,9 @@ export default function Booking() {
                     First_Name: data.customer?.First_Name || "",
                     Last_Name: data.customer?.Last_Name || "",
                     Email: data.customer?.Email || "",
-                    Phone_No: data.customer?.Phone_No || "",
+                    Phone_No: rawPhone,
                     NIC: data.customer?.NIC || "",
-                    Country: data.customer?.Country || "",
+                    Country: prefilledCountry?.name || rawCountry,
                 };
 
                 setForm(bookingForm);
@@ -176,27 +221,57 @@ export default function Booking() {
             api.get('/customer-profile')
                 .then((res) => {
                     if (res.data) {
+                        const rawCountry = res.data.Country || "";
+                        const prefilledCountry = countryOptions.find(
+                            (c) => c.name.toLowerCase() === rawCountry.toLowerCase() || c.code.toLowerCase() === rawCountry.toLowerCase()
+                        );
+                        if (prefilledCountry) {
+                            setCountryCode(prefilledCountry.code);
+                        }
+                        let rawPhone = res.data.Phone_No || "";
+                        if (rawPhone && prefilledCountry) {
+                            const parsed = parsePhoneNumberFromString(rawPhone, prefilledCountry.code);
+                            if (parsed?.nationalNumber) {
+                                rawPhone = parsed.nationalNumber;
+                            }
+                        }
+
                         setForm((prev) => ({
                             ...prev,
                             First_Name: res.data.First_Name || "",
                             Last_Name: res.data.Last_Name || "",
                             Email: res.data.Email || "",
-                            Phone_No: res.data.Phone_No || "",
+                            Phone_No: rawPhone,
                             NIC: res.data.NIC || "",
-                            Country: res.data.Country || "",
+                            Country: prefilledCountry?.name || rawCountry,
                         }));
                     }
                 })
                 .catch((err) => console.error("Error loading customer profile:", err));
         } else if (guestCustomer) {
+            const rawCountry = guestCustomer.Country || "";
+            const prefilledCountry = countryOptions.find(
+                (c) => c.name.toLowerCase() === rawCountry.toLowerCase() || c.code.toLowerCase() === rawCountry.toLowerCase()
+            );
+            if (prefilledCountry) {
+                setCountryCode(prefilledCountry.code);
+            }
+            let rawPhone = guestCustomer.Phone_No || "";
+            if (rawPhone && prefilledCountry) {
+                const parsed = parsePhoneNumberFromString(rawPhone, prefilledCountry.code);
+                if (parsed?.nationalNumber) {
+                    rawPhone = parsed.nationalNumber;
+                }
+            }
+
             setForm((prev) => ({
                 ...prev,
                 First_Name: guestCustomer.First_Name || "",
                 Last_Name: guestCustomer.Last_Name || "",
                 Email: guestCustomer.Email || "",
-                Phone_No: guestCustomer.Phone_No || "",
+                Phone_No: rawPhone,
                 NIC: guestCustomer.NIC || "",
-                Country: guestCustomer.Country || "",
+                Country: prefilledCountry?.name || rawCountry,
             }));
         }
     }, [user, guestCustomer]);
@@ -239,10 +314,10 @@ export default function Booking() {
 
     // area extras (amounts added to final payment)
     const areaExtraMap = {
-        Dambulla: 5,
-        Sigiriya: 15,
-        Habarana: 18,
-        Kandalama: 15,
+        Dambulla: 12,
+        Sigiriya: 10,
+        Habarana: 3,
+        Kandalama: 16,
     };
 
     const getAreaExtra = () => {
@@ -305,15 +380,35 @@ export default function Booking() {
             return;
         }
 
-        if (user?.Customer_ID) {
-            payload.Customer_ID = user.Customer_ID;
-        } else {
+        let fullPhone = form.Phone_No;
+        if (!user?.Customer_ID) {
+            if (!form.Country || !countryCode) {
+                setCountryError("Please select a country.");
+                alert("Please select a country.");
+                return;
+            }
+            const parsedPhone = parsePhoneNumberFromString(form.Phone_No, countryCode);
+            if (!parsedPhone || !parsedPhone.isValid()) {
+                setPhoneError("Enter a valid phone number for the selected country.");
+                alert("Enter a valid phone number for the selected country.");
+                return;
+            }
+            fullPhone = parsedPhone.format("E.164");
             payload.First_Name = form.First_Name;
             payload.Last_Name = form.Last_Name;
             payload.Email = form.Email;
-            payload.Phone_No = form.Phone_No;
+            payload.Phone_No = fullPhone;
             payload.NIC = form.NIC;
             payload.Country = form.Country;
+        } else {
+            payload.Customer_ID = user.Customer_ID;
+            if (countryCode && form.Phone_No) {
+                const parsedPhone = parsePhoneNumberFromString(form.Phone_No, countryCode);
+                if (parsedPhone && parsedPhone.isValid()) {
+                    fullPhone = parsedPhone.format("E.164");
+                }
+            }
+            payload.Phone_No = fullPhone;
         }
 
         try {
@@ -426,7 +521,7 @@ export default function Booking() {
                                                             value={p.Package_ID || p.id}
                                                             className="py-2 text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-900"
                                                         >
-                                                            {p.Package_Name} (1 Adult: ${p.price_one_adult} | 2+ Adults: ${p.price_more_adult} | Child: ${p.price_child})
+                                                            {p.Package_Name} (1 Adult: ${p.price_one_adult}/person | 2+ Adults: ${p.price_more_adult}/person | Child: ${p.price_child})
                                                         </option>
                                                     ))}
                                                 </>
@@ -512,10 +607,10 @@ export default function Booking() {
                                             required
                                         >
                                             <option value="">-- Select area --</option>
-                                            <option value="Dambulla">Dambulla (+ $5.00)</option>
-                                            <option value="Sigiriya">Sigiriya (+ $15.00)</option>
-                                            <option value="Habarana">Habarana (+ $18.00)</option>
-                                            <option value="Kandalama">Kandalama (+ $15.00)</option>
+                                            <option value="Dambulla">Dambulla (+ $12.00)</option>
+                                            <option value="Sigiriya">Sigiriya (+ $10.00)</option>
+                                            <option value="Habarana">Habarana (+ $3.00)</option>
+                                            <option value="Kandalama">Kandalama (+ $16.00)</option>
                                         </select>
                                         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400">
                                             <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20">
@@ -606,26 +701,6 @@ export default function Booking() {
 
                                     <div className="flex flex-col gap-1.5">
                                         <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
-                                            Phone Number
-                                        </label>
-                                        <div className="relative flex items-center">
-                                            <Phone size={14} className="absolute left-3.5 text-slate-400 pointer-events-none shrink-0" />
-                                            <input
-                                                type="text"
-                                                name="Phone_No"
-                                                placeholder="+94 77 123 4567"
-                                                value={form.Phone_No}
-                                                onChange={handleChange}
-                                                className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs sm:text-sm font-bold py-3 pl-10 pr-4 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all min-h-[44px]"
-                                                required
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                                    <div className="flex flex-col gap-1.5">
-                                        <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
                                             NIC / Passport Number
                                         </label>
                                         <div className="relative flex items-center">
@@ -641,23 +716,139 @@ export default function Booking() {
                                             />
                                         </div>
                                     </div>
+                                </div>
 
-                                    <div className="flex flex-col gap-1.5">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                                    {/* Country Selector */}
+                                    <div className="flex flex-col gap-1.5" ref={countryMenuRef}>
                                         <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
                                             Country
                                         </label>
+                                        <div className="relative">
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowCountryMenu((open) => !open)}
+                                                className="w-full flex items-center justify-between bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs sm:text-sm font-bold py-3 px-3.5 sm:px-4 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all min-h-[44px]"
+                                                aria-expanded={showCountryMenu}
+                                                aria-haspopup="listbox"
+                                            >
+                                                <span className="flex items-center gap-2 truncate">
+                                                    {selectedCountry ? (
+                                                        <>
+                                                            <img
+                                                                src={`https://flagcdn.com/w20/${selectedCountry.code.toLowerCase()}.png`}
+                                                                srcSet={`https://flagcdn.com/w40/${selectedCountry.code.toLowerCase()}.png 2x`}
+                                                                width="20"
+                                                                alt={selectedCountry.name}
+                                                                className="rounded-[2px] shadow-sm shrink-0"
+                                                            />
+                                                            <span className="truncate">{selectedCountry.name}</span>
+                                                        </>
+                                                    ) : (
+                                                        <span className="text-slate-400 font-normal">Select a country</span>
+                                                    )}
+                                                </span>
+                                                <span className="text-xs font-semibold text-slate-400 shrink-0 ml-2">
+                                                    {selectedCountry ? `+${selectedCountry.callingCode}` : "Required"}
+                                                </span>
+                                            </button>
+
+                                            {showCountryMenu && (
+                                                <div className="absolute z-50 left-0 right-0 top-full mt-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-2 shadow-2xl">
+                                                    <input
+                                                        type="search"
+                                                        aria-label="Search countries"
+                                                        autoFocus
+                                                        placeholder="Search countries..."
+                                                        value={countryQuery}
+                                                        onChange={(e) => setCountryQuery(e.target.value)}
+                                                        className="mb-2 w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3 py-2 text-xs sm:text-sm text-slate-800 dark:text-white outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-castleton font-normal"
+                                                    />
+                                                    <div className="max-h-52 overflow-y-auto space-y-0.5" role="listbox">
+                                                        {countryOptions
+                                                            .filter(
+                                                                (c) =>
+                                                                    c.name.toLowerCase().includes(countryQuery.toLowerCase()) ||
+                                                                    c.callingCode.includes(countryQuery)
+                                                            )
+                                                            .map((c) => (
+                                                                <button
+                                                                    type="button"
+                                                                    role="option"
+                                                                    aria-selected={c.code === countryCode}
+                                                                    key={c.code}
+                                                                    onClick={() => {
+                                                                        setCountryCode(c.code);
+                                                                        setForm((prev) => ({ ...prev, Country: c.name, Phone_No: "" }));
+                                                                        setPhoneError("");
+                                                                        setCountryError("");
+                                                                        setCountryQuery("");
+                                                                        setShowCountryMenu(false);
+                                                                    }}
+                                                                    className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-xs sm:text-sm transition-colors ${
+                                                                        c.code === countryCode
+                                                                            ? "bg-castleton/10 text-castleton font-bold"
+                                                                            : "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+                                                                    }`}
+                                                                >
+                                                                    <span className="flex items-center gap-2 truncate">
+                                                                        <img
+                                                                            src={`https://flagcdn.com/w20/${c.code.toLowerCase()}.png`}
+                                                                            srcSet={`https://flagcdn.com/w40/${c.code.toLowerCase()}.png 2x`}
+                                                                            width="20"
+                                                                            alt={c.name}
+                                                                            className="rounded-[2px] shadow-sm shrink-0"
+                                                                        />
+                                                                        <span className="truncate">{c.name}</span>
+                                                                    </span>
+                                                                    <span className="text-slate-400 font-semibold shrink-0 ml-2">
+                                                                        +{c.callingCode}
+                                                                    </span>
+                                                                </button>
+                                                            ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                        {countryError && (
+                                            <p className="text-[11px] font-semibold text-rose-500 mt-0.5">{countryError}</p>
+                                        )}
+                                    </div>
+
+                                    {/* Phone Number Input */}
+                                    <div className="flex flex-col gap-1.5">
+                                        <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                                            Phone Number
+                                        </label>
                                         <div className="relative flex items-center">
-                                            <Globe size={14} className="absolute left-3.5 text-slate-400 pointer-events-none shrink-0" />
+                                            <span className="absolute inset-y-0 left-0 z-10 flex items-center justify-center px-3 text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-300 border-r border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900/60 rounded-l-xl select-none min-w-[54px]">
+                                                {selectedCountry ? `+${selectedCountry.callingCode}` : "--"}
+                                            </span>
                                             <input
-                                                type="text"
-                                                name="Country"
-                                                placeholder="e.g. Sri Lanka"
-                                                value={form.Country}
-                                                onChange={handleChange}
-                                                className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs sm:text-sm font-bold py-3 pl-10 pr-4 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all min-h-[44px]"
+                                                type="tel"
+                                                name="Phone_No"
+                                                autoComplete="tel"
                                                 required
+                                                disabled={!countryCode}
+                                                placeholder={
+                                                    !countryCode
+                                                        ? "Select country first"
+                                                        : countryCode === "LK"
+                                                        ? "77 123 4567"
+                                                        : "Enter phone number"
+                                                }
+                                                value={form.Phone_No}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    setForm((prev) => ({ ...prev, Phone_No: val }));
+                                                    if (phoneError) setPhoneError("");
+                                                }}
+                                                className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs sm:text-sm font-bold py-3 pl-20 pr-4 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
                                             />
                                         </div>
+                                        {phoneError && (
+                                            <p className="text-[11px] font-semibold text-rose-500 mt-0.5">{phoneError}</p>
+                                        )}
                                     </div>
                                 </div>
                             </div>
