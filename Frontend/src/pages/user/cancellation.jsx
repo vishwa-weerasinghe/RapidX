@@ -106,10 +106,10 @@ export default function Cancellation() {
             Pickup area
             <select className="form-input mt-1" name="Area" value={form.Area} onChange={handleChange} disabled={!isEditable} required>
               <option value="">-- Select area --</option>
-              <option value="Dambulla">Dambulla (+ $5.00)</option>
-              <option value="Sigiriya">Sigiriya (+ $15.00)</option>
-              <option value="Habarana">Habarana (+ $18.00)</option>
-              <option value="Kandalama">Kandalama (+ $15.00)</option>
+              <option value="Dambulla">Dambulla (+ $12.00)</option>
+              <option value="Sigiriya">Sigiriya (+ $10.00)</option>
+              <option value="Habarana">Habarana (+ $3.00)</option>
+              <option value="Kandalama">Kandalama (+ $16.00)</option>
             </select>
           </label>
           <label className="font-semibold text-charcoal dark:text-white md:col-span-2">
