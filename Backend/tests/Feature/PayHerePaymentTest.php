@@ -147,7 +147,7 @@ class PayHerePaymentTest extends TestCase
             'No_of_adults'    => 2,
             'No_of_child'     => 1,
             'Package_ID'      => $package->id,
-            'Payment'         => 390.00,
+            'Payment'         => 391.00,
             'First_Name'      => 'Alice',
             'Last_Name'       => 'Walker',
             'Email'           => 'alice@example.com',
@@ -182,7 +182,7 @@ class PayHerePaymentTest extends TestCase
         $this->assertDatabaseHas('payments', [
             'Payment_ID' => $paymentId,
             'order_id'   => $orderId,
-            'amount'     => 390.00,
+            'amount'     => 391.00,
             'status'     => 'Pending',
         ]);
 
@@ -190,7 +190,7 @@ class PayHerePaymentTest extends TestCase
         $this->assertDatabaseHas('bookings', [
             'Payment_ID' => $paymentId,
             'Status'     => 'Pending',
-            'Payment'    => 390.00,
+            'Payment'    => 391.00,
         ]);
     }
 
@@ -230,10 +230,10 @@ class PayHerePaymentTest extends TestCase
 
         $paymentId = $response->json('Payment_ID');
 
-        // Verify Payment amount is sum of cart bookings calculated server-side (150 + 200 + 30 area fees = 380)
+        // Verify Payment amount is sum of cart bookings calculated server-side (150 + 200 + 20 area fees = 370)
         $this->assertDatabaseHas('payments', [
             'Payment_ID' => $paymentId,
-            'amount'     => 380.00,
+            'amount'     => 370.00,
             'status'     => 'Pending',
         ]);
 
@@ -260,13 +260,13 @@ class PayHerePaymentTest extends TestCase
 
         $paymentId = $response->json('Payment_ID');
 
-        // Server must recalculate to authoritative price 300.00 + 15.00 area fee = 315.00, ignoring tampered 1.00
+        // Server must recalculate to authoritative price 300.00 + 10.00 area fee = 310.00, ignoring tampered 1.00
         $this->assertDatabaseHas('payments', [
             'Payment_ID' => $paymentId,
-            'amount'     => 315.00,
+            'amount'     => 310.00,
             'status'     => 'Pending',
         ]);
-        $this->assertEquals(315.00, (float) $booking->fresh()->Payment);
+        $this->assertEquals(310.00, (float) $booking->fresh()->Payment);
     }
 
     // -------------------------------------------------------------------------
@@ -626,14 +626,14 @@ class PayHerePaymentTest extends TestCase
 
         $paymentId = $response->json('Payment_ID');
 
-        // Verify that server forced correct calculation: 250.00 + 15.00 area fee = 265.00
+        // Verify that server forced correct calculation: 250.00 + 16.00 area fee = 266.00
         $this->assertDatabaseHas('payments', [
             'Payment_ID' => $paymentId,
-            'amount'     => 265.00,
+            'amount'     => 266.00,
         ]);
         $this->assertDatabaseHas('bookings', [
             'Payment_ID' => $paymentId,
-            'Payment'    => 265.00,
+            'Payment'    => 266.00,
         ]);
     }
 }

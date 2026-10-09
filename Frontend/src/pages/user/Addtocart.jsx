@@ -122,10 +122,10 @@ export default function Booking() {
 
   // area extras (amounts added to final payment)
   const areaExtraMap = {
-    Dambulla: 5,
-    Sigiriya: 15,
-    Habarana: 18,
-    Kandalama: 15,
+    Dambulla: 12,
+    Sigiriya: 10,
+    Habarana: 3,
+    Kandalama: 16,
   };
 
   const getAreaExtra = () => {
@@ -302,10 +302,10 @@ export default function Booking() {
                     required
                   >
                     <option value="">-- Select area --</option>
-                    <option value="Dambulla">Dambulla (+ $5.00)</option>
-                    <option value="Sigiriya">Sigiriya (+ $15.00)</option>
-                    <option value="Habarana">Habarana (+ $18.00)</option>
-                    <option value="Kandalama">Kandalama (+ $15.00)</option>
+                    <option value="Dambulla">Dambulla (+ $12.00)</option>
+                    <option value="Sigiriya">Sigiriya (+ $10.00)</option>
+                    <option value="Habarana">Habarana (+ $3.00)</option>
+                    <option value="Kandalama">Kandalama (+ $16.00)</option>
                   </select>
                 </div>
 
