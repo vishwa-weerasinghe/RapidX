@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\User;
 
 
 class AdminSeeder extends Seeder
@@ -13,14 +14,11 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
-        \App\Models\User::firstOrCreate(
-            ['Email' => 'admin@rapidx.com'],
-            [
-                'User_Name' => 'Admin User',
-                'Password' => \Illuminate\Support\Facades\Hash::make('password123'),
-                'role' => 'admin',
-                'Status' => 'Active'
-            ]
-        );
+        // Promote client to admin
+        User::where('Email', 'minneriyawildjeepsafari@gmail.com')
+            ->update(['role' => 'admin']);
+
+        // Remove demo admin account
+        User::where('Email', 'admin@rapidx.com')->delete();
     }
 }
