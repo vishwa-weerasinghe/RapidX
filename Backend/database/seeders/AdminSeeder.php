@@ -17,8 +17,5 @@ class AdminSeeder extends Seeder
         // Promote client to admin
         User::where('Email', 'minneriyawildjeepsafari@gmail.com')
             ->update(['role' => 'admin']);
-
-        // Remove demo admin account
-        User::where('Email', 'admin@rapidx.com')->delete();
     }
 }

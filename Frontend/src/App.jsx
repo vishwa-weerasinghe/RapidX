@@ -422,6 +422,7 @@ export default function App() {
 
             return {
               id: pkg.id,
+              blog_id: pkg.blog_id,
               related_package: pkg.related_package,
               title: pkg.Package_Name,
               desc: pkg.Description,
@@ -1313,7 +1314,7 @@ export default function App() {
               ) : packages.length > 0 ? (
                 packages.map((pkg, idx) => {
                   const relatedSection = getStaticBlogPackageSection(
-                    pkg.related_package
+                    pkg.blog_id || pkg.related_package
                   );
 
                   return (

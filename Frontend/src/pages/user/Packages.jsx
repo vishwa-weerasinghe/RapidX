@@ -108,134 +108,134 @@ export default function Packages() {
 
           {filteredPackages.map((pkg) => {
             const relatedSection = getStaticBlogPackageSection(
-              pkg.related_package
+              pkg.blog_id || pkg.related_package
             );
 
             return (
 
-            <div
-              key={pkg.id}
-              className="group rounded-3xl overflow-hidden card backdrop-blur-md shadow-lg hover:shadow-2xl transition duration-500 hover:-translate-y-3"
-            >
+              <div
+                key={pkg.id}
+                className="group rounded-3xl overflow-hidden card backdrop-blur-md shadow-lg hover:shadow-2xl transition duration-500 hover:-translate-y-3"
+              >
 
-              {/* Image */}
+                {/* Image */}
 
-              <div className="relative overflow-hidden h-60">
+                <div className="relative overflow-hidden h-60">
 
-                <img
-                  src={
-                    pkg.Image
-                      ? pkg.Image.startsWith("http")
-                        ? pkg.Image
-                        : `${import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://127.0.0.1:8000'}/storage/${pkg.Image}`
-                      : "https://images.unsplash.com/photo-1549366021-9f761d450615?q=80&w=2012&auto=format&fit=crop"
-                  }
-                  alt={pkg.Package_Name}
-                  className="w-full h-full object-cover group-hover:scale-110 transition duration-700"
-                />
+                  <img
+                    src={
+                      pkg.Image
+                        ? pkg.Image.startsWith("http")
+                          ? pkg.Image
+                          : `${import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://127.0.0.1:8000'}/storage/${pkg.Image}`
+                        : "https://images.unsplash.com/photo-1549366021-9f761d450615?q=80&w=2012&auto=format&fit=crop"
+                    }
+                    alt={pkg.Package_Name}
+                    className="w-full h-full object-cover group-hover:scale-110 transition duration-700"
+                  />
 
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
 
-                <div className="absolute bottom-5 left-5">
+                  <div className="absolute bottom-5 left-5">
 
-                  <h2 className="text-2xl font-bold text-white">
-                    {pkg.Package_Name}
-                  </h2>
-
-                </div>
-
-              </div>
-
-              {/* Body */}
-
-              <div className="p-6">
-
-                <p className="text-muted leading-relaxed mb-6 line-clamp-4">
-                  {pkg.Description}
-                </p>
-
-                <div className="space-y-3 mb-6">
-
-                  <div className="flex justify-between items-center">
-
-                    <div className="flex items-center gap-2">
-
-                      <Users
-                        size={18}
-                        className="text-sacramento"
-                      />
-
-                      <span>1 Adult</span>
-
-                    </div>
-
-                    <span className="font-bold text-sacramento">
-                      $ {pkg.price_one_adult}
-                    </span>
-
-                  </div>
-
-                  <div className="flex justify-between items-center">
-
-                    <div className="flex items-center gap-2">
-
-                      <Users
-                        size={18}
-                        className="text-sacramento"
-                      />
-
-                      <span>Per Adult (2+)</span>
-
-                    </div>
-
-                    <span className="font-bold text-sacramento">
-                      $ {pkg.price_more_adult}
-                    </span>
-
-                  </div>
-
-                  <div className="flex justify-between items-center">
-
-                    <div className="flex items-center gap-2">
-
-                      <Baby
-                        size={18}
-                        className="text-sacramento"
-                      />
-
-                      <span>Child</span>
-
-                    </div>
-
-                    <span className="font-bold text-sacramento">
-                      $ {pkg.price_child}
-                    </span>
+                    <h2 className="text-2xl font-bold text-white">
+                      {pkg.Package_Name}
+                    </h2>
 
                   </div>
 
                 </div>
 
-                <button
-                  onClick={() => handleBook(pkg)}
-                  className="btn-primary w-full py-3"
-                >
-                  Book Safari
-                  <ArrowRight size={18} />
-                </button>
+                {/* Body */}
 
-                {relatedSection && (
-                  <Link
-                    to={`/blog#${relatedSection}`}
-                    className="mt-3 inline-flex items-center justify-center gap-1 text-sacramento font-semibold hover:underline"
+                <div className="p-6">
+
+                  <p className="text-muted leading-relaxed mb-6 line-clamp-4">
+                    {pkg.Description}
+                  </p>
+
+                  <div className="space-y-3 mb-6">
+
+                    <div className="flex justify-between items-center">
+
+                      <div className="flex items-center gap-2">
+
+                        <Users
+                          size={18}
+                          className="text-sacramento"
+                        />
+
+                        <span>1 Adult</span>
+
+                      </div>
+
+                      <span className="font-bold text-sacramento">
+                        $ {pkg.price_one_adult}
+                      </span>
+
+                    </div>
+
+                    <div className="flex justify-between items-center">
+
+                      <div className="flex items-center gap-2">
+
+                        <Users
+                          size={18}
+                          className="text-sacramento"
+                        />
+
+                        <span>Per Adult (2+)</span>
+
+                      </div>
+
+                      <span className="font-bold text-sacramento">
+                        $ {pkg.price_more_adult}
+                      </span>
+
+                    </div>
+
+                    <div className="flex justify-between items-center">
+
+                      <div className="flex items-center gap-2">
+
+                        <Baby
+                          size={18}
+                          className="text-sacramento"
+                        />
+
+                        <span>Child</span>
+
+                      </div>
+
+                      <span className="font-bold text-sacramento">
+                        $ {pkg.price_child}
+                      </span>
+
+                    </div>
+
+                  </div>
+
+                  <button
+                    onClick={() => handleBook(pkg)}
+                    className="btn-primary w-full py-3"
                   >
-                    Read More
-                    <ArrowRight size={16} />
-                  </Link>
-                )}
+                    Book Safari
+                    <ArrowRight size={18} />
+                  </button>
+
+                  {relatedSection && (
+                    <Link
+                      to={`/blog#${relatedSection}`}
+                      className="mt-3 inline-flex items-center justify-center gap-1 text-sacramento font-semibold hover:underline"
+                    >
+                      Read More
+                      <ArrowRight size={16} />
+                    </Link>
+                  )}
+
+                </div>
 
               </div>
-
-            </div>
 
             );
           })}
