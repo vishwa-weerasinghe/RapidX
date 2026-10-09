@@ -43,6 +43,7 @@ export default function CustomerManagement() {
       [
         customer.First_Name,
         customer.Last_Name,
+        [customer.First_Name, customer.Last_Name].filter(Boolean).join(" "),
         customer.Email,
         customer.Phone_No,
         customer.NIC,

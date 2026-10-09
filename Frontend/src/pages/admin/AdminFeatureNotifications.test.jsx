@@ -65,6 +65,10 @@ describe("Admin notification and driver flows", () => {
 
     await waitFor(() => expect(apiGet).toHaveBeenCalledWith("/appointments", { params: { month: expect.any(String) } }));
 
+    const confirmedEarningsAmount = screen.getAllByText("$ 1,000")[0];
+    expect(confirmedEarningsAmount.classList.contains("mt-auto")).toBe(true);
+    expect(confirmedEarningsAmount.classList.contains("text-left")).toBe(true);
+
     fireEvent.click(screen.getByTitle(/show new appointments/i));
 
     expect(await screen.findByText(/new appointments/i)).toBeTruthy();
