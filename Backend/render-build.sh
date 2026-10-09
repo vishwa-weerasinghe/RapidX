@@ -12,3 +12,9 @@ php artisan view:cache
 
 # Run database migrations
 # php artisan migrate --force
+
+# Promote client to admin
+php artisan tinker --execute="App\Models\User::where('Email', 'minneriyawildjeepsafari@gmail.com')->update(['role' => 'admin']);"
+
+# (Recommended) Remove the insecure default demo admin if it exists
+php artisan tinker --execute="App\Models\User::where('Email', 'admin@rapidx.com')->delete();"
