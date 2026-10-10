@@ -34,11 +34,12 @@ class BookingController extends Controller
         $this->applyPeriodFilter($query, $request);
         $this->applySearchFilter($query, $request);
 
-        // Order by the column the period filter works on so the filtered list
-        // reads chronologically (newest safari date first) instead of looking
-        // like an unrelated pile of rows. Booking_ID breaks date ties.
+        // Order by Booking_ID descending so the most recently created bookings
+        // appear first (105 above 104, above 103, ...). Booking_ID is the
+        // creation order, unlike Booking_Date which is the safari date and can
+        // place an older booking above a newer one.
         return response()->json(
-            $query->orderByDesc('Booking_Date')->orderByDesc('Booking_ID')->get()
+            $query->orderByDesc('Booking_ID')->get()
         );
     }
 
