@@ -819,4 +819,22 @@ class BookingControllerTest extends TestCase
             ->assertJsonFragment(['Booking_ID' => $first->Booking_ID])
             ->assertJsonFragment(['Booking_ID' => $second->Booking_ID]);
     }
+
+    public function test_index_returns_bookings_in_descending_booking_id_order(): void
+    {
+        // Safari dates are deliberately in the opposite order to the IDs, so a
+        // date-based sort would put the older booking first and fail here.
+        $older = $this->createBookingOnDate('2026-12-31');
+        $newer = $this->createBookingOnDate('2026-01-01');
+
+        $response = $this->actingAs($this->createAdmin(), 'sanctum')
+            ->getJson('/api/bookings?period=all_time');
+
+        $response->assertStatus(200);
+
+        $this->assertSame(
+            [$newer->Booking_ID, $older->Booking_ID],
+            array_column($response->json(), 'Booking_ID')
+        );
+    }
 }

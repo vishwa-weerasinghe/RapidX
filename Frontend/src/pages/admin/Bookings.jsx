@@ -129,7 +129,7 @@ export default function Bookings() {
   const [vehicles, setVehicles] = useState([]);
   const [packages, setPackages] = useState([]);
   const [search, setSearch] = useState("");
-  const [period, setPeriod] = useState("this_month");
+  const [period, setPeriod] = useState("all_time");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [loading, setLoading] = useState(true);
@@ -477,11 +477,15 @@ export default function Bookings() {
 
   // Search + date period filtering happen on the backend (`/bookings`), so the
   // list returned by the API is already scoped. Only the "new bookings" toggle
-  // still narrows things down client-side.
-  const filteredBookings = bookings.filter((booking) => {
-    if (!showNewOnly) return true;
-    return notificationBookingIds.has(getBookingId(booking));
-  });
+  // still narrows things down client-side. The rows are then ordered by
+  // Booking_ID descending so the most recently created bookings (105 above 104,
+  // above 103, ...) always appear first, whichever period is selected.
+  const filteredBookings = bookings
+    .filter((booking) => {
+      if (!showNewOnly) return true;
+      return notificationBookingIds.has(getBookingId(booking));
+    })
+    .sort((a, b) => getBookingId(b) - getBookingId(a));
 
   const hasNoCustomDates = period === "custom" && !fromDate && !toDate;
   const hasInvertedCustomRange =

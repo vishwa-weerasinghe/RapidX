@@ -39,6 +39,24 @@ const renderBookings = async () => {
   await waitFor(() => expect(bookingsCalls().length).toBeGreaterThan(0));
 };
 
+// The first cell of every table row is the Booking ID, so the rendered order of
+// the table can be read back without depending on the other columns.
+const renderedBookingIds = () =>
+  Array.from(document.querySelectorAll("tbody tr")).map((row) =>
+    row.querySelector("td")?.textContent?.trim(),
+  );
+
+const bookingRow = (id, date) => ({
+  Booking_ID: id,
+  Booking_Date: date,
+  Pickup_Time: "10:00:00",
+  Pickup_Location: "Colombo",
+  No_of_adults: 2,
+  No_of_child: 0,
+  Payment: 1500,
+  Status: "Confirmed",
+});
+
 describe("Admin bookings period filter", () => {
   beforeEach(() => {
     apiGet.mockReset();
@@ -53,13 +71,13 @@ describe("Admin bookings period filter", () => {
     cleanup();
   });
 
-  it("loads only the current month on first render instead of every booking", async () => {
+  it("defaults to All Time on first render so every booking period is loaded", async () => {
     await renderBookings();
 
-    expect(lastBookingsParams()).toEqual({ period: "this_month" });
+    expect(lastBookingsParams()).toEqual({ period: "all_time" });
 
     // Regression guard: no request may be sent without a period, because that
-    // is what used to pull the full booking list into the browser.
+    // would bypass the server-side filter contract entirely.
     expect(bookingsCalls().every((config) => Boolean(config?.params?.period))).toBe(true);
   });
 
@@ -95,10 +113,10 @@ describe("Admin bookings period filter", () => {
     );
   });
 
-  it("keeps every period option available and defaults to This Month", async () => {
+  it("keeps every period option available and defaults to All Time", async () => {
     await renderBookings();
 
-    expect(screen.getByLabelText(/booking period/i).value).toBe("this_month");
+    expect(screen.getByLabelText(/booking period/i).value).toBe("all_time");
 
     const labels = Array.from(screen.getByLabelText(/booking period/i).options).map(
       (option) => option.textContent,
@@ -166,6 +184,76 @@ describe("Admin bookings period filter", () => {
     await renderBookings();
 
     await waitFor(() => expect(screen.getByText("501")).toBeTruthy());
-    expect(screen.getByText(/showing/i).textContent).toContain("1 booking for This Month");
+    expect(screen.getByText(/showing/i).textContent).toContain("1 booking for All Time");
+  });
+
+  it("shows bookings from every booking period while All Time is the default", async () => {
+    // Bookings spread across the year: all of them must render because the
+    // default period is All Time, and they must come back newest ID first.
+    apiGet.mockImplementation((url) => {
+      if (url === "/bookings") {
+        return Promise.resolve({
+          data: [
+            bookingRow(103, "2026-01-15"),
+            bookingRow(104, "2026-06-10"),
+            bookingRow(105, "2026-09-20"),
+          ],
+        });
+      }
+
+      return Promise.resolve({ data: [] });
+    });
+
+    await renderBookings();
+
+    await waitFor(() => expect(renderedBookingIds()).toEqual(["105", "104", "103"]));
+    expect(screen.getByText(/showing/i).textContent).toContain("3 bookings for All Time");
+  });
+
+  it("sorts the table by Booking_ID descending regardless of the response order", async () => {
+    apiGet.mockImplementation((url) => {
+      if (url === "/bookings") {
+        // Deliberately unsorted, with safari dates in the opposite order too,
+        // so only a Booking_ID descending sort yields 105 -> 104 -> 103.
+        return Promise.resolve({
+          data: [
+            bookingRow(103, "2026-12-01"),
+            bookingRow(105, "2026-01-05"),
+            bookingRow(104, "2026-06-10"),
+          ],
+        });
+      }
+
+      return Promise.resolve({ data: [] });
+    });
+
+    await renderBookings();
+
+    await waitFor(() => expect(renderedBookingIds()).toEqual(["105", "104", "103"]));
+  });
+
+  it("keeps the descending Booking_ID order after another period is selected", async () => {
+    await renderBookings();
+
+    apiGet.mockImplementation((url) => {
+      if (url === "/bookings") {
+        return Promise.resolve({
+          data: [
+            bookingRow(201, "2026-08-01"),
+            bookingRow(203, "2026-08-05"),
+            bookingRow(202, "2026-08-10"),
+          ],
+        });
+      }
+
+      return Promise.resolve({ data: [] });
+    });
+
+    fireEvent.change(screen.getByLabelText(/booking period/i), {
+      target: { value: "last_month" },
+    });
+
+    await waitFor(() => expect(lastBookingsParams()).toEqual({ period: "last_month" }));
+    await waitFor(() => expect(renderedBookingIds()).toEqual(["203", "202", "201"]));
   });
 });
