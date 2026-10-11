@@ -15,6 +15,7 @@ import {
 import api from "../../axios";
 import { useNavigate } from "react-router-dom";
 import { pickupTimeOptions, getPickupTimeOptions, getDefaultPickupTime } from "../../constants/pickupTimeOptions";
+import { CancellationModal } from "../user/cancellation.jsx";
 
 const emptyCreateForm = {
   Booking_Date: "",
@@ -145,6 +146,22 @@ export default function Bookings() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [assignmentModal, setAssignmentModal] = useState(null);
   const [savingAssignment, setSavingAssignment] = useState(false);
+
+  // Cancellation policy modal — reused from the user booking screen so the
+  // admin sees the exact same policy / not-confirmed / expired messages
+  // before a booking is cancelled.
+  const [cancelTarget, setCancelTarget] = useState(null);
+  const [policyAgreed, setPolicyAgreed] = useState(false);
+  const [cancellingId, setCancellingId] = useState(null);
+
+  // The refund tiers an admin may apply when cancelling a confirmed booking.
+  // The selected value is sent to the backend and overrides the percentage
+  // the policy would have calculated automatically.
+  const REFUND_OPTIONS = ["100%", "50%", "25%", "0%"];
+
+  // Starts empty on purpose: the modal's confirm button stays disabled until
+  // the admin actively picks a tier, so a refund is never applied by accident.
+  const [selectedRefund, setSelectedRefund] = useState("");
   const bookingsRef = useRef(bookings);
   const periodRef = useRef(period);
   const searchRef = useRef(search);
@@ -347,16 +364,52 @@ export default function Bookings() {
     });
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to cancel this booking?")) return;
+  // Open the shared cancellation policy modal for a booking. The actual
+  // deletion only happens after the admin ticks "Agree and continue
+  // cancellation" in the modal.
+  const openCancelPolicy = (booking) => {
+    setPolicyAgreed(false);
+    setSelectedRefund("");
+    setCancelTarget(booking);
+  };
+
+  // Close the cancellation policy modal
+  const closeCancelPolicy = () => {
+    setPolicyAgreed(false);
+    setCancelTarget(null);
+  };
+
+  // Cancel booking — only reachable from the policy modal after the admin
+  // has ticked "Agree and continue cancellation".
+  const handleCancelBooking = async (bookingId) => {
+    setCancellingId(bookingId);
 
     try {
-      const response = await api.delete(`/bookings/${id}`);
+      // "50%" -> 50. Only sent when the admin actually picked a tier (the modal
+      // blocks confirming otherwise); omitting it lets the backend fall back to
+      // the policy-calculated percentage for unpaid bookings.
+      const refundPercentage = selectedRefund
+        ? Number.parseInt(selectedRefund, 10)
+        : null;
+
+      const response = await api.delete(`/bookings/${bookingId}`, {
+        data: {
+          // The backend requires the policy to be acknowledged, matching the
+          // agreement box that had to be ticked before this ran.
+          agreed: true,
+          ...(refundPercentage === null
+            ? {}
+            : { Refund_Percentage: refundPercentage }),
+        },
+      });
       alert(`Booking cancelled successfully. Applicable refund: ${response.data.refund_percentage}%`);
+      closeCancelPolicy();
       fetchData();
     } catch (err) {
       console.error(err);
       alert(err.response?.data?.message || "Failed to cancel booking.");
+    } finally {
+      setCancellingId(null);
     }
   };
 
@@ -759,6 +812,18 @@ export default function Bookings() {
         );
       })()}
 
+      <CancellationModal
+        booking={cancelTarget}
+        cancellingId={cancellingId}
+        policyAgreed={policyAgreed}
+        onPolicyAgreedChange={setPolicyAgreed}
+        onClose={closeCancelPolicy}
+        onConfirm={handleCancelBooking}
+        refundOptions={REFUND_OPTIONS}
+        selectedRefund={selectedRefund}
+        onRefundChange={setSelectedRefund}
+      />
+
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl card p-6 shadow-2xl">
@@ -1089,7 +1154,7 @@ export default function Bookings() {
                     <button onClick={() => handleEdit(booking)} className="text-sacramento hover:underline">
                       Edit
                     </button>
-                    <button onClick={() => handleDelete(booking.Booking_ID)} className="ml-3 text-red-600 hover:underline dark:text-red-400">
+                    <button onClick={() => openCancelPolicy(booking)} className="ml-3 text-red-600 hover:underline dark:text-red-400">
                       Cancel
                     </button>
                   </td>

@@ -210,6 +210,38 @@ export default function PaymentSuccess() {
 
                 {/* Actions */}
                 <div className="mt-8 pt-6 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-center gap-3">
+                    {/* Guest bookings (no signed-in account) cannot be cancelled
+                        through the site — there is no account to authenticate the
+                        cancellation against — so point them at the contact
+                        channels the staff monitor. */}
+                    {isSuccess && !user?.Customer_ID && (
+                        <div className="w-full mb-2 rounded-xl border border-amber-200 bg-amber-50 p-4 text-left dark:border-amber-900/50 dark:bg-amber-950/30">
+                            <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">
+                                Need to cancel this booking?
+                            </p>
+                            <p className="mt-1 text-xs leading-6 text-amber-800 dark:text-amber-300">
+                                Guest bookings cannot be cancelled online. Please
+                                contact us and our team will arrange it for you:
+                                {" "}
+                                <a
+                                    href="tel:+94778902811"
+                                    className="font-semibold underline"
+                                >
+                                    +94 77 890 2811
+                                </a>
+                                {" "}(WhatsApp / Call) or{" "}
+                                <a
+                                    href="mailto:info@minneriyawildjeepsafari.com"
+                                    className="font-semibold underline"
+                                >
+                                    info@minneriyawildjeepsafari.com
+                                </a>
+                                . Registering an account lets you manage and
+                                cancel your bookings yourself.
+                            </p>
+                        </div>
+                    )}
+
                     {isSuccess && user?.Customer_ID && (
                         <Link
                             to="/user/bookings"

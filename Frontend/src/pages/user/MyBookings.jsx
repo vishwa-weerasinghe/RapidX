@@ -11,15 +11,26 @@ import {
   XCircle,
 } from "lucide-react";
 import api from "../../axios";
+import {
+  useCancellation,
+  CancellationModal,
+} from "./cancellation.jsx";
 
 export default function MyBookings() {
   const user = JSON.parse(localStorage.getItem("user"));
   const navigate = useNavigate();
+  const customerId = user?.Customer_ID;
 
   const [bookings, setBookings] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
-  const [cancellingId, setCancellingId] = useState(null);
+
+  // Booking notification bell — mirrors the admin Bookings screen. Unseen
+  // customer notifications (e.g. a booking cancelled by the staff) show as a
+  // badge until the panel is opened.
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [bookingNotifications, setBookingNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     fetchBookings();
@@ -37,33 +48,63 @@ export default function MyBookings() {
     }
   };
 
-  // Cancel booking
-  const handleCancelBooking = async (bookingId) => {
-    if (!window.confirm("Are you sure you want to cancel this booking?")) {
+  // Poll the unseen customer-notification count so a booking cancelled by the
+  // staff shows up on the bell without a manual reload (mirrors the Header).
+  const fetchUnreadCount = async () => {
+    if (!customerId) return;
+
+    try {
+      const response = await api.get(
+        `/customer/${customerId}/booking-notifications/unread-count`
+      );
+      setUnreadCount(response.data.count || 0);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    if (!customerId) return;
+    fetchUnreadCount();
+    const interval = setInterval(fetchUnreadCount, 30000);
+    return () => clearInterval(interval);
+  }, [customerId]);
+
+  // Open the notification panel, load the unseen notifications and mark them
+  // seen so the badge clears (same flow as the admin Bookings bell).
+  const handleBellClick = async () => {
+    if (showNotifications) {
+      setShowNotifications(false);
       return;
     }
 
-    setCancellingId(bookingId);
-
     try {
-      const response = await api.patch(
-        `/user/bookings/${bookingId}/cancel`
+      const response = await api.get(
+        `/customer/${customerId}/booking-notifications`
       );
-
-      alert(
-        `Booking cancelled. Applicable refund: ${response.data.refund_percentage}%.`
+      setBookingNotifications(response.data || []);
+      setShowNotifications(true);
+      await api.post(
+        `/customer/${customerId}/booking-notifications/mark-seen`
       );
-
-      fetchBookings();
-    } catch (error) {
-      alert(
-        error.response?.data?.message ||
-          "Failed to cancel booking."
-      );
-    } finally {
-      setCancellingId(null);
+      setUnreadCount(0);
+    } catch (err) {
+      console.error(err);
+      setShowNotifications(true);
     }
   };
+
+  // The cancellation flow (policy modal state, agreement checkbox and the
+  // cancel API call) lives in cancellation.jsx.
+  const {
+    cancelTarget,
+    cancellingId,
+    policyAgreed,
+    setPolicyAgreed,
+    openCancelPolicy,
+    closeCancelPolicy,
+    handleCancelBooking,
+  } = useCancellation(fetchBookings);
 
   // Booking statuses that can still be edited by the customer
   const isEditableStatus = (status) =>
@@ -111,14 +152,75 @@ export default function MyBookings() {
     <div className="p-4 sm:p-6 md:p-8">
 
       {/* Page Header */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-sacramento">
-          My Bookings
-        </h1>
+      <div className="mb-6 flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-sacramento">
+            My Bookings
+          </h1>
 
-        <p className="mt-1 text-sm text-muted">
-          View and manage your safari bookings
-        </p>
+          <p className="mt-1 text-sm text-muted">
+            View and manage your safari bookings
+          </p>
+        </div>
+
+        {/* Booking notifications bell — mirrors the admin Bookings screen */}
+        <div className="relative">
+          <button
+            type="button"
+            onClick={handleBellClick}
+            className="relative rounded-full card p-2 shadow-sm hover:bg-offwhite-100 dark:hover:bg-surface-2"
+            title="Booking notifications"
+            aria-label="Booking notifications"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+            {unreadCount > 0 && (
+              <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-bold text-white">
+                {unreadCount}
+              </span>
+            )}
+          </button>
+
+          {showNotifications && (
+            <div className="absolute right-0 top-14 z-50 w-96 max-w-[calc(100vw-2rem)] rounded-xl border border-border-light bg-white p-3 shadow-xl dark:border-border-dark dark:bg-bg-dark">
+              <div className="mb-2 flex items-center justify-between">
+                <h2 className="text-sm font-bold text-charcoal dark:text-white">Booking notifications</h2>
+                <button
+                  type="button"
+                  onClick={() => setShowNotifications(false)}
+                  className="rounded-md px-2 py-1 text-lg leading-none text-muted hover:bg-offwhite-100 dark:hover:bg-surface-2"
+                  aria-label="Close booking notifications"
+                  title="Close"
+                >
+                  x
+                </button>
+              </div>
+              {bookingNotifications.length === 0 ? (
+                <p className="py-3 text-sm text-muted">No booking notifications.</p>
+              ) : (
+                <div className="max-h-72 space-y-2 overflow-y-auto">
+                  {bookingNotifications.map((notification) => (
+                    <div
+                      key={notification.Booking_ID}
+                      className="rounded-lg border border-border-light p-3 text-left dark:border-border-dark"
+                    >
+                      <p className="text-xs font-bold text-red-600 dark:text-red-400">
+                        {notification.package?.Package_Name || "Safari package"} - {notification.Status}
+                      </p>
+                      <p className="mt-1 break-words whitespace-pre-line text-sm text-charcoal dark:text-white">
+                        {notification.Customer_Message}
+                      </p>
+                      <p className="mt-1 text-xs text-muted">
+                        Safari date: {notification.Booking_Date}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Search */}
@@ -325,7 +427,7 @@ export default function MyBookings() {
                       <button
                         type="button"
                         onClick={() =>
-                          handleCancelBooking(booking.Booking_ID)
+                          openCancelPolicy(booking)
                         }
                         disabled={
                           isCancelled ||
@@ -460,9 +562,7 @@ export default function MyBookings() {
                           }
                           onEdit={() => handleClickEdit(booking)}
                           onCancel={() =>
-                            handleCancelBooking(
-                              booking.Booking_ID
-                            )
+                            openCancelPolicy(booking)
                           }
                         />
                       </td>
@@ -476,6 +576,21 @@ export default function MyBookings() {
           </div>
         </>
       )}
+
+      {/* =====================================================
+          CANCELLATION POLICY MODAL
+          Shown when the customer clicks "Cancel". The booking
+          can only be cancelled after ticking the agreement box.
+          The modal itself lives in cancellation.jsx.
+          ===================================================== */}
+      <CancellationModal
+        booking={cancelTarget}
+        cancellingId={cancellingId}
+        policyAgreed={policyAgreed}
+        onPolicyAgreedChange={setPolicyAgreed}
+        onClose={closeCancelPolicy}
+        onConfirm={handleCancelBooking}
+      />
     </div>
   );
 }

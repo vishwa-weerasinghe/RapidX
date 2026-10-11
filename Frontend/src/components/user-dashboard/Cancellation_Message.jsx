@@ -16,6 +16,25 @@ function getRefundPercentage(bookingDate) {
   return 0;
 }
 
+// The percentage that was actually applied when the booking was cancelled.
+//
+// The backend stores it as Refund_Percentage, so that is the source of truth:
+// an admin may override the policy tier (25%, or a withheld 0%), and a booking
+// that was never paid is always 0 regardless of its date. Recomputing it here
+// from Booking_Date would show a different number than the one really refunded.
+//
+// The policy calculation is only a fallback for records cancelled before the
+// column existed, where nothing was stored.
+function getAppliedRefundPercentage(booking) {
+  const stored = booking?.Refund_Percentage;
+
+  if (stored !== null && stored !== undefined && stored !== "") {
+    return Number(stored) || 0;
+  }
+
+  return getRefundPercentage(booking?.Booking_Date);
+}
+
 export function CancellationMessage() {
   const { bookings, loading } = useBookings();
   const { theme } = useTheme();
@@ -79,8 +98,12 @@ export function CancellationMessage() {
       <div className="flex max-h-[400px] sm:max-h-[500px] flex-col gap-4 overflow-y-auto">
         {cancelledBookings.map((booking) => {
           const pkg = booking.package;
-          const refundPercentage = getRefundPercentage(booking.Booking_Date);
+          const refundPercentage = getAppliedRefundPercentage(booking);
           const refundAmount = (Number(booking.Payment || 0) * refundPercentage) / 100;
+
+          // Bookings cancelled by the staff carry a Customer_Message set by the
+          // admin cancel endpoint; customer-initiated cancellations leave it null.
+          const isStaffCancelled = Boolean(booking.Customer_Message);
 
           return (
             <div key={booking.Booking_ID} className={itemClass}>
@@ -106,11 +129,29 @@ export function CancellationMessage() {
                 </div>
               </div>
 
-              <p className={`mb-3 text-sm leading-6 ${mutedTextClass}`}>
-                Your safari booking has been cancelled. An applicable refund of{" "}
-                <span className={`font-semibold ${highlightTextClass}`}>{refundPercentage}%</span>{" "}
-                will be issued to your original payment method within 7–14 business days.
-              </p>
+              {isStaffCancelled ? (
+                <>
+                  <p className={`mb-2 text-sm leading-6 ${mutedTextClass}`}>
+                    Sorry your booking is not accepted by the staff. Try again. Thank you for choosing us.
+                  </p>
+
+                  <p className={`mb-2 text-sm leading-6 ${mutedTextClass}`}>
+                    Refund policy: an applicable refund of{" "}
+                    <span className={`font-semibold ${highlightTextClass}`}>{refundPercentage}%</span>{" "}
+                    will be issued to your original payment method within 7–14 business days.
+                  </p>
+
+                  <p className={`mb-3 text-sm leading-6 ${mutedTextClass}`}>
+                    Refund is applied only for already paid bookings.
+                  </p>
+                </>
+              ) : (
+                <p className={`mb-3 text-sm leading-6 ${mutedTextClass}`}>
+                  Your safari booking has been cancelled. An applicable refund of{" "}
+                  <span className={`font-semibold ${highlightTextClass}`}>{refundPercentage}%</span>{" "}
+                  will be issued to your original payment method within 7–14 business days.
+                </p>
+              )}
 
               <div className={`flex items-center justify-between border-t pt-3 ${borderLineClass}`}>
                 <div className={`flex items-center gap-1.5 text-sm ${mutedTextClass}`}>

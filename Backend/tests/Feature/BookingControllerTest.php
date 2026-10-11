@@ -486,7 +486,9 @@ class BookingControllerTest extends TestCase
         $booking = $this->createBooking();
 
         $response = $this->actingAs($admin, 'sanctum')
-            ->deleteJson('/api/bookings/' . $booking->Booking_ID);
+            ->deleteJson('/api/bookings/' . $booking->Booking_ID, [
+                'agreed' => true,
+            ]);
 
         $response->assertStatus(200)
             ->assertJson(['message' => 'Booking cancelled successfully']);
@@ -549,7 +551,9 @@ class BookingControllerTest extends TestCase
         ]);
 
         $this->actingAs($customerUser, 'sanctum')
-            ->patchJson('/api/user/bookings/' . $booking->Booking_ID . '/cancel')
+            ->patchJson('/api/user/bookings/' . $booking->Booking_ID . '/cancel', [
+                'agreed' => true,
+            ])
             ->assertStatus(200)
             ->assertJsonPath('booking.Status', 'Cancelled');
 
