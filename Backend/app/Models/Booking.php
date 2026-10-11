@@ -11,6 +11,8 @@ class Booking extends Model
     protected $casts = [
         'Admin_Seen' => 'boolean',
         'Customer_Seen' => 'boolean',
+        'Refund_Percentage' => 'integer',
+        'Cancelled_At' => 'datetime',
     ];
 
     protected $fillable = [
@@ -21,6 +23,8 @@ class Booking extends Model
         'No_of_adults',
         'No_of_child',
         'Payment',
+        'Refund_Percentage',
+        'Cancelled_At',
         'Status',
         'Customer_ID',
         'Package_ID',
