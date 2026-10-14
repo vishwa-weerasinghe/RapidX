@@ -10,6 +10,7 @@ import {
   Menu,
   X,
   ArrowRight,
+  ChevronDown,
 } from "lucide-react";
 import ThemeToggle from "./components/ThemeToggle";
 import { useTheme } from "./context/ThemeContext";
@@ -324,6 +325,7 @@ export default function App() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [lightboxImage, setLightboxImage] = useState(null);
   const [notification, setNotification] = useState(null);
+  const [openFaq, setOpenFaq] = useState(0);
 
   // Widget States for quick booking overlay
   const [selectedPark, setSelectedPark] = useState("minneriya");
@@ -759,8 +761,9 @@ export default function App() {
   return (
     <>
       <SEO
-        title="Online Safari Booking Sri Lanka | Minneriya, Kaudulla, Hurulu & Wasgamuwa Jeep Safari Tours"
-        description="Book trusted Sri Lanka jeep safaris online. Experience the famous Minneriya Elephant Gathering, Kaudulla & Wasgamuwa with experienced local drivers. Instant booking & best rates."
+        title="Minneriya, Kaudulla, Hurulu &amp; Wasgamuwa Safari Jeep Tours Sri Lanka"
+        description="Book official Sri Lanka jeep safaris online. Experience Minneriya Elephant Gathering, Kaudulla, Hurulu Eco Park &amp; Wasgamuwa National Park with licensed local drivers &amp; best rates."
+        keywords="minneriya safari, minneriya jeep safari, kaudulla safari, kaudulla jeep safari, hurulu eco park safari, hurulu safari, wasgamuwa safari, wasgamuwa national park safari, minneriya elephant gathering, sri lanka jeep safari, minneriya national park safari booking, safari jeep hire minneriya, habarana safari, dambulla safari, sigiriya safari"
         canonical="https://www.minneriyawildjeepsafari.com"
       />
       <div
@@ -1222,17 +1225,16 @@ export default function App() {
               </div>
 
               {/* Title */}
-              <h1 className="font-serif text-[2.5rem] leading-[1.1] sm:text-5xl md:text-6xl font-bold mb-6 text-white drop-shadow-2xl">
-                Witness Sri Lanka's Legendary{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-emerald-300 to-teal-200 dark:from-amber-300 dark:via-emerald-400 dark:to-teal-300">
-                  Wild Elephant Gathering
+              <h1 className="font-serif text-[2.4rem] leading-[1.15] sm:text-5xl md:text-6xl font-bold mb-6 text-white drop-shadow-2xl">
+                Minneriya, Kaudulla &amp; Hurulu{" "}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-emerald-300 to-teal-200 dark:from-amber-300 dark:via-emerald-400 dark:to-teal-300 block sm:inline">
+                  Safari Jeep Tours
                 </span>
               </h1>
 
               {/* Description */}
               <p className="text-neutral-100 dark:text-neutral-300 font-medium tracking-wide text-sm sm:text-base mb-8 drop-shadow-md max-w-xl leading-relaxed">
-                Experience unforgettable close-up encounters with majestic
-                elephants in Minneriya and Kaudulla National Parks.
+                Book official <strong>Minneriya safari</strong>, <strong>Kaudulla jeep safari</strong>, <strong>Hurulu Eco Park</strong>, and <strong>Wasgamuwa</strong> tours online. Witness the famous Sri Lanka Elephant Gathering and wild leopards with licensed local drivers, guaranteed wildlife sightings, and free hotel pickup in Habarana, Sigiriya &amp; Dambulla.
               </p>
 
               {/* Action Buttons */}
@@ -1296,12 +1298,11 @@ export default function App() {
               </span>
 
               <h2 className="mt-5 font-outfit text-3xl sm:text-5xl font-bold text-gray-900">
-                Choose Your Adventure
+                Minneriya, Kaudulla, Hurulu &amp; Wasgamuwa Safari Packages
               </h2>
 
               <p className="mt-4 text-gray-500">
-                Discover unforgettable safari experiences with expert guides,
-                comfortable jeeps, and affordable prices.
+                Book private 4x4 jeep safaris across Minneriya National Park, Kaudulla, Hurulu Eco Park, and Wasgamuwa with experienced local guides, park permits, and best price guarantee.
               </p>
             </div>
 
@@ -1316,6 +1317,14 @@ export default function App() {
                   const relatedSection = getStaticBlogPackageSection(
                     pkg.blog_id || pkg.related_package
                   );
+
+                  const nameLower = (pkg.Package_Name || pkg.title || "").toLowerCase();
+                  const sectionLower = String(relatedSection || "").toLowerCase();
+                  const isSigiriyaOrPidurangala =
+                    nameLower.includes("sigiriya") ||
+                    nameLower.includes("pidurangala") ||
+                    sectionLower.includes("sigiriya") ||
+                    sectionLower.includes("pidurangala");
 
                   return (
                     <div
@@ -1366,22 +1375,33 @@ export default function App() {
                             <span className="text-green-600 shrink-0">✓</span>
                             <span>Reasonable Prices</span>
                           </li>
+
                           <li className="flex items-center gap-2">
                             <span className="text-green-600 shrink-0">✓</span>
-                            <span>Entrance Ticket</span>
+                            <span>Safari Entrance Ticket</span>
                           </li>
+
                           <li className="flex items-center gap-2">
                             <span className="text-green-600 shrink-0">✓</span>
                             <span>Water Bottle</span>
                           </li>
+
                           <li className="flex items-center gap-2">
                             <span className="text-green-600 shrink-0">✓</span>
                             <span>Binoculars</span>
                           </li>
+
                           <li className="flex items-center gap-2">
                             <span className="text-green-600 shrink-0">✓</span>
                             <span>Pick-Up & Drop-Off</span>
                           </li>
+
+                          {isSigiriyaOrPidurangala && (
+                            <li className="flex items-center gap-2">
+                              <span className="text-red-500 font-bold shrink-0">✗</span>
+                              <span className="text-red-600 dark:text-red-400 font-medium">Extra Entrance Ticket</span>
+                            </li>
+                          )}
                         </ul>
 
                         {/* Buttons */}
@@ -1479,15 +1499,12 @@ export default function App() {
                 </div>
 
                 <h2 className="font-outfit text-4xl sm:text-5xl font-bold mb-6 text-gray-900 leading-[1.15]">
-                  Witness the World's Largest <br />
-                  <span className="text-castleton">Elephant Gathering</span>
+                  Sri Lanka's Premier Safari Agency for <br />
+                  <span className="text-castleton">Minneriya, Kaudulla &amp; Wasgamuwa</span>
                 </h2>
 
                 <p className="text-gray-500 text-lg leading-relaxed mb-10">
-                  Experience the world-famous gathering at Minneriya and Kaudulla
-                  National Parks. Join our expert-guided jeep safaris for
-                  unforgettable, close-up encounters with hundreds of majestic
-                  elephants in their natural habitat.
+                  Based in Habarana, we operate trusted private 4x4 safaris across <strong>Minneriya National Park</strong>, <strong>Kaudulla</strong>, <strong>Hurulu Eco Park</strong>, and <strong>Wasgamuwa National Park</strong>. Our experienced local trackers monitor elephant and wildlife migrations daily to guarantee you the closest, safest encounters with wild elephants, leopards, and sloth bears.
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-10">
@@ -1686,7 +1703,7 @@ export default function App() {
                 Explore Safari Locations
               </span>
               <h2 className="font-outfit text-3xl sm:text-5xl font-bold text-gray-900">
-                Beautiful Places Around Sri Lanka
+                Top Safari Parks: Minneriya, Kaudulla, Hurulu &amp; Wasgamuwa
               </h2>
             </div>
 
@@ -1694,7 +1711,7 @@ export default function App() {
               {safariLocations.map((loc) => (
                 <div
                   key={loc.id}
-                  onClick={() => navigate(`/blog#${loc.id}`)}
+                  onClick={() => navigate(`/${loc.id}-safari`)}
                   className="rounded-3xl overflow-hidden shadow-sm border border-gray-100 dark:border-neutral-800 hover:shadow-xl hover:-translate-y-2 transition-all duration-500 group bg-white dark:bg-neutral-900 flex flex-col cursor-pointer"
                 >
                   <div className="relative h-56 overflow-hidden">
@@ -1711,7 +1728,7 @@ export default function App() {
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate(`/blog#${loc.id}`);
+                          navigate(`/${loc.id}-safari`);
                         }}
                         className="relative px-6 py-2.5 rounded-full text-sm font-bold text-white bg-white/20 hover:bg-white/30 active:scale-95 backdrop-blur-sm border border-white/40 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] hover:shadow-[0_8px_32px_0_rgba(46,125,50,0.4)] hover:border-white/60 hover:scale-105 transition-all duration-300 cursor-pointer overflow-hidden tracking-wide"
                       >
@@ -2058,6 +2075,79 @@ export default function App() {
             </div>
           </div>
         )}
+
+        {/* --- SEO FAQ & TRAVEL GUIDE SECTION --- */}
+        <section id="faq" className="py-20 md:py-28 bg-white border-t border-gray-100 transition-colors duration-200">
+          <div className="max-w-4xl mx-auto px-4 md:px-6">
+            <div className="text-center max-w-2xl mx-auto mb-14">
+              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-50 text-castleton text-xs font-bold uppercase tracking-widest mb-4 border border-gray-100">
+                <span className="w-2 h-2 rounded-full bg-castleton"></span>
+                Safari Travel Guide &amp; FAQs
+              </span>
+              <h2 className="font-outfit text-3xl sm:text-5xl font-bold text-gray-900 mb-4">
+                Safari Travel Guide &amp; Questions
+              </h2>
+              <p className="text-gray-600 text-sm sm:text-base">
+                Everything you need to know about booking private jeep safaris to Minneriya, Kaudulla, Hurulu Eco Park, and Wasgamuwa National Parks.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              {[
+                {
+                  q: "What is the difference between Minneriya, Kaudulla, and Hurulu Eco Park safaris?",
+                  a: "Minneriya, Kaudulla, and Hurulu Eco Park are interconnected elephant corridors in Sri Lanka's cultural triangle. During the dry season (July to October), herds of 200–300+ wild elephants gather around Minneriya Tank and Kaudulla Tank. From November to April (wet season), the herds migrate through Hurulu Eco Park. Our licensed local drivers check sightings twice daily and take you to whichever park has the largest elephant gathering on the day of your safari."
+                },
+                {
+                  q: "Can I do a safari in Wasgamuwa National Park?",
+                  a: "Yes! We operate dedicated private jeep safaris to Wasgamuwa National Park. Wasgamuwa is celebrated for its thriving elephant population, lush wilderness, and is one of the premier locations in Sri Lanka to spot the elusive Sri Lankan sloth bear, leopards, marsh crocodiles, and rare birds without the crowds."
+                },
+                {
+                  q: "What is the best time for a Minneriya Jeep Safari?",
+                  a: "The afternoon / evening safari (1:30 PM – 6:30 PM) is the absolute best time to experience the famous Elephant Gathering. During the hot midday hours, elephants rest in the dense jungle and emerge onto the open reservoir plains as temperatures cool down. Morning safaris (5:30 AM – 9:00 AM) are peaceful, cooler, and ideal for spotting predatory birds, deer, water buffalo, and taking sunrise photographs."
+                },
+                {
+                  q: "How much does a private safari jeep cost?",
+                  a: "Our private jeep safari packages start from $40 per adult and $20 per child. All bookings include an exclusive 4x4 safari jeep hire, licensed experienced driver/tracker, national park entry ticket assistance, and complimentary hotel pickup & drop-off from Habarana, Sigiriya, or Dambulla with no hidden costs."
+                },
+                {
+                  q: "How do I book a Minneriya, Kaudulla, Hurulu or Wasgamuwa safari online?",
+                  a: "You can easily book online directly on our website! Simply choose your desired park or package, select your safari date and passenger count, and complete your reservation. You receive instant confirmation and 24/7 WhatsApp assistance from our local Habarana team (+94 778902811)."
+                },
+                {
+                  q: "Do you provide hotel pickup in Habarana, Sigiriya, and Dambulla?",
+                  a: "Yes! Door-to-door hotel pickup and return drop-off is included free of charge for all hotels, villas, and guesthouses in Habarana, Sigiriya, Dambulla, Kandalama, and Minneriya. Our driver will meet you right at your hotel lobby."
+                },
+                {
+                  q: "What animals can I see during the safari?",
+                  a: "Along with hundreds of Asian elephants, you have great chances of spotting spotted deer, sambar deer, water buffaloes, wild boars, toque macaques, grey langurs, jackals, marsh crocodiles, water monitor lizards, and over 160 bird species including white-bellied sea eagles, grey herons, and painted storks. Sloth bears and leopards are also present in Wasgamuwa and Minneriya."
+                }
+              ].map((item, idx) => (
+                <div
+                  key={idx}
+                  className="rounded-2xl border border-gray-200 bg-gray-50/50 overflow-hidden transition-all duration-200"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setOpenFaq(openFaq === idx ? -1 : idx)}
+                    className="w-full py-5 px-6 text-left font-bold text-gray-900 flex items-center justify-between gap-4 hover:text-castleton transition-colors"
+                  >
+                    <span className="text-base sm:text-lg">{item.q}</span>
+                    <ChevronDown
+                      className={`w-5 h-5 shrink-0 text-gray-500 transition-transform duration-300 ${openFaq === idx ? "rotate-180 text-castleton" : ""
+                        }`}
+                    />
+                  </button>
+                  {openFaq === idx && (
+                    <div className="px-6 pb-6 text-sm sm:text-base text-gray-600 leading-relaxed border-t border-gray-100 pt-4">
+                      {item.a}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
 
         {/* --- CTA BANNER --- */}
         <section className="py-16 md:py-20 bg-gradient-to-br from-sacramento to-castleton text-white text-center">

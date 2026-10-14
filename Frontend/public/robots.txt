@@ -3,7 +3,13 @@
 
 User-agent: *
 Allow: /
+Allow: /minneriya-safari
+Allow: /minneriya-jeep-safari
+Allow: /kaudulla-safari
+Allow: /hurulu-safari
+Allow: /wasgamuwa-safari
 Allow: /booking
+Allow: /blog
 Allow: /login
 Allow: /register
 
