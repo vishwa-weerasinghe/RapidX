@@ -948,11 +948,24 @@ function ModernBlogGallery({ photos, onPhotoClick, fallbackImg, isDark }) {
   );
 }
 
-export default function Blog() {
+export default function Blog({ defaultPark }) {
   const { theme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
-  const [activeSection, setActiveSection] = useState("");
+
+  const targetPark = defaultPark || (
+    location.pathname.includes("minneriya")
+      ? "minneriya"
+      : location.pathname.includes("kaudulla")
+      ? "kaudulla"
+      : location.pathname.includes("hurulu")
+      ? "hurulu"
+      : location.pathname.includes("wasgamuwa")
+      ? "wasgamuwa"
+      : null
+  );
+
+  const [activeSection, setActiveSection] = useState(targetPark || "");
   const [expandedPkg, setExpandedPkg] = useState({});
   const [dbPackages, setDbPackages] = useState([]);
 
@@ -1074,9 +1087,10 @@ export default function Blog() {
   };
 
   useEffect(() => {
-    if (location.hash) {
-      const id = location.hash.replace("#", "");
-      const element = document.getElementById(id);
+    const parkToScroll = location.hash ? location.hash.replace("#", "") : targetPark;
+    if (parkToScroll) {
+      setActiveSection(parkToScroll);
+      const element = document.getElementById(parkToScroll);
       if (element) {
         setTimeout(() => {
           element.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -1085,7 +1099,7 @@ export default function Blog() {
     } else {
       window.scrollTo(0, 0);
     }
-  }, [location]);
+  }, [location, targetPark]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -1101,11 +1115,56 @@ export default function Blog() {
     return () => sections.forEach((s) => observer.unobserve(s));
   }, []);
 
+  // Compute targeted SEO based on active or landing park
+  const effectivePark = targetPark || activeSection;
+  const seoDetails = (() => {
+    if (effectivePark === "minneriya") {
+      return {
+        title: "Minneriya Safari & Jeep Tours Sri Lanka | Elephant Gathering Booking",
+        description: "Book your Minneriya safari jeep tour. Witness the famous Sri Lanka Elephant Gathering in Minneriya National Park with licensed local drivers and best rates.",
+        keywords: "minneriya safari, minneriya jeep safari, minneriya elephant gathering, minneriya national park safari booking, sri lanka jeep safari, habarana safari",
+        canonical: "https://www.minneriyawildjeepsafari.com/minneriya-safari"
+      };
+    }
+    if (effectivePark === "kaudulla") {
+      return {
+        title: "Kaudulla Safari & Jeep Tours Sri Lanka | Kaudulla National Park Booking",
+        description: "Experience the Kaudulla safari with herds of wild elephants at Kaudulla Tank. Private 4x4 jeep safari tours, licensed guides, and easy online booking.",
+        keywords: "kaudulla safari, kaudulla jeep safari, kaudulla national park safari, kaudulla elephant gathering, sri lanka jeep safari, habarana safari",
+        canonical: "https://www.minneriyawildjeepsafari.com/kaudulla-safari"
+      };
+    }
+    if (effectivePark === "hurulu") {
+      return {
+        title: "Hurulu Eco Park Safari Sri Lanka | Elephant Corridor Jeep Tours",
+        description: "Book your Hurulu Eco Park jeep safari in Habarana, Sri Lanka. Year-round wild elephant sightings with local guides.",
+        keywords: "hurulu safari, hurulu eco park safari, habarana elephant safari, sri lanka jeep safari",
+        canonical: "https://www.minneriyawildjeepsafari.com/hurulu-safari"
+      };
+    }
+    if (effectivePark === "wasgamuwa") {
+      return {
+        title: "Wasgamuwa Safari & Jeep Tours Sri Lanka | Wasgamuwa National Park",
+        description: "Discover Wasgamuwa National Park safari with wild elephants and sloth bears in pristine nature. Private 4x4 jeep tours available.",
+        keywords: "wasgamuwa safari, wasgamuwa national park, sri lanka jeep safari",
+        canonical: "https://www.minneriyawildjeepsafari.com/wasgamuwa-safari"
+      };
+    }
+    return {
+      title: "Safari Guides & Jeep Tours Sri Lanka | Minneriya & Kaudulla Safari",
+      description: "Explore our safari tours and travel guides for Minneriya safari, Kaudulla safari, Wasgamuwa, Hurulu Eco Park, and cultural tours across Sri Lanka.",
+      keywords: "minneriya safari, minneriya jeep safari, kaudulla safari, sri lanka safari jeep booking",
+      canonical: "https://www.minneriyawildjeepsafari.com/blog"
+    };
+  })();
+
   return (
     <>
       <SEO
-        title="Safari Tours & Travel Guides | Wild Jeep Safari"
-        description="Explore our safari tours and travel guides for Minneriya, Kaudulla, Wasgamuwa, Hurulu Eco Park, and cultural tours across Sri Lanka."
+        title={seoDetails.title}
+        description={seoDetails.description}
+        keywords={seoDetails.keywords}
+        canonical={seoDetails.canonical}
       />
 
       <PublicHeader />

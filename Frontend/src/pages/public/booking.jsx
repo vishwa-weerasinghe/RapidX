@@ -9,12 +9,12 @@ import { getCountries, getCountryCallingCode, parsePhoneNumberFromString } from 
 
 const countryDisplayNames = new Intl.DisplayNames(["en"], { type: "region" });
 const countryOptions = getCountries()
-  .map((code) => ({
-    code,
-    name: countryDisplayNames.of(code) || code,
-    callingCode: getCountryCallingCode(code),
-  }))
-  .sort((a, b) => a.name.localeCompare(b.name));
+    .map((code) => ({
+        code,
+        name: countryDisplayNames.of(code) || code,
+        callingCode: getCountryCallingCode(code),
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
 import {
     Calendar,
     Clock,
@@ -68,6 +68,7 @@ export default function Booking() {
     const bookingId = location.state?.bookingId;
     const isEditMode = Boolean(bookingId);
     const [originalForm, setOriginalForm] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Country and phone number states matching register form
     const [countryCode, setCountryCode] = useState("");
@@ -338,6 +339,8 @@ export default function Booking() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        if (isSubmitting) return;
+
         if (!selectedPackageId || !pkg) {
             alert("Please select a tour package to proceed with your booking.");
             return;
@@ -360,6 +363,7 @@ export default function Booking() {
         }
 
         if (isEditMode) {
+            setIsSubmitting(true);
             try {
                 await api.put(`/bookings/${bookingId}`, {
                     Booking_Date: form.Booking_Date,
@@ -376,6 +380,8 @@ export default function Booking() {
             } catch (err) {
                 console.log(err);
                 alert(err.response?.data?.message || "Failed to update booking");
+            } finally {
+                setIsSubmitting(false);
             }
             return;
         }
@@ -411,6 +417,8 @@ export default function Booking() {
             payload.Phone_No = fullPhone;
         }
 
+        setIsSubmitting(true);
+
         try {
             const res = await api.post("/payhere/initiate", payload);
             const { payhere_params } = res.data;
@@ -422,14 +430,19 @@ export default function Booking() {
                     },
                     onDismissed: () => {
                         console.log("PayHere payment modal closed by user");
+                        setIsSubmitting(false);
                     },
                     onError: (error) => {
+                        setIsSubmitting(false);
                         alert("PayHere Error: " + error);
                     },
                 });
+            } else {
+                setIsSubmitting(false);
             }
         } catch (err) {
             console.log(err);
+            setIsSubmitting(false);
             alert(
                 err.response?.data?.message ||
                 err.response?.data?.error ||
@@ -785,11 +798,10 @@ export default function Booking() {
                                                                         setCountryQuery("");
                                                                         setShowCountryMenu(false);
                                                                     }}
-                                                                    className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-xs sm:text-sm transition-colors ${
-                                                                        c.code === countryCode
-                                                                            ? "bg-castleton/10 text-castleton font-bold"
-                                                                            : "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
-                                                                    }`}
+                                                                    className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-xs sm:text-sm transition-colors ${c.code === countryCode
+                                                                        ? "bg-castleton/10 text-castleton font-bold"
+                                                                        : "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+                                                                        }`}
                                                                 >
                                                                     <span className="flex items-center gap-2 truncate">
                                                                         <img
@@ -834,8 +846,8 @@ export default function Booking() {
                                                     !countryCode
                                                         ? "Select country first"
                                                         : countryCode === "LK"
-                                                        ? "77 123 4567"
-                                                        : "Enter phone number"
+                                                            ? "77 123 4567"
+                                                            : "Enter phone number"
                                                 }
                                                 value={form.Phone_No}
                                                 onChange={(e) => {
@@ -865,7 +877,7 @@ export default function Booking() {
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                     <div className="flex flex-col gap-1.5">
                                         <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
-                                            Adult Guests (12+ yrs)
+                                            Adult Guests (11+ yrs)
                                         </label>
                                         <input
                                             type="number"
@@ -880,7 +892,7 @@ export default function Booking() {
 
                                     <div className="flex flex-col gap-1.5">
                                         <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
-                                            Child Guests (under 12 yrs)
+                                            Child Guests (6-11 yrs)
                                         </label>
                                         <input
                                             type="number"
@@ -926,17 +938,26 @@ export default function Booking() {
                             {/* Submit & Cart Action */}
                             <button
                                 type="submit"
-                                disabled={!selectedPackageId}
-                                className="w-full min-h-[48px] bg-sacramento hover:bg-sacramento-600 disabled:bg-slate-300 dark:disabled:bg-slate-800 disabled:text-slate-500 disabled:cursor-not-allowed text-white font-extrabold text-xs sm:text-sm uppercase py-3.5 sm:py-4 px-4 rounded-xl shadow-lg shadow-sacramento/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2 group cursor-pointer"
+                                disabled={!selectedPackageId || isSubmitting}
+                                className="w-full min-h-[48px] bg-sacramento hover:bg-sacramento-600 disabled:bg-slate-300 dark:disabled:bg-slate-800 disabled:text-slate-300 disabled:cursor-not-allowed text-white font-extrabold text-xs sm:text-sm uppercase py-3.5 sm:py-4 px-4 rounded-xl shadow-lg shadow-sacramento/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2 group cursor-pointer"
                             >
-                                <ShoppingCart size={16} className="shrink-0" />
-                                <span className="truncate">
-                                    {isEditMode
-                                        ? "Update Booking"
-                                        : pkg
-                                            ? `Confirm & Pay • $ ${new Intl.NumberFormat().format(getFinalTotal())}`
-                                            : "Select a Package to Continue"}
-                                </span>
+                                {isSubmitting ? (
+                                    <>
+                                        <Loader2 size={16} className="animate-spin shrink-0" />
+                                        <span className="truncate">Please Wait...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <ShoppingCart size={16} className="shrink-0" />
+                                        <span className="truncate">
+                                            {isEditMode
+                                                ? "Update Booking"
+                                                : pkg
+                                                    ? `Confirm & Pay • $ ${new Intl.NumberFormat().format(getFinalTotal())}`
+                                                    : "Select a Package to Continue"}
+                                        </span>
+                                    </>
+                                )}
                             </button>
                             {isEditMode && (
                                 <button
