@@ -1225,8 +1225,8 @@ export default function App() {
               </div>
 
               {/* Title */}
-              <h1 className="font-serif text-[2.4rem] leading-[1.15] sm:text-5xl md:text-6xl font-bold mb-6 text-white drop-shadow-2xl">
-                Minneriya, Kaudulla &amp; Hurulu{" "}
+              <h1 className="font-serif text-[2.4rem] leading-[1.15] sm:text-4xl md:text-5xl font-bold mb-6 text-white drop-shadow-2xl">
+                Minneriya, Kaudulla, Hurulu &amp; Wasgamuwa{" "}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-emerald-300 to-teal-200 dark:from-amber-300 dark:via-emerald-400 dark:to-teal-300 block sm:inline">
                   Safari Jeep Tours
                 </span>
@@ -1234,7 +1234,7 @@ export default function App() {
 
               {/* Description */}
               <p className="text-neutral-100 dark:text-neutral-300 font-medium tracking-wide text-sm sm:text-base mb-8 drop-shadow-md max-w-xl leading-relaxed">
-                Book official <strong>Minneriya safari</strong>, <strong>Kaudulla jeep safari</strong>, <strong>Hurulu Eco Park</strong>, and <strong>Wasgamuwa</strong> tours online. Witness the famous Sri Lanka Elephant Gathering and wild leopards with licensed local drivers, guaranteed wildlife sightings, and free hotel pickup in Habarana, Sigiriya &amp; Dambulla.
+                Book official <strong>Minneriya safari</strong>, <strong>Kaudulla jeep safari</strong>, <strong>Hurulu Eco Park</strong>, and <strong>Wasgamuwa</strong> safaries online. Witness the famous Sri Lanka Elephant Gathering and wild leopards with licensed local drivers, guaranteed wildlife sightings, and hotel pickup in Habarana, Sigiriya, Kandalama &amp; Dambulla.
               </p>
 
               {/* Action Buttons */}
@@ -1302,7 +1302,7 @@ export default function App() {
               </h2>
 
               <p className="mt-4 text-gray-500">
-                Book private 4x4 jeep safaris across Minneriya National Park, Kaudulla, Hurulu Eco Park, and Wasgamuwa with experienced local guides, park permits, and best price guarantee.
+                Book private jeep safaris across Minneriya National Park, Kaudulla, Hurulu Eco Park, and Wasgamuwa with experienced local drivers, park permits, and best price guarantee.
               </p>
             </div>
 
@@ -1499,12 +1499,12 @@ export default function App() {
                 </div>
 
                 <h2 className="font-outfit text-4xl sm:text-5xl font-bold mb-6 text-gray-900 leading-[1.15]">
-                  Sri Lanka's Premier Safari Agency for <br />
-                  <span className="text-castleton">Minneriya, Kaudulla &amp; Wasgamuwa</span>
+                  Sri Lanka's Premier Safari for <br />
+                  <span className="text-castleton">Minneriya, Kaudulla, Hurulu Eco &amp; Wasgamuwa</span>
                 </h2>
 
                 <p className="text-gray-500 text-lg leading-relaxed mb-10">
-                  Based in Habarana, we operate trusted private 4x4 safaris across <strong>Minneriya National Park</strong>, <strong>Kaudulla</strong>, <strong>Hurulu Eco Park</strong>, and <strong>Wasgamuwa National Park</strong>. Our experienced local trackers monitor elephant and wildlife migrations daily to guarantee you the closest, safest encounters with wild elephants, leopards, and sloth bears.
+                  Based in Habarana, we operate trusted private safaris across <strong>Minneriya National Park</strong>, <strong>Kaudulla National Park</strong>, <strong>Hurulu Eco Park</strong>, and <strong>Wasgamuwa National Park</strong>. Our experienced local drivers monitor elephant and wildlife migrations daily to guarantee you the closest, safest encounters with wild elephants, leopards, and sloth bears.
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-10">
