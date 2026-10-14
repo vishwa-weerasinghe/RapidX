@@ -2107,16 +2107,8 @@ export default function App() {
                   a: "The afternoon / evening safari (1:30 PM – 6:30 PM) is the absolute best time to experience the famous Elephant Gathering. During the hot midday hours, elephants rest in the dense jungle and emerge onto the open reservoir plains as temperatures cool down. Morning safaris (5:30 AM – 9:00 AM) are peaceful, cooler, and ideal for spotting predatory birds, deer, water buffalo, and taking sunrise photographs."
                 },
                 {
-                  q: "How much does a private safari jeep cost?",
-                  a: "Our private jeep safari packages start from $40 per adult and $20 per child. All bookings include an exclusive 4x4 safari jeep hire, licensed experienced driver/tracker, national park entry ticket assistance, and complimentary hotel pickup & drop-off from Habarana, Sigiriya, or Dambulla with no hidden costs."
-                },
-                {
                   q: "How do I book a Minneriya, Kaudulla, Hurulu or Wasgamuwa safari online?",
-                  a: "You can easily book online directly on our website! Simply choose your desired park or package, select your safari date and passenger count, and complete your reservation. You receive instant confirmation and 24/7 WhatsApp assistance from our local Habarana team (+94 778902811)."
-                },
-                {
-                  q: "Do you provide hotel pickup in Habarana, Sigiriya, and Dambulla?",
-                  a: "Yes! Door-to-door hotel pickup and return drop-off is included free of charge for all hotels, villas, and guesthouses in Habarana, Sigiriya, Dambulla, Kandalama, and Minneriya. Our driver will meet you right at your hotel lobby."
+                  a: "You can easily book online directly on our website! Simply choose your desired park or package, select your safari date and passenger count, and complete your reservation. You receive instant confirmation and also you can contact us via website."
                 },
                 {
                   q: "What animals can I see during the safari?",
