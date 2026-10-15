@@ -34,7 +34,7 @@ class BookingController extends Controller
     //                 pickup location, area and status
     public function index(Request $request)
     {
-        $query = Booking::with(['customer', 'package', 'vehicle.driver', 'vehicles.driver']);
+        $query = Booking::with(['customer', 'package', 'vehicle.driver', 'vehicles.driver', 'payment']);
 
         $this->applyPeriodFilter($query, $request);
         $this->applySearchFilter($query, $request);
@@ -158,7 +158,7 @@ class BookingController extends Controller
         }
 
         return response()->json(
-            Booking::with(['package', 'vehicle.driver', 'vehicles.driver'])
+            Booking::with(['package', 'vehicle.driver', 'vehicles.driver', 'payment'])
                 ->where('Customer_ID', $customerId)
                 ->latest()
                 ->get()
@@ -240,7 +240,7 @@ class BookingController extends Controller
     // =========================
     public function show($id)
     {
-        $booking = Booking::with(['customer', 'package', 'vehicle.driver', 'vehicles.driver'])
+        $booking = Booking::with(['customer', 'package', 'vehicle.driver', 'vehicles.driver', 'payment'])
             ->findOrFail($id);
 
         $user = request()->user('sanctum') ?? auth('sanctum')->user();
@@ -262,7 +262,7 @@ class BookingController extends Controller
             'Area' => 'sometimes|required|string|max:100',
         ]);
 
-        $booking = Booking::findOrFail($id);
+        $booking = Booking::with('payment')->findOrFail($id);
 
         $user = request()->user('sanctum') ?? auth('sanctum')->user();
 
@@ -304,6 +304,16 @@ class BookingController extends Controller
 
         $booking->update($request->only($allowedFields));
 
+        // If admin confirms a booking that has a pending payment (e.g. Pay Later collected on tour),
+        // mark the payment as Success.
+        if ($this->isAdmin($user) && $request->input('Status') === 'Confirmed' && $booking->payment && $booking->payment->status === 'Pending') {
+            $booking->payment->update([
+                'status'         => 'Success',
+                'status_code'    => 2,
+                'status_message' => 'Payment collected and confirmed by Admin on tour date',
+            ]);
+        }
+
         // Keep the multi-vehicle pivot in sync whenever the single Vehicle_ID
         // column is changed through this generic endpoint.
         if ($request->has('Vehicle_ID')) {
@@ -313,7 +323,38 @@ class BookingController extends Controller
 
         return response()->json([
             'message' => 'Booking updated successfully',
-            'booking' => $booking
+            'booking' => $booking->fresh(['customer', 'package', 'vehicle.driver', 'vehicles.driver', 'payment'])
+        ]);
+    }
+
+    // =========================
+    // COLLECT PAYMENT ON TOUR (ADMIN)
+    // =========================
+    public function collectPayment(Request $request, $id)
+    {
+        $user = request()->user('sanctum') ?? auth('sanctum')->user();
+        if (!$user || !$this->isAdmin($user)) {
+            return response()->json(['message' => 'Unauthorized: Only administrators can collect payment.'], 403);
+        }
+
+        $booking = Booking::with('payment')->findOrFail($id);
+
+        $booking->update([
+            'Status' => 'Confirmed',
+        ]);
+
+        if ($booking->payment) {
+            $booking->payment->update([
+                'status'         => 'Success',
+                'status_code'    => 2,
+                'status_message' => 'Payment collected by Admin on tour date',
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Payment collected and booking confirmed successfully.',
+            'booking' => $booking->fresh(['customer', 'package', 'vehicle.driver', 'vehicles.driver', 'payment']),
         ]);
     }
 

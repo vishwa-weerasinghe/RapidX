@@ -177,6 +177,7 @@ export default function BookingForm() {
             onChange={handleChange}
             className="form-input mt-1"
           >
+            <option value="Pending">Pending</option>
             <option value="Confirmed">Confirmed</option>
             <option value="Completed">Completed</option>
             <option value="Cancelled">Cancelled</option>

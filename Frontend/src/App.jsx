@@ -1399,7 +1399,7 @@ export default function App() {
                           {isSigiriyaOrPidurangala && (
                             <li className="flex items-center gap-2">
                               <span className="text-red-500 font-bold shrink-0">✗</span>
-                              <span className="text-red-600 dark:text-red-400 font-medium">Extra Entrance Ticket</span>
+                              <span className="text-red-600 dark:text-red-400 font-medium">Rock Entrance Ticket</span>
                             </li>
                           )}
                         </ul>

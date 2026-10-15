@@ -636,4 +636,159 @@ class PayHerePaymentTest extends TestCase
             'Payment'    => 266.00,
         ]);
     }
+
+    public function test_single_booking_initiation_with_pay_later(): void
+    {
+        $package = $this->createPackage();
+
+        $response = $this->postJson('/api/payhere/initiate', [
+            'Booking_Date'    => '2026-09-10',
+            'Pickup_Time'     => '06:00',
+            'Pickup_Location' => 'Hotel Sigiriya',
+            'Area'            => 'Sigiriya',
+            'No_of_adults'    => 2,
+            'No_of_child'     => 0,
+            'Package_ID'      => $package->id,
+            'Payment'         => 310.00, // 2 * 150 + 10 area fee
+            'First_Name'      => 'Alice',
+            'Last_Name'       => 'Smith',
+            'Email'           => 'alice@example.com',
+            'Phone_No'        => '0771122334',
+            'NIC'             => '112233445V',
+            'Country'         => 'United Kingdom',
+            'payment_method'  => 'Pay Later',
+        ]);
+
+        $response->assertStatus(201);
+        $response->assertJson([
+            'success'        => true,
+            'payment_method' => 'Pay Later',
+            'status'         => 'Pending',
+        ]);
+        $this->assertArrayNotHasKey('payhere_params', $response->json());
+
+        $paymentId = $response->json('Payment_ID');
+        $this->assertDatabaseHas('payments', [
+            'Payment_ID'     => $paymentId,
+            'payment_method' => 'Pay Later',
+            'status'         => 'Pending',
+        ]);
+        $this->assertDatabaseHas('bookings', [
+            'Payment_ID' => $paymentId,
+            'Status'     => 'Pending',
+        ]);
+    }
+
+    public function test_cart_checkout_with_pay_later(): void
+    {
+        $customer = $this->createCustomer();
+        $package = $this->createPackage();
+        $booking = $this->createBookingInCart($customer->Customer_ID, $package->id, 160.00);
+
+        $response = $this->postJson('/api/payhere/initiate', [
+            'checkout_type'  => 'cart',
+            'Customer_ID'    => $customer->Customer_ID,
+            'payment_method' => 'Pay Later',
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'success'        => true,
+            'payment_method' => 'Pay Later',
+            'status'         => 'Pending',
+            'bookings_count' => 1,
+        ]);
+
+        $this->assertDatabaseHas('payments', [
+            'Customer_ID'    => $customer->Customer_ID,
+            'payment_method' => 'Pay Later',
+            'status'         => 'Pending',
+        ]);
+
+        $this->assertDatabaseHas('bookings', [
+            'Booking_ID' => $booking->Booking_ID,
+            'Status'     => 'Pending',
+        ]);
+
+        // Cart should be empty
+        $this->assertDatabaseMissing('carts', [
+            'Customer_ID' => $customer->Customer_ID,
+        ]);
+    }
+
+    public function test_confirm_endpoint_rejects_pay_later_orders(): void
+    {
+        $customer = $this->createCustomer();
+        $payment = Payment::create([
+            'order_id'       => 'SAFARI_BK_PAY_LATER_100',
+            'Customer_ID'    => $customer->Customer_ID,
+            'amount'         => 160.00,
+            'currency'       => 'USD',
+            'payment_method' => 'Pay Later',
+            'status'         => 'Pending',
+        ]);
+
+        $response = $this->postJson('/api/payhere/confirm', [
+            'order_id' => $payment->order_id,
+        ]);
+
+        $response->assertStatus(400);
+        $response->assertJson([
+            'success' => false,
+            'status'  => 'Pending',
+        ]);
+    }
+
+    public function test_admin_can_collect_payment_on_tour(): void
+    {
+        $customer = $this->createCustomer();
+        $package = $this->createPackage();
+        $payment = Payment::create([
+            'order_id'       => 'SAFARI_BK_PAY_LATER_200',
+            'Customer_ID'    => $customer->Customer_ID,
+            'amount'         => 160.00,
+            'currency'       => 'USD',
+            'payment_method' => 'Pay Later',
+            'status'         => 'Pending',
+        ]);
+
+        $booking = Booking::create([
+            'Booking_Date'    => '2026-09-20',
+            'Pickup_Time'     => '06:00',
+            'Pickup_Location' => 'Sigiriya',
+            'Area'            => 'Sigiriya',
+            'No_of_adults'    => 1,
+            'No_of_child'     => 0,
+            'Payment'         => 160.00,
+            'Status'          => 'Pending',
+            'Customer_ID'     => $customer->Customer_ID,
+            'Package_ID'      => $package->id,
+            'Payment_ID'      => $payment->Payment_ID,
+        ]);
+
+        $admin = \App\Models\User::create([
+            'User_Name' => 'Admin Manager',
+            'Email'     => 'admin_mgr@example.com',
+            'Password'  => bcrypt('secret123'),
+            'role'      => 'admin',
+        ]);
+
+        $response = $this->actingAs($admin, 'sanctum')
+            ->postJson("/api/bookings/{$booking->Booking_ID}/collect-payment");
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'success' => true,
+        ]);
+
+        $this->assertDatabaseHas('bookings', [
+            'Booking_ID' => $booking->Booking_ID,
+            'Status'     => 'Confirmed',
+        ]);
+
+        $this->assertDatabaseHas('payments', [
+            'Payment_ID' => $payment->Payment_ID,
+            'status'     => 'Success',
+        ]);
+    }
 }

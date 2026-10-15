@@ -29,6 +29,8 @@ import {
     Info,
     Compass,
     Loader2,
+    CreditCard,
+    Clock3,
 } from "lucide-react";
 
 export default function Booking() {
@@ -69,6 +71,7 @@ export default function Booking() {
     const isEditMode = Boolean(bookingId);
     const [originalForm, setOriginalForm] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [paymentMethod, setPaymentMethod] = useState("PayHere");
 
     // Country and phone number states matching register form
     const [countryCode, setCountryCode] = useState("");
@@ -417,10 +420,18 @@ export default function Booking() {
             payload.Phone_No = fullPhone;
         }
 
+        payload.payment_method = paymentMethod;
+
         setIsSubmitting(true);
 
         try {
             const res = await api.post("/payhere/initiate", payload);
+
+            if (res.data?.payment_method === "Pay Later" || paymentMethod === "Pay Later") {
+                navigate(`/payment/success?order_id=${res.data.order_id}`);
+                return;
+            }
+
             const { payhere_params } = res.data;
 
             if (payhere_params) {
@@ -907,6 +918,100 @@ export default function Booking() {
                                 </div>
                             </div>
 
+                            {/* Section 4: Payment Method Selection */}
+                            {!isEditMode && (
+                                <div className="space-y-3.5 sm:space-y-4 pt-1 sm:pt-2">
+                                    <div className="flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-800/40">
+                                        <CreditCard size={16} className="text-castleton shrink-0" />
+                                        <h4 className="text-xs font-extrabold uppercase tracking-widest text-slate-400">
+                                            4. Payment Method
+                                        </h4>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                                        {/* Pay Online with PayHere */}
+                                        <div
+                                            onClick={() => setPaymentMethod("PayHere")}
+                                            className={`cursor-pointer rounded-2xl p-4 border-2 transition-all duration-200 relative ${paymentMethod === "PayHere"
+                                                    ? "border-sacramento bg-sacramento/5 dark:bg-sacramento/10 shadow-sm"
+                                                    : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900"
+                                                }`}
+                                        >
+                                            <div className="flex items-start justify-between">
+                                                <div className="flex items-center gap-2.5">
+                                                    <div className={`p-2 rounded-xl ${paymentMethod === "PayHere" ? "bg-sacramento text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"}`}>
+                                                        <CreditCard size={18} />
+                                                    </div>
+                                                    <div>
+                                                        <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white block">
+                                                            Pay Online
+                                                        </span>
+                                                        <span className="text-[10px] text-slate-500 dark:text-slate-400">
+                                                            Card / PayHere Gateway
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${paymentMethod === "PayHere" ? "border-sacramento" : "border-slate-300 dark:border-slate-600"}`}>
+                                                    {paymentMethod === "PayHere" && <div className="w-2 h-2 rounded-full bg-sacramento"></div>}
+                                                </div>
+                                            </div>
+                                            <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                                                Instant online confirmation. Pay securely via Visa, MasterCard, or online banking.
+                                            </p>
+                                            <div className="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800/80">
+                                                <img
+                                                    src="/payhere-cards.png"
+                                                    alt="Accepted Cards: LankaPay, Visa, Mastercard, American Express, Discover, Diners Club"
+                                                    className="w-full max-w-[290px] h-auto object-contain rounded-md"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Pay Later */}
+                                        <div
+                                            onClick={() => setPaymentMethod("Pay Later")}
+                                            className={`cursor-pointer rounded-2xl p-4 border-2 transition-all duration-200 relative ${paymentMethod === "Pay Later"
+                                                    ? "border-amber-500 bg-amber-50/50 dark:bg-amber-950/20 shadow-sm"
+                                                    : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900"
+                                                }`}
+                                        >
+                                            <div className="flex items-start justify-between">
+                                                <div className="flex items-center gap-2.5">
+                                                    <div className={`p-2 rounded-xl ${paymentMethod === "Pay Later" ? "bg-amber-500 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"}`}>
+                                                        <Clock3 size={18} />
+                                                    </div>
+                                                    <div>
+                                                        <div className="flex items-center gap-1.5">
+                                                            <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white block">
+                                                                Pay Later
+                                                            </span>
+                                                        </div>
+                                                        <span className="text-[10px] text-slate-500 dark:text-slate-400">
+                                                            Pay near tour date
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${paymentMethod === "Pay Later" ? "border-amber-500" : "border-slate-300 dark:border-slate-600"}`}>
+                                                    {paymentMethod === "Pay Later" && <div className="w-2 h-2 rounded-full bg-amber-500"></div>}
+                                                </div>
+                                            </div>
+                                            <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                                                Reserve now without paying upfront. Our admin will collect payment near the tour date.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {paymentMethod === "Pay Later" && (
+                                        <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 text-amber-800 dark:text-amber-300 text-[11px] leading-relaxed flex items-start gap-2">
+                                            <Info size={15} className="shrink-0 mt-0.5" />
+                                            <span>
+                                                Confirmation emails with reservation details will be sent immediately. Booking status will be set to <strong>Pending</strong>, and our admin will take payment at the near date on your tour.
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
                             {/* Bill Details Summary */}
                             {pkg && (
                                 <div className="bg-castleton/5 dark:bg-sacramento-900/10 border border-castleton/20 dark:border-castleton/10 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 shadow-sm">
@@ -916,11 +1021,15 @@ export default function Booking() {
                                         </div>
                                         <div>
                                             <p className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">
-                                                Total Reservation Cost
+                                                {paymentMethod === "Pay Later" ? "Total Due on Tour Date" : "Total Reservation Cost"}
                                             </p>
                                             <p className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-0.5 tracking-tight">
                                                 $ {new Intl.NumberFormat().format(getFinalTotal())}
                                             </p>
+                                            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100/90 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800/80 px-2.5 py-0.5 rounded-full mt-1.5">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                                No Hidden Charges
+                                            </span>
                                         </div>
                                     </div>
                                     <div className="w-full sm:w-auto pt-2.5 sm:pt-0 border-t sm:border-t-0 border-castleton/10 dark:border-castleton/20 text-left sm:text-right text-[11px] font-bold text-slate-500 dark:text-slate-400 space-y-0.5">
@@ -938,8 +1047,11 @@ export default function Booking() {
                             {/* Submit & Cart Action */}
                             <button
                                 type="submit"
-                                disabled={!selectedPackageId || isSubmitting}
-                                className="w-full min-h-[48px] bg-sacramento hover:bg-sacramento-600 disabled:bg-slate-300 dark:disabled:bg-slate-800 disabled:text-slate-300 disabled:cursor-not-allowed text-white font-extrabold text-xs sm:text-sm uppercase py-3.5 sm:py-4 px-4 rounded-xl shadow-lg shadow-sacramento/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2 group cursor-pointer"
+                                disabled={isSubmitting}
+                                className={`w-full min-h-[48px] ${paymentMethod === "Pay Later" && !isEditMode
+                                        ? "bg-amber-600 hover:bg-amber-700 shadow-amber-600/20"
+                                        : "bg-sacramento hover:bg-sacramento-600 shadow-sacramento/20"
+                                    } disabled:opacity-60 disabled:cursor-not-allowed text-white font-extrabold text-xs sm:text-sm uppercase py-3.5 sm:py-4 px-4 rounded-xl shadow-lg active:scale-[0.99] transition-all flex items-center justify-center gap-2 group cursor-pointer`}
                             >
                                 {isSubmitting ? (
                                     <>
@@ -953,8 +1065,12 @@ export default function Booking() {
                                             {isEditMode
                                                 ? "Update Booking"
                                                 : pkg
-                                                    ? `Confirm & Pay • $ ${new Intl.NumberFormat().format(getFinalTotal())}`
-                                                    : "Select a Package to Continue"}
+                                                    ? paymentMethod === "Pay Later"
+                                                        ? `Confirm & Reserve (Pay Later) • $ ${new Intl.NumberFormat().format(getFinalTotal())}`
+                                                        : `Confirm & Pay • $ ${new Intl.NumberFormat().format(getFinalTotal())}`
+                                                    : paymentMethod === "Pay Later"
+                                                        ? "Select a Package to Reserve (Pay Later)"
+                                                        : "Select a Package to Continue"}
                                         </span>
                                     </>
                                 )}

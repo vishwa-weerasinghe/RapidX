@@ -134,10 +134,13 @@ export default function MyBookings() {
   });
 
   // Status styling
-  const statusClass = (status) =>
-    status?.toLowerCase() === "cancelled"
-      ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300"
-      : "bg-sacramento/10 text-sacramento";
+  const statusClass = (status) => {
+    const s = status?.toLowerCase();
+    if (s === "cancelled") return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300";
+    if (s === "pending") return "bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-400";
+    if (s === "confirmed") return "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300";
+    return "bg-sacramento/10 text-sacramento";
+  };
 
   // Loading
   if (loading) {
@@ -395,9 +398,16 @@ export default function MyBookings() {
                     <div className="mt-4 flex items-center justify-between rounded-xl bg-sacramento/10 px-4 py-3">
 
                       <div>
-                        <p className="text-xs font-medium text-muted">
-                          Total Payment
-                        </p>
+                        <div className="flex items-center gap-1.5">
+                          <p className="text-xs font-medium text-muted">
+                            Total Payment
+                          </p>
+                          {booking.payment?.payment_method === "Pay Later" && (
+                            <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-200/70 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300">
+                              Pay Later
+                            </span>
+                          )}
+                        </div>
 
                         <p className="mt-0.5 text-xl font-extrabold text-sacramento">
                           $ {booking.Payment || "0.00"}
@@ -540,7 +550,16 @@ export default function MyBookings() {
                       </td>
 
                       <td className="p-3 text-right text-charcoal dark:text-white">
-                        $ {booking.Payment}
+                        <div className="font-bold">$ {booking.Payment}</div>
+                        {booking.payment?.payment_method === "Pay Later" ? (
+                          <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300">
+                            Pay Later
+                          </span>
+                        ) : (
+                          <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300">
+                            {booking.payment?.payment_method || "Paid"}
+                          </span>
+                        )}
                       </td>
 
                       <td className="p-3 text-center">
