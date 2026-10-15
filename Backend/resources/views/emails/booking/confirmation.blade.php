@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $isAdminCopy ? 'New Booking Received - Order #' . $payment->order_id : 'Safari Booking Confirmation - Order #' . $payment->order_id }}</title>
+    <title>{{ $isAdminCopy ? ($payment->payment_method === 'Pay Later' ? 'New Pay Later Booking Received - Order #' . $payment->order_id : 'New Booking Received - Order #' . $payment->order_id) : ($payment->payment_method === 'Pay Later' ? 'Safari Reservation Confirmed (Pay Later) - Order #' . $payment->order_id : 'Safari Booking Confirmation - Order #' . $payment->order_id) }}</title>
 </head>
 <body style="margin: 0; padding: 0; background-color: #f3f6f4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; color: #243329;">
 
@@ -27,13 +27,25 @@
                             <!-- Status Badge -->
                             <div style="margin-top: 20px;">
                                 @if($isAdminCopy)
-                                    <span style="display: inline-block; background-color: rgba(234, 179, 8, 0.2); border: 1px solid #eab308; color: #fef08a; padding: 6px 16px; border-radius: 9999px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
-                                        🔔 Admin Notification • New Booking
-                                    </span>
+                                    @if($payment->payment_method === 'Pay Later')
+                                        <span style="display: inline-block; background-color: rgba(234, 179, 8, 0.2); border: 1px solid #eab308; color: #fef08a; padding: 6px 16px; border-radius: 9999px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
+                                            🔔 Admin Notification • Pay Later (Pending Payment)
+                                        </span>
+                                    @else
+                                        <span style="display: inline-block; background-color: rgba(234, 179, 8, 0.2); border: 1px solid #eab308; color: #fef08a; padding: 6px 16px; border-radius: 9999px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
+                                            🔔 Admin Notification • New Booking
+                                        </span>
+                                    @endif
                                 @else
-                                    <span style="display: inline-block; background-color: rgba(34, 197, 94, 0.2); border: 1px solid #22c55e; color: #86efac; padding: 6px 18px; border-radius: 9999px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
-                                        ✓ Booking Confirmed & Paid
-                                    </span>
+                                    @if($payment->payment_method === 'Pay Later')
+                                        <span style="display: inline-block; background-color: rgba(245, 158, 11, 0.2); border: 1px solid #f59e0b; color: #fde68a; padding: 6px 18px; border-radius: 9999px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
+                                            ⏳ Booking Reserved • Pay Later on Tour Date
+                                        </span>
+                                    @else
+                                        <span style="display: inline-block; background-color: rgba(34, 197, 94, 0.2); border: 1px solid #22c55e; color: #86efac; padding: 6px 18px; border-radius: 9999px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
+                                            ✓ Booking Confirmed & Paid
+                                        </span>
+                                    @endif
                                 @endif
                             </div>
                         </td>
@@ -43,19 +55,34 @@
                     <tr>
                         <td style="padding: 36px 32px 28px 32px;">
                             @if($isAdminCopy)
-                                <h2 style="margin: 0 0 12px 0; font-size: 20px; font-weight: 700; color: #153825;">
-                                    New Safari Reservation Received
-                                </h2>
-                                <p style="margin: 0 0 24px 0; font-size: 15px; line-height: 1.6; color: #4a5e51;">
-                                    A new safari reservation has been successfully booked and paid online by <strong>{{ $payment->customer->First_Name ?? 'Guest' }} {{ $payment->customer->Last_Name ?? '' }}</strong>.
-                                </p>
+                                @if($payment->payment_method === 'Pay Later')
+                                    <h2 style="margin: 0 0 12px 0; font-size: 20px; font-weight: 700; color: #153825;">
+                                        New "Pay Later" Safari Reservation Received
+                                    </h2>
+                                    <p style="margin: 0 0 24px 0; font-size: 15px; line-height: 1.6; color: #4a5e51;">
+                                        A new safari reservation has been placed by <strong>{{ $payment->customer->First_Name ?? 'Guest' }} {{ $payment->customer->Last_Name ?? '' }}</strong> with <strong>Pay Later</strong>. The booking status is <strong>Pending</strong>, and payment should be collected on or near the tour date.
+                                    </p>
+                                @else
+                                    <h2 style="margin: 0 0 12px 0; font-size: 20px; font-weight: 700; color: #153825;">
+                                        New Safari Reservation Received
+                                    </h2>
+                                    <p style="margin: 0 0 24px 0; font-size: 15px; line-height: 1.6; color: #4a5e51;">
+                                        A new safari reservation has been successfully booked and paid online by <strong>{{ $payment->customer->First_Name ?? 'Guest' }} {{ $payment->customer->Last_Name ?? '' }}</strong>.
+                                    </p>
+                                @endif
                             @else
                                 <h2 style="margin: 0 0 12px 0; font-size: 20px; font-weight: 700; color: #153825;">
                                     Ayubowan, {{ $payment->customer->First_Name ?? 'Valued Guest' }}! 🌿
                                 </h2>
-                                <p style="margin: 0 0 24px 0; font-size: 15px; line-height: 1.6; color: #4a5e51;">
-                                    Thank you for booking your wildlife safari adventure with us! Your payment has been successfully processed, and your safari tour is now <strong>fully confirmed</strong>.
-                                </p>
+                                @if($payment->payment_method === 'Pay Later')
+                                    <p style="margin: 0 0 24px 0; font-size: 15px; line-height: 1.6; color: #4a5e51;">
+                                        Thank you for reserving your wildlife safari adventure with us! Your reservation is placed with <strong>Pay Later</strong>. Your safari slot is held with <strong>Pending status</strong>, and your payment will be collected by our safari team at or near the date of your tour.
+                                    </p>
+                                @else
+                                    <p style="margin: 0 0 24px 0; font-size: 15px; line-height: 1.6; color: #4a5e51;">
+                                        Thank you for booking your wildlife safari adventure with us! Your payment has been successfully processed, and your safari tour is now <strong>fully confirmed</strong>.
+                                    </p>
+                                @endif
                             @endif
 
                             <!-- Key Details Highlight Grid -->
@@ -66,20 +93,26 @@
                                         <div style="font-size: 15px; font-weight: 700; color: #153825; margin-top: 3px; font-family: monospace;">{{ $payment->order_id }}</div>
                                     </td>
                                     <td style="padding: 16px 20px; border-bottom: 1px solid #e1eade; width: 50%;">
-                                        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #6b8273; letter-spacing: 0.5px;">Payment Reference</div>
-                                        <div style="font-size: 15px; font-weight: 700; color: #153825; margin-top: 3px; font-family: monospace;">{{ $payment->payhere_payment_id ?? 'Approved' }}</div>
+                                        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #6b8273; letter-spacing: 0.5px;">Payment Method</div>
+                                        <div style="font-size: 15px; font-weight: 700; color: #153825; margin-top: 3px; font-family: monospace;">{{ $payment->payment_method ?? 'PayHere' }}</div>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td style="padding: 16px 20px; width: 50%;">
-                                        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #6b8273; letter-spacing: 0.5px;">Total Amount Paid</div>
+                                        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #6b8273; letter-spacing: 0.5px;">{{ $payment->payment_method === 'Pay Later' ? 'Total Amount Due' : 'Total Amount Paid' }}</div>
                                         <div style="font-size: 18px; font-weight: 800; color: #1e7e34; margin-top: 2px;">$ {{ number_format($payment->amount, 2) }}</div>
                                     </td>
                                     <td style="padding: 16px 20px; width: 50%;">
                                         <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #6b8273; letter-spacing: 0.5px;">Payment Status</div>
-                                        <div style="font-size: 14px; font-weight: 700; color: #15803d; margin-top: 3px;">
-                                            ● Completed & Verified
-                                        </div>
+                                        @if($payment->payment_method === 'Pay Later' && $payment->status === 'Pending')
+                                            <div style="font-size: 14px; font-weight: 700; color: #d97706; margin-top: 3px;">
+                                                ⏳ Pending • Pay on Tour Date
+                                            </div>
+                                        @else
+                                            <div style="font-size: 14px; font-weight: 700; color: #15803d; margin-top: 3px;">
+                                                ● {{ $payment->status ?? 'Completed & Verified' }}
+                                            </div>
+                                        @endif
                                     </td>
                                 </tr>
                             </table>
@@ -167,6 +200,11 @@
                                         <li>Please be ready at your pickup location <strong>15 minutes prior</strong> to scheduled departure.</li>
                                         <li>Bring comfortable clothing, hats, sunscreen, and your cameras or binoculars.</li>
                                         <li>National Park entrance fees and professional safari jeep driver are fully included.</li>
+                                        @if($payment->payment_method === 'Pay Later')
+                                            <li style="margin-top: 6px; color: #b45309; font-weight: 600;">
+                                                💵 <strong>Pay on Tour:</strong> Please have <strong>$ {{ number_format($payment->amount, 2) }}</strong> ready (cash USD/LKR or card) for our safari team on the day of your safari.
+                                            </li>
+                                        @endif
                                     </ul>
                                 </div>
                             @endif

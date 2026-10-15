@@ -36,8 +36,8 @@ export default function PaymentSuccess() {
             // Fetch actual payment status verified by backend
             let res = await api.get(`/payhere/status/${orderId}`);
 
-            // If still marked as pending, confirm payment from client completion
-            if (res.data?.status === "Pending") {
+            // If still marked as pending and NOT Pay Later, confirm payment from client completion
+            if (res.data?.status === "Pending" && res.data?.payment_method !== "Pay Later") {
                 try {
                     const confirmRes = await api.post("/payhere/confirm", { order_id: orderId });
                     if (confirmRes.data?.payment) {
@@ -65,6 +65,7 @@ export default function PaymentSuccess() {
     }, [orderId]);
 
     const isDark = theme === "dark";
+    const isPayLater = payment?.payment_method === "Pay Later";
     const isSuccess = payment?.status === "Success";
     const isPending = payment?.status === "Pending";
     const isFailed = payment?.status === "Failed" || payment?.status === "Cancelled";
@@ -73,12 +74,31 @@ export default function PaymentSuccess() {
         <div className={`min-h-screen py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center transition-colors duration-300 ${isDark ? "bg-slate-950 text-slate-100" : "bg-gradient-to-br from-emerald-50 via-teal-50 to-slate-100 text-slate-900"
             }`}>
             <div className={`max-w-2xl w-full rounded-2xl p-8 sm:p-10 shadow-2xl border transition-all ${isDark
-                    ? "bg-slate-900/90 border-slate-800 backdrop-blur-xl"
-                    : "bg-white/95 border-emerald-100 backdrop-blur-xl"
+                ? "bg-slate-900/90 border-slate-800 backdrop-blur-xl"
+                : "bg-white/95 border-emerald-100 backdrop-blur-xl"
                 }`}>
                 {/* Header based on status */}
                 <div className="text-center">
-                    {isSuccess ? (
+                    {isPayLater ? (
+                        <>
+                            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 mb-6 shadow-inner ring-8 ring-amber-50 dark:ring-amber-900/20">
+                                <CheckCircle2 className="w-12 h-12 text-amber-600 dark:text-amber-400" />
+                            </div>
+                            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+                                Safari Reserved • Pay Later
+                            </h1>
+                            <p className="mt-2 text-sm sm:text-base text-slate-500 dark:text-slate-400">
+                                Your booking is placed with Pay Later. Confirmation emails have been sent to your email.
+                            </p>
+                            <div className="mt-4 p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 text-amber-800 dark:text-amber-300 text-xs sm:text-sm leading-relaxed text-left flex items-start gap-2.5">
+                                <Clock className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                                <div>
+                                    <span className="font-bold block">Status: Pending Payment</span>
+                                    <span>No payment was charged today. Our team will collect the payment near or on the date of your tour.</span>
+                                </div>
+                            </div>
+                        </>
+                    ) : isSuccess ? (
                         <>
                             <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 mb-6 shadow-inner ring-8 ring-emerald-50 dark:ring-emerald-900/20 animate-bounce">
                                 <CheckCircle2 className="w-12 h-12" />
@@ -148,12 +168,12 @@ export default function PaymentSuccess() {
                                 <div>
                                     <span className="text-xs text-slate-500 block">Payment Status</span>
                                     <span className={`font-bold text-xs px-2 py-0.5 rounded-full inline-block mt-0.5 ${isSuccess
-                                            ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
-                                            : isPending
-                                                ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
-                                                : "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300"
+                                        ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+                                        : isPending
+                                            ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+                                            : "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300"
                                         }`}>
-                                        {payment?.status || "Unknown"}
+                                        {isPayLater && isPending ? "Pending" : (payment?.status || "Unknown")}
                                     </span>
                                 </div>
                                 <div className="col-span-2 sm:col-span-1">
@@ -177,8 +197,8 @@ export default function PaymentSuccess() {
                                         <div className="font-bold text-slate-900 dark:text-slate-100 flex items-center justify-between">
                                             <span>{b.package?.Package_Name || "Wild Safari Tour"}</span>
                                             <span className={`text-xs px-2.5 py-0.5 rounded-full font-medium ${b.Status === "Confirmed"
-                                                    ? "bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300"
-                                                    : "bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300"
+                                                ? "bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300"
+                                                : "bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300"
                                                 }`}>
                                                 {b.Status || "Pending"}
                                             </span>

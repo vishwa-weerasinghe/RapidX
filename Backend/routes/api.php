@@ -94,6 +94,9 @@ Route::post('/bookings', [BookingController::class, 'store']);
 Route::put('/bookings/{id}', [BookingController::class, 'update'])
     ->middleware('auth:sanctum');
 
+Route::post('/bookings/{id}/collect-payment', [BookingController::class, 'collectPayment'])
+    ->middleware('auth:sanctum');
+
 Route::put('/bookings/{id}/vehicle', [BookingController::class, 'assignVehicle'])
     ->middleware('auth:sanctum');
 

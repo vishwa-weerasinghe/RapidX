@@ -93,6 +93,9 @@ class PayHereController extends Controller
 
             $currency = config('payhere.currency', 'USD');
 
+            $isPayLater = strcasecmp((string) $request->input('payment_method', 'PayHere'), 'Pay Later') === 0;
+            $paymentMethod = $isPayLater ? 'Pay Later' : 'PayHere';
+
             // Unique Order Reference
             $orderId = 'SAFARI_BK_' . time() . '_' . rand(100, 999);
 
@@ -102,8 +105,9 @@ class PayHereController extends Controller
                 'Customer_ID'    => $customerId,
                 'amount'         => $amount,
                 'currency'       => $currency,
-                'payment_method' => 'PayHere',
+                'payment_method' => $paymentMethod,
                 'status'         => 'Pending',
+                'status_message' => $isPayLater ? 'Pay Later on Tour Date' : 'Pending Payment Initiation',
             ]);
 
             // Create Booking Record (Pending) linked to Payment
@@ -123,8 +127,25 @@ class PayHereController extends Controller
                 'Admin_Seen'      => false,
                 'Admin_Message'  => $request->boolean('Created_By_Admin')
                     ? 'New booking successfully placed by you.'
-                    : 'A new booking has been placed by a customer.',
+                    : ($isPayLater
+                        ? 'A new "Pay Later" booking has been placed by a customer. Payment pending on tour date.'
+                        : 'A new booking has been placed by a customer.'),
             ]);
+
+            if ($isPayLater) {
+                // Send confirmation emails immediately
+                $this->sendConfirmationEmails($payment);
+
+                return response()->json([
+                    'success'        => true,
+                    'payment_method' => 'Pay Later',
+                    'order_id'       => $orderId,
+                    'Payment_ID'     => $payment->Payment_ID,
+                    'Booking_ID'     => $booking->Booking_ID,
+                    'status'         => 'Pending',
+                    'message'        => 'Booking reserved successfully with Pay Later. Confirmation emails sent.',
+                ], 201);
+            }
 
             $payHereParams = $this->payHereService->prepareCheckoutPayload(
                 $orderId,
@@ -205,8 +226,10 @@ class PayHereController extends Controller
         }
 
         $currency = config('payhere.currency', 'USD');
+        $isPayLater = strcasecmp((string) $request->input('payment_method', 'PayHere'), 'Pay Later') === 0;
+        $paymentMethod = $isPayLater ? 'Pay Later' : 'PayHere';
 
-        return DB::transaction(function () use ($customerId, $customer, $bookings, $totalAmount, $currency) {
+        return DB::transaction(function () use ($customerId, $customer, $bookings, $totalAmount, $currency, $isPayLater, $paymentMethod) {
             $orderId = 'SAFARI_CART_' . $customerId . '_' . time() . '_' . rand(100, 999);
 
             // Create 1 parent Payment record for all bookings in this cart
@@ -215,15 +238,34 @@ class PayHereController extends Controller
                 'Customer_ID'    => $customerId,
                 'amount'         => $totalAmount,
                 'currency'       => $currency,
-                'payment_method' => 'PayHere',
+                'payment_method' => $paymentMethod,
                 'status'         => 'Pending',
+                'status_message' => $isPayLater ? 'Pay Later on Tour Date' : 'Pending Payment Initiation',
             ]);
 
             // Link all bookings to this Payment_ID
             Booking::whereIn('Booking_ID', $bookings->pluck('Booking_ID'))->update([
                 'Payment_ID' => $payment->Payment_ID,
-                'Status'     => 'In Cart',
+                'Status'     => 'Pending',
             ]);
+
+            if ($isPayLater) {
+                // Remove from cart
+                Cart::where('Customer_ID', $customerId)->delete();
+
+                // Send confirmation emails
+                $this->sendConfirmationEmails($payment);
+
+                return response()->json([
+                    'success'        => true,
+                    'payment_method' => 'Pay Later',
+                    'order_id'       => $orderId,
+                    'Payment_ID'     => $payment->Payment_ID,
+                    'bookings_count' => $bookings->count(),
+                    'status'         => 'Pending',
+                    'message'        => 'Cart bookings reserved successfully with Pay Later. Confirmation emails sent.',
+                ], 200);
+            }
 
             $payHereParams = $this->payHereService->prepareCheckoutPayload(
                 $orderId,
@@ -356,6 +398,17 @@ class PayHereController extends Controller
             }
         }
 
+        // Pay Later orders cannot be confirmed through PayHere gateway confirmation
+        if ($payment->payment_method === 'Pay Later') {
+            return response()->json([
+                'success'  => false,
+                'message'  => 'Pay Later orders must be collected and confirmed by an administrator.',
+                'order_id' => $payment->order_id,
+                'status'   => $payment->status,
+                'payment'  => $payment,
+            ], 400);
+        }
+
         // 1. If already marked Success by PayHere signed IPN webhook, return confirmed
         if ($payment->status === 'Success') {
             return response()->json([
@@ -482,12 +535,20 @@ class PayHereController extends Controller
         try {
             $payment->loadMissing(['customer', 'bookings.package']);
 
+            $isPayLater = ($payment->payment_method === 'Pay Later');
+            $subjectCustomer = $isPayLater
+                ? 'Safari Reservation (Pay Later) - Order #' . $payment->order_id
+                : 'Booking Confirmation - Order #' . $payment->order_id;
+            $subjectAdmin = $isPayLater
+                ? '[ADMIN NOTIFICATION] New Pay Later Booking - Order #' . $payment->order_id
+                : '[ADMIN NOTIFICATION] Booking Confirmation - Order #' . $payment->order_id;
+
             // Send to Customer
             if ($payment->customer && $payment->customer->Email) {
                 $htmlContent = (new BookingConfirmationMail($payment, false))->render();
                 \App\Services\BrevoMailService::send(
                     $payment->customer->Email,
-                    'Booking Confirmation - Order #' . $payment->order_id,
+                    $subjectCustomer,
                     $htmlContent,
                     $payment->customer->Name ?? null
                 );
@@ -499,7 +560,7 @@ class PayHereController extends Controller
                 $htmlContentAdmin = (new BookingConfirmationMail($payment, true))->render();
                 \App\Services\BrevoMailService::send(
                     $adminEmail,
-                    '[ADMIN NOTIFICATION] Booking Confirmation - Order #' . $payment->order_id,
+                    $subjectAdmin,
                     $htmlContentAdmin,
                     'Admin'
                 );

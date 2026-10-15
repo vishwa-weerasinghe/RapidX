@@ -358,6 +358,25 @@ export default function Bookings() {
     }
   };
 
+  const handleCollectPayment = async (booking) => {
+    const customerName = booking.customer
+      ? `${booking.customer.First_Name} ${booking.customer.Last_Name}`
+      : "Guest";
+    const confirmed = window.confirm(
+      `Collect payment of $${booking.Payment} for Booking #${booking.Booking_ID} (${customerName}) and mark this booking as Confirmed?`
+    );
+    if (!confirmed) return;
+
+    try {
+      const res = await api.post(`/bookings/${booking.Booking_ID}/collect-payment`);
+      alert(res.data?.message || "Payment collected and booking confirmed!");
+      fetchData();
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || "Failed to collect payment.");
+    }
+  };
+
   const handleEdit = (booking) => {
     navigate("/booking", {
       state: { bookingId: booking.Booking_ID },
@@ -1092,9 +1111,32 @@ export default function Bookings() {
                   <td className="px-4 py-3 text-charcoal/80 dark:text-white/80">{booking.Pickup_Location}</td>
                   <td className="px-4 py-3 text-center text-charcoal/80 dark:text-white/80">{booking.No_of_adults}</td>
                   <td className="px-4 py-3 text-center text-charcoal/80 dark:text-white/80">{booking.No_of_child}</td>
-                  <td className="px-4 py-3 text-right text-charcoal dark:text-white">$ {booking.Payment}</td>
+                  <td className="px-4 py-3 text-right">
+                    <div className="font-bold text-charcoal dark:text-white">$ {booking.Payment}</div>
+                    <div className="mt-0.5">
+                      {booking.payment?.payment_method === "Pay Later" ? (
+                        <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/50">
+                          Pay Later
+                        </span>
+                      ) : (
+                        <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/50">
+                          {booking.payment?.payment_method || "Online"}
+                        </span>
+                      )}
+                    </div>
+                  </td>
                   <td className="px-4 py-3 text-center">
-                    <span className="rounded-full bg-amber-100 px-3 py-1 text-sm font-semibold text-amber-700 dark:bg-amber-950/40 dark:text-amber-400">
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs font-bold inline-block ${
+                        booking.Status?.toLowerCase() === "confirmed"
+                          ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300"
+                          : booking.Status?.toLowerCase() === "pending"
+                          ? "bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300"
+                          : booking.Status?.toLowerCase() === "cancelled"
+                          ? "bg-rose-100 text-rose-800 dark:bg-rose-950/50 dark:text-rose-300"
+                          : "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200"
+                      }`}
+                    >
                       {booking.Status}
                     </span>
                   </td>
@@ -1150,7 +1192,17 @@ export default function Bookings() {
                       return driverNames.length > 0 ? driverNames.join(", ") : "—";
                     })()}
                   </td>
-                  <td className="px-4 py-3 text-center">
+                  <td className="px-4 py-3 text-center whitespace-nowrap">
+                    {booking.Status?.toLowerCase() === "pending" && (
+                      <button
+                        type="button"
+                        onClick={() => handleCollectPayment(booking)}
+                        className="mr-3 font-semibold text-xs px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition shadow-sm cursor-pointer"
+                        title="Collect payment and confirm booking"
+                      >
+                        Collect Payment
+                      </button>
+                    )}
                     <button onClick={() => handleEdit(booking)} className="text-sacramento hover:underline">
                       Edit
                     </button>
