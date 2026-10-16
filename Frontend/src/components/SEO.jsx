@@ -19,9 +19,9 @@ import { useEffect } from "react";
  */
 
 const SITE_NAME = "Minneriya Wild Jeep Safari";
-const DEFAULT_TITLE = `Online Safari Booking Sri Lanka | Minneriya, Kaudulla & Wasgamuwa Jeep Tours`;
+const DEFAULT_TITLE = `Minneriya Jeep Safari | Official Tours & Booking Sri Lanka`;
 const DEFAULT_DESCRIPTION =
-  "Book trusted Sri Lanka jeep safaris online. Experience the famous Minneriya Elephant Gathering, Kaudulla & Wasgamuwa with experienced local drivers. Instant booking & best rates.";
+  "Book official Minneriya jeep safari online. Experience the famous Minneriya Elephant Gathering, Kaudulla, Hurulu Eco Park & Wasgamuwa with licensed local drivers & best rates.";
 const DEFAULT_OG_IMAGE = "https://www.minneriyawildjeepsafari.com/og-safari.jpg";
 const BASE_URL = "https://www.minneriyawildjeepsafari.com";
 
