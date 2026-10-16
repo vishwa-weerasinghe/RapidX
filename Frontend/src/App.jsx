@@ -761,7 +761,7 @@ export default function App() {
   return (
     <>
       <SEO
-        title="Minneriya Jeep Safari &amp; Tours | Prices &amp; Online Booking Sri Lanka"
+        title="Minneriya Jeep Safari &amp; Tours | Best Prices &amp; Online Booking Sri Lanka"
         description="Book official Minneriya jeep safari online. Experience the famous Minneriya Elephant Gathering, Kaudulla, Hurulu &amp; Wasgamuwa with best rates, prices &amp; certified drivers."
         keywords="minneriya jeep safari, minneriya safari, minneriya safari price, minneriya national park jeep safari price, minneriya jeep safari &amp; tours, minneriya national park safari, minneriya elephant gathering, sri lanka jeep safari, kaudulla jeep safari, hurulu eco park safari, wasgamuwa safari"
         canonical="https://www.minneriyawildjeepsafari.com"
@@ -1326,6 +1326,10 @@ export default function App() {
                     sectionLower.includes("sigiriya") ||
                     sectionLower.includes("pidurangala");
 
+                  const isPolonnaruwa =
+                    nameLower.includes("polonnaruwa") ||
+                    sectionLower.includes("polonnaruwa");
+
                   return (
                     <div
                       key={idx}
@@ -1400,6 +1404,13 @@ export default function App() {
                             <li className="flex items-center gap-2">
                               <span className="text-red-500 font-bold shrink-0">✗</span>
                               <span className="text-red-600 dark:text-red-400 font-medium">Rock Entrance Ticket</span>
+                            </li>
+                          )}
+
+                          {isPolonnaruwa && (
+                            <li className="flex items-center gap-2">
+                              <span className="text-green-600 shrink-0">✓</span>
+                              <span>Sri Lankan Buffet Lunch</span>
                             </li>
                           )}
                         </ul>
