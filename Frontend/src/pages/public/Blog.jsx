@@ -1120,40 +1120,40 @@ export default function Blog({ defaultPark }) {
   const seoDetails = (() => {
     if (effectivePark === "minneriya") {
       return {
-        title: "Minneriya Safari & Jeep Tours Sri Lanka | Elephant Gathering Booking",
-        description: "Book your Minneriya safari jeep tour. Witness the famous Sri Lanka Elephant Gathering in Minneriya National Park with licensed local drivers and best rates.",
-        keywords: "minneriya safari, minneriya jeep safari, minneriya elephant gathering, minneriya national park safari booking, sri lanka jeep safari, habarana safari",
+        title: "Minneriya Jeep Safari - Morning & Evening Tours | Online Booking",
+        description: "Book official Minneriya jeep safari in Sri Lanka. Experience the famous Minneriya Elephant Gathering with licensed local drivers, hotel pickup, & best rates.",
+        keywords: "minneriya jeep safari, minneriya safari, minneriya national park safari booking, minneriya elephant gathering, sri lanka jeep safari",
         canonical: "https://www.minneriyawildjeepsafari.com/minneriya-safari"
       };
     }
     if (effectivePark === "kaudulla") {
       return {
-        title: "Kaudulla Safari & Jeep Tours Sri Lanka | Kaudulla National Park Booking",
-        description: "Experience the Kaudulla safari with herds of wild elephants at Kaudulla Tank. Private 4x4 jeep safari tours, licensed guides, and easy online booking.",
-        keywords: "kaudulla safari, kaudulla jeep safari, kaudulla national park safari, kaudulla elephant gathering, sri lanka jeep safari, habarana safari",
+        title: "Kaudulla Jeep Safari - Morning & Evening Tours | Online Booking",
+        description: "Book the best Kaudulla jeep safari in Sri Lanka. Witness massive wild elephant herds at Kaudulla Tank with expert local guides & best price guaranteed.",
+        keywords: "kaudulla jeep safari, kaudulla safari, kaudulla national park safari, kaudulla elephant gathering, sri lanka jeep safari",
         canonical: "https://www.minneriyawildjeepsafari.com/kaudulla-safari"
       };
     }
     if (effectivePark === "hurulu") {
       return {
-        title: "Hurulu Eco Park Safari Sri Lanka | Elephant Corridor Jeep Tours",
-        description: "Book your Hurulu Eco Park jeep safari in Habarana, Sri Lanka. Year-round wild elephant sightings with local guides.",
-        keywords: "hurulu safari, hurulu eco park safari, habarana elephant safari, sri lanka jeep safari",
+        title: "Hurulu Eco Park Jeep Safari - Habarana Tours Sri Lanka",
+        description: "Experience the thrilling Hurulu Eco Park jeep safari in Habarana, Sri Lanka. Year-round wild elephant corridor sightings with experienced local guides.",
+        keywords: "hurulu eco park jeep safari, hurulu safari, habarana elephant safari, hurulu eco park safari sri lanka",
         canonical: "https://www.minneriyawildjeepsafari.com/hurulu-safari"
       };
     }
     if (effectivePark === "wasgamuwa") {
       return {
-        title: "Wasgamuwa Safari & Jeep Tours Sri Lanka | Wasgamuwa National Park",
-        description: "Discover Wasgamuwa National Park safari with wild elephants and sloth bears in pristine nature. Private 4x4 jeep tours available.",
-        keywords: "wasgamuwa safari, wasgamuwa national park, sri lanka jeep safari",
+        title: "Wasgamuwa National Park Jeep Safari | Wildlife Tours Sri Lanka",
+        description: "Discover Wasgamuwa National Park jeep safari with wild elephants and sloth bears in untouched nature. Private 4x4 safari jeep hire with local guides.",
+        keywords: "wasgamuwa national park jeep safari, wasgamuwa safari, wasgamuwa jeep safari, sri lanka wildlife safari",
         canonical: "https://www.minneriyawildjeepsafari.com/wasgamuwa-safari"
       };
     }
     return {
-      title: "Safari Guides & Jeep Tours Sri Lanka | Minneriya & Kaudulla Safari",
+      title: "Minneriya Jeep Safari & Sri Lanka National Park Guides | Online Booking",
       description: "Explore our safari tours and travel guides for Minneriya safari, Kaudulla safari, Wasgamuwa, Hurulu Eco Park, and cultural tours across Sri Lanka.",
-      keywords: "minneriya safari, minneriya jeep safari, kaudulla safari, sri lanka safari jeep booking",
+      keywords: "minneriya jeep safari, kaudulla jeep safari, hurulu eco park safari, wasgamuwa safari, sri lanka safari booking",
       canonical: "https://www.minneriyawildjeepsafari.com/blog"
     };
   })();
