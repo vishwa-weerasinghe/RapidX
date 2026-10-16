@@ -761,9 +761,9 @@ export default function App() {
   return (
     <>
       <SEO
-        title="Minneriya, Kaudulla, Hurulu &amp; Wasgamuwa Safari Jeep Tours Sri Lanka"
-        description="Book official Sri Lanka jeep safaris online. Experience Minneriya Elephant Gathering, Kaudulla, Hurulu Eco Park &amp; Wasgamuwa National Park with licensed local drivers &amp; best rates."
-        keywords="minneriya safari, minneriya jeep safari, kaudulla safari, kaudulla jeep safari, hurulu eco park safari, hurulu safari, wasgamuwa safari, wasgamuwa national park safari, minneriya elephant gathering, sri lanka jeep safari, minneriya national park safari booking, safari jeep hire minneriya, habarana safari, dambulla safari, sigiriya safari"
+        title="Minneriya Jeep Safari &amp; Tours | Prices &amp; Online Booking Sri Lanka"
+        description="Book official Minneriya jeep safari online. Experience the famous Minneriya Elephant Gathering, Kaudulla, Hurulu &amp; Wasgamuwa with best rates, prices &amp; certified drivers."
+        keywords="minneriya jeep safari, minneriya safari, minneriya safari price, minneriya national park jeep safari price, minneriya jeep safari &amp; tours, minneriya national park safari, minneriya elephant gathering, sri lanka jeep safari, kaudulla jeep safari, hurulu eco park safari, wasgamuwa safari"
         canonical="https://www.minneriyawildjeepsafari.com"
       />
       <div
