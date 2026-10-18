@@ -15,6 +15,7 @@ import {
 import api from "../../axios";
 import { useNavigate } from "react-router-dom";
 import { pickupTimeOptions, getPickupTimeOptions, getDefaultPickupTime } from "../../constants/pickupTimeOptions";
+import { ADMIN_BOOKING_NOTIFICATIONS_UPDATED } from "../../constants/notificationEvents";
 import { CancellationModal } from "../user/cancellation.jsx";
 
 const emptyCreateForm = {
@@ -525,6 +526,10 @@ export default function Bookings() {
       setNewBookingIds(new Set());
       setShowNotifications(true);
       await api.post("/admin/bookings/mark-seen");
+      // The backend has now flagged every notification as seen. Notify shared
+      // UI (the admin Sidebar badge) so it re-fetches the unread count right
+      // away instead of showing a stale badge until its next polling cycle.
+      window.dispatchEvent(new CustomEvent(ADMIN_BOOKING_NOTIFICATIONS_UPDATED));
     } catch (err) {
       console.error(err);
       setShowNotifications(true);

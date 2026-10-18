@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import api from "../axios";
 import logoImg from "../assets/logo.jpg";
+import { ADMIN_BOOKING_NOTIFICATIONS_UPDATED } from "../constants/notificationEvents";
 
 import {
   LayoutDashboard,
@@ -65,10 +66,28 @@ export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
       }
     };
 
+    // Screens that clear booking notifications on the backend (e.g. the
+    // notification bell on the Bookings page) dispatch this event after the
+    // mark-seen request succeeds, so the badge re-syncs with the server
+    // immediately instead of staying stale until the next polling cycle.
+    const handleBookingNotificationsUpdated = () => {
+      fetchUnreadBookings();
+    };
+
     fetchUnreadBookings();
     const interval = setInterval(fetchUnreadBookings, 30000);
+    window.addEventListener(
+      ADMIN_BOOKING_NOTIFICATIONS_UPDATED,
+      handleBookingNotificationsUpdated,
+    );
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener(
+        ADMIN_BOOKING_NOTIFICATIONS_UPDATED,
+        handleBookingNotificationsUpdated,
+      );
+    };
   }, [normalizedRole]);
 
   useEffect(() => {
