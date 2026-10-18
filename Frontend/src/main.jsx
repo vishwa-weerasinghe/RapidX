@@ -68,6 +68,11 @@ createRoot(document.getElementById("root")).render(
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<App />} />
+          <Route path="/minneriya-safari" element={<Blog defaultPark="minneriya" />} />
+          <Route path="/minneriya-jeep-safari" element={<Blog defaultPark="minneriya" />} />
+          <Route path="/kaudulla-safari" element={<Blog defaultPark="kaudulla" />} />
+          <Route path="/hurulu-safari" element={<Blog defaultPark="hurulu" />} />
+          <Route path="/wasgamuwa-safari" element={<Blog defaultPark="wasgamuwa" />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />

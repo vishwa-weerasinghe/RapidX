@@ -1,39 +1,119 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
         http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
 
-  <!-- Home Page — highest priority -->
+  <!-- Home Page — Primary Target for Minneriya Safari & Kaudulla Safari -->
   <url>
     <loc>https://www.minneriyawildjeepsafari.com/</loc>
-    <lastmod>2026-08-25</lastmod>
-    <changefreq>weekly</changefreq>
+    <lastmod>2026-10-14</lastmod>
+    <changefreq>daily</changefreq>
     <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://www.minneriyawildjeepsafari.com/og-safari.jpg</image:loc>
+      <image:title>Minneriya Elephant Gathering Jeep Safari Sri Lanka</image:title>
+      <image:caption>Wild elephant herd gathering around Minneriya reservoir with safari jeep tour</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://www.minneriyawildjeepsafari.com/logo.jpg</image:loc>
+      <image:title>Minneriya Wild Jeep Safari Logo</image:title>
+    </image:image>
   </url>
 
-  <!-- Booking Page — core conversion page -->
+  <!-- Minneriya Safari Dedicated Landing URL -->
+  <url>
+    <loc>https://www.minneriyawildjeepsafari.com/minneriya-safari</loc>
+    <lastmod>2026-10-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+    <image:image>
+      <image:loc>https://www.minneriyawildjeepsafari.com/og-safari.jpg</image:loc>
+      <image:title>Minneriya Jeep Safari Tours</image:title>
+      <image:caption>Minneriya National Park morning and evening private 4x4 jeep safari</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Kaudulla Safari Dedicated Landing URL -->
+  <url>
+    <loc>https://www.minneriyawildjeepsafari.com/kaudulla-safari</loc>
+    <lastmod>2026-10-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+    <image:image>
+      <image:loc>https://www.minneriyawildjeepsafari.com/og-safari.jpg</image:loc>
+      <image:title>Kaudulla Safari Jeep Tours</image:title>
+      <image:caption>Kaudulla National Park wild elephant herd gathering at sunset</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Online Safari Booking Page -->
   <url>
     <loc>https://www.minneriyawildjeepsafari.com/booking</loc>
-    <lastmod>2026-08-25</lastmod>
+    <lastmod>2026-10-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.90</priority>
+  </url>
+
+  <!-- Hurulu Eco Park Safari Dedicated Landing URL -->
+  <url>
+    <loc>https://www.minneriyawildjeepsafari.com/hurulu-safari</loc>
+    <lastmod>2026-10-14</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
+    <priority>0.85</priority>
   </url>
 
-  <!-- Login -->
+  <!-- Wasgamuwa Safari Dedicated Landing URL -->
   <url>
-    <loc>https://www.minneriyawildjeepsafari.com/login</loc>
-    <lastmod>2026-08-25</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.3</priority>
+    <loc>https://www.minneriyawildjeepsafari.com/wasgamuwa-safari</loc>
+    <lastmod>2026-10-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
   </url>
 
-  <!-- Register -->
+  <!-- Safari Travel Guides & Park Blogs -->
   <url>
-    <loc>https://www.minneriyawildjeepsafari.com/register</loc>
-    <lastmod>2026-08-25</lastmod>
+    <loc>https://www.minneriyawildjeepsafari.com/blog</loc>
+    <lastmod>2026-10-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
+  </url>
+
+  <!-- Help & Safari FAQs -->
+  <url>
+    <loc>https://www.minneriyawildjeepsafari.com/help/frequently</loc>
+    <lastmod>2026-10-14</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.3</priority>
+    <priority>0.60</priority>
+  </url>
+
+  <!-- Guest Safari Reviews -->
+  <url>
+    <loc>https://www.minneriyawildjeepsafari.com/write-review</loc>
+    <lastmod>2026-10-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.50</priority>
+  </url>
+
+  <!-- Policies -->
+  <url>
+    <loc>https://www.minneriyawildjeepsafari.com/privacy-policy</loc>
+    <lastmod>2026-10-14</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.40</priority>
+  </url>
+  <url>
+    <loc>https://www.minneriyawildjeepsafari.com/terms-and-conditions</loc>
+    <lastmod>2026-10-14</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.40</priority>
+  </url>
+  <url>
+    <loc>https://www.minneriyawildjeepsafari.com/return-refund-policy</loc>
+    <lastmod>2026-10-14</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.40</priority>
   </url>
 
 </urlset>

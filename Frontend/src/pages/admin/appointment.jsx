@@ -120,11 +120,15 @@ export default function Appointments() {
   };
 
   return (
-    <div className="p-6">
-      <div className="mb-6 flex items-center justify-between">
+    <div className="space-y-6 max-w-7xl mx-auto pb-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl md:text-4xl font-black text-[#29AB87] dark:text-white tracking-tight">Earnings and Reports</h1>
-          <p className="text-sm text-muted mt-1">You can see and download earnings,appointments,and summary report here</p>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            Earnings and Financial Reports
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+            Monitor real-time revenue, view appointment summaries, and export financial PDFs.
+          </p>
         </div>
 
         <div className="flex items-center gap-4">

@@ -11,6 +11,8 @@ class Booking extends Model
     protected $casts = [
         'Admin_Seen' => 'boolean',
         'Customer_Seen' => 'boolean',
+        'Refund_Percentage' => 'integer',
+        'Cancelled_At' => 'datetime',
     ];
 
     protected $fillable = [
@@ -21,6 +23,8 @@ class Booking extends Model
         'No_of_adults',
         'No_of_child',
         'Payment',
+        'Refund_Percentage',
+        'Cancelled_At',
         'Status',
         'Customer_ID',
         'Package_ID',
@@ -69,10 +73,10 @@ class Booking extends Model
     public static function getAreaFee(?string $area): float
     {
         $areaFees = [
-            'Dambulla'  => 5.0,
-            'Sigiriya'  => 15.0,
-            'Habarana'  => 18.0,
-            'Kandalama' => 15.0,
+            'Dambulla'  => 12.0,
+            'Sigiriya'  => 10.0,
+            'Habarana'  => 3.0,
+            'Kandalama' => 16.0,
         ];
 
         return $area && isset($areaFees[$area]) ? (float) $areaFees[$area] : 0.0;

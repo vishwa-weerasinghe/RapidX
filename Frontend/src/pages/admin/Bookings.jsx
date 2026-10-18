@@ -14,7 +14,9 @@ import {
 } from "date-fns";
 import api from "../../axios";
 import { useNavigate } from "react-router-dom";
-import { pickupTimeOptions } from "../../constants/pickupTimeOptions";
+import { pickupTimeOptions, getPickupTimeOptions, getDefaultPickupTime } from "../../constants/pickupTimeOptions";
+import { ADMIN_BOOKING_NOTIFICATIONS_UPDATED } from "../../constants/notificationEvents";
+import { CancellationModal } from "../user/cancellation.jsx";
 
 const emptyCreateForm = {
   Booking_Date: "",
@@ -129,7 +131,7 @@ export default function Bookings() {
   const [vehicles, setVehicles] = useState([]);
   const [packages, setPackages] = useState([]);
   const [search, setSearch] = useState("");
-  const [period, setPeriod] = useState("this_month");
+  const [period, setPeriod] = useState("all_time");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [loading, setLoading] = useState(true);
@@ -145,6 +147,22 @@ export default function Bookings() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [assignmentModal, setAssignmentModal] = useState(null);
   const [savingAssignment, setSavingAssignment] = useState(false);
+
+  // Cancellation policy modal — reused from the user booking screen so the
+  // admin sees the exact same policy / not-confirmed / expired messages
+  // before a booking is cancelled.
+  const [cancelTarget, setCancelTarget] = useState(null);
+  const [policyAgreed, setPolicyAgreed] = useState(false);
+  const [cancellingId, setCancellingId] = useState(null);
+
+  // The refund tiers an admin may apply when cancelling a confirmed booking.
+  // The selected value is sent to the backend and overrides the percentage
+  // the policy would have calculated automatically.
+  const REFUND_OPTIONS = ["100%", "50%", "25%", "0%"];
+
+  // Starts empty on purpose: the modal's confirm button stays disabled until
+  // the admin actively picks a tier, so a refund is never applied by accident.
+  const [selectedRefund, setSelectedRefund] = useState("");
   const bookingsRef = useRef(bookings);
   const periodRef = useRef(period);
   const searchRef = useRef(search);
@@ -341,22 +359,77 @@ export default function Bookings() {
     }
   };
 
+  const handleCollectPayment = async (booking) => {
+    const customerName = booking.customer
+      ? `${booking.customer.First_Name} ${booking.customer.Last_Name}`
+      : "Guest";
+    const confirmed = window.confirm(
+      `Collect payment of $${booking.Payment} for Booking #${booking.Booking_ID} (${customerName}) and mark this booking as Confirmed?`
+    );
+    if (!confirmed) return;
+
+    try {
+      const res = await api.post(`/bookings/${booking.Booking_ID}/collect-payment`);
+      alert(res.data?.message || "Payment collected and booking confirmed!");
+      fetchData();
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || "Failed to collect payment.");
+    }
+  };
+
   const handleEdit = (booking) => {
     navigate("/booking", {
       state: { bookingId: booking.Booking_ID },
     });
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to cancel this booking?")) return;
+  // Open the shared cancellation policy modal for a booking. The actual
+  // deletion only happens after the admin ticks "Agree and continue
+  // cancellation" in the modal.
+  const openCancelPolicy = (booking) => {
+    setPolicyAgreed(false);
+    setSelectedRefund("");
+    setCancelTarget(booking);
+  };
+
+  // Close the cancellation policy modal
+  const closeCancelPolicy = () => {
+    setPolicyAgreed(false);
+    setCancelTarget(null);
+  };
+
+  // Cancel booking — only reachable from the policy modal after the admin
+  // has ticked "Agree and continue cancellation".
+  const handleCancelBooking = async (bookingId) => {
+    setCancellingId(bookingId);
 
     try {
-      const response = await api.delete(`/bookings/${id}`);
+      // "50%" -> 50. Only sent when the admin actually picked a tier (the modal
+      // blocks confirming otherwise); omitting it lets the backend fall back to
+      // the policy-calculated percentage for unpaid bookings.
+      const refundPercentage = selectedRefund
+        ? Number.parseInt(selectedRefund, 10)
+        : null;
+
+      const response = await api.delete(`/bookings/${bookingId}`, {
+        data: {
+          // The backend requires the policy to be acknowledged, matching the
+          // agreement box that had to be ticked before this ran.
+          agreed: true,
+          ...(refundPercentage === null
+            ? {}
+            : { Refund_Percentage: refundPercentage }),
+        },
+      });
       alert(`Booking cancelled successfully. Applicable refund: ${response.data.refund_percentage}%`);
+      closeCancelPolicy();
       fetchData();
     } catch (err) {
       console.error(err);
       alert(err.response?.data?.message || "Failed to cancel booking.");
+    } finally {
+      setCancellingId(null);
     }
   };
 
@@ -369,6 +442,12 @@ export default function Bookings() {
       if (name === "Package_ID") {
         const pkg = packages.find((item) => String(item.Package_ID || item.id) === String(value));
         setSelectedPackage(pkg || null);
+        if (pkg) {
+          const available = getPickupTimeOptions(pkg);
+          if (!available.some((opt) => opt.value === prev.Pickup_Time)) {
+            updated.Pickup_Time = getDefaultPickupTime(pkg);
+          }
+        }
       }
 
       return updated;
@@ -447,6 +526,10 @@ export default function Bookings() {
       setNewBookingIds(new Set());
       setShowNotifications(true);
       await api.post("/admin/bookings/mark-seen");
+      // The backend has now flagged every notification as seen. Notify shared
+      // UI (the admin Sidebar badge) so it re-fetches the unread count right
+      // away instead of showing a stale badge until its next polling cycle.
+      window.dispatchEvent(new CustomEvent(ADMIN_BOOKING_NOTIFICATIONS_UPDATED));
     } catch (err) {
       console.error(err);
       setShowNotifications(true);
@@ -471,11 +554,15 @@ export default function Bookings() {
 
   // Search + date period filtering happen on the backend (`/bookings`), so the
   // list returned by the API is already scoped. Only the "new bookings" toggle
-  // still narrows things down client-side.
-  const filteredBookings = bookings.filter((booking) => {
-    if (!showNewOnly) return true;
-    return notificationBookingIds.has(getBookingId(booking));
-  });
+  // still narrows things down client-side. The rows are then ordered by
+  // Booking_ID descending so the most recently created bookings (105 above 104,
+  // above 103, ...) always appear first, whichever period is selected.
+  const filteredBookings = bookings
+    .filter((booking) => {
+      if (!showNewOnly) return true;
+      return notificationBookingIds.has(getBookingId(booking));
+    })
+    .sort((a, b) => getBookingId(b) - getBookingId(a));
 
   const hasNoCustomDates = period === "custom" && !fromDate && !toDate;
   const hasInvertedCustomRange =
@@ -491,18 +578,23 @@ export default function Bookings() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="w-14 h-14 border-4 border-sacramento border-t-transparent rounded-full animate-spin"></div>
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <div className="w-12 h-12 border-4 border-emerald-100 border-t-sacramento rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="p-8">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
-       <h1 className="text-3xl md:text-4xl font-black text-[#29AB87] dark:text-white tracking-tight">
-          Booking Management
-      </h1>
+    <div className="space-y-6 max-w-7xl mx-auto pb-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            Booking Management
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+            Monitor reservations, review customer requests, and assign vehicles.
+          </p>
+        </div>
         <div className="flex items-center gap-3">
           <button
             type="button"
@@ -749,6 +841,18 @@ export default function Bookings() {
         );
       })()}
 
+      <CancellationModal
+        booking={cancelTarget}
+        cancellingId={cancellingId}
+        policyAgreed={policyAgreed}
+        onPolicyAgreedChange={setPolicyAgreed}
+        onClose={closeCancelPolicy}
+        onConfirm={handleCancelBooking}
+        refundOptions={REFUND_OPTIONS}
+        selectedRefund={selectedRefund}
+        onRefundChange={setSelectedRefund}
+      />
+
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl card p-6 shadow-2xl">
@@ -788,7 +892,7 @@ export default function Bookings() {
                     className="form-input"
                     required
                   >
-                    {pickupTimeOptions.map((option) => (
+                    {getPickupTimeOptions(selectedPackage).map((option) => (
                       <option key={option.value} value={option.value}>
                         {option.label}
                       </option>
@@ -967,11 +1071,12 @@ export default function Bookings() {
         </div>
       )}
 
-      <div className="overflow-x-auto rounded-xl card">
-        <table className="min-w-full">
-          <thead className="bg-sacramento text-white">
-            <tr>
-              <th className="px-4 py-3 text-left">Booking ID</th>
+      <div className="overflow-hidden rounded-3xl bg-white dark:bg-[#16231c] border border-border-light dark:border-border-dark/60 shadow-sm">
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-sm">
+            <thead>
+              <tr className="bg-slate-50/70 dark:bg-surface-2/40 text-[11px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider border-b border-border-light/60 dark:border-border-dark/40">
+                <th className="px-4 py-3.5 text-left">Booking ID</th>
               <th className="px-4 py-3 text-left">Customer</th>
               <th className="px-4 py-3 text-left">Package</th>
               <th className="px-4 py-3 text-left">Booking Date</th>
@@ -1017,9 +1122,32 @@ export default function Bookings() {
                   <td className="px-4 py-3 text-charcoal/80 dark:text-white/80">{booking.Pickup_Location}</td>
                   <td className="px-4 py-3 text-center text-charcoal/80 dark:text-white/80">{booking.No_of_adults}</td>
                   <td className="px-4 py-3 text-center text-charcoal/80 dark:text-white/80">{booking.No_of_child}</td>
-                  <td className="px-4 py-3 text-right text-charcoal dark:text-white">$ {booking.Payment}</td>
+                  <td className="px-4 py-3 text-right">
+                    <div className="font-bold text-charcoal dark:text-white">$ {booking.Payment}</div>
+                    <div className="mt-0.5">
+                      {booking.payment?.payment_method === "Pay Later" ? (
+                        <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/50">
+                          Pay Later
+                        </span>
+                      ) : (
+                        <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/50">
+                          {booking.payment?.payment_method || "Online"}
+                        </span>
+                      )}
+                    </div>
+                  </td>
                   <td className="px-4 py-3 text-center">
-                    <span className="rounded-full bg-amber-100 px-3 py-1 text-sm font-semibold text-amber-700 dark:bg-amber-950/40 dark:text-amber-400">
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs font-bold inline-block ${
+                        booking.Status?.toLowerCase() === "confirmed"
+                          ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300"
+                          : booking.Status?.toLowerCase() === "pending"
+                          ? "bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300"
+                          : booking.Status?.toLowerCase() === "cancelled"
+                          ? "bg-rose-100 text-rose-800 dark:bg-rose-950/50 dark:text-rose-300"
+                          : "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200"
+                      }`}
+                    >
                       {booking.Status}
                     </span>
                   </td>
@@ -1075,11 +1203,21 @@ export default function Bookings() {
                       return driverNames.length > 0 ? driverNames.join(", ") : "—";
                     })()}
                   </td>
-                  <td className="px-4 py-3 text-center">
+                  <td className="px-4 py-3 text-center whitespace-nowrap">
+                    {booking.Status?.toLowerCase() === "pending" && (
+                      <button
+                        type="button"
+                        onClick={() => handleCollectPayment(booking)}
+                        className="mr-3 font-semibold text-xs px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition shadow-sm cursor-pointer"
+                        title="Collect payment and confirm booking"
+                      >
+                        Collect Payment
+                      </button>
+                    )}
                     <button onClick={() => handleEdit(booking)} className="text-sacramento hover:underline">
                       Edit
                     </button>
-                    <button onClick={() => handleDelete(booking.Booking_ID)} className="ml-3 text-red-600 hover:underline dark:text-red-400">
+                    <button onClick={() => openCancelPolicy(booking)} className="ml-3 text-red-600 hover:underline dark:text-red-400">
                       Cancel
                     </button>
                   </td>
@@ -1089,6 +1227,7 @@ export default function Bookings() {
           </tbody>
         </table>
       </div>
+    </div>
     </div>
   );
 }

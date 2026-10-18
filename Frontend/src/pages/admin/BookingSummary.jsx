@@ -42,7 +42,7 @@ export default function BookingSummary() {
   const years = Array.from({ length: 6 }, (_, index) => String(currentYear - index));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-7xl mx-auto pb-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <Link to="/admin/earnings-and-reports" className="mb-3 inline-flex items-center gap-2 text-sm font-semibold text-muted hover:text-sacramento"><ArrowLeft size={16} /> Back to Earnings and Reports</Link>
@@ -82,7 +82,7 @@ export default function BookingSummary() {
               </div>
               <div className="overflow-x-auto">
                 <table className="min-w-full bg-surface text-sm">
-                  <thead className="bg-[#29AB87] text-xs uppercase text-white"><tr><th className="px-4 py-3 text-left">Booking ID</th><th className="px-4 py-3 text-left">Name</th><th className="px-4 py-3 text-left">Package</th><th className="px-4 py-3 text-left">Date</th><th className="px-4 py-3 text-right">Price</th></tr></thead>
+                  <thead className="bg-slate-50/70 dark:bg-surface-2/40 text-[11px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider border-b border-border-light/60 dark:border-border-dark/40"><tr><th className="px-4 py-3 text-left">Booking ID</th><th className="px-4 py-3 text-left">Name</th><th className="px-4 py-3 text-left">Package</th><th className="px-4 py-3 text-left">Date</th><th className="px-4 py-3 text-right">Price</th></tr></thead>
                   <tbody className="divide-y divide-border-light dark:divide-border-dark">
                     {monthlyBookings.length === 0 ? <tr><td colSpan="5" className="px-4 py-6 text-center text-muted">No bookings for this month.</td></tr> : monthlyBookings.map((booking) => <tr key={booking.Booking_ID}><td className="px-4 py-3 font-mono">#{booking.Booking_ID}</td><td className="px-4 py-3 font-medium">{booking.First_Name} {booking.Last_Name}</td><td className="px-4 py-3">{booking.Package_Name || "Booking"}</td><td className="px-4 py-3">{booking.Booking_Date}</td><td className="px-4 py-3 text-right font-mono">$ {Number(booking.Payment || 0).toLocaleString()}</td></tr>)}
                   </tbody>
@@ -103,7 +103,7 @@ export default function BookingSummary() {
               <h2 className="mb-4 text-xl font-bold text-charcoal dark:text-white">Annual Booking Summary</h2>
               <div className="overflow-x-auto rounded-lg border border-border-light dark:border-border-dark">
                 <table className="min-w-full bg-surface text-sm">
-                  <thead className="bg-[#29AB87] text-xs uppercase text-white">
+                  <thead className="bg-slate-50/70 dark:bg-surface-2/40 text-[11px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider border-b border-border-light/60 dark:border-border-dark/40">
                     <tr>
                       <th className="px-4 py-3 text-left">Month</th>
                       <th className="px-4 py-3 text-center">Confirmed</th>

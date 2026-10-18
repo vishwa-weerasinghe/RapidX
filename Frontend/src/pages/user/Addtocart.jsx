@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { pickupTimeOptions } from "../../constants/pickupTimeOptions";
+import { pickupTimeOptions, getPickupTimeOptions, getDefaultPickupTime } from "../../constants/pickupTimeOptions";
 import {
     Calendar,
     Clock,
@@ -56,6 +56,15 @@ export default function Booking() {
     try {
       const res = await api.get(`/packages/${id}`);
       setPkg(res.data);
+      if (res.data) {
+        const available = getPickupTimeOptions(res.data);
+        if (!available.some((opt) => opt.value === form.Pickup_Time)) {
+          setForm((prev) => ({
+            ...prev,
+            Pickup_Time: getDefaultPickupTime(res.data),
+          }));
+        }
+      }
     } catch (err) {
       console.log(err);
     }
@@ -113,10 +122,10 @@ export default function Booking() {
 
   // area extras (amounts added to final payment)
   const areaExtraMap = {
-    Dambulla: 5,
-    Sigiriya: 15,
-    Habarana: 18,
-    Kandalama: 15,
+    Dambulla: 12,
+    Sigiriya: 10,
+    Habarana: 3,
+    Kandalama: 16,
   };
 
   const getAreaExtra = () => {
@@ -272,7 +281,7 @@ export default function Booking() {
                       className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 px-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all"
                       required
                     >
-                      {pickupTimeOptions.map((option) => (
+                      {getPickupTimeOptions(pkg).map((option) => (
                         <option key={option.value} value={option.value}>
                           {option.label}
                         </option>
@@ -293,10 +302,10 @@ export default function Booking() {
                     required
                   >
                     <option value="">-- Select area --</option>
-                    <option value="Dambulla">Dambulla (+ $5.00)</option>
-                    <option value="Sigiriya">Sigiriya (+ $15.00)</option>
-                    <option value="Habarana">Habarana (+ $18.00)</option>
-                    <option value="Kandalama">Kandalama (+ $15.00)</option>
+                    <option value="Dambulla">Dambulla (+ $12.00)</option>
+                    <option value="Sigiriya">Sigiriya (+ $10.00)</option>
+                    <option value="Habarana">Habarana (+ $3.00)</option>
+                    <option value="Kandalama">Kandalama (+ $16.00)</option>
                   </select>
                 </div>
 

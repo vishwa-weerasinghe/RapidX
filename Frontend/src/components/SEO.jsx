@@ -19,9 +19,9 @@ import { useEffect } from "react";
  */
 
 const SITE_NAME = "Minneriya Wild Jeep Safari";
-const DEFAULT_TITLE = `Online Safari Booking Sri Lanka | Minneriya, Kaudulla & Wasgamuwa Jeep Tours`;
+const DEFAULT_TITLE = `Minneriya Jeep Safari & Tours | Best Prices & Online Booking Sri Lanka`;
 const DEFAULT_DESCRIPTION =
-  "Book trusted Sri Lanka jeep safaris online. Experience the famous Minneriya Elephant Gathering, Kaudulla & Wasgamuwa with experienced local drivers. Instant booking & best rates.";
+  "Book official Minneriya jeep safari online. Experience the famous Minneriya Elephant Gathering, Kaudulla, Hurulu & Wasgamuwa with best rates, prices & certified drivers.";
 const DEFAULT_OG_IMAGE = "https://www.minneriyawildjeepsafari.com/og-safari.jpg";
 const BASE_URL = "https://www.minneriyawildjeepsafari.com";
 
@@ -49,11 +49,16 @@ function upsertLink(rel, href) {
 export default function SEO({
   title,
   description = DEFAULT_DESCRIPTION,
+  keywords,
   canonical,
   robots,
   ogImage = DEFAULT_OG_IMAGE,
+  structuredData,
 }) {
-  const fullTitle = title ? `${title} | ${SITE_NAME}` : DEFAULT_TITLE;
+  // Prevent duplicate brand name if already present or if title is intentionally formatted
+  const fullTitle = title
+    ? (title.includes(SITE_NAME) || title.length >= 48 ? title : `${title} | ${SITE_NAME}`)
+    : DEFAULT_TITLE;
 
   useEffect(() => {
     // --- Title ---
@@ -61,6 +66,9 @@ export default function SEO({
 
     // --- Basic meta ---
     upsertMeta('meta[name="description"]', 'name="description"', description);
+    if (keywords) {
+      upsertMeta('meta[name="keywords"]', 'name="keywords"', keywords);
+    }
     if (robots) {
       upsertMeta('meta[name="robots"]', 'name="robots"', robots);
     }
@@ -83,6 +91,16 @@ export default function SEO({
     upsertMeta('meta[name="twitter:description"]', 'name="twitter:description"', description);
     upsertMeta('meta[name="twitter:image"]', 'name="twitter:image"', ogImage);
 
+    // --- Dynamic JSON-LD structured data (if provided) ---
+    let scriptTag = null;
+    if (structuredData) {
+      scriptTag = document.createElement("script");
+      scriptTag.type = "application/ld+json";
+      scriptTag.setAttribute("data-dynamic-seo", "true");
+      scriptTag.textContent = JSON.stringify(structuredData);
+      document.head.appendChild(scriptTag);
+    }
+
     // Cleanup: restore defaults on unmount
     return () => {
       document.title = DEFAULT_TITLE;
@@ -94,8 +112,11 @@ export default function SEO({
       upsertMeta('meta[name="twitter:title"]', 'name="twitter:title"', DEFAULT_TITLE);
       upsertMeta('meta[name="twitter:description"]', 'name="twitter:description"', DEFAULT_DESCRIPTION);
       upsertMeta('meta[name="twitter:image"]', 'name="twitter:image"', DEFAULT_OG_IMAGE);
+      if (scriptTag && scriptTag.parentNode) {
+        scriptTag.parentNode.removeChild(scriptTag);
+      }
     };
-  }, [fullTitle, description, canonical, robots, ogImage]);
+  }, [fullTitle, description, keywords, canonical, robots, ogImage, structuredData]);
 
   return null; // renders nothing to the DOM
 }

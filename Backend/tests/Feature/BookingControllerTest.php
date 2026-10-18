@@ -486,7 +486,9 @@ class BookingControllerTest extends TestCase
         $booking = $this->createBooking();
 
         $response = $this->actingAs($admin, 'sanctum')
-            ->deleteJson('/api/bookings/' . $booking->Booking_ID);
+            ->deleteJson('/api/bookings/' . $booking->Booking_ID, [
+                'agreed' => true,
+            ]);
 
         $response->assertStatus(200)
             ->assertJson(['message' => 'Booking cancelled successfully']);
@@ -549,7 +551,9 @@ class BookingControllerTest extends TestCase
         ]);
 
         $this->actingAs($customerUser, 'sanctum')
-            ->patchJson('/api/user/bookings/' . $booking->Booking_ID . '/cancel')
+            ->patchJson('/api/user/bookings/' . $booking->Booking_ID . '/cancel', [
+                'agreed' => true,
+            ])
             ->assertStatus(200)
             ->assertJsonPath('booking.Status', 'Cancelled');
 
@@ -818,5 +822,23 @@ class BookingControllerTest extends TestCase
             ->assertJsonCount(2)
             ->assertJsonFragment(['Booking_ID' => $first->Booking_ID])
             ->assertJsonFragment(['Booking_ID' => $second->Booking_ID]);
+    }
+
+    public function test_index_returns_bookings_in_descending_booking_id_order(): void
+    {
+        // Safari dates are deliberately in the opposite order to the IDs, so a
+        // date-based sort would put the older booking first and fail here.
+        $older = $this->createBookingOnDate('2026-12-31');
+        $newer = $this->createBookingOnDate('2026-01-01');
+
+        $response = $this->actingAs($this->createAdmin(), 'sanctum')
+            ->getJson('/api/bookings?period=all_time');
+
+        $response->assertStatus(200);
+
+        $this->assertSame(
+            [$newer->Booking_ID, $older->Booking_ID],
+            array_column($response->json(), 'Booking_ID')
+        );
     }
 }

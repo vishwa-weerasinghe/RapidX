@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Mail, Phone, RefreshCw, Search, Users } from "lucide-react";
+import { Mail, Phone, RefreshCw, Search, Users, X, Globe, Calendar } from "lucide-react";
 import api from "../../axios";
 
 const formatDate = (value) => {
@@ -55,110 +55,177 @@ export default function CustomerManagement() {
   }, [customers, search]);
 
   return (
-    <div className="p-4 sm:p-6">
-      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-sacramento/10 p-3 text-sacramento dark:bg-sacramento/20 dark:text-castleton-300">
-              <Users size={24} />
-            </div>
-            <div>
-              <h1 className="text-2xl font-black tracking-tight text-charcoal dark:text-white sm:text-3xl">
-                Customer Management
-              </h1>
-              <p className="mt-1 text-sm text-muted">
-                View registered safari customers and their contact details.
-              </p>
-            </div>
+    <div className="space-y-6 max-w-7xl mx-auto pb-8">
+      {/* Header Area */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-3 rounded-2xl bg-sacramento/10 dark:bg-sacramento-900/40 text-sacramento dark:text-sacramento-300">
+            <Users size={24} strokeWidth={2.2} />
+          </div>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+              Customer Management
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+              View registered safari customers, guest contact details, and account histories.
+            </p>
           </div>
         </div>
+      </div>
 
-        <div className="flex flex-col gap-3 sm:flex-row">
+      {/* Search & Actions Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#16231c] p-3.5 sm:p-4 rounded-2xl border border-border-light dark:border-border-dark/60 shadow-sm">
+        <div className="relative flex-1 max-w-md">
           <label className="relative block">
             <span className="sr-only">Search customers</span>
             <Search
-              size={17}
-              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted"
+              size={16}
+              className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
             />
             <input
               type="search"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search customers..."
-              className="form-input w-full pl-9 sm:w-64"
+              placeholder="Search customers by name, email, phone, NIC..."
+              className="w-full pl-10 pr-9 py-2 rounded-xl text-sm bg-slate-50 dark:bg-surface-2 border border-slate-200/80 dark:border-border-dark text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sacramento/30"
             />
           </label>
+          {search && (
+            <button
+              onClick={() => setSearch("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+            >
+              <X size={15} />
+            </button>
+          )}
+        </div>
+
+        <div className="flex items-center justify-between sm:justify-end gap-3 text-xs text-slate-500 dark:text-slate-400">
+          <span>
+            {loading ? "Syncing..." : `${filteredCustomers.length} of ${customers.length} customers`}
+          </span>
           <button
             type="button"
             onClick={fetchCustomers}
             disabled={loading}
-            className="inline-flex items-center justify-center gap-2 rounded-lg border border-border-light px-4 py-2 text-sm font-semibold text-charcoal transition hover:bg-offwhite-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-border-dark dark:text-white dark:hover:bg-surface-2"
+            className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-surface-2 text-slate-500 hover:text-sacramento transition-colors"
+            title="Refresh List"
           >
-            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-            Refresh
+            <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
           </button>
         </div>
       </div>
 
-      <div className="mb-4 flex items-center justify-between text-sm text-muted">
-        <span>
-          {loading ? "Loading customers..." : `${filteredCustomers.length} customer${filteredCustomers.length === 1 ? "" : "s"}`}
-        </span>
-        {search && !loading && <span>Filtered by &quot;{search}&quot;</span>}
-      </div>
-
-      {error ? (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-5 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300">
-          <p>{error}</p>
-          <button type="button" onClick={fetchCustomers} className="mt-3 font-semibold underline">
+      {/* Error Alert */}
+      {error && (
+        <div className="rounded-2xl border border-rose-200 bg-rose-50 dark:border-rose-900/40 dark:bg-rose-950/20 p-4 text-xs font-semibold text-rose-700 dark:text-rose-300 flex items-center justify-between">
+          <span>{error}</span>
+          <button type="button" onClick={fetchCustomers} className="underline font-bold">
             Try again
           </button>
         </div>
-      ) : loading ? (
-        <div className="rounded-xl border border-border-light bg-surface p-8 text-center text-muted dark:border-border-dark">
-          Loading registered customers...
+      )}
+
+      {/* Main Content Area */}
+      {loading ? (
+        <div className="py-20 flex flex-col items-center justify-center gap-3">
+          <div className="w-10 h-10 rounded-full border-3 border-emerald-100 border-t-sacramento animate-spin" />
+          <p className="text-sm font-semibold text-slate-400 animate-pulse">Loading customer profiles...</p>
+        </div>
+      ) : customers.length === 0 ? (
+        <div className="bg-white dark:bg-[#16231c] rounded-3xl border border-border-light dark:border-border-dark/60 p-12 text-center">
+          <Users size={36} className="mx-auto mb-3 text-slate-300 dark:text-slate-600" />
+          <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-1">No Customers Registered</h3>
+          <p className="text-xs text-slate-400">New customer registrations will appear here automatically.</p>
         </div>
       ) : filteredCustomers.length === 0 ? (
-        <div className="rounded-xl border border-border-light bg-surface p-8 text-center text-muted dark:border-border-dark">
-          {search ? "No customers match your search." : "No registered customers found."}
+        <div className="bg-white dark:bg-[#16231c] rounded-3xl border border-border-light dark:border-border-dark/60 p-10 text-center">
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            No customers match your search &quot;<span className="font-semibold">{search}</span>&quot;.
+          </p>
+          <button
+            onClick={() => setSearch("")}
+            className="mt-3 text-xs font-bold text-sacramento dark:text-sacramento-300 underline"
+          >
+            Clear Search
+          </button>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-border-light dark:border-border-dark">
+        <div className="overflow-hidden rounded-3xl bg-white dark:bg-[#16231c] border border-border-light dark:border-border-dark/60 shadow-sm">
           <div className="overflow-x-auto">
-            <table className="min-w-full bg-surface text-sm">
-              <thead className="bg-sacramento text-left text-xs uppercase tracking-wide text-white dark:bg-sacramento-900">
-                <tr>
-                  <th className="px-4 py-3">Customer</th>
-                  <th className="px-4 py-3">Contact</th>
-                  <th className="px-4 py-3">NIC</th>
-                  <th className="px-4 py-3">Country</th>
-                  <th className="px-4 py-3">Bookings</th>
-                  <th className="px-4 py-3">Registered</th>
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="bg-slate-50/70 dark:bg-surface-2/40 text-[11px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider border-b border-border-light/60 dark:border-border-dark/40">
+                  <th className="px-5 py-3.5 text-left">Customer</th>
+                  <th className="px-5 py-3.5 text-left">Contact Channels</th>
+                  <th className="px-5 py-3.5 text-left">NIC / ID</th>
+                  <th className="px-5 py-3.5 text-left">Country</th>
+                  <th className="px-5 py-3.5 text-center">Bookings</th>
+                  <th className="px-5 py-3.5 text-right">Registered</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border-light dark:divide-border-dark">
-                {filteredCustomers.map((customer) => (
-                  <tr key={customer.Customer_ID} className="transition-colors hover:bg-offwhite-100 dark:hover:bg-surface-2">
-                    <td className="px-4 py-4 align-top">
-                      <p className="font-semibold text-charcoal dark:text-white">
-                        {customer.First_Name} {customer.Last_Name}
-                      </p>
-                      <p className="mt-1 text-xs text-muted">#{customer.Customer_ID}</p>
-                    </td>
-                    <td className="px-4 py-4 align-top">
-                      <a href={`mailto:${customer.Email}`} className="flex items-center gap-2 text-sacramento hover:underline">
-                        <Mail size={14} /> {customer.Email}
-                      </a>
-                      <a href={`tel:${customer.Phone_No}`} className="mt-2 flex items-center gap-2 text-muted hover:text-sacramento">
-                        <Phone size={14} /> {customer.Phone_No}
-                      </a>
-                    </td>
-                    <td className="px-4 py-4 align-top font-mono text-muted">{customer.NIC || "-"}</td>
-                    <td className="px-4 py-4 align-top text-charcoal dark:text-slate-200">{customer.Country || "-"}</td>
-                    <td className="px-4 py-4 align-top text-charcoal dark:text-slate-200">{customer.bookings_count ?? 0}</td>
-                    <td className="px-4 py-4 align-top text-muted">{formatDate(customer.created_at)}</td>
-                  </tr>
-                ))}
+              <tbody className="divide-y divide-border-light/60 dark:divide-border-dark/40">
+                {filteredCustomers.map((customer) => {
+                  const initial = (customer.First_Name?.[0] ?? "C").toUpperCase();
+                  return (
+                    <tr
+                      key={customer.Customer_ID}
+                      className="hover:bg-slate-50/60 dark:hover:bg-surface-2/20 transition-colors"
+                    >
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-sacramento to-castleton-400 text-white flex items-center justify-center font-bold text-xs shadow-sm shrink-0">
+                            {initial}
+                          </div>
+                          <div>
+                            <span className="font-bold text-slate-800 dark:text-slate-200 block">
+                              {customer.First_Name} {customer.Last_Name}
+                            </span>
+                            <span className="text-[10px] font-mono text-slate-400">
+                              #{customer.Customer_ID}
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-5 py-4">
+                        <div className="space-y-1 text-xs">
+                          {customer.Email && (
+                            <a
+                              href={`mailto:${customer.Email}`}
+                              className="flex items-center gap-1.5 text-sacramento dark:text-sacramento-300 hover:underline"
+                            >
+                              <Mail size={12} className="shrink-0" />
+                              <span className="truncate max-w-[170px]">{customer.Email}</span>
+                            </a>
+                          )}
+                          {customer.Phone_No && (
+                            <a
+                              href={`tel:${customer.Phone_No}`}
+                              className="flex items-center gap-1.5 font-mono text-slate-500 dark:text-slate-400 hover:text-slate-800"
+                            >
+                              <Phone size={12} className="shrink-0" />
+                              <span>{customer.Phone_No}</span>
+                            </a>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-5 py-4 font-mono text-xs text-slate-600 dark:text-slate-400">
+                        {customer.NIC || "—"}
+                      </td>
+                      <td className="px-5 py-4 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                        {customer.Country || "—"}
+                      </td>
+                      <td className="px-5 py-4 text-center">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-sacramento/10 text-sacramento dark:text-sacramento-300">
+                          {customer.bookings_count ?? 0}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4 text-right text-xs text-slate-400 dark:text-slate-500 whitespace-nowrap">
+                        {formatDate(customer.created_at)}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

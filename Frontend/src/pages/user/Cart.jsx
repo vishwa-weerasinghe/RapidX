@@ -10,6 +10,9 @@ import {
   Baby,
   ArrowRight,
   ShieldCheck,
+  CreditCard,
+  Clock3,
+  Info,
 } from "lucide-react";
 import api from "../../axios";
 import { useTheme } from "../../context/ThemeContext";
@@ -31,6 +34,7 @@ export default function Cart() {
   const [promoError, setPromoError] = useState("");
   const [validPromoCode, setValidPromoCode] = useState("");
   const [validatingPromo, setValidatingPromo] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("PayHere");
 
   useEffect(() => {
     if (!activeCustomer) {
@@ -78,7 +82,13 @@ export default function Cart() {
         checkout_type: "cart",
         Customer_ID: activeCustomer.Customer_ID,
         promotion_code: validPromoCode || undefined,
+        payment_method: paymentMethod,
       });
+
+      if (res.data?.payment_method === "Pay Later" || paymentMethod === "Pay Later") {
+        navigate(`/payment/success?order_id=${res.data.order_id}`);
+        return;
+      }
 
       const { payhere_params } = res.data;
 
@@ -95,6 +105,8 @@ export default function Cart() {
             alert("Payment Error: " + error);
           },
         });
+      } else {
+        setCheckingOut(false);
       }
     } catch (err) {
       console.error(err);
@@ -283,18 +295,18 @@ export default function Cart() {
                   <span>Taxes & Service Fees</span>
                   <span className={`font-semibold ${theme === "dark" ? "text-castleton-300" : "text-sacramento"}`}>Included</span>
                 </div>
-                
+
                 {/* Promo Code Input */}
                 <div className="pt-2">
                   <div className="flex gap-2">
-                    <input 
-                      type="text" 
-                      placeholder="Promo Code" 
+                    <input
+                      type="text"
+                      placeholder="Promo Code"
                       className={`flex-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sacramento/50 ${theme === "dark" ? "bg-bg-dark border-border-dark text-white" : "bg-white border-border-light text-charcoal"}`}
                       value={promoCode}
                       onChange={(e) => setPromoCode(e.target.value)}
                     />
-                    <button 
+                    <button
                       onClick={validatePromoCode}
                       disabled={validatingPromo || !promoCode.trim()}
                       className="px-4 py-2 bg-sacramento text-white text-sm font-semibold rounded-lg disabled:opacity-50"
@@ -311,32 +323,98 @@ export default function Cart() {
                 </div>
 
                 <div className={`flex justify-between items-center pt-3 border-t font-bold text-base border-border-light dark:border-border-dark ${theme === "dark" ? "text-white" : "text-charcoal"}`}>
-                  <span>Total Amount</span>
+                  <div>
+                    <span className="block">Total Amount</span>
+                    <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100/90 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800/80 px-2 py-0.5 rounded-full mt-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                      No Hidden Charges
+                    </span>
+                  </div>
                   <span className={`text-xl ${theme === "dark" ? "text-castleton-300" : "text-sacramento"}`}>
-                    $ {getCartTotal().toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                    $ {getCartTotal().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </span>
                 </div>
               </div>
 
-              <div className={`p-3.5 rounded-2xl flex items-start gap-2.5 text-xs leading-relaxed bg-sacramento/10 text-sacramento`}>
-                <ShieldCheck size={18} className="flex-shrink-0 mt-0.5" />
-                <span>
-                  By confirming, your bookings will be placed as{" "}
-                  <strong>Confirmed</strong>, ready for guide/vehicle allocation by
-                  our admins. No immediate payment is required.
+              {/* Payment Method Selector */}
+              <div className="pt-2 space-y-2 border-t border-border-light dark:border-border-dark">
+                <span className={`text-xs font-bold uppercase tracking-wider block ${theme === "dark" ? "text-slate-300" : "text-slate-600"}`}>
+                  Payment Method
                 </span>
+                <div className="grid grid-cols-2 gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod("PayHere")}
+                    className={`p-3 rounded-xl border text-left transition text-xs flex flex-col justify-between cursor-pointer ${paymentMethod === "PayHere"
+                      ? "border-sacramento bg-sacramento/10 text-sacramento font-bold ring-1 ring-sacramento"
+                      : "border-border-light dark:border-border-dark text-muted hover:border-slate-400"
+                      }`}
+                  >
+                    <div className="flex items-center justify-between w-full mb-1.5">
+                      <CreditCard size={16} className="text-sacramento" />
+                      <div className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${paymentMethod === "PayHere" ? "border-sacramento" : "border-slate-400"}`}>
+                        {paymentMethod === "PayHere" && <div className="w-2 h-2 rounded-full bg-sacramento"></div>}
+                      </div>
+                    </div>
+                    <span>Pay Online</span>
+                    <span className="text-[10px] font-normal opacity-75">Card / PayHere</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod("Pay Later")}
+                    className={`p-3 rounded-xl border text-left transition text-xs flex flex-col justify-between cursor-pointer ${paymentMethod === "Pay Later"
+                      ? "border-amber-500 bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 font-bold ring-1 ring-amber-500"
+                      : "border-border-light dark:border-border-dark text-muted hover:border-slate-400"
+                      }`}
+                  >
+                    <div className="flex items-center justify-between w-full mb-1.5">
+                      <Clock3 size={16} className="text-amber-500" />
+                      <div className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${paymentMethod === "Pay Later" ? "border-amber-500" : "border-slate-400"}`}>
+                        {paymentMethod === "Pay Later" && <div className="w-2 h-2 rounded-full bg-amber-500"></div>}
+                      </div>
+                    </div>
+                    <span>Pay Later</span>
+                  </button>
+                </div>
               </div>
+
+              {paymentMethod === "Pay Later" ? (
+                <div className="p-3.5 rounded-2xl flex items-start gap-2.5 text-xs leading-relaxed bg-amber-50 dark:bg-amber-950/30 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/40">
+                  <Info size={18} className="flex-shrink-0 mt-0.5" />
+                  <span>
+                    Your bookings will be placed with <strong>Pending</strong> status, and confirmation emails will be sent immediately. Payment will be collected by our admin near the tour date.
+                  </span>
+                </div>
+              ) : (
+                <div className="p-3.5 rounded-2xl flex flex-col gap-2.5 text-xs leading-relaxed bg-sacramento/10 text-sacramento">
+                  <div className="flex items-start gap-2.5">
+                    <ShieldCheck size={18} className="flex-shrink-0 mt-0.5" />
+                    <span>
+                      Pay securely online using PayHere payment gateway. Instant booking confirmation is provided.
+                    </span>
+                  </div>
+                  <img
+                    src="/payhere-cards.png"
+                    alt="Accepted Cards: LankaPay, Visa, Mastercard, American Express, Discover, Diners Club"
+                    className="w-full max-w-[260px] h-auto object-contain rounded"
+                  />
+                </div>
+              )}
 
               <button
                 onClick={handleCheckout}
                 disabled={checkingOut}
-                className="btn-primary w-full py-3.5 rounded-full"
+                className={`w-full py-3.5 rounded-full font-bold flex items-center justify-center gap-2 transition duration-200 cursor-pointer ${paymentMethod === "Pay Later"
+                  ? "bg-amber-600 hover:bg-amber-700 text-white shadow-lg shadow-amber-600/20"
+                  : "btn-primary"
+                  }`}
               >
                 {checkingOut ? (
                   <div className="w-5 h-5 border-[3px] border-white border-t-transparent rounded-full animate-spin"></div>
                 ) : (
                   <>
-                    Confirm & Place Bookings
+                    {paymentMethod === "Pay Later" ? "Confirm & Reserve (Pay Later)" : "Pay Online & Confirm"}
                     <ArrowRight size={18} />
                   </>
                 )}

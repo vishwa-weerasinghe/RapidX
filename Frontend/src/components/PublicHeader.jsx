@@ -284,7 +284,7 @@ export default function PublicHeader({ activeSection, onNavigate, forceGlass = f
                 setIsMobileBlogOpen(false);
                 setIsMobileHelpOpen(false);
               }}
-              className={`md:hidden flex items-center justify-center p-2.5 rounded-full transition-all duration-300 active:scale-95 ${isMobileMenuOpen
+              className={`md:hidden flex items-center justify-center min-w-[44px] min-h-[44px] p-2.5 rounded-full transition-all duration-300 active:scale-95 ${isMobileMenuOpen
                 ? "bg-sacramento text-white shadow-md"
                 : isScrolled
                   ? "bg-slate-100 dark:bg-neutral-800 text-slate-800 dark:text-white"

@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../../axios";
-import { pickupTimeOptions } from "../../constants/pickupTimeOptions";
+import { pickupTimeOptions, getPickupTimeOptions } from "../../constants/pickupTimeOptions";
 
 export default function BookingForm() {
   const { id } = useParams();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
+  const [pkg, setPkg] = useState(null);
   const [form, setForm] = useState({
     Booking_Date: "",
     Pickup_Time: "13:00",
@@ -37,6 +38,7 @@ export default function BookingForm() {
         Payment: data.Payment || 0,
         Status: data.Status || "Confirmed",
       });
+      setPkg(data.package || null);
     } catch (err) {
       console.log(err);
       alert("Failed to load booking");
@@ -107,7 +109,7 @@ export default function BookingForm() {
             onChange={handleChange}
             className="form-input mt-1"
           >
-            {pickupTimeOptions.map((option) => (
+            {getPickupTimeOptions(pkg).map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>
@@ -175,6 +177,7 @@ export default function BookingForm() {
             onChange={handleChange}
             className="form-input mt-1"
           >
+            <option value="Pending">Pending</option>
             <option value="Confirmed">Confirmed</option>
             <option value="Completed">Completed</option>
             <option value="Cancelled">Cancelled</option>

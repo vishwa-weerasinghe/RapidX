@@ -1,10 +1,20 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import SEO from "../../components/SEO";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import api from "../../axios";
 import { useTheme } from "../../context/ThemeContext";
-import { pickupTimeOptions } from "../../constants/pickupTimeOptions";
 import { startPayHerePayment } from "../../utils/payhere";
+import { pickupTimeOptions, getPickupTimeOptions, getDefaultPickupTime } from "../../constants/pickupTimeOptions";
+import { getCountries, getCountryCallingCode, parsePhoneNumberFromString } from "libphonenumber-js";
+
+const countryDisplayNames = new Intl.DisplayNames(["en"], { type: "region" });
+const countryOptions = getCountries()
+    .map((code) => ({
+        code,
+        name: countryDisplayNames.of(code) || code,
+        callingCode: getCountryCallingCode(code),
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
 import {
     Calendar,
     Clock,
@@ -19,6 +29,8 @@ import {
     Info,
     Compass,
     Loader2,
+    CreditCard,
+    Clock3,
 } from "lucide-react";
 
 export default function Booking() {
@@ -58,6 +70,28 @@ export default function Booking() {
     const bookingId = location.state?.bookingId;
     const isEditMode = Boolean(bookingId);
     const [originalForm, setOriginalForm] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [paymentMethod, setPaymentMethod] = useState("PayHere");
+
+    // Country and phone number states matching register form
+    const [countryCode, setCountryCode] = useState("");
+    const [countryQuery, setCountryQuery] = useState("");
+    const [showCountryMenu, setShowCountryMenu] = useState(false);
+    const [phoneError, setPhoneError] = useState("");
+    const [countryError, setCountryError] = useState("");
+    const countryMenuRef = useRef(null);
+
+    const selectedCountry = countryOptions.find((c) => c.code === countryCode);
+
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (countryMenuRef.current && !countryMenuRef.current.contains(e.target)) {
+                setShowCountryMenu(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     // Load packages and set initial selected package
     useEffect(() => {
@@ -118,18 +152,19 @@ export default function Booking() {
                 setSelectedPackageId(resolvedId);
                 setPkg(foundPkg);
                 setIsPackageLocked(!isEditMode && explicitPackageRequested);
+
+                const available = getPickupTimeOptions(foundPkg);
+                const requestedTime = location.state?.pickupTime;
+                if (requestedTime && available.some((opt) => opt.value === requestedTime)) {
+                    setForm((prev) => ({ ...prev, Pickup_Time: requestedTime }));
+                } else if (!available.some((opt) => opt.value === form.Pickup_Time)) {
+                    setForm((prev) => ({ ...prev, Pickup_Time: getDefaultPickupTime(foundPkg) }));
+                }
             } else {
                 // Do not auto-select any package when none was explicitly requested
                 setSelectedPackageId("");
                 setPkg(null);
                 setIsPackageLocked(false);
-            }
-
-            if (location.state?.pickupTime) {
-                setForm((prev) => ({
-                    ...prev,
-                    Pickup_Time: location.state.pickupTime,
-                }));
             }
         } catch (err) {
             console.log(err);
@@ -144,6 +179,21 @@ export default function Booking() {
         api.get(`/bookings/${bookingId}`)
             .then((res) => {
                 const data = res.data;
+                const rawCountry = data.customer?.Country || "";
+                const prefilledCountry = countryOptions.find(
+                    (c) => c.name.toLowerCase() === rawCountry.toLowerCase() || c.code.toLowerCase() === rawCountry.toLowerCase()
+                );
+                if (prefilledCountry) {
+                    setCountryCode(prefilledCountry.code);
+                }
+                let rawPhone = data.customer?.Phone_No || "";
+                if (rawPhone && prefilledCountry) {
+                    const parsed = parsePhoneNumberFromString(rawPhone, prefilledCountry.code);
+                    if (parsed?.nationalNumber) {
+                        rawPhone = parsed.nationalNumber;
+                    }
+                }
+
                 const bookingForm = {
                     Booking_Date: data.Booking_Date || "",
                     Pickup_Time: data.Pickup_Time || "13:00",
@@ -154,9 +204,9 @@ export default function Booking() {
                     First_Name: data.customer?.First_Name || "",
                     Last_Name: data.customer?.Last_Name || "",
                     Email: data.customer?.Email || "",
-                    Phone_No: data.customer?.Phone_No || "",
+                    Phone_No: rawPhone,
                     NIC: data.customer?.NIC || "",
-                    Country: data.customer?.Country || "",
+                    Country: prefilledCountry?.name || rawCountry,
                 };
 
                 setForm(bookingForm);
@@ -175,27 +225,57 @@ export default function Booking() {
             api.get('/customer-profile')
                 .then((res) => {
                     if (res.data) {
+                        const rawCountry = res.data.Country || "";
+                        const prefilledCountry = countryOptions.find(
+                            (c) => c.name.toLowerCase() === rawCountry.toLowerCase() || c.code.toLowerCase() === rawCountry.toLowerCase()
+                        );
+                        if (prefilledCountry) {
+                            setCountryCode(prefilledCountry.code);
+                        }
+                        let rawPhone = res.data.Phone_No || "";
+                        if (rawPhone && prefilledCountry) {
+                            const parsed = parsePhoneNumberFromString(rawPhone, prefilledCountry.code);
+                            if (parsed?.nationalNumber) {
+                                rawPhone = parsed.nationalNumber;
+                            }
+                        }
+
                         setForm((prev) => ({
                             ...prev,
                             First_Name: res.data.First_Name || "",
                             Last_Name: res.data.Last_Name || "",
                             Email: res.data.Email || "",
-                            Phone_No: res.data.Phone_No || "",
+                            Phone_No: rawPhone,
                             NIC: res.data.NIC || "",
-                            Country: res.data.Country || "",
+                            Country: prefilledCountry?.name || rawCountry,
                         }));
                     }
                 })
                 .catch((err) => console.error("Error loading customer profile:", err));
         } else if (guestCustomer) {
+            const rawCountry = guestCustomer.Country || "";
+            const prefilledCountry = countryOptions.find(
+                (c) => c.name.toLowerCase() === rawCountry.toLowerCase() || c.code.toLowerCase() === rawCountry.toLowerCase()
+            );
+            if (prefilledCountry) {
+                setCountryCode(prefilledCountry.code);
+            }
+            let rawPhone = guestCustomer.Phone_No || "";
+            if (rawPhone && prefilledCountry) {
+                const parsed = parsePhoneNumberFromString(rawPhone, prefilledCountry.code);
+                if (parsed?.nationalNumber) {
+                    rawPhone = parsed.nationalNumber;
+                }
+            }
+
             setForm((prev) => ({
                 ...prev,
                 First_Name: guestCustomer.First_Name || "",
                 Last_Name: guestCustomer.Last_Name || "",
                 Email: guestCustomer.Email || "",
-                Phone_No: guestCustomer.Phone_No || "",
+                Phone_No: rawPhone,
                 NIC: guestCustomer.NIC || "",
-                Country: guestCustomer.Country || "",
+                Country: prefilledCountry?.name || rawCountry,
             }));
         }
     }, [user, guestCustomer]);
@@ -207,6 +287,16 @@ export default function Booking() {
             (p) => String(p.Package_ID || p.id) === String(pkgId)
         );
         setPkg(foundPkg || null);
+
+        if (foundPkg) {
+            const available = getPickupTimeOptions(foundPkg);
+            if (!available.some((opt) => opt.value === form.Pickup_Time)) {
+                setForm((prev) => ({
+                    ...prev,
+                    Pickup_Time: getDefaultPickupTime(foundPkg),
+                }));
+            }
+        }
     };
 
     // handle input change
@@ -228,10 +318,10 @@ export default function Booking() {
 
     // area extras (amounts added to final payment)
     const areaExtraMap = {
-        Dambulla: 5,
-        Sigiriya: 15,
-        Habarana: 18,
-        Kandalama: 15,
+        Dambulla: 12,
+        Sigiriya: 10,
+        Habarana: 3,
+        Kandalama: 16,
     };
 
     const getAreaExtra = () => {
@@ -251,6 +341,8 @@ export default function Booking() {
     // submit booking
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (isSubmitting) return;
 
         if (!selectedPackageId || !pkg) {
             alert("Please select a tour package to proceed with your booking.");
@@ -274,6 +366,7 @@ export default function Booking() {
         }
 
         if (isEditMode) {
+            setIsSubmitting(true);
             try {
                 await api.put(`/bookings/${bookingId}`, {
                     Booking_Date: form.Booking_Date,
@@ -290,23 +383,55 @@ export default function Booking() {
             } catch (err) {
                 console.log(err);
                 alert(err.response?.data?.message || "Failed to update booking");
+            } finally {
+                setIsSubmitting(false);
             }
             return;
         }
 
-        if (user?.Customer_ID) {
-            payload.Customer_ID = user.Customer_ID;
-        } else {
+        let fullPhone = form.Phone_No;
+        if (!user?.Customer_ID) {
+            if (!form.Country || !countryCode) {
+                setCountryError("Please select a country.");
+                alert("Please select a country.");
+                return;
+            }
+            const parsedPhone = parsePhoneNumberFromString(form.Phone_No, countryCode);
+            if (!parsedPhone || !parsedPhone.isValid()) {
+                setPhoneError("Enter a valid phone number for the selected country.");
+                alert("Enter a valid phone number for the selected country.");
+                return;
+            }
+            fullPhone = parsedPhone.format("E.164");
             payload.First_Name = form.First_Name;
             payload.Last_Name = form.Last_Name;
             payload.Email = form.Email;
-            payload.Phone_No = form.Phone_No;
+            payload.Phone_No = fullPhone;
             payload.NIC = form.NIC;
             payload.Country = form.Country;
+        } else {
+            payload.Customer_ID = user.Customer_ID;
+            if (countryCode && form.Phone_No) {
+                const parsedPhone = parsePhoneNumberFromString(form.Phone_No, countryCode);
+                if (parsedPhone && parsedPhone.isValid()) {
+                    fullPhone = parsedPhone.format("E.164");
+                }
+            }
+            payload.Phone_No = fullPhone;
         }
+
+        payload.payment_method = paymentMethod;
+
+        setIsSubmitting(true);
 
         try {
             const res = await api.post("/payhere/initiate", payload);
+
+            if (res.data?.payment_method === "Pay Later" || paymentMethod === "Pay Later") {
+                navigate(`/payment/success?order_id=${res.data.order_id}`);
+                return;
+            }
+
             const { payhere_params } = res.data;
 
             if (payhere_params) {
@@ -316,14 +441,19 @@ export default function Booking() {
                     },
                     onDismissed: () => {
                         console.log("PayHere payment modal closed by user");
+                        setIsSubmitting(false);
                     },
                     onError: (error) => {
+                        setIsSubmitting(false);
                         alert("PayHere Error: " + error);
                     },
                 });
+            } else {
+                setIsSubmitting(false);
             }
         } catch (err) {
             console.log(err);
+            setIsSubmitting(false);
             alert(
                 err.response?.data?.message ||
                 err.response?.data?.error ||
@@ -415,7 +545,7 @@ export default function Booking() {
                                                             value={p.Package_ID || p.id}
                                                             className="py-2 text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-900"
                                                         >
-                                                            {p.Package_Name} (1 Adult: ${p.price_one_adult} | 2+ Adults: ${p.price_more_adult} | Child: ${p.price_child})
+                                                            {p.Package_Name} (1 Adult: ${p.price_one_adult}/person | 2+ Adults: ${p.price_more_adult}/person | Child: ${p.price_child})
                                                         </option>
                                                     ))}
                                                 </>
@@ -473,7 +603,7 @@ export default function Booking() {
                                                 className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs sm:text-sm font-bold py-3 pl-3.5 sm:pl-4 pr-10 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all min-h-[44px] appearance-none cursor-pointer"
                                                 required
                                             >
-                                                {pickupTimeOptions.map((option) => (
+                                                {getPickupTimeOptions(pkg).map((option) => (
                                                     <option key={option.value} value={option.value}>
                                                         {option.label}
                                                     </option>
@@ -501,10 +631,10 @@ export default function Booking() {
                                             required
                                         >
                                             <option value="">-- Select area --</option>
-                                            <option value="Dambulla">Dambulla (+ $5.00)</option>
-                                            <option value="Sigiriya">Sigiriya (+ $15.00)</option>
-                                            <option value="Habarana">Habarana (+ $18.00)</option>
-                                            <option value="Kandalama">Kandalama (+ $15.00)</option>
+                                            <option value="Dambulla">Dambulla (+ $12.00)</option>
+                                            <option value="Sigiriya">Sigiriya (+ $10.00)</option>
+                                            <option value="Habarana">Habarana (+ $3.00)</option>
+                                            <option value="Kandalama">Kandalama (+ $16.00)</option>
                                         </select>
                                         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400">
                                             <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20">
@@ -595,26 +725,6 @@ export default function Booking() {
 
                                     <div className="flex flex-col gap-1.5">
                                         <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
-                                            Phone Number
-                                        </label>
-                                        <div className="relative flex items-center">
-                                            <Phone size={14} className="absolute left-3.5 text-slate-400 pointer-events-none shrink-0" />
-                                            <input
-                                                type="text"
-                                                name="Phone_No"
-                                                placeholder="+94 77 123 4567"
-                                                value={form.Phone_No}
-                                                onChange={handleChange}
-                                                className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs sm:text-sm font-bold py-3 pl-10 pr-4 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all min-h-[44px]"
-                                                required
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                                    <div className="flex flex-col gap-1.5">
-                                        <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
                                             NIC / Passport Number
                                         </label>
                                         <div className="relative flex items-center">
@@ -630,23 +740,138 @@ export default function Booking() {
                                             />
                                         </div>
                                     </div>
+                                </div>
 
-                                    <div className="flex flex-col gap-1.5">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                                    {/* Country Selector */}
+                                    <div className="flex flex-col gap-1.5" ref={countryMenuRef}>
                                         <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
                                             Country
                                         </label>
+                                        <div className="relative">
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowCountryMenu((open) => !open)}
+                                                className="w-full flex items-center justify-between bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs sm:text-sm font-bold py-3 px-3.5 sm:px-4 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all min-h-[44px]"
+                                                aria-expanded={showCountryMenu}
+                                                aria-haspopup="listbox"
+                                            >
+                                                <span className="flex items-center gap-2 truncate">
+                                                    {selectedCountry ? (
+                                                        <>
+                                                            <img
+                                                                src={`https://flagcdn.com/w20/${selectedCountry.code.toLowerCase()}.png`}
+                                                                srcSet={`https://flagcdn.com/w40/${selectedCountry.code.toLowerCase()}.png 2x`}
+                                                                width="20"
+                                                                alt={selectedCountry.name}
+                                                                className="rounded-[2px] shadow-sm shrink-0"
+                                                            />
+                                                            <span className="truncate">{selectedCountry.name}</span>
+                                                        </>
+                                                    ) : (
+                                                        <span className="text-slate-400 font-normal">Select a country</span>
+                                                    )}
+                                                </span>
+                                                <span className="text-xs font-semibold text-slate-400 shrink-0 ml-2">
+                                                    {selectedCountry ? `+${selectedCountry.callingCode}` : "Required"}
+                                                </span>
+                                            </button>
+
+                                            {showCountryMenu && (
+                                                <div className="absolute z-50 left-0 right-0 top-full mt-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-2 shadow-2xl">
+                                                    <input
+                                                        type="search"
+                                                        aria-label="Search countries"
+                                                        autoFocus
+                                                        placeholder="Search countries..."
+                                                        value={countryQuery}
+                                                        onChange={(e) => setCountryQuery(e.target.value)}
+                                                        className="mb-2 w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3 py-2 text-xs sm:text-sm text-slate-800 dark:text-white outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-castleton font-normal"
+                                                    />
+                                                    <div className="max-h-52 overflow-y-auto space-y-0.5" role="listbox">
+                                                        {countryOptions
+                                                            .filter(
+                                                                (c) =>
+                                                                    c.name.toLowerCase().includes(countryQuery.toLowerCase()) ||
+                                                                    c.callingCode.includes(countryQuery)
+                                                            )
+                                                            .map((c) => (
+                                                                <button
+                                                                    type="button"
+                                                                    role="option"
+                                                                    aria-selected={c.code === countryCode}
+                                                                    key={c.code}
+                                                                    onClick={() => {
+                                                                        setCountryCode(c.code);
+                                                                        setForm((prev) => ({ ...prev, Country: c.name, Phone_No: "" }));
+                                                                        setPhoneError("");
+                                                                        setCountryError("");
+                                                                        setCountryQuery("");
+                                                                        setShowCountryMenu(false);
+                                                                    }}
+                                                                    className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-xs sm:text-sm transition-colors ${c.code === countryCode
+                                                                        ? "bg-castleton/10 text-castleton font-bold"
+                                                                        : "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+                                                                        }`}
+                                                                >
+                                                                    <span className="flex items-center gap-2 truncate">
+                                                                        <img
+                                                                            src={`https://flagcdn.com/w20/${c.code.toLowerCase()}.png`}
+                                                                            srcSet={`https://flagcdn.com/w40/${c.code.toLowerCase()}.png 2x`}
+                                                                            width="20"
+                                                                            alt={c.name}
+                                                                            className="rounded-[2px] shadow-sm shrink-0"
+                                                                        />
+                                                                        <span className="truncate">{c.name}</span>
+                                                                    </span>
+                                                                    <span className="text-slate-400 font-semibold shrink-0 ml-2">
+                                                                        +{c.callingCode}
+                                                                    </span>
+                                                                </button>
+                                                            ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                        {countryError && (
+                                            <p className="text-[11px] font-semibold text-rose-500 mt-0.5">{countryError}</p>
+                                        )}
+                                    </div>
+
+                                    {/* Phone Number Input */}
+                                    <div className="flex flex-col gap-1.5">
+                                        <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                                            Phone Number
+                                        </label>
                                         <div className="relative flex items-center">
-                                            <Globe size={14} className="absolute left-3.5 text-slate-400 pointer-events-none shrink-0" />
+                                            <span className="absolute inset-y-0 left-0 z-10 flex items-center justify-center px-3 text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-300 border-r border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900/60 rounded-l-xl select-none min-w-[54px]">
+                                                {selectedCountry ? `+${selectedCountry.callingCode}` : "--"}
+                                            </span>
                                             <input
-                                                type="text"
-                                                name="Country"
-                                                placeholder="e.g. Sri Lanka"
-                                                value={form.Country}
-                                                onChange={handleChange}
-                                                className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs sm:text-sm font-bold py-3 pl-10 pr-4 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all min-h-[44px]"
+                                                type="tel"
+                                                name="Phone_No"
+                                                autoComplete="tel"
                                                 required
+                                                disabled={!countryCode}
+                                                placeholder={
+                                                    !countryCode
+                                                        ? "Select country first"
+                                                        : countryCode === "LK"
+                                                            ? "77 123 4567"
+                                                            : "Enter phone number"
+                                                }
+                                                value={form.Phone_No}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    setForm((prev) => ({ ...prev, Phone_No: val }));
+                                                    if (phoneError) setPhoneError("");
+                                                }}
+                                                className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs sm:text-sm font-bold py-3 pl-20 pr-4 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
                                             />
                                         </div>
+                                        {phoneError && (
+                                            <p className="text-[11px] font-semibold text-rose-500 mt-0.5">{phoneError}</p>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -663,7 +888,7 @@ export default function Booking() {
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                     <div className="flex flex-col gap-1.5">
                                         <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
-                                            Adult Guests (12+ yrs)
+                                            Adult Guests (11+ yrs)
                                         </label>
                                         <input
                                             type="number"
@@ -678,7 +903,7 @@ export default function Booking() {
 
                                     <div className="flex flex-col gap-1.5">
                                         <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
-                                            Child Guests (under 12 yrs)
+                                            Child Guests (6-11 yrs)
                                         </label>
                                         <input
                                             type="number"
@@ -693,6 +918,100 @@ export default function Booking() {
                                 </div>
                             </div>
 
+                            {/* Section 4: Payment Method Selection */}
+                            {!isEditMode && (
+                                <div className="space-y-3.5 sm:space-y-4 pt-1 sm:pt-2">
+                                    <div className="flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-800/40">
+                                        <CreditCard size={16} className="text-castleton shrink-0" />
+                                        <h4 className="text-xs font-extrabold uppercase tracking-widest text-slate-400">
+                                            4. Payment Method
+                                        </h4>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                                        {/* Pay Online with PayHere */}
+                                        <div
+                                            onClick={() => setPaymentMethod("PayHere")}
+                                            className={`cursor-pointer rounded-2xl p-4 border-2 transition-all duration-200 relative ${paymentMethod === "PayHere"
+                                                    ? "border-sacramento bg-sacramento/5 dark:bg-sacramento/10 shadow-sm"
+                                                    : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900"
+                                                }`}
+                                        >
+                                            <div className="flex items-start justify-between">
+                                                <div className="flex items-center gap-2.5">
+                                                    <div className={`p-2 rounded-xl ${paymentMethod === "PayHere" ? "bg-sacramento text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"}`}>
+                                                        <CreditCard size={18} />
+                                                    </div>
+                                                    <div>
+                                                        <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white block">
+                                                            Pay Online
+                                                        </span>
+                                                        <span className="text-[10px] text-slate-500 dark:text-slate-400">
+                                                            Card / PayHere Gateway
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${paymentMethod === "PayHere" ? "border-sacramento" : "border-slate-300 dark:border-slate-600"}`}>
+                                                    {paymentMethod === "PayHere" && <div className="w-2 h-2 rounded-full bg-sacramento"></div>}
+                                                </div>
+                                            </div>
+                                            <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                                                Instant online confirmation. Pay securely via Visa, MasterCard, or online banking.
+                                            </p>
+                                            <div className="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800/80">
+                                                <img
+                                                    src="/payhere-cards.png"
+                                                    alt="Accepted Cards: LankaPay, Visa, Mastercard, American Express, Discover, Diners Club"
+                                                    className="w-full max-w-[290px] h-auto object-contain rounded-md"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Pay Later */}
+                                        <div
+                                            onClick={() => setPaymentMethod("Pay Later")}
+                                            className={`cursor-pointer rounded-2xl p-4 border-2 transition-all duration-200 relative ${paymentMethod === "Pay Later"
+                                                    ? "border-amber-500 bg-amber-50/50 dark:bg-amber-950/20 shadow-sm"
+                                                    : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900"
+                                                }`}
+                                        >
+                                            <div className="flex items-start justify-between">
+                                                <div className="flex items-center gap-2.5">
+                                                    <div className={`p-2 rounded-xl ${paymentMethod === "Pay Later" ? "bg-amber-500 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"}`}>
+                                                        <Clock3 size={18} />
+                                                    </div>
+                                                    <div>
+                                                        <div className="flex items-center gap-1.5">
+                                                            <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white block">
+                                                                Pay Later
+                                                            </span>
+                                                        </div>
+                                                        <span className="text-[10px] text-slate-500 dark:text-slate-400">
+                                                            Pay near tour date
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${paymentMethod === "Pay Later" ? "border-amber-500" : "border-slate-300 dark:border-slate-600"}`}>
+                                                    {paymentMethod === "Pay Later" && <div className="w-2 h-2 rounded-full bg-amber-500"></div>}
+                                                </div>
+                                            </div>
+                                            <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                                                Reserve now without paying upfront. Our admin will collect payment near the tour date.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {paymentMethod === "Pay Later" && (
+                                        <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 text-amber-800 dark:text-amber-300 text-[11px] leading-relaxed flex items-start gap-2">
+                                            <Info size={15} className="shrink-0 mt-0.5" />
+                                            <span>
+                                                Confirmation emails with reservation details will be sent immediately. Booking status will be set to <strong>Pending</strong>, and our admin will take payment at the near date on your tour.
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
                             {/* Bill Details Summary */}
                             {pkg && (
                                 <div className="bg-castleton/5 dark:bg-sacramento-900/10 border border-castleton/20 dark:border-castleton/10 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 shadow-sm">
@@ -702,11 +1021,15 @@ export default function Booking() {
                                         </div>
                                         <div>
                                             <p className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">
-                                                Total Reservation Cost
+                                                {paymentMethod === "Pay Later" ? "Total Due on Tour Date" : "Total Reservation Cost"}
                                             </p>
                                             <p className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-0.5 tracking-tight">
                                                 $ {new Intl.NumberFormat().format(getFinalTotal())}
                                             </p>
+                                            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100/90 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800/80 px-2.5 py-0.5 rounded-full mt-1.5">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                                No Hidden Charges
+                                            </span>
                                         </div>
                                     </div>
                                     <div className="w-full sm:w-auto pt-2.5 sm:pt-0 border-t sm:border-t-0 border-castleton/10 dark:border-castleton/20 text-left sm:text-right text-[11px] font-bold text-slate-500 dark:text-slate-400 space-y-0.5">
@@ -724,17 +1047,33 @@ export default function Booking() {
                             {/* Submit & Cart Action */}
                             <button
                                 type="submit"
-                                disabled={!selectedPackageId}
-                                className="w-full min-h-[48px] bg-sacramento hover:bg-sacramento-600 disabled:bg-slate-300 dark:disabled:bg-slate-800 disabled:text-slate-500 disabled:cursor-not-allowed text-white font-extrabold text-xs sm:text-sm uppercase py-3.5 sm:py-4 px-4 rounded-xl shadow-lg shadow-sacramento/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2 group cursor-pointer"
+                                disabled={isSubmitting}
+                                className={`w-full min-h-[48px] ${paymentMethod === "Pay Later" && !isEditMode
+                                        ? "bg-amber-600 hover:bg-amber-700 shadow-amber-600/20"
+                                        : "bg-sacramento hover:bg-sacramento-600 shadow-sacramento/20"
+                                    } disabled:opacity-60 disabled:cursor-not-allowed text-white font-extrabold text-xs sm:text-sm uppercase py-3.5 sm:py-4 px-4 rounded-xl shadow-lg active:scale-[0.99] transition-all flex items-center justify-center gap-2 group cursor-pointer`}
                             >
-                                <ShoppingCart size={16} className="shrink-0" />
-                                <span className="truncate">
-                                    {isEditMode
-                                        ? "Update Booking"
-                                        : pkg
-                                            ? `Confirm & Pay • $ ${new Intl.NumberFormat().format(getFinalTotal())}`
-                                            : "Select a Package to Continue"}
-                                </span>
+                                {isSubmitting ? (
+                                    <>
+                                        <Loader2 size={16} className="animate-spin shrink-0" />
+                                        <span className="truncate">Please Wait...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <ShoppingCart size={16} className="shrink-0" />
+                                        <span className="truncate">
+                                            {isEditMode
+                                                ? "Update Booking"
+                                                : pkg
+                                                    ? paymentMethod === "Pay Later"
+                                                        ? `Confirm & Reserve (Pay Later) • $ ${new Intl.NumberFormat().format(getFinalTotal())}`
+                                                        : `Confirm & Pay • $ ${new Intl.NumberFormat().format(getFinalTotal())}`
+                                                    : paymentMethod === "Pay Later"
+                                                        ? "Select a Package to Reserve (Pay Later)"
+                                                        : "Select a Package to Continue"}
+                                        </span>
+                                    </>
+                                )}
                             </button>
                             {isEditMode && (
                                 <button

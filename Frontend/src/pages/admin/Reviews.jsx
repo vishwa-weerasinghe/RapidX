@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import api from "../../axios";
 import { getApiErrorMessage } from "../../utils/apiErrorMessage";
-import { Trash2 } from "lucide-react";
+import { Trash2, Star, Search, X, Bell, RefreshCw, Sparkles, MessageSquareQuote } from "lucide-react";
 
 export default function AdminReviews() {
   const [reviews, setReviews] = useState([]);
@@ -40,7 +40,7 @@ export default function AdminReviews() {
         data.filter((r) => getReviewId(r) > storedLastId).map((r) => getReviewId(r))
       );
       setNewReviewIds(unseenIds);
-    } catch (err) {
+    } catch {
       setError("Unable to load reviews right now.");
     } finally {
       setLoading(false);
@@ -84,14 +84,14 @@ export default function AdminReviews() {
           );
           setNewReviewIds(unseenIds);
         })
-        .catch(() => { });
+        .catch(() => {});
     }, 5000);
 
     return () => clearInterval(interval);
   }, []);
 
   const handleDelete = async (reviewId) => {
-    if (!window.confirm("Delete this review?")) return;
+    if (!window.confirm("Are you sure you want to delete this customer review?")) return;
 
     try {
       const token = localStorage.getItem("token");
@@ -103,6 +103,7 @@ export default function AdminReviews() {
 
       setReviews((prev) => prev.filter((review) => getReviewId(review) !== Number(reviewId)));
       setMessage("Review deleted successfully.");
+      setTimeout(() => setMessage(""), 3500);
       fetchAnalytics();
     } catch (err) {
       console.error(err);
@@ -121,9 +122,8 @@ export default function AdminReviews() {
 
     setNotificationReviewIds(new Set(newReviewIds));
 
-    const maxId = reviews.length > 0
-      ? Math.max(...reviews.map((r) => getReviewId(r)))
-      : 0;
+    const maxId =
+      reviews.length > 0 ? Math.max(...reviews.map((r) => getReviewId(r))) : 0;
     localStorage.setItem("lastSeenReviewId", String(maxId));
     setNewReviewIds(new Set());
     setShowNewOnly(true);
@@ -138,92 +138,113 @@ export default function AdminReviews() {
   });
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl md:text-4xl font-black text-[#29AB87] dark:text-white tracking-tight">Manage Reviews</h1>
-          <p className="mt-2 text-muted">Delete customer reviews from this admin page.</p>
+    <div className="space-y-6 max-w-7xl mx-auto pb-8">
+      {/* Header Area */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-3 rounded-2xl bg-sacramento/10 dark:bg-sacramento-900/40 text-sacramento dark:text-sacramento-300">
+            <Star size={24} strokeWidth={2.2} />
+          </div>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+              Manage Guest Reviews
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+              Monitor customer feedback sentiment, satisfaction rates, and moderation.
+            </p>
+          </div>
         </div>
 
-        <div className="relative">
+        <div className="flex items-center gap-2.5">
           <button
             type="button"
             onClick={handleBellClick}
-            className="relative rounded-full card p-2 shadow-sm hover:bg-offwhite-100 dark:hover:bg-surface-2"
+            className={`relative p-2.5 rounded-xl border transition-all ${
+              newReviewIds.size > 0
+                ? "bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400"
+                : "bg-white dark:bg-[#16231c] border-border-light dark:border-border-dark text-slate-600 dark:text-slate-300 hover:text-sacramento"
+            }`}
             title={showNewOnly ? "Show all reviews" : "Show new reviews"}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6 text-muted"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-              />
-            </svg>
+            <Bell size={18} className={newReviewIds.size > 0 ? "animate-bounce" : ""} />
             {newReviewIds.size > 0 && (
-              <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-bold text-white">
+              <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-extrabold text-white shadow-sm">
                 {newReviewIds.size}
               </span>
             )}
           </button>
+
+          <button
+            onClick={() => {
+              fetchReviews();
+              fetchAnalytics();
+            }}
+            disabled={loading}
+            className="p-2.5 rounded-xl bg-white dark:bg-[#16231c] border border-border-light dark:border-border-dark text-slate-600 dark:text-slate-300 hover:text-sacramento transition-colors"
+            title="Refresh Reviews"
+          >
+            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+          </button>
         </div>
       </div>
 
-      {message ? <p className="rounded-lg bg-sacramento/10 p-3 text-sacramento">{message}</p> : null}
-      {error ? <p className="rounded-lg bg-red-50 border border-red-200 p-3 text-red-700 dark:bg-red-950/30 dark:border-red-900/30 dark:text-red-400">{error}</p> : null}
+      {message && (
+        <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/40 text-emerald-800 dark:text-emerald-300 text-xs font-bold">
+          {message}
+        </div>
+      )}
 
-      {/* ── Rating Analytics ── */}
+      {error && (
+        <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/40 text-rose-800 dark:text-rose-300 text-xs font-bold">
+          {error}
+        </div>
+      )}
+
+      {/* ── Rating Analytics Section ── */}
       {analytics && (
-        <div className="card p-6 space-y-6">
+        <div className="rounded-3xl bg-white dark:bg-[#16231c] border border-border-light dark:border-border-dark/60 p-6 shadow-sm space-y-6">
           <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-bold text-charcoal dark:text-white">Rating Analytics</h2>
-              <p className="text-xs text-muted mt-0.5">Review feedback breakdown by rating</p>
+            <div className="flex items-center gap-2">
+              <Sparkles size={16} className="text-sacramento dark:text-sacramento-300" />
+              <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+                Rating Analytics & Insights
+              </h2>
             </div>
-            <div className="flex items-center gap-1.5 rounded-full bg-sacramento/10 px-3 py-1.5 text-xs font-bold text-sacramento dark:text-castleton-300">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.958a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.367 2.446a1 1 0 00-.364 1.118l1.287 3.957c.3.922-.755 1.688-1.539 1.118l-3.366-2.445a1 1 0 00-1.176 0l-3.366 2.445c-.784.57-1.838-.196-1.539-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.98 9.385c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.951-.69l1.286-3.958z" />
-              </svg>
-              Live Insights
-            </div>
+            <span className="text-xs font-bold px-3 py-1 rounded-full bg-sacramento/10 text-sacramento dark:text-sacramento-300 border border-sacramento/20">
+              Live Verified
+            </span>
           </div>
 
-          {/* Summary cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="rounded-xl bg-sacramento/10 dark:bg-sacramento-900/20 p-4 ring-1 ring-sacramento/20 dark:ring-sacramento-900/30">
-              <p className="text-2xl font-extrabold text-charcoal dark:text-white leading-none">
-                {analytics.average_rating} / 5
-              </p>
-              <p className="text-xs font-semibold text-muted mt-2">Average Rating</p>
+          {/* Metric KPI cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div className="p-4 rounded-2xl bg-slate-50/70 dark:bg-surface-2/40 border border-slate-200/50 dark:border-border-dark/40">
+              <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
+                {analytics.average_rating} <span className="text-sm font-semibold text-slate-400">/ 5</span>
+              </span>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1">Average Score</p>
             </div>
-            <div className="rounded-xl bg-sacramento/10 dark:bg-sacramento-900/20 p-4 ring-1 ring-sacramento/20 dark:ring-sacramento-900/30">
-              <p className="text-2xl font-extrabold text-charcoal dark:text-white leading-none">
+            <div className="p-4 rounded-2xl bg-slate-50/70 dark:bg-surface-2/40 border border-slate-200/50 dark:border-border-dark/40">
+              <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
                 {analytics.total_reviews}
-              </p>
-              <p className="text-xs font-semibold text-muted mt-2">Total Reviews</p>
+              </span>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1">Total Submissions</p>
             </div>
-            <div className="rounded-xl bg-green-50 dark:bg-green-950/20 p-4 ring-1 ring-green-100 dark:ring-green-900/30">
-              <p className="text-2xl font-extrabold text-green-700 dark:text-green-400 leading-none">
+            <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
+              <span className="text-2xl sm:text-3xl font-black text-emerald-700 dark:text-emerald-400">
                 {analytics.positive_percentage}%
-              </p>
-              <p className="text-xs font-semibold text-muted mt-2">Positive (4-5 ★)</p>
+              </span>
+              <p className="text-xs font-semibold text-emerald-800 dark:text-emerald-300 mt-1">Positive (4-5 ★)</p>
             </div>
-            <div className="rounded-xl bg-red-50 dark:bg-red-950/20 p-4 ring-1 ring-red-100 dark:ring-red-900/30">
-              <p className="text-2xl font-extrabold text-red-600 dark:text-red-400 leading-none">
+            <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20">
+              <span className="text-2xl sm:text-3xl font-black text-rose-700 dark:text-rose-400">
                 {analytics.negative_reviews}
-              </p>
-              <p className="text-xs font-semibold text-muted mt-2">Negative (1-2 ★)</p>
+              </span>
+              <p className="text-xs font-semibold text-rose-800 dark:text-rose-300 mt-1">Negative (1-2 ★)</p>
             </div>
           </div>
 
-          {/* Per-rating distribution bars */}
-          <div className="space-y-2.5">
+          {/* Rating Distribution Bars */}
+          <div className="space-y-2 pt-2">
             {(analytics.rating_distribution || []).map((row) => {
               const maxCount = Math.max(
                 ...(analytics.rating_distribution || []).map((r) => r.count),
@@ -231,85 +252,138 @@ export default function AdminReviews() {
               );
               const barWidth = row.count > 0 ? (row.count / maxCount) * 100 : 0;
               return (
-                <div key={row.rating} className="flex items-center gap-3">
-                  <span className="w-12 flex items-center justify-end gap-0.5 text-sm font-bold text-charcoal dark:text-white shrink-0">
+                <div key={row.rating} className="flex items-center gap-3 text-xs">
+                  <span className="w-12 flex items-center justify-end gap-1 font-bold text-slate-800 dark:text-slate-200 shrink-0">
                     {row.rating}
-                    <span className="text-amber-400">★</span>
+                    <Star size={12} className="fill-amber-400 text-amber-400" />
                   </span>
-                  <div className="flex-1 h-2.5 rounded-full bg-offwhite-200 dark:bg-surface-2 overflow-hidden">
+                  <div className="flex-1 h-2 rounded-full bg-slate-100 dark:bg-surface-2 overflow-hidden">
                     <div
-                      className="h-full rounded-full bg-sacramento dark:bg-castleton-300 transition-all duration-500"
+                      className="h-full rounded-full bg-sacramento dark:bg-castleton-400 transition-all duration-500"
                       style={{ width: `${barWidth}%` }}
                     />
                   </div>
-                  <span className="w-20 text-right text-xs font-semibold text-muted shrink-0">
+                  <span className="w-16 text-right font-mono text-[11px] font-semibold text-slate-400 shrink-0">
                     {row.count} ({row.percentage}%)
                   </span>
                 </div>
               );
             })}
           </div>
-
-          <div className="flex flex-wrap gap-4 pt-1 text-xs font-semibold text-muted border-t border-[var(--border)]">
-            <span>Neutral (3 ★): {analytics.neutral_reviews}</span>
-            <span>Highest: {analytics.highest_rating || "—"} ★</span>
-            <span>Lowest: {analytics.lowest_rating || "—"} ★</span>
-            <span>Most common: {analytics.most_common_rating || "—"} ★</span>
-          </div>
         </div>
       )}
 
-      <div className="flex items-center gap-3">
-        <div className="flex w-full md:w-1/2">
+      {/* Search Bar */}
+      <div className="bg-white dark:bg-[#16231c] p-3.5 sm:p-4 rounded-2xl border border-border-light dark:border-border-dark/60 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="relative flex-1 max-w-md">
+          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
-            placeholder="Search reviews by keyword..."
+            placeholder="Search reviews by keyword, message..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="form-input flex-1"
+            className="w-full pl-10 pr-9 py-2 rounded-xl text-sm bg-slate-50 dark:bg-surface-2 border border-slate-200/80 dark:border-border-dark text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sacramento/30"
           />
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+            >
+              <X size={15} />
+            </button>
+          )}
+        </div>
+
+        <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center justify-between sm:justify-end gap-3">
+          <span>{filteredReviews.length} review{filteredReviews.length === 1 ? "" : "s"} shown</span>
+          {showNewOnly && (
+            <button
+              onClick={() => setShowNewOnly(false)}
+              className="text-xs font-bold text-sacramento underline"
+            >
+              Show all reviews
+            </button>
+          )}
         </div>
       </div>
 
+      {/* Reviews Feed */}
       {loading ? (
-        <p className="text-muted">Loading reviews...</p>
+        <div className="py-20 flex flex-col items-center justify-center gap-3">
+          <div className="w-10 h-10 rounded-full border-3 border-emerald-100 border-t-sacramento animate-spin" />
+          <p className="text-sm font-semibold text-slate-400 animate-pulse">Loading feedback records...</p>
+        </div>
       ) : filteredReviews.length === 0 ? (
-        <p className="text-muted">
-          {showNewOnly ? "No new reviews." : "No reviews found."}
-        </p>
+        <div className="bg-white dark:bg-[#16231c] rounded-3xl border border-border-light dark:border-border-dark/60 p-12 text-center">
+          <MessageSquareQuote size={36} className="mx-auto mb-3 text-slate-300 dark:text-slate-600" />
+          <p className="text-sm font-bold text-slate-700 dark:text-slate-300">
+            {showNewOnly ? "No new unread reviews." : "No reviews match your search filter."}
+          </p>
+        </div>
       ) : (
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filteredReviews.map((review) => {
             const reviewId = getReviewId(review);
             const isNew = newReviewIds.has(reviewId) || notificationReviewIds.has(reviewId);
+            const customerName = review.customer
+              ? `${review.customer.First_Name || ""} ${review.customer.Last_Name || ""}`.trim()
+              : "Guest Traveler";
+            const initial = (customerName[0] ?? "G").toUpperCase();
+
             return (
               <div
                 key={reviewId}
-                className={`card p-4 ${isNew
-                    ? "border-sacramento ring-1 ring-sacramento/30"
-                    : ""
-                  }`}
+                className={`rounded-3xl bg-white dark:bg-[#16231c] p-5 sm:p-6 border transition-all duration-300 shadow-sm flex flex-col justify-between ${
+                  isNew
+                    ? "border-sacramento dark:border-sacramento-400 ring-2 ring-sacramento/20"
+                    : "border-border-light dark:border-border-dark/60"
+                }`}
               >
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="font-semibold text-charcoal dark:text-white">
-                      Rating: {review.Rate} / 5
-                    </p>
-                    <p className="mt-1 text-amber-400 text-sm leading-none">
-                      {Array.from({ length: review.Rate || 0 }).map(() => "★").join("")}
-                      {Array.from({ length: 5 - (review.Rate || 0) }).map(() => "☆").join("")}
-                    </p>
-                    <p className="text-sm text-muted">
-                      {review.customer
-                        ? `${review.customer.First_Name || ""} ${review.customer.Last_Name || ""}`.trim()
-                        : "Guest"}
-                    </p>
-                    <p className="mt-3 text-charcoal/80 dark:text-white/80">{review.Description}</p>
+                <div>
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-sacramento to-castleton-400 text-white flex items-center justify-center font-bold text-xs shadow-sm">
+                        {initial}
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-sm text-slate-900 dark:text-white">
+                          {customerName}
+                        </h4>
+                        <span className="text-[10px] font-mono text-slate-400">
+                          #{reviewId}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-xs font-extrabold text-amber-700 dark:text-amber-400">
+                      <Star size={13} className="fill-amber-400 text-amber-400" />
+                      <span>{review.Rate} / 5</span>
+                    </div>
+                  </div>
+
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed italic mt-2">
+                    &quot;{review.Description}&quot;
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between pt-4 mt-4 border-t border-border-light/60 dark:border-border-dark/40">
+                  <div className="flex items-center gap-0.5">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        size={13}
+                        className={
+                          star <= (review.Rate || 0)
+                            ? "fill-amber-400 text-amber-400"
+                            : "fill-slate-200 dark:fill-slate-700 text-slate-200 dark:text-slate-700"
+                        }
+                      />
+                    ))}
                   </div>
 
                   <button
                     onClick={() => handleDelete(review.Review_ID)}
-                    className="btn-danger"
+                    className="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
                     title="Delete review"
                     aria-label="Delete review"
                   >
@@ -320,10 +394,6 @@ export default function AdminReviews() {
             );
           })}
         </div>
-      )}
-
-      {showNewOnly && newReviewIds.size === 0 && !loading && (
-        <p className="mt-2 text-sm text-muted">No new reviews to show.</p>
       )}
     </div>
   );

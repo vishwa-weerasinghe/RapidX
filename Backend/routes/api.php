@@ -17,6 +17,7 @@ use App\Http\Controllers\ContactController;
 use App\Http\Controllers\PayHereController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\PromotionCodeController;
+use App\Http\Controllers\CancellationController;
 
 Route::get('/health', function () {
     return response()->json(['status' => 'ok', 'timestamp' => now()->toIso8601String()]);
@@ -93,6 +94,9 @@ Route::post('/bookings', [BookingController::class, 'store']);
 Route::put('/bookings/{id}', [BookingController::class, 'update'])
     ->middleware('auth:sanctum');
 
+Route::post('/bookings/{id}/collect-payment', [BookingController::class, 'collectPayment'])
+    ->middleware('auth:sanctum');
+
 Route::put('/bookings/{id}/vehicle', [BookingController::class, 'assignVehicle'])
     ->middleware('auth:sanctum');
 
@@ -107,7 +111,7 @@ Route::get('/bookings/{id}', [BookingController::class, 'show'])
 
 Route::get('/user-bookings/{customerId}', [BookingController::class, 'userBookings']);
 
-Route::patch('/user/bookings/{id}/cancel', [BookingController::class, 'cancel'])
+Route::patch('/user/bookings/{id}/cancel', [CancellationController::class, 'cancel'])
     ->middleware('auth:sanctum');
 
 Route::get('/user/bookings/{id}', [BookingController::class, 'show'])

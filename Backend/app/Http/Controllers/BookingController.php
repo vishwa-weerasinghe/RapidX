@@ -4,11 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
+use App\Services\CancellationService;
 use Carbon\WeekDay;
 use Illuminate\Http\Request;
 
 class BookingController extends Controller
 {
+    public function __construct(private CancellationService $cancellationService)
+    {
+    }
+
     private function isAdmin($user): bool
     {
         $role = $user->role ?? $user->Role ?? $user->user_type ?? null;
@@ -29,16 +34,17 @@ class BookingController extends Controller
     //                 pickup location, area and status
     public function index(Request $request)
     {
-        $query = Booking::with(['customer', 'package', 'vehicle.driver', 'vehicles.driver']);
+        $query = Booking::with(['customer', 'package', 'vehicle.driver', 'vehicles.driver', 'payment']);
 
         $this->applyPeriodFilter($query, $request);
         $this->applySearchFilter($query, $request);
 
-        // Order by the column the period filter works on so the filtered list
-        // reads chronologically (newest safari date first) instead of looking
-        // like an unrelated pile of rows. Booking_ID breaks date ties.
+        // Order by Booking_ID descending so the most recently created bookings
+        // appear first (105 above 104, above 103, ...). Booking_ID is the
+        // creation order, unlike Booking_Date which is the safari date and can
+        // place an older booking above a newer one.
         return response()->json(
-            $query->orderByDesc('Booking_Date')->orderByDesc('Booking_ID')->get()
+            $query->orderByDesc('Booking_ID')->get()
         );
     }
 
@@ -152,7 +158,7 @@ class BookingController extends Controller
         }
 
         return response()->json(
-            Booking::with(['package', 'vehicle.driver', 'vehicles.driver'])
+            Booking::with(['package', 'vehicle.driver', 'vehicles.driver', 'payment'])
                 ->where('Customer_ID', $customerId)
                 ->latest()
                 ->get()
@@ -234,7 +240,7 @@ class BookingController extends Controller
     // =========================
     public function show($id)
     {
-        $booking = Booking::with(['customer', 'package', 'vehicle.driver', 'vehicles.driver'])
+        $booking = Booking::with(['customer', 'package', 'vehicle.driver', 'vehicles.driver', 'payment'])
             ->findOrFail($id);
 
         $user = request()->user('sanctum') ?? auth('sanctum')->user();
@@ -256,7 +262,7 @@ class BookingController extends Controller
             'Area' => 'sometimes|required|string|max:100',
         ]);
 
-        $booking = Booking::findOrFail($id);
+        $booking = Booking::with('payment')->findOrFail($id);
 
         $user = request()->user('sanctum') ?? auth('sanctum')->user();
 
@@ -298,6 +304,16 @@ class BookingController extends Controller
 
         $booking->update($request->only($allowedFields));
 
+        // If admin confirms a booking that has a pending payment (e.g. Pay Later collected on tour),
+        // mark the payment as Success.
+        if ($this->isAdmin($user) && $request->input('Status') === 'Confirmed' && $booking->payment && $booking->payment->status === 'Pending') {
+            $booking->payment->update([
+                'status'         => 'Success',
+                'status_code'    => 2,
+                'status_message' => 'Payment collected and confirmed by Admin on tour date',
+            ]);
+        }
+
         // Keep the multi-vehicle pivot in sync whenever the single Vehicle_ID
         // column is changed through this generic endpoint.
         if ($request->has('Vehicle_ID')) {
@@ -307,53 +323,38 @@ class BookingController extends Controller
 
         return response()->json([
             'message' => 'Booking updated successfully',
-            'booking' => $booking
+            'booking' => $booking->fresh(['customer', 'package', 'vehicle.driver', 'vehicles.driver', 'payment'])
         ]);
     }
 
     // =========================
-    // CANCEL BOOKING (CUSTOMER SELF-SERVICE)
-    // Applies the refund policy shown on the customer cancellation page
-    // (Frontend/src/pages/user/cancellation.jsx):
-    //   - More than 7 days before the tour date: 100% refund
-    //   - 3-7 days before the tour date: 50% refund
-    //   - Less than 3 days before the tour date (or no-show): no refund
+    // COLLECT PAYMENT ON TOUR (ADMIN)
     // =========================
-    public function cancel(Request $request, $id)
+    public function collectPayment(Request $request, $id)
     {
+        $user = request()->user('sanctum') ?? auth('sanctum')->user();
+        if (!$user || !$this->isAdmin($user)) {
+            return response()->json(['message' => 'Unauthorized: Only administrators can collect payment.'], 403);
+        }
+
         $booking = Booking::with('payment')->findOrFail($id);
 
-        if (strtolower((string) $booking->Status) === 'cancelled') {
-            return response()->json([
-                'message' => 'This booking is already cancelled.',
-            ], 422);
-        }
-
-        // Ownership check
-        $user = $request->user('sanctum') ?? auth('sanctum')->user();
-        if (!$user) {
-            return response()->json(['message' => 'Unauthenticated. Only registered users can cancel bookings.'], 401);
-        }
-
-        if (!$this->isAdmin($user) && (int) $user->Customer_ID !== (int) $booking->Customer_ID) {
-            return response()->json(['message' => 'Unauthorized. You can only cancel your own bookings.'], 403);
-        }
-
-        // Trigger the real PayHere refund, mirroring the admin-delete path.
-        // It accurately calculates the tiered percentage based on dates,
-        // checks if the booking was actually paid, and processes the refund.
-        $refundPercentage = $this->processRefund($booking);
-
         $booking->update([
-            'Status' => 'Cancelled',
-            'Admin_Seen' => false,
-            'Admin_Message' => 'Customer cancelled this booking.',
+            'Status' => 'Confirmed',
         ]);
 
+        if ($booking->payment) {
+            $booking->payment->update([
+                'status'         => 'Success',
+                'status_code'    => 2,
+                'status_message' => 'Payment collected by Admin on tour date',
+            ]);
+        }
+
         return response()->json([
-            'message' => 'Booking cancelled successfully',
-            'booking' => $booking,
-            'refund_percentage' => $refundPercentage,
+            'success' => true,
+            'message' => 'Payment collected and booking confirmed successfully.',
+            'booking' => $booking->fresh(['customer', 'package', 'vehicle.driver', 'vehicles.driver', 'payment']),
         ]);
     }
 
@@ -438,43 +439,7 @@ class BookingController extends Controller
     // =========================
     // DELETE BOOKING (ADMIN)
     // =========================
-    private function processRefund(Booking $booking)
-    {
-        $refundPercentage = 0;
-        
-        $bookingDate = \Carbon\Carbon::parse($booking->Booking_Date)->startOfDay();
-        $today = \Carbon\Carbon::now()->startOfDay();
-        
-        // Calculate days difference correctly ignoring time of day
-        $daysDifference = (int) round($today->diffInDays($bookingDate, false));
-
-        if ($daysDifference > 7) {
-            $refundPercentage = 100;
-        } elseif ($daysDifference >= 3 && $daysDifference <= 7) {
-            $refundPercentage = 50;
-        }
-
-        // Only actually refund money via PayHere if it was confirmed and paid
-        if ($booking->Status === 'Confirmed' && $booking->payment && $booking->payment->payhere_payment_id) {
-            if ($refundPercentage > 0 && $booking->Payment > 0) {
-                $refundAmount = ($booking->Payment * $refundPercentage) / 100;
-                
-                $payHereService = app(\App\Services\PayHereService::class);
-                $description = "Automated Refund: {$refundPercentage}% (Cancelled {$daysDifference} days before tour)";
-                
-                try {
-                    $payHereService->refund($booking->payment->payhere_payment_id, $refundAmount, $description);
-                    \Illuminate\Support\Facades\Log::info("Refunded {$refundAmount} for Booking ID {$booking->Booking_ID}");
-                } catch (\Exception $e) {
-                    \Illuminate\Support\Facades\Log::error("Failed to process refund for Booking ID {$booking->Booking_ID}: " . $e->getMessage());
-                }
-            }
-        }
-        
-        return $refundPercentage;
-    }
-
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         $booking = Booking::with('payment')->findOrFail($id);
 
@@ -488,13 +453,46 @@ class BookingController extends Controller
             return response()->json(['message' => 'Only administrators can delete bookings.'], 403);
         }
 
-        $refundPercentage = $this->processRefund($booking);
+        // A confirmed booking whose safari date has passed cannot be cancelled
+        // by anyone — the same rule the customer flow enforces, and checked
+        // first so the expiry is reported rather than a missing checkbox. Unpaid
+        // bookings stay cancellable even when their date has passed.
+        if ($this->cancellationService->isConfirmedBooking($booking)
+            && $this->cancellationService->isExpired($booking)) {
+            return response()->json([
+                'message' => 'Sorry, your request cannot be completed as your booking date is expired.',
+            ], 422);
+        }
+
+        // The policy must be acknowledged just like on the customer flow, and
+        // admins may pick the refund tier themselves (the modal offers
+        // 100/50/25/0%). When no tier is sent we fall back to the automatic
+        // policy-calculated percentage.
+        $validated = $request->validate([
+            'agreed' => ['required', 'accepted'],
+            'Refund_Percentage' => ['sometimes', 'nullable', 'in:0,25,50,100'],
+        ]);
+
+        $refundPercentage = $this->cancellationService->processRefund(
+            $booking,
+            isset($validated['Refund_Percentage'])
+                ? (int) $validated['Refund_Percentage']
+                : null
+        );
 
         $booking->update([
             'Status' => 'Cancelled',
             'Customer_Seen' => false,
             'Customer_Message' => 'Your booking was cancelled by an administrator.',
+            // Persist the applied percentage (auto-calculated or the admin's
+            // override) so the record matches what was actually refunded.
+            'Refund_Percentage' => $refundPercentage,
+            'Cancelled_At' => now(),
         ]);
+
+        // An "In Cart" booking leaves its cart entry behind unless it is dropped
+        // here, and the cart page would keep showing a cancelled item.
+        $this->cancellationService->removeFromCart($booking);
 
         return response()->json([
             'message' => 'Booking cancelled successfully',

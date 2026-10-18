@@ -33,8 +33,12 @@ class BookingConfirmationMail extends Mailable
     public function envelope(): Envelope
     {
         $prefix = $this->isAdminCopy ? '[ADMIN NOTIFICATION] ' : '';
+        $subjectTitle = ($this->payment->payment_method === 'Pay Later')
+            ? ($this->isAdminCopy ? 'New Pay Later Booking - Order #' : 'Safari Reservation (Pay Later) - Order #')
+            : 'Booking Confirmation - Order #';
+
         return new Envelope(
-            subject: $prefix . 'Booking Confirmation - Order #' . $this->payment->order_id,
+            subject: $prefix . $subjectTitle . $this->payment->order_id,
         );
     }
 
