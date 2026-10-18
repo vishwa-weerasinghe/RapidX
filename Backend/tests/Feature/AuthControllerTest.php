@@ -301,6 +301,57 @@ class AuthControllerTest extends TestCase
             ->assertJsonValidationErrors(['Email']);
     }
 
+    public function test_customer_can_update_profile_without_changing_their_email(): void
+    {
+        $customer = $this->createCustomer(['Email' => 'profile@example.com']);
+        $user = $this->createUser($customer->Customer_ID, 'profile@example.com');
+
+        $response = $this->actingAs($user, 'sanctum')->putJson('/api/customer-profile', [
+            'First_Name' => 'Updated',
+            'Last_Name' => 'Customer',
+            'Email' => 'profile@example.com',
+            'Phone_No' => '0771234567',
+            'NIC' => '199912345678',
+            'Country' => 'Sri Lanka',
+        ]);
+
+        $response->assertOk()
+            ->assertJsonPath('message', 'Profile updated successfully.')
+            ->assertJsonPath('customer.First_Name', 'Updated')
+            ->assertJsonPath('user.Email', 'profile@example.com');
+
+        $this->assertDatabaseHas('users', [
+            'Member_ID' => $user->Member_ID,
+            'Email' => 'profile@example.com',
+            'User_Name' => 'Updated Customer',
+        ]);
+    }
+
+    public function test_customer_cannot_update_profile_to_another_users_email(): void
+    {
+        $customer = $this->createCustomer(['Email' => 'profile@example.com']);
+        $user = $this->createUser($customer->Customer_ID, 'profile@example.com');
+        $otherCustomer = $this->createCustomer(['Email' => 'other@example.com']);
+        $this->createUser($otherCustomer->Customer_ID, 'other@example.com');
+
+        $response = $this->actingAs($user, 'sanctum')->putJson('/api/customer-profile', [
+            'First_Name' => 'Updated',
+            'Last_Name' => 'Customer',
+            'Email' => 'other@example.com',
+            'Phone_No' => '0771234567',
+            'NIC' => '199912345678',
+            'Country' => 'Sri Lanka',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['Email']);
+
+        $this->assertDatabaseHas('users', [
+            'Member_ID' => $user->Member_ID,
+            'Email' => 'profile@example.com',
+        ]);
+    }
+
     // -------------------------------------------------------------------------
     // Logout
     // -------------------------------------------------------------------------

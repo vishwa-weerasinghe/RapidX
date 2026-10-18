@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use App\Models\Customer;
 use App\Models\User;
 use Closure;
@@ -130,7 +131,11 @@ class AuthController extends Controller
         $validated = $request->validate([
             'First_Name' => 'required|string|max:50',
             'Last_Name' => 'required|string|max:50',
-            'Email' => 'required|email|unique:users,Email,' . $user->id,
+            'Email' => [
+                'required',
+                'email',
+                Rule::unique('users', 'Email')->ignore($user->getKey(), $user->getKeyName()),
+            ],
             'Phone_No' => 'required|string|max:20',
             'NIC' => 'required|string|max:20',
             'Country' => 'required|string|max:50',
