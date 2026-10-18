@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { Car, Search, Plus, Edit3, Trash2, X, RefreshCw, Eye, Users } from "lucide-react";
 import api from "../../axios";
 
 export default function Vehicles() {
@@ -14,7 +15,7 @@ export default function Vehicles() {
     try {
       setLoading(true);
       const res = await api.get("/vehicles");
-      setVehicles(res.data);
+      setVehicles(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error(err);
     } finally {
@@ -27,10 +28,13 @@ export default function Vehicles() {
   }, []);
 
   const handleDelete = async (id) => {
-    if (!confirm("Delete this vehicle?")) return;
+    if (!confirm("Are you sure you want to delete this vehicle?")) return;
     try {
       await api.delete(`/vehicles/${id}`);
       setVehicles((prev) => prev.filter((v) => v.Vehicle_ID !== id));
+      if (showVehicleResults) {
+        setVehicleResults((prev) => prev.filter((v) => v.Vehicle_ID !== id));
+      }
     } catch (err) {
       console.error(err);
       alert("Failed to delete vehicle.");
@@ -81,79 +85,133 @@ export default function Vehicles() {
   });
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl md:text-4xl font-black text-[#29AB87] dark:text-white tracking-tight">Vehicles</h1>
-        <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <div className="relative">
-              <svg
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 21l-4.35-4.35m1.35-5.4a6.75 6.75 0 11-13.5 0 6.75 6.75 0 0113.5 0z"
-                />
-              </svg>
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search by number or type..."
-                className="form-input w-full sm:w-64 pl-9"
-              />
-            </div>
-            <button
-              type="button"
-              onClick={handleSeeVehicle}
-              className="btn-secondary"
-              aria-label="See vehicle"
-            >
-              {filteredVehicles.length > 0 ? `See Vehicle (${filteredVehicles.length})` : "See Vehicle"}
-            </button>
+    <div className="space-y-6 max-w-7xl mx-auto pb-8">
+      {/* Header Area */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-3 rounded-2xl bg-sacramento/10 dark:bg-sacramento-900/40 text-sacramento dark:text-sacramento-300">
+            <Car size={24} strokeWidth={2.2} />
           </div>
-          <button onClick={() => navigate("/admin/vehicles/create")} className="btn-primary">
-            + Add Vehicle
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+              Safari Fleet Vehicles
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+              Inspect jeep models, passenger seating capacities, and assigned drivers.
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={() => navigate("/admin/vehicles/create")}
+          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-sacramento hover:bg-sacramento-600 dark:bg-castleton-500 dark:hover:bg-castleton-600 text-white font-bold text-sm shadow-sm transition-all active:scale-95"
+        >
+          <Plus size={16} />
+          <span>Add Vehicle</span>
+        </button>
+      </div>
+
+      {/* Search & Actions Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#16231c] p-3.5 sm:p-4 rounded-2xl border border-border-light dark:border-border-dark/60 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-1">
+          <div className="relative flex-1 max-w-md">
+            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by vehicle number, type, ID..."
+              className="w-full pl-10 pr-9 py-2 rounded-xl text-sm bg-slate-50 dark:bg-surface-2 border border-slate-200/80 dark:border-border-dark text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sacramento/30"
+            />
+            {search && (
+              <button
+                onClick={() => setSearch("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+              >
+                <X size={15} />
+              </button>
+            )}
+          </div>
+
+          <button
+            type="button"
+            onClick={handleSeeVehicle}
+            aria-label="See vehicle"
+            className="inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl border border-border-light dark:border-border-dark bg-slate-50 dark:bg-surface-2 hover:bg-slate-100 dark:hover:bg-surface-2/80 text-xs font-bold text-slate-700 dark:text-slate-200 transition-colors"
+          >
+            <Eye size={14} className="text-sacramento dark:text-sacramento-300" />
+            <span>{filteredVehicles.length > 0 ? `See Vehicle (${filteredVehicles.length})` : "See Vehicle"}</span>
+          </button>
+        </div>
+
+        <div className="flex items-center justify-between sm:justify-end gap-3 text-xs text-slate-500 dark:text-slate-400">
+          <span>
+            {loading ? "Syncing..." : `${filteredVehicles.length} of ${vehicles.length} vehicles`}
+          </span>
+          <button
+            onClick={fetchVehicles}
+            disabled={loading}
+            className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-surface-2 text-slate-500 hover:text-sacramento transition-colors"
+            title="Refresh List"
+          >
+            <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
           </button>
         </div>
       </div>
 
+      {/* Matched Vehicles Modal / Card Container */}
       {showVehicleResults && (
-        <div className="mb-6 rounded-[18px] border border-[#d8c9a7] bg-[#fffdf7] p-4 shadow-sm dark:border-[#385b48] dark:bg-[#101f19]">
+        <div className="rounded-3xl border border-amber-200/80 bg-amber-50/40 p-5 sm:p-6 shadow-sm dark:border-amber-900/40 dark:bg-amber-950/20">
           <div className="mb-4 flex items-center justify-between gap-3">
-            <h2 className="text-[15px] font-black text-[#183b2d] dark:text-[#fff8e7]">Matched vehicles</h2>
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
+              <h2 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white">
+                Matched Fleet Overview
+              </h2>
+            </div>
             <button
               type="button"
               onClick={() => setShowVehicleResults(false)}
-              className="rounded-md px-2 py-1 text-lg leading-none text-[#4c5a4e] hover:bg-[#f3ead8] dark:text-[#e2e8df] dark:hover:bg-[#20392e]"
               aria-label="Close vehicle results"
+              className="rounded-lg p-1.5 text-slate-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
             >
-              ×
+              <X size={18} />
             </button>
           </div>
 
           {vehicleResults.length === 0 ? (
-            <p className="text-sm text-muted">No vehicles found for the current search.</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">No vehicles match the current filter criteria.</p>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {vehicleResults.map((vehicle) => (
                 <div
                   key={vehicle.Vehicle_ID}
-                  className="rounded-[14px] border border-[#d8c9a7] border-l-4 border-l-[#9a7628] bg-[#f3ead8] p-4 shadow-sm dark:border-[#385b48] dark:border-l-[#e6c15a] dark:bg-[#17352b]"
+                  className="rounded-2xl border border-border-light dark:border-border-dark/60 bg-white dark:bg-[#16231c] p-4 shadow-sm"
                 >
-                  <p className="text-[12px] font-black uppercase tracking-wide text-[#765719] dark:text-[#e6c15a]">
-                    Vehicle #{vehicle.Vehicle_ID}
-                  </p>
-                  <p className="mt-2 text-[22px] font-extrabold leading-tight text-[#183b2d] dark:text-[#fff8e7]">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-sacramento dark:text-sacramento-300 bg-sacramento/10 dark:bg-sacramento-900/40 px-2 py-0.5 rounded-md">
+                      #{vehicle.Vehicle_ID}
+                    </span>
+                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                      {vehicle.No_of_Seats} Seats
+                    </span>
+                  </div>
+                  <p className="text-lg font-black text-slate-900 dark:text-white">
                     {vehicle.Vehicle_No}
                   </p>
-                  <p className="mt-2 text-[15px] font-medium text-[#334b3e] dark:text-[#d7e4d8]">Type: {vehicle.Vehicle_Type}</p>
-                  <p className="text-[15px] font-medium text-[#334b3e] dark:text-[#d7e4d8]">Seats: {vehicle.No_of_Seats}</p>
+                  <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
+                    Type: <span className="text-slate-700 dark:text-slate-200">{vehicle.Vehicle_Type}</span>
+                  </p>
+                  {vehicle.driver ? (
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1">
+                      <Users size={12} className="text-sacramento" />
+                      <span>{vehicle.driver.Driver_Name}</span>
+                    </p>
+                  ) : (
+                    <p className="text-[11px] text-slate-400 mt-1">
+                      Driver: #{vehicle.Driver_ID || "Unassigned"}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>
@@ -161,64 +219,171 @@ export default function Vehicles() {
         </div>
       )}
 
+      {/* Main Content Area */}
       {loading ? (
-        <p className="text-muted">Loading...</p>
+        <div className="py-20 flex flex-col items-center justify-center gap-3">
+          <div className="w-10 h-10 rounded-full border-3 border-emerald-100 border-t-sacramento animate-spin" />
+          <p className="text-sm font-semibold text-slate-400 animate-pulse">Loading fleet vehicles...</p>
+        </div>
       ) : vehicles.length === 0 ? (
-        <p className="text-muted">No vehicles found.</p>
+        <div className="bg-white dark:bg-[#16231c] rounded-3xl border border-border-light dark:border-border-dark/60 p-12 text-center">
+          <Car size={36} className="mx-auto mb-3 text-slate-300 dark:text-slate-600" />
+          <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-1">No Vehicles Registered</h3>
+          <p className="text-xs text-slate-400 mb-5">Add safari jeeps and vehicles to configure operations.</p>
+          <button
+            onClick={() => navigate("/admin/vehicles/create")}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-sacramento text-white text-xs font-bold"
+          >
+            <Plus size={14} /> Add First Vehicle
+          </button>
+        </div>
       ) : filteredVehicles.length === 0 ? (
-        <p className="text-muted">
-          No vehicles match your search for "{search.trim()}".
-        </p>
+        <div className="bg-white dark:bg-[#16231c] rounded-3xl border border-border-light dark:border-border-dark/60 p-10 text-center">
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            No vehicles match your search &quot;<span className="font-semibold">{search}</span>&quot;.
+          </p>
+          <button
+            onClick={() => setSearch("")}
+            className="mt-3 text-xs font-bold text-sacramento dark:text-sacramento-300 underline"
+          >
+            Clear Search
+          </button>
+        </div>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-border-light dark:border-border-dark">
-          <table className="min-w-full bg-surface text-sm">
-           <thead className="bg-[#29AB87] text-white uppercase text-xs dark:bg-[#29AB87]">
-              <tr>
-                <th className="px-4 py-3 text-left">Vehicle ID</th>
-                <th className="px-4 py-3 text-left">Vehicle Number</th>
-                <th className="px-4 py-3 text-left">Type</th>
-                <th className="px-4 py-3 text-center">Seats</th>
-                <th className="px-4 py-3 text-left">Driver ID</th>
-                <th className="px-4 py-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border-light dark:divide-border-dark">
-              {filteredVehicles.map((vehicle) => (
-                <tr key={vehicle.Vehicle_ID} className="hover:bg-offwhite-100 dark:hover:bg-surface-2">
-                  <td className="px-4 py-3 font-medium text-charcoal dark:text-white">
-                    #{vehicle.Vehicle_ID}
-                  </td>
-                  <td className="px-4 py-3 text-charcoal dark:text-white font-medium">
-                    {vehicle.Vehicle_No}
-                  </td>
-                  <td className="px-4 py-3 text-muted">
-                    {vehicle.Vehicle_Type}
-                  </td>
-                  <td className="px-4 py-3 text-center text-muted">
-                    {vehicle.No_of_Seats}
-                  </td>
-                  <td className="px-4 py-3 text-muted">
-                    #{vehicle.Driver_ID}
-                  </td>
-                  <td className="px-4 py-3 text-right space-x-3">
+        <>
+          {/* Mobile Card View (visible on < sm screens) */}
+          <div className="grid grid-cols-1 gap-3.5 sm:hidden">
+            {filteredVehicles.map((vehicle) => (
+              <div
+                key={vehicle.Vehicle_ID}
+                className="bg-white dark:bg-[#16231c] p-4 rounded-2xl border border-border-light dark:border-border-dark/60 shadow-sm flex flex-col gap-3"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-xl bg-sacramento/10 text-sacramento dark:text-sacramento-300">
+                      <Car size={18} />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-base text-slate-900 dark:text-white">
+                        {vehicle.Vehicle_No}
+                      </h3>
+                      <span className="text-[11px] font-mono text-slate-400">
+                        ID: #{vehicle.Vehicle_ID}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1.5">
                     <Link
                       to={`/admin/vehicles/${vehicle.Vehicle_ID}/edit`}
-                      className="text-sacramento hover:underline font-medium"
+                      className="p-2 rounded-lg bg-slate-50 dark:bg-surface-2 text-slate-600 dark:text-slate-300 hover:text-sacramento transition-colors"
+                      title="Edit Vehicle"
                     >
-                      Edit
+                      <Edit3 size={15} />
                     </Link>
                     <button
                       onClick={() => handleDelete(vehicle.Vehicle_ID)}
-                      className="text-red-600 hover:underline font-medium dark:text-red-400"
+                      className="p-2 rounded-lg bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 hover:bg-rose-100 transition-colors"
+                      title="Delete Vehicle"
                     >
-                      Delete
+                      <Trash2 size={15} />
                     </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 pt-2 border-t border-border-light/60 dark:border-border-dark/40 text-[11px]">
+                  <div className="p-2 rounded-xl bg-slate-50 dark:bg-surface-2/60 text-center">
+                    <span className="block text-[10px] text-slate-400 font-semibold">Type</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200 truncate block">
+                      {vehicle.Vehicle_Type}
+                    </span>
+                  </div>
+                  <div className="p-2 rounded-xl bg-slate-50 dark:bg-surface-2/60 text-center">
+                    <span className="block text-[10px] text-slate-400 font-semibold">Capacity</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200">
+                      {vehicle.No_of_Seats} Seats
+                    </span>
+                  </div>
+                  <div className="p-2 rounded-xl bg-slate-50 dark:bg-surface-2/60 text-center">
+                    <span className="block text-[10px] text-slate-400 font-semibold">Driver</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200">
+                      #{vehicle.Driver_ID}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop & Tablet Table (visible on sm and larger screens) */}
+          <div className="hidden sm:block overflow-hidden rounded-3xl bg-white dark:bg-[#16231c] border border-border-light dark:border-border-dark/60 shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-sm">
+                <thead>
+                  <tr className="bg-slate-50/70 dark:bg-surface-2/40 text-[11px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider border-b border-border-light/60 dark:border-border-dark/40">
+                    <th className="px-5 py-3.5 text-left">Vehicle ID</th>
+                    <th className="px-5 py-3.5 text-left">Vehicle Number</th>
+                    <th className="px-5 py-3.5 text-left">Model / Type</th>
+                    <th className="px-5 py-3.5 text-center">Capacity</th>
+                    <th className="px-5 py-3.5 text-left">Assigned Driver</th>
+                    <th className="px-5 py-3.5 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border-light/60 dark:divide-border-dark/40">
+                  {filteredVehicles.map((vehicle) => (
+                    <tr
+                      key={vehicle.Vehicle_ID}
+                      className="hover:bg-slate-50/60 dark:hover:bg-surface-2/20 transition-colors"
+                    >
+                      <td className="px-5 py-4 font-mono font-semibold text-xs text-slate-500 dark:text-slate-400">
+                        #{vehicle.Vehicle_ID}
+                      </td>
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-2.5">
+                          <div className="p-2 rounded-xl bg-sacramento/10 text-sacramento dark:text-sacramento-300">
+                            <Car size={16} />
+                          </div>
+                          <span className="font-extrabold text-slate-900 dark:text-white">
+                            {vehicle.Vehicle_No}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-5 py-4 text-slate-600 dark:text-slate-300 font-medium">
+                        {vehicle.Vehicle_Type}
+                      </td>
+                      <td className="px-5 py-4 text-center">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 dark:bg-surface-2 text-slate-700 dark:text-slate-300">
+                          {vehicle.No_of_Seats} Seats
+                        </span>
+                      </td>
+                      <td className="px-5 py-4 text-slate-600 dark:text-slate-300 font-mono text-xs">
+                        #{vehicle.Driver_ID}
+                      </td>
+                      <td className="px-5 py-4 text-right">
+                        <div className="inline-flex items-center gap-2">
+                          <Link
+                            to={`/admin/vehicles/${vehicle.Vehicle_ID}/edit`}
+                            className="p-1.5 rounded-lg text-slate-500 hover:text-sacramento hover:bg-slate-100 dark:hover:bg-surface-2 transition-colors"
+                            title="Edit Vehicle"
+                          >
+                            <Edit3 size={15} />
+                          </Link>
+                          <button
+                            onClick={() => handleDelete(vehicle.Vehicle_ID)}
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
+                            title="Delete Vehicle"
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );

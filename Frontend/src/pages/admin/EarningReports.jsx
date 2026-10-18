@@ -72,12 +72,12 @@ export default function EarningReports() {
   }, [bookings]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-7xl mx-auto pb-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <Link to="/admin/earnings-and-reports" className="mb-3 inline-flex items-center gap-2 text-sm font-semibold text-muted hover:text-sacramento"><ArrowLeft size={16} /> Back to Earnings and Reports</Link>
-          <h1 className="text-3xl font-black text-[#29AB87] dark:text-white">Earning Reports</h1>
-          <p className="mt-1 text-sm text-muted">Check your earnings and download the report as PDF.</p>
+          <Link to="/admin/earnings-and-reports" className="mb-3 inline-flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-sacramento transition-colors"><ArrowLeft size={15} /> Back to Earnings and Reports</Link>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Earning Reports</h1>
+          <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400">Check your earnings and download financial statements as PDF.</p>
         </div>
         <div className="flex items-end gap-3">
           <label className="flex flex-col gap-1 text-xs font-semibold text-muted">
@@ -110,14 +110,14 @@ export default function EarningReports() {
 
           {reportView === "monthly" && <div className="card p-4">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-lg font-bold text-charcoal dark:text-white">Monthly Earnings</h2><p className="text-sm text-muted">Earnings grouped by package for {month}.</p></div><input type="month" value={month} onChange={(event) => setMonth(event.target.value)} className="form-input py-2 text-sm" /></div>
-            <div className="overflow-x-auto rounded-lg border border-border-light dark:border-border-dark"><table className="min-w-full bg-surface text-sm"><thead className="bg-[#29AB87] text-xs uppercase text-white"><tr><th className="px-4 py-3 text-left">Package</th><th className="px-4 py-3 text-right">Confirmed Earnings</th><th className="px-4 py-3 text-right">Unconfirmed Earnings</th><th className="px-4 py-3 text-right">Refund</th><th className="px-4 py-3 text-right">Total</th></tr></thead><tbody className="divide-y divide-border-light dark:divide-border-dark">{packageRows.length === 0 ? <tr><td colSpan="5" className="px-4 py-6 text-center text-muted">No bookings for this month.</td></tr> : packageRows.map((row) => <tr key={row.packageName}><td className="px-4 py-3 font-medium">{row.packageName}</td><td className="px-4 py-3 text-right font-mono text-sacramento">$ {row.confirmed.toLocaleString()}</td><td className="px-4 py-3 text-right font-mono">$ {row.unconfirmed.toLocaleString()}</td><td className={`px-4 py-3 text-right font-mono ${row.refund !== 0 ? "text-red-600" : "text-charcoal dark:text-white"}`}>$ {row.refund.toLocaleString()}</td><td className="px-4 py-3 text-right font-mono font-bold text-[#765719] dark:text-[#e6c15a]">$ {row.total.toLocaleString()}</td></tr>)}</tbody></table></div>
+            <div className="overflow-x-auto rounded-lg border border-border-light dark:border-border-dark"><table className="min-w-full bg-surface text-sm"><thead className="bg-slate-50/70 dark:bg-surface-2/40 text-[11px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider border-b border-border-light/60 dark:border-border-dark/40"><tr><th className="px-4 py-3 text-left">Package</th><th className="px-4 py-3 text-right">Confirmed Earnings</th><th className="px-4 py-3 text-right">Unconfirmed Earnings</th><th className="px-4 py-3 text-right">Refund</th><th className="px-4 py-3 text-right">Total</th></tr></thead><tbody className="divide-y divide-border-light dark:divide-border-dark">{packageRows.length === 0 ? <tr><td colSpan="5" className="px-4 py-6 text-center text-muted">No bookings for this month.</td></tr> : packageRows.map((row) => <tr key={row.packageName}><td className="px-4 py-3 font-medium">{row.packageName}</td><td className="px-4 py-3 text-right font-mono text-sacramento">$ {row.confirmed.toLocaleString()}</td><td className="px-4 py-3 text-right font-mono">$ {row.unconfirmed.toLocaleString()}</td><td className={`px-4 py-3 text-right font-mono ${row.refund !== 0 ? "text-red-600" : "text-charcoal dark:text-white"}`}>$ {row.refund.toLocaleString()}</td><td className="px-4 py-3 text-right font-mono font-bold text-[#765719] dark:text-[#e6c15a]">$ {row.total.toLocaleString()}</td></tr>)}</tbody></table></div>
           </div>}
 
           {reportView === "annual" && <div className="card p-4">
             <h2 className="mb-4 text-lg font-bold text-charcoal dark:text-white">Annual Earnings</h2>
             <div className="overflow-x-auto rounded-lg border border-border-light dark:border-border-dark">
               <table className="min-w-full bg-surface text-sm">
-                <thead className="bg-[#29AB87] text-xs uppercase text-white">
+                <thead className="bg-slate-50/70 dark:bg-surface-2/40 text-[11px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider border-b border-border-light/60 dark:border-border-dark/40">
                   <tr>
                     <th className="px-4 py-3 text-left">Month</th>
                     <th className="px-4 py-3 text-right">Confirmed Earnings</th>
