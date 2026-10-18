@@ -24,6 +24,7 @@ import {
   Image,
   UserRound,
   Compass,
+  Trash2,
 } from "lucide-react";
 
 // ─── Helpers ──────────────────────────────────────────────
@@ -437,6 +438,21 @@ export default function AdminDashboard({ user }) {
     fetchStats();
   }, []);
 
+  const handleDeleteBooking = async (id) => {
+    if (!confirm("Are you sure you want to delete this booking?")) return;
+    try {
+      await api.delete(`/bookings/${id}`);
+      setStats((prev) => ({
+        ...prev,
+        recent_bookings: (prev?.recent_bookings || []).filter((b) => b.id !== id),
+        total_bookings: Math.max(0, (prev?.total_bookings || 1) - 1),
+      }));
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete booking.");
+    }
+  };
+
   const adminName = user?.User_Name ?? "Administrator";
 
   // Derive Pipeline Status Data
@@ -788,6 +804,7 @@ export default function AdminDashboard({ user }) {
                       <th className="px-6 py-3.5 text-left">Target Date</th>
                       <th className="px-6 py-3.5 text-left">Status</th>
                       <th className="px-6 py-3.5 text-right">Value</th>
+                      <th className="px-6 py-3.5 text-right">Action</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border-light/60 dark:divide-border-dark/40">
@@ -836,6 +853,16 @@ export default function AdminDashboard({ user }) {
                           </td>
                           <td className="px-6 py-4 text-right font-extrabold text-slate-900 dark:text-slate-100">
                             {fmtMoney(b.payment)}
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <button
+                              onClick={() => handleDeleteBooking(b.id)}
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/30 hover:bg-rose-600 hover:text-white dark:hover:bg-rose-600 dark:hover:text-white border border-rose-200/80 dark:border-rose-800/40 transition-all active:scale-95 shadow-sm"
+                              title="Delete Booking"
+                            >
+                              <Trash2 size={13} />
+                              <span className="hidden sm:inline">Delete</span>
+                            </button>
                           </td>
                         </tr>
                       );
