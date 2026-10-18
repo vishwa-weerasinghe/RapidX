@@ -320,6 +320,7 @@ function RefundPolicyPage({ isDark }) {
         <h1 className="text-3xl font-extrabold tracking-tight text-[#153827] sm:text-4xl dark:text-white">Return &amp; Refund Policy</h1>
         <p className="mt-3 text-sm text-[#66806d] dark:text-[#9fb5a2]">Effective date: 19 August 2025</p>
         <p className={bodyClass}>We aim to provide memorable safari experiences. This Return &amp; Refund Policy explains how cancellations, changes, and refunds are handled when booking safari tours through our website.</p>
+        <p className={bodyClass}>Non-registered customers cannot make bookings through this website and should contact our staff using the contact methods provided.</p>
 
         <div className="mt-8 space-y-8">
           <section><h2 className={headingClass}>1) Cancellations by Customers</h2><ul className={listClass}><li>More than 7 days before tour date: Full refund (minus payment gateway/transaction fees).</li><li>3–7 days before tour date: 50% refund.</li><li>Less than 3 days before tour date or no-show: No refund.</li></ul></section>
