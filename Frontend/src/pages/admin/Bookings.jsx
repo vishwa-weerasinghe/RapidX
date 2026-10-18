@@ -573,18 +573,23 @@ export default function Bookings() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="w-14 h-14 border-4 border-sacramento border-t-transparent rounded-full animate-spin"></div>
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <div className="w-12 h-12 border-4 border-emerald-100 border-t-sacramento rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="p-8">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
-       <h1 className="text-3xl md:text-4xl font-black text-[#29AB87] dark:text-white tracking-tight">
-          Booking Management
-      </h1>
+    <div className="space-y-6 max-w-7xl mx-auto pb-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            Booking Management
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+            Monitor reservations, review customer requests, and assign vehicles.
+          </p>
+        </div>
         <div className="flex items-center gap-3">
           <button
             type="button"
@@ -1061,11 +1066,12 @@ export default function Bookings() {
         </div>
       )}
 
-      <div className="overflow-x-auto rounded-xl card">
-        <table className="min-w-full">
-          <thead className="bg-sacramento text-white">
-            <tr>
-              <th className="px-4 py-3 text-left">Booking ID</th>
+      <div className="overflow-hidden rounded-3xl bg-white dark:bg-[#16231c] border border-border-light dark:border-border-dark/60 shadow-sm">
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-sm">
+            <thead>
+              <tr className="bg-slate-50/70 dark:bg-surface-2/40 text-[11px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider border-b border-border-light/60 dark:border-border-dark/40">
+                <th className="px-4 py-3.5 text-left">Booking ID</th>
               <th className="px-4 py-3 text-left">Customer</th>
               <th className="px-4 py-3 text-left">Package</th>
               <th className="px-4 py-3 text-left">Booking Date</th>
@@ -1216,6 +1222,7 @@ export default function Bookings() {
           </tbody>
         </table>
       </div>
+    </div>
     </div>
   );
 }
