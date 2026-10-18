@@ -184,6 +184,25 @@ class VehicleControllerTest extends TestCase
         ]);
     }
 
+    public function test_admin_can_create_vehicle_without_assigning_a_driver(): void
+    {
+        $response = $this->actingAs($this->createAdmin(), 'sanctum')
+            ->postJson('/api/vehicles', [
+                'Vehicle_No' => 'SP-NODRIVER-1',
+                'Vehicle_Type' => 'Coach',
+                'No_of_Seats' => 45,
+            ]);
+
+        $response->assertCreated()
+            ->assertJsonPath('Vehicle_No', 'SP-NODRIVER-1')
+            ->assertJsonPath('Driver_ID', null);
+
+        $this->assertDatabaseHas('vehicles', [
+            'Vehicle_No' => 'SP-NODRIVER-1',
+            'Driver_ID' => null,
+        ]);
+    }
+
     public function test_admin_can_update_vehicle_and_persist_updated_values(): void
     {
         $vehicle = $this->createVehicle();
@@ -204,6 +223,21 @@ class VehicleControllerTest extends TestCase
             'Vehicle_No' => 'WP-NEW-4321',
             'Vehicle_Type' => 'Luxury Bus',
             'No_of_Seats' => 50,
+        ]);
+    }
+
+    public function test_admin_can_clear_a_vehicles_driver_assignment(): void
+    {
+        $vehicle = $this->createVehicle();
+
+        $this->actingAs($this->createAdmin(), 'sanctum')
+            ->putJson('/api/vehicles/' . $vehicle->Vehicle_ID, ['Driver_ID' => null])
+            ->assertOk()
+            ->assertJsonPath('Driver_ID', null);
+
+        $this->assertDatabaseHas('vehicles', [
+            'Vehicle_ID' => $vehicle->Vehicle_ID,
+            'Driver_ID' => null,
         ]);
     }
 

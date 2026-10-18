@@ -75,7 +75,7 @@ describe("Admin notification and driver flows", () => {
     expect(screen.getByText(/Leopard Safari/i)).toBeTruthy();
   });
 
-  it("shows the matched vehicles when the See Vehicle button is used on the vehicle page", async () => {
+  it("shows the matched vehicles when the All Vehicles button is used on the vehicle page", async () => {
     apiGet.mockImplementation((url) => {
       if (url === "/vehicles") {
         return Promise.resolve({
@@ -104,7 +104,7 @@ describe("Admin notification and driver flows", () => {
     render(<Vehicles />);
 
     await waitFor(() => expect(apiGet).toHaveBeenCalledWith("/vehicles"));
-    fireEvent.click(screen.getByRole("button", { name: /see vehicle/i }));
+    fireEvent.click(screen.getByRole("button", { name: /all vehicles/i }));
 
     expect((await screen.findAllByText(/ABC-123/i)).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/DEF-456/i).length).toBeGreaterThan(0);

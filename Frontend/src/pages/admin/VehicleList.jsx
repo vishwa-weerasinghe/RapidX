@@ -128,9 +128,28 @@ export default function Vehicles() {
                 onClick={() => setSearch("")}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
               >
-                <X size={15} />
-              </button>
-            )}
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M21 21l-4.35-4.35m1.35-5.4a6.75 6.75 0 11-13.5 0 6.75 6.75 0 0113.5 0z"
+                />
+              </svg>
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search by number or type..."
+                className="form-input w-full sm:w-64 pl-9"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={handleSeeVehicle}
+              className="btn-secondary"
+              aria-label="All Vehicles"
+            >
+              All Vehicles
+            </button>
           </div>
 
           <button
