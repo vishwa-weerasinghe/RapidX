@@ -125,42 +125,16 @@ export default function Vehicles() {
             />
             {search && (
               <button
+                type="button"
                 onClick={() => setSearch("")}
+                aria-label="Clear search"
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 21l-4.35-4.35m1.35-5.4a6.75 6.75 0 11-13.5 0 6.75 6.75 0 0113.5 0z"
-                />
-              </svg>
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search by number or type..."
-                className="form-input w-full sm:w-64 pl-9"
-              />
-            </div>
-            <button
-              type="button"
-              onClick={handleSeeVehicle}
-              className="btn-secondary"
-              aria-label="All Vehicles"
-            >
-              All Vehicles
-            </button>
+                <X size={14} />
+              </button>
+            )}
           </div>
 
-          <button
-            type="button"
-            onClick={handleSeeVehicle}
-            aria-label="See vehicle"
-            className="inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl border border-border-light dark:border-border-dark bg-slate-50 dark:bg-surface-2 hover:bg-slate-100 dark:hover:bg-surface-2/80 text-xs font-bold text-slate-700 dark:text-slate-200 transition-colors"
-          >
-            <Eye size={14} className="text-sacramento dark:text-sacramento-300" />
-            <span>{filteredVehicles.length > 0 ? `See Vehicle (${filteredVehicles.length})` : "See Vehicle"}</span>
-          </button>
         </div>
 
         <div className="flex items-center justify-between sm:justify-end gap-3 text-xs text-slate-500 dark:text-slate-400">
@@ -168,6 +142,7 @@ export default function Vehicles() {
             {loading ? "Syncing..." : `${filteredVehicles.length} of ${vehicles.length} vehicles`}
           </span>
           <button
+            type="button"
             onClick={fetchVehicles}
             disabled={loading}
             className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-surface-2 text-slate-500 hover:text-sacramento transition-colors"
@@ -339,7 +314,7 @@ export default function Vehicles() {
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm">
                 <thead>
-                  <tr className="bg-slate-50/70 dark:bg-surface-2/40 text-[11px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider border-b border-border-light/60 dark:border-border-dark/40">
+                  <tr className="bg-slate-50/70 dark:bg-surface-2/40 text-[11px] text-slate-400 dark:text-slate-200 font-bold uppercase tracking-wider border-b border-border-light/60 dark:border-border-dark/40">
                     <th className="px-5 py-3.5 text-left">Vehicle ID</th>
                     <th className="px-5 py-3.5 text-left">Vehicle Number</th>
                     <th className="px-5 py-3.5 text-left">Model / Type</th>
