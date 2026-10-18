@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Driver;
 use App\Models\Vehicle;
 use Illuminate\Http\Request;
 
@@ -37,10 +36,6 @@ class VehicleController extends Controller
             'Driver_ID'    => 'nullable|exists:drivers,Driver_ID',
         ]);
 
-        if (empty($validated['Driver_ID'])) {
-            $validated['Driver_ID'] = Driver::query()->value('Driver_ID') ?? 1;
-        }
-
         $vehicle = Vehicle::create($validated);
 
         return response()->json($vehicle, 201);
@@ -67,10 +62,6 @@ class VehicleController extends Controller
             'No_of_Seats'  => 'sometimes|required|integer|min:1',
             'Driver_ID'    => 'nullable|exists:drivers,Driver_ID',
         ]);
-
-        if (array_key_exists('Driver_ID', $validated) && empty($validated['Driver_ID'])) {
-            $validated['Driver_ID'] = Driver::query()->value('Driver_ID') ?? 1;
-        }
 
         $vehicle->update($validated);
 

@@ -112,9 +112,9 @@ export default function Vehicles() {
               type="button"
               onClick={handleSeeVehicle}
               className="btn-secondary"
-              aria-label="See vehicle"
+              aria-label="All Vehicles"
             >
-              {filteredVehicles.length > 0 ? `See Vehicle (${filteredVehicles.length})` : "See Vehicle"}
+              All Vehicles
             </button>
           </div>
           <button onClick={() => navigate("/admin/vehicles/create")} className="btn-primary">

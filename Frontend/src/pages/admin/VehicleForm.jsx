@@ -45,10 +45,15 @@ export default function VehicleForm() {
     setSaving(true);
     setErrors({});
     try {
+      const payload = {
+        ...form,
+        Driver_ID: form.Driver_ID || null,
+      };
+
       if (isEdit) {
-        await api.put(`/vehicles/${id}`, form);
+        await api.put(`/vehicles/${id}`, payload);
       } else {
-        await api.post("/vehicles", form);
+        await api.post("/vehicles", payload);
       }
       navigate("/admin/vehicles");
     } catch (err) {
