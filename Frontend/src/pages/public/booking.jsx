@@ -320,8 +320,9 @@ export default function Booking() {
     const areaExtraMap = {
         Dambulla: 12,
         Sigiriya: 10,
-        Habarana: 3,
+        Habarana: 0,
         Kandalama: 16,
+        "At the Entrance": 0,
     };
 
     const getAreaExtra = () => {
@@ -631,9 +632,10 @@ export default function Booking() {
                                             required
                                         >
                                             <option value="">-- Select area --</option>
-                                            <option value="Dambulla">Dambulla (+ $12.00)</option>
+                                            <option value="At the Entrance">At the Entrance (Free)</option>
+                                            <option value="Habarana">Habarana (Free Around 4km)</option>
                                             <option value="Sigiriya">Sigiriya (+ $10.00)</option>
-                                            <option value="Habarana">Habarana (+ $3.00)</option>
+                                            <option value="Dambulla">Dambulla (+ $12.00)</option>
                                             <option value="Kandalama">Kandalama (+ $16.00)</option>
                                         </select>
                                         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400">
@@ -933,8 +935,8 @@ export default function Booking() {
                                         <div
                                             onClick={() => setPaymentMethod("PayHere")}
                                             className={`cursor-pointer rounded-2xl p-4 border-2 transition-all duration-200 relative ${paymentMethod === "PayHere"
-                                                    ? "border-sacramento bg-sacramento/5 dark:bg-sacramento/10 shadow-sm"
-                                                    : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900"
+                                                ? "border-sacramento bg-sacramento/5 dark:bg-sacramento/10 shadow-sm"
+                                                : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900"
                                                 }`}
                                         >
                                             <div className="flex items-start justify-between">
@@ -971,8 +973,8 @@ export default function Booking() {
                                         <div
                                             onClick={() => setPaymentMethod("Pay Later")}
                                             className={`cursor-pointer rounded-2xl p-4 border-2 transition-all duration-200 relative ${paymentMethod === "Pay Later"
-                                                    ? "border-amber-500 bg-amber-50/50 dark:bg-amber-950/20 shadow-sm"
-                                                    : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900"
+                                                ? "border-amber-500 bg-amber-50/50 dark:bg-amber-950/20 shadow-sm"
+                                                : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900"
                                                 }`}
                                         >
                                             <div className="flex items-start justify-between">
@@ -1038,7 +1040,9 @@ export default function Booking() {
                                             <p>{form.No_of_child} Child(ren) × $ {pkg.price_child}</p>
                                         )}
                                         {form.Area && (
-                                            <p>{form.Area} surcharge: $ {new Intl.NumberFormat().format(getAreaExtra())}</p>
+                                            <p>
+                                                {form.Area} pickup: {getAreaExtra() > 0 ? `+ $ ${new Intl.NumberFormat().format(getAreaExtra())}` : "Free"}
+                                            </p>
                                         )}
                                     </div>
                                 </div>
@@ -1049,8 +1053,8 @@ export default function Booking() {
                                 type="submit"
                                 disabled={isSubmitting}
                                 className={`w-full min-h-[48px] ${paymentMethod === "Pay Later" && !isEditMode
-                                        ? "bg-amber-600 hover:bg-amber-700 shadow-amber-600/20"
-                                        : "bg-sacramento hover:bg-sacramento-600 shadow-sacramento/20"
+                                    ? "bg-amber-600 hover:bg-amber-700 shadow-amber-600/20"
+                                    : "bg-sacramento hover:bg-sacramento-600 shadow-sacramento/20"
                                     } disabled:opacity-60 disabled:cursor-not-allowed text-white font-extrabold text-xs sm:text-sm uppercase py-3.5 sm:py-4 px-4 rounded-xl shadow-lg active:scale-[0.99] transition-all flex items-center justify-center gap-2 group cursor-pointer`}
                             >
                                 {isSubmitting ? (
