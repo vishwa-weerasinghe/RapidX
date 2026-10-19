@@ -174,9 +174,10 @@ export default function Cancellation() {
                   required
                 >
                   <option value="">-- Select area --</option>
-                  <option value="Dambulla">Dambulla (+ $12.00)</option>
+                  <option value="Habarana">Habarana (Free Around 4km)</option>
+                  <option value="At the Entrance">At the Entrance (Free)</option>
                   <option value="Sigiriya">Sigiriya (+ $10.00)</option>
-                  <option value="Habarana">Habarana (+ $3.00)</option>
+                  <option value="Dambulla">Dambulla (+ $12.00)</option>
                   <option value="Kandalama">Kandalama (+ $16.00)</option>
                 </select>
               </div>
@@ -296,7 +297,7 @@ export function useCancellation(onCancelled) {
     } catch (error) {
       alert(
         error.response?.data?.message ||
-          "Failed to cancel booking."
+        "Failed to cancel booking."
       );
     } finally {
       setCancellingId(null);
@@ -482,11 +483,10 @@ export function CancellationModal({
           {/* Agreement checkbox */}
           <label
             htmlFor="cancellation-policy-agreement"
-            className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-4 transition-colors ${
-              policyAgreed
+            className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-4 transition-colors ${policyAgreed
                 ? "border-sacramento bg-sacramento/10 text-sacramento dark:border-emerald-500/50"
                 : "border-slate-200 dark:border-border-dark bg-slate-50/50 dark:bg-surface-2/40"
-            }`}
+              }`}
           >
             <input
               id="cancellation-policy-agreement"

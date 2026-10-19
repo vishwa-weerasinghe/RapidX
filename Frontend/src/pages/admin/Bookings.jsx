@@ -1242,6 +1242,8 @@ export default function Bookings() {
                         >
                           <Ban size={13} />
                         </button>
+
+                        {/*
                         <button
                           type="button"
                           onClick={() => handleDeleteBooking(booking.Booking_ID)}
@@ -1250,7 +1252,7 @@ export default function Bookings() {
                         >
                           <Trash2 size={13} />
                           <span>Delete</span>
-                        </button>
+                        </button>*/}
                       </div>
                     </td>
                   </tr>
