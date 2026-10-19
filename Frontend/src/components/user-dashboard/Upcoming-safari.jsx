@@ -53,8 +53,9 @@ export function HeroCountdown({ user }) {
 
   if (loading) {
     return (
-      <section className={`${cardClass} p-6 sm:p-10 lg:p-12`}>
-        <p className={`text-lg font-medium ${labelClass}`}>
+      <section className={`${cardClass} p-8 sm:p-12 flex flex-col items-center justify-center gap-3`}>
+        <div className="w-10 h-10 rounded-full border-3 border-emerald-100 dark:border-emerald-950/40 border-t-sacramento dark:border-t-sacramento-300 animate-spin" />
+        <p className="text-sm font-semibold text-slate-400 dark:text-slate-500 animate-pulse">
           Loading your upcoming safari...
         </p>
       </section>
