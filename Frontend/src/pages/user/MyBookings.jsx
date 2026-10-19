@@ -149,8 +149,9 @@ export default function MyBookings() {
   // Loading
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="h-14 w-14 animate-spin rounded-full border-4 border-sacramento border-t-transparent"></div>
+      <div className="flex flex-col items-center justify-center h-screen gap-3 bg-slate-50/50 dark:bg-bg-dark">
+        <div className="w-12 h-12 rounded-full border-4 border-emerald-100 dark:border-emerald-950/40 border-t-sacramento dark:border-t-sacramento-300 animate-spin" />
+        <p className="text-sm font-semibold text-slate-400 dark:text-slate-500 animate-pulse">Loading your bookings...</p>
       </div>
     );
   }

@@ -103,8 +103,8 @@ Route::put('/bookings/{id}/vehicle', [BookingController::class, 'assignVehicle']
 Route::put('/bookings/{id}/vehicles', [BookingController::class, 'assignVehicles'])
     ->middleware('auth:sanctum');
 
-Route::delete('/bookings/{id}', [BookingController::class, 'destroy'])
-    ->middleware('auth:sanctum');
+{/*Route::delete('/bookings/{id}', [BookingController::class, 'destroy'])
+->middleware('auth:sanctum');*/}
 
 Route::get('/bookings/{id}', [BookingController::class, 'show'])
     ->middleware('auth:sanctum');
@@ -126,6 +126,10 @@ Route::get('/user-upcoming-booking/{customerId}', [BookingController::class, 'up
 Route::get('/admin/stats', [DashboardController::class, 'stats']);
 
 Route::get('/admin/customers', [CustomerController::class, 'index'])
+    ->middleware('auth:sanctum');
+Route::delete('/admin/customers/{id}', [CustomerController::class, 'destroy'])
+    ->middleware('auth:sanctum');
+Route::post('/admin/customers/bulk-delete', [CustomerController::class, 'bulkDestroy'])
     ->middleware('auth:sanctum');
 
 Route::get('/admin/bookings/unread-count', [BookingController::class, 'unreadCount'])

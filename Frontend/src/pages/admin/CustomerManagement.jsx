@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Mail, Phone, RefreshCw, Search, Users, X, Globe, Calendar } from "lucide-react";
+import { Mail, Phone, RefreshCw, Search, Users, X, Trash2 } from "lucide-react";
 import api from "../../axios";
 
 const formatDate = (value) => {
@@ -16,6 +16,9 @@ export default function CustomerManagement() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [actionMessage, setActionMessage] = useState("");
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchCustomers = async () => {
     try {
@@ -54,6 +57,92 @@ export default function CustomerManagement() {
     );
   }, [customers, search]);
 
+  const isAllSelected =
+    filteredCustomers.length > 0 &&
+    filteredCustomers.every((c) => selectedIds.includes(c.Customer_ID));
+
+  const toggleSelectAll = () => {
+    if (isAllSelected) {
+      const filteredSet = new Set(filteredCustomers.map((c) => c.Customer_ID));
+      setSelectedIds((prev) => prev.filter((id) => !filteredSet.has(id)));
+    } else {
+      const newIds = new Set([
+        ...selectedIds,
+        ...filteredCustomers.map((c) => c.Customer_ID),
+      ]);
+      setSelectedIds(Array.from(newIds));
+    }
+  };
+
+  const toggleSelect = (id) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
+    );
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selectedIds.length === 0) return;
+
+    const count = selectedIds.length;
+    const confirmed = window.confirm(
+      `Are you sure you want to delete ${count} selected customer(s)? This will also remove any associated bookings.`,
+    );
+    if (!confirmed) return;
+
+    try {
+      setIsDeleting(true);
+      setError("");
+      setActionMessage("");
+
+      await api.post("/admin/customers/bulk-delete", { ids: selectedIds });
+
+      setCustomers((prev) =>
+        prev.filter((c) => !selectedIds.includes(c.Customer_ID)),
+      );
+      setActionMessage(`Successfully deleted ${count} customer(s).`);
+      setSelectedIds([]);
+    } catch (err) {
+      console.error(err);
+      setError(
+        err.response?.data?.message || "Failed to delete selected customers.",
+      );
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteSingle = async (customer) => {
+    const customerName =
+      [customer.First_Name, customer.Last_Name].filter(Boolean).join(" ") ||
+      `#${customer.Customer_ID}`;
+
+    const confirmed = window.confirm(
+      `Are you sure you want to delete customer "${customerName}"? This will also remove any associated bookings.`,
+    );
+    if (!confirmed) return;
+
+    try {
+      setIsDeleting(true);
+      setError("");
+      setActionMessage("");
+
+      await api.delete(`/admin/customers/${customer.Customer_ID}`);
+
+      setCustomers((prev) =>
+        prev.filter((c) => c.Customer_ID !== customer.Customer_ID),
+      );
+      setSelectedIds((prev) =>
+        prev.filter((id) => id !== customer.Customer_ID),
+      );
+      setActionMessage(`Customer "${customerName}" deleted successfully.`);
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.message || "Failed to delete customer.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-8">
       {/* Header Area */}
@@ -71,7 +160,50 @@ export default function CustomerManagement() {
             </p>
           </div>
         </div>
+
+        {/* Delete Selected Button (in header when items are selected) */}
+        {selectedIds.length > 0 && (
+          <button
+            type="button"
+            onClick={handleDeleteSelected}
+            disabled={isDeleting}
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm shadow-sm transition-all active:scale-95 disabled:opacity-50"
+          >
+            <Trash2 size={16} />
+            <span>{isDeleting ? "Deleting..." : `Delete Selected (${selectedIds.length})`}</span>
+          </button>
+        )}
       </div>
+
+      {/* Selection Banner */}
+      {selectedIds.length > 0 && (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-rose-50 dark:bg-rose-950/20 border border-rose-200/80 dark:border-rose-900/40 px-4 py-3 rounded-2xl shadow-sm">
+          <div className="flex items-center gap-2.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse" />
+            <span className="text-xs sm:text-sm font-bold text-rose-900 dark:text-rose-200">
+              {selectedIds.length} customer{selectedIds.length > 1 ? "s" : ""} selected for deletion
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setSelectedIds([])}
+              className="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-surface-2 transition-colors"
+            >
+              Deselect All
+            </button>
+            <button
+              type="button"
+              onClick={handleDeleteSelected}
+              disabled={isDeleting}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 shadow-sm transition-all active:scale-95 disabled:opacity-50"
+            >
+              <Trash2 size={13} />
+              <span>{isDeleting ? "Deleting..." : `Delete Selected (${selectedIds.length})`}</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Search & Actions Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#16231c] p-3.5 sm:p-4 rounded-2xl border border-border-light dark:border-border-dark/60 shadow-sm">
@@ -92,6 +224,7 @@ export default function CustomerManagement() {
           </label>
           {search && (
             <button
+              type="button"
               onClick={() => setSearch("")}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
             >
@@ -115,6 +248,20 @@ export default function CustomerManagement() {
           </button>
         </div>
       </div>
+
+      {/* Success Notification */}
+      {actionMessage && (
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 dark:border-emerald-900/40 dark:bg-emerald-950/20 p-4 text-xs font-semibold text-emerald-800 dark:text-emerald-300 flex items-center justify-between">
+          <span>{actionMessage}</span>
+          <button
+            type="button"
+            onClick={() => setActionMessage("")}
+            className="text-emerald-600 hover:text-emerald-800 dark:hover:text-emerald-200"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      )}
 
       {/* Error Alert */}
       {error && (
@@ -144,6 +291,7 @@ export default function CustomerManagement() {
             No customers match your search &quot;<span className="font-semibold">{search}</span>&quot;.
           </p>
           <button
+            type="button"
             onClick={() => setSearch("")}
             className="mt-3 text-xs font-bold text-sacramento dark:text-sacramento-300 underline"
           >
@@ -156,22 +304,47 @@ export default function CustomerManagement() {
             <table className="min-w-full text-sm">
               <thead>
                 <tr className="bg-slate-50/70 dark:bg-surface-2/40 text-[11px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider border-b border-border-light/60 dark:border-border-dark/40">
+                  <th className="w-12 px-4 py-3.5 text-center">
+                    <input
+                      type="checkbox"
+                      checked={isAllSelected}
+                      onChange={toggleSelectAll}
+                      aria-label="Select all customers"
+                      className="w-4 h-4 rounded border-slate-300 text-sacramento focus:ring-sacramento/30 cursor-pointer accent-sacramento"
+                    />
+                  </th>
                   <th className="px-5 py-3.5 text-left">Customer</th>
                   <th className="px-5 py-3.5 text-left">Contact Channels</th>
                   <th className="px-5 py-3.5 text-left">NIC / ID</th>
                   <th className="px-5 py-3.5 text-left">Country</th>
                   <th className="px-5 py-3.5 text-center">Bookings</th>
-                  <th className="px-5 py-3.5 text-right">Registered</th>
+                  <th className="px-5 py-3.5 text-left">Registered</th>
+                  <th className="px-5 py-3.5 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border-light/60 dark:divide-border-dark/40">
                 {filteredCustomers.map((customer) => {
                   const initial = (customer.First_Name?.[0] ?? "C").toUpperCase();
+                  const isSelected = selectedIds.includes(customer.Customer_ID);
+
                   return (
                     <tr
                       key={customer.Customer_ID}
-                      className="hover:bg-slate-50/60 dark:hover:bg-surface-2/20 transition-colors"
+                      className={`transition-colors ${
+                        isSelected
+                          ? "bg-rose-50/50 dark:bg-rose-950/20"
+                          : "hover:bg-slate-50/60 dark:hover:bg-surface-2/20"
+                      }`}
                     >
+                      <td className="w-12 px-4 py-4 text-center">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleSelect(customer.Customer_ID)}
+                          aria-label={`Select customer ${customer.Customer_ID}`}
+                          className="w-4 h-4 rounded border-slate-300 text-sacramento focus:ring-sacramento/30 cursor-pointer accent-sacramento"
+                        />
+                      </td>
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-sacramento to-castleton-400 text-white flex items-center justify-center font-bold text-xs shadow-sm shrink-0">
@@ -220,8 +393,19 @@ export default function CustomerManagement() {
                           {customer.bookings_count ?? 0}
                         </span>
                       </td>
-                      <td className="px-5 py-4 text-right text-xs text-slate-400 dark:text-slate-500 whitespace-nowrap">
+                      <td className="px-5 py-4 text-xs text-slate-400 dark:text-slate-500 whitespace-nowrap">
                         {formatDate(customer.created_at)}
+                      </td>
+                      <td className="px-5 py-4 text-right">
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteSingle(customer)}
+                          disabled={isDeleting}
+                          title="Delete Customer"
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors disabled:opacity-50"
+                        >
+                          <Trash2 size={15} />
+                        </button>
                       </td>
                     </tr>
                   );
