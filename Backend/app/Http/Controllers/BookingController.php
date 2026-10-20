@@ -453,11 +453,6 @@ class BookingController extends Controller
             return response()->json(['message' => 'Only administrators can delete bookings.'], 403);
         }
 
-        if (!$request->has('agreed')) {
-            $booking->delete();
-            return response()->json(['message' => 'Booking deleted']);
-        }
-
         // A confirmed booking whose safari date has passed cannot be cancelled
         // by anyone — the same rule the customer flow enforces, and checked
         // first so the expiry is reported rather than a missing checkbox. Unpaid

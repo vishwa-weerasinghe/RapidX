@@ -103,8 +103,8 @@ Route::put('/bookings/{id}/vehicle', [BookingController::class, 'assignVehicle']
 Route::put('/bookings/{id}/vehicles', [BookingController::class, 'assignVehicles'])
     ->middleware('auth:sanctum');
 
-{/*Route::delete('/bookings/{id}', [BookingController::class, 'destroy'])
-->middleware('auth:sanctum');*/}
+{Route::delete('/bookings/{id}', [BookingController::class, 'destroy'])
+->middleware('auth:sanctum');}
 
 Route::get('/bookings/{id}', [BookingController::class, 'show'])
     ->middleware('auth:sanctum');
