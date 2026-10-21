@@ -219,7 +219,7 @@ export default function Review() {
                           className={`${
                             isFilled
                               ? "text-amber-400 fill-amber-400 drop-shadow-sm"
-                              : "text-slate-300 dark:text-slate-600"
+                              : "text-slate-400 dark:text-slate-600"
                           } transition-colors duration-150`}
                         />
                       </button>
@@ -260,7 +260,7 @@ export default function Review() {
                   </span>
                 </div>
 
-                <label className="flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-200 dark:border-border-dark bg-slate-50/50 dark:bg-surface-2/40 p-4 text-xs text-slate-500 dark:text-slate-400 cursor-pointer hover:bg-slate-50 dark:hover:bg-surface-2 transition duration-200">
+                <label className="flex flex-col items-center justify-center gap-2 p-4 sm:p-5 rounded-2xl border-2 border-dashed border-neutral-200 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors duration-200 text-xs text-slate-500 dark:text-slate-400 cursor-pointer">
                   <div className="p-2 rounded-full bg-sacramento/10 text-sacramento dark:text-castleton-300">
                     <Camera size={20} />
                   </div>
@@ -360,13 +360,13 @@ export default function Review() {
 
             <div className="space-y-4 overflow-y-auto max-h-[640px] pr-1">
               {reviews.length === 0 ? (
-                <div className="p-10 text-center rounded-2xl border border-dashed border-slate-200 dark:border-border-dark bg-slate-50/50 dark:bg-surface-2/30">
-                  <MessageSquareQuote size={36} className="mx-auto text-slate-300 dark:text-slate-600 mb-2" />
+                <div className="p-10 text-center rounded-2xl border-2 border-dashed border-green-400 dark:border-green-600 bg-green-100 dark:bg-green-950/80">
+                  <MessageSquareQuote size={36} className="mx-auto text-slate-400 dark:text-slate-600 mb-2" />
                   <p className="text-sm font-bold text-slate-700 dark:text-slate-200">
                     No reviews yet
                   </p>
                   <p className="text-xs text-slate-400 mt-1">
-                    Be the first explorer to share your experience with our team!
+                    Share your experience with our team!
                   </p>
                 </div>
               ) : (
@@ -379,8 +379,7 @@ export default function Review() {
                   return (
                     <div
                       key={review.Review_ID}
-                      className="p-4 sm:p-5 rounded-2xl border border-slate-100 dark:border-border-dark/60 bg-slate-50/60 dark:bg-surface-2/40 hover:bg-slate-50 dark:hover:bg-surface-2/70 transition duration-200 space-y-3"
-                    >
+                      className="p-4 sm:p-5 rounded-2xl border border-neutral-200 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors duration-200 space-y-3">
                       {/* Review Card Header */}
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex items-center gap-3">
@@ -400,7 +399,7 @@ export default function Review() {
                                     className={
                                       i < Number(review.Rate || 0)
                                         ? "text-amber-400 fill-amber-400"
-                                        : "text-slate-200 dark:text-slate-700"
+                                        : "text-slate-400 dark:text-slate-700"
                                     }
                                   />
                                 ))}
@@ -437,7 +436,7 @@ export default function Review() {
                               <img
                                 src={photoUrl}
                                 alt={`Review photo ${photoIndex + 1}`}
-                                className="h-full w-full object-cover group-hover:scale-110 transition duration-200"
+                                className="h-full w-full object-cover group-hover:scale-200 transition duration-200"
                               />
                             </a>
                           ))}
