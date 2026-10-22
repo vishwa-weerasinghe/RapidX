@@ -245,6 +245,16 @@ export function getPickupTimeOptions(pkgOrName) {
     return FULL_DAY_PICKUP_TIMES;
   }
 
+  // ── Dambulla — must be FIRST (name may also contain kaudulla/minneriya) ────
+  if (lower.includes("dambulla")) {
+    return DAMBULLA_TOUR_SAFARI_TIMES;
+  }
+
+  // ── Polonnaruwa — check BEFORE kaudulla/minneriya/sigiriya ────────────────
+  if (lower.includes("polonnaruwa")) {
+    return POLONNARUWA_TIMES;
+  }
+
   // ── Hurulu Eco — check BEFORE generic "morning or evening" ─────────────────
   if (lower.includes("hurulu")) {
     if (lower.includes("half day")) {
@@ -283,6 +293,16 @@ export function getPickupTimeOptions(pkgOrName) {
     return WASGAMUWA_MORNING_OR_EVENING_TIMES;
   }
 
+  // ── Pidurangala / Sigiriya — check BEFORE generic "evening" ───────────────
+  if (lower.includes("pidurangala") || lower.includes("sigiriya")) {
+    return SIGIRIYA_PIDURANGALA_ECOPARK_SAFARI_TIMES;
+  }
+
+  // ── Village Tour — check BEFORE generic fallbacks ─────────────────────────
+  if (lower.includes("village")) {
+    return VILLAGE_TOUR_TIMES;
+  }
+
   // ── Generic half day / morning or evening / morning / evening ─────────────
   if (
     lower.includes("half day") ||
@@ -294,30 +314,6 @@ export function getPickupTimeOptions(pkgOrName) {
 
   if (lower.includes("morning")) {
     return MINNERIYA_MORNING_PICKUP_TIMES;
-  }
-
-  if (lower.includes("evening") || lower.includes("afternoon")) {
-    return EVENING_PICKUP_TIMES;
-  }
-
-  // ── Pidurangala / Sigiriya (eco or combined) ───────────────────────────────
-  if (lower.includes("pidurangala") || lower.includes("sigiriya")) {
-    return SIGIRIYA_PIDURANGALA_ECOPARK_SAFARI_TIMES;
-  }
-
-  // ── Polonnaruwa ────────────────────────────────────────────────────────────
-  if (lower.includes("polonnaruwa")) {
-    return POLONNARUWA_TIMES;
-  }
-
-  // ── Dambulla ───────────────────────────────────────────────────────────────
-  if (lower.includes("dambulla")) {
-    return DAMBULLA_TOUR_SAFARI_TIMES;
-  }
-
-  // ── Village Tour ───────────────────────────────────────────────────────────
-  if (lower.includes("village")) {
-    return VILLAGE_TOUR_TIMES;
   }
 
   // ── Fallback ───────────────────────────────────────────────────────────────
