@@ -49,4 +49,8 @@ class Package extends Model
     {
         return $this->hasMany(\App\Models\Booking::class, 'Package_ID');
     }
+    public function images()
+    {
+        return $this->hasMany(PackageImage::class)->orderBy('id');
+    }
 }

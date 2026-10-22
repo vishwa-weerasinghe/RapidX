@@ -13,6 +13,8 @@ import {
 import api from "../../axios";
 import { Link, useNavigate } from "react-router-dom";
 import { getStaticBlogPackageSection } from "../../constants/staticBlogPackages";
+import PackageImageCarousel from "../../components/PackageImageCarousel";
+import { FALLBACK_PACKAGE_IMAGE, getPackageImageUrls } from "../../utils/packageImages";
 
 export default function Packages() {
   const navigate = useNavigate();
@@ -153,6 +155,7 @@ export default function Packages() {
         ) : (
           <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-6 sm:gap-8">
             {filteredPackages.map((pkg) => {
+              const packageImages = getPackageImageUrls(pkg);
               const relatedSection = getStaticBlogPackageSection(
                 pkg.blog_id || pkg.related_package
               );
@@ -165,18 +168,7 @@ export default function Packages() {
                   <div>
                     {/* Image Banner */}
                     <div className="relative overflow-hidden h-56 bg-slate-100 dark:bg-slate-800">
-                      <img
-                        src={
-                          pkg.Image
-                            ? pkg.Image.startsWith("http")
-                              ? pkg.Image
-                              : `${import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://127.0.0.1:8000'}/storage/${pkg.Image}`
-                            : "https://images.unsplash.com/photo-1549366021-9f761d450615?q=80&w=2012&auto=format&fit=crop"
-                        }
-                        alt={pkg.Package_Name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
-                        loading="lazy"
-                      />
+                      <PackageImageCarousel images={packageImages} fallbackSrc={FALLBACK_PACKAGE_IMAGE} alt={pkg.Package_Name} />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent"></div>
 
                       <div className="absolute top-4 left-4">
@@ -186,7 +178,7 @@ export default function Packages() {
                         </span>
                       </div>
 
-                      <div className="absolute bottom-4 left-4 right-4">
+                      <div className="absolute bottom-11 left-4 right-4 z-10">
                         <h2 className="text-xl font-extrabold text-white leading-snug drop-shadow-sm">
                           {pkg.Package_Name}
                         </h2>
