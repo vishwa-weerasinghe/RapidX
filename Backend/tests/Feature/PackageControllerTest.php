@@ -148,6 +148,165 @@ class PackageControllerTest extends TestCase
         ]);
     }
 
+    public function test_admin_can_upload_one_two_or_three_images_per_package(): void
+    {
+        $urls = array_map(fn ($number) => "https://res.cloudinary.com/demo/package-images/image-{$number}.jpg", range(1, 6));
+        $this->mockCloudinaryUploads($urls);
+        $admin = $this->adminUser();
+
+        foreach ([1, 2, 3] as $count) {
+            $files = [];
+            for ($index = 0; $index < $count; $index++) {
+                $files[] = UploadedFile::fake()->create("image-{$count}-{$index}.jpg", 100, 'image/jpeg');
+            }
+
+            $response = $this->actingAs($admin, 'sanctum')->postJson('/api/packages', [
+                'Package_Name' => "Package with {$count} images",
+                'Description' => 'Multiple package photos',
+                'price_one_adult' => 100,
+                'price_more_adult' => 100,
+                'price_child' => 50,
+                'Images' => $files,
+            ]);
+
+            $response->assertCreated()->assertJsonCount($count, 'images');
+        }
+
+        $this->assertDatabaseCount('package_images', 6);
+    }
+
+    public function test_package_upload_rejects_more_than_three_images(): void
+    {
+        $this->actingAs($this->adminUser(), 'sanctum')->postJson('/api/packages', [
+            'Package_Name' => 'Too Many Images',
+            'Description' => 'Should be rejected',
+            'price_one_adult' => 100,
+            'price_more_adult' => 100,
+            'price_child' => 50,
+            'Images' => array_map(fn ($index) => UploadedFile::fake()->create("image-{$index}.jpg", 100, 'image/jpeg'), range(1, 4)),
+        ])->assertUnprocessable()->assertJsonValidationErrors('Images');
+
+        $this->assertDatabaseCount('packages', 0);
+    }
+
+    public function test_package_upload_rejects_images_over_ten_megabytes_and_unsupported_types(): void
+    {
+        $admin = $this->adminUser();
+        $base = [
+            'Package_Name' => 'Invalid Image',
+            'Description' => 'Should be rejected',
+            'price_one_adult' => 100,
+            'price_more_adult' => 100,
+            'price_child' => 50,
+        ];
+
+        $this->actingAs($admin, 'sanctum')->postJson('/api/packages', $base + [
+            'Images' => [UploadedFile::fake()->create('large.jpg', 10241, 'image/jpeg')],
+        ])->assertUnprocessable()->assertJsonValidationErrors('Images.0');
+
+        $this->actingAs($admin, 'sanctum')->postJson('/api/packages', $base + [
+            'Images' => [UploadedFile::fake()->create('animated.gif', 100, 'image/gif')],
+        ])->assertUnprocessable()->assertJsonValidationErrors('Images.0');
+    }
+
+    public function test_edit_can_retain_existing_images_and_add_another(): void
+    {
+        $package = Package::create([
+            'Package_Name' => 'Existing Package',
+            'Description' => 'Has two images',
+            'price_one_adult' => 100,
+            'price_more_adult' => 100,
+            'price_child' => 50,
+        ]);
+        $first = $package->images()->create([
+            'image_url' => 'https://res.cloudinary.com/demo/package-images/first.jpg',
+            'cloudinary_public_id' => 'package-images/first',
+        ]);
+        $second = $package->images()->create([
+            'image_url' => 'https://res.cloudinary.com/demo/package-images/second.jpg',
+            'cloudinary_public_id' => 'package-images/second',
+        ]);
+        $package->update(['Image' => $first->image_url]);
+        $this->mockCloudinaryUploads(['https://res.cloudinary.com/demo/package-images/third.jpg']);
+
+        $response = $this->actingAs($this->adminUser(), 'sanctum')->post('/api/packages/' . $package->id, [
+            '_method' => 'PUT',
+            'manage_images' => '1',
+            'retain_image_ids' => [$first->id, $second->id],
+            'keep_legacy_image' => '0',
+            'Images' => [UploadedFile::fake()->create('third.jpg', 100, 'image/jpeg')],
+        ]);
+
+        $response->assertOk()->assertJsonCount(3, 'images');
+        $this->assertDatabaseCount('package_images', 3);
+        $this->assertSame($first->image_url, $response->json('Image'));
+    }
+
+    public function test_edit_can_remove_an_image_without_removing_retained_images(): void
+    {
+        $package = Package::create([
+            'Package_Name' => 'Existing Package',
+            'Description' => 'Has two images',
+            'price_one_adult' => 100,
+            'price_more_adult' => 100,
+            'price_child' => 50,
+        ]);
+        $keep = $package->images()->create([
+            'image_url' => 'https://res.cloudinary.com/demo/package-images/keep.jpg',
+            'cloudinary_public_id' => 'package-images/keep',
+        ]);
+        $remove = $package->images()->create([
+            'image_url' => 'https://res.cloudinary.com/demo/package-images/remove.jpg',
+            'cloudinary_public_id' => 'package-images/remove',
+        ]);
+        $package->update(['Image' => $keep->image_url]);
+        $this->mockCloudinaryUploads([]);
+
+        $response = $this->actingAs($this->adminUser(), 'sanctum')->post('/api/packages/' . $package->id, [
+            '_method' => 'PUT',
+            'manage_images' => '1',
+            'retain_image_ids' => [$keep->id],
+            'keep_legacy_image' => '0',
+        ]);
+
+        $response->assertOk()->assertJsonCount(1, 'images');
+        $this->assertDatabaseHas('package_images', ['id' => $keep->id]);
+        $this->assertDatabaseMissing('package_images', ['id' => $remove->id]);
+    }
+    public function test_legacy_single_image_is_returned_in_the_images_list(): void
+    {
+        $package = Package::create([
+            'Package_Name' => 'Legacy Image Package',
+            'Description' => 'Uses the original Image field',
+            'price_one_adult' => 100,
+            'price_more_adult' => 100,
+            'price_child' => 50,
+            'Image' => 'https://res.cloudinary.com/demo/package-images/legacy.jpg',
+        ]);
+
+        $this->getJson('/api/packages/' . $package->id)
+            ->assertOk()
+            ->assertJsonPath('images.0.url', $package->Image)
+            ->assertJsonPath('images.0.legacy', true);
+    }
+
+    public function test_editing_package_details_retains_its_legacy_image(): void
+    {
+        $package = Package::create([
+            'Package_Name' => 'Legacy Image Package',
+            'Description' => 'Uses the original Image field',
+            'price_one_adult' => 100,
+            'price_more_adult' => 100,
+            'price_child' => 50,
+            'Image' => 'legacy/safari.jpg',
+        ]);
+
+        $this->actingAs($this->adminUser(), 'sanctum')
+            ->putJson('/api/packages/' . $package->id, ['Package_Name' => 'Renamed Package'])
+            ->assertOk()
+            ->assertJsonPath('Image', 'legacy/safari.jpg')
+            ->assertJsonPath('images.0.url', 'legacy/safari.jpg');
+    }
     public function test_store_returns_validation_errors_for_missing_required_fields(): void
     {
         $response = $this->actingAs($this->adminUser(), 'sanctum')
@@ -318,6 +477,24 @@ class PackageControllerTest extends TestCase
      * Swap the Cloudinary SDK singleton with a mock so tests never hit the
      * real (external) Cloudinary API or require a CLOUDINARY_URL credential.
      */
+    private function mockCloudinaryUploads(array $secureUrls): void
+    {
+        $this->mock(
+            \Cloudinary\Cloudinary::class,
+            function ($mock) use ($secureUrls) {
+                $uploadApi = Mockery::mock(\Cloudinary\Api\Upload\UploadApi::class);
+                $responses = array_map(fn ($url, $index) => new \Cloudinary\Api\ApiResponse([
+                    'secure_url' => $url,
+                    'public_id' => "package-images/test-{$index}",
+                ], []), $secureUrls, array_keys($secureUrls));
+                $uploadApi->shouldReceive('upload')->times(count($responses))->andReturn(...$responses);
+                $uploadApi->shouldReceive('destroy')->andReturn(new \Cloudinary\Api\ApiResponse([
+                    'result' => 'ok',
+                ], []));
+                $mock->shouldReceive('uploadApi')->andReturn($uploadApi);
+            }
+        );
+    }
     private function mockCloudinaryUpload(string $secureUrl): void
     {
         $this->mock(

@@ -28,6 +28,9 @@ import {
   ReviewCardSkeleton,
 } from "./components/Skeletons";
 import { getStaticBlogPackageSection } from "./constants/staticBlogPackages";
+import PackageImageCarousel from "./components/PackageImageCarousel";
+import { FALLBACK_PACKAGE_IMAGE, getPackageImageUrls } from "./utils/packageImages";
+import { HOME_PACKAGE_LIMIT, orderHomePackages } from "./utils/homePackageOrdering";
 import TripAdvisorWidget from "./components/TripAdvisorWidget";
 import { STATIC_TRIPADVISOR_REVIEWS } from "./constants/staticTripadvisorReviews";
 import ReserveNowNotice from "./components/ReserveNowNotice";
@@ -403,6 +406,11 @@ export default function App() {
   const [packages, setPackages] = useState([]);
   const [galleryImages, setGalleryImages] = useState([]);
   const [packagesLoading, setPackagesLoading] = useState(true);
+  const [showAllPackages, setShowAllPackages] = useState(false);
+  const orderedPackages = orderHomePackages(packages);
+  const visiblePackages = showAllPackages
+    ? orderedPackages
+    : orderedPackages.slice(0, HOME_PACKAGE_LIMIT);
 
   useEffect(() => {
     // 1. Fetch Packages from DB
@@ -410,9 +418,6 @@ export default function App() {
       .get("/packages")
       .then((res) => {
         if (res.data && res.data.length > 0) {
-          const backendUrl = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : "http://127.0.0.1:8000";
-          const fallbackImage =
-            "https://images.unsplash.com/photo-1549366021-9f761d450615?q=80&w=2012&auto=format&fit=crop";
 
           const maxBookings = Math.max(
             0,
@@ -420,6 +425,7 @@ export default function App() {
           );
 
           const mapped = res.data.map((pkg) => {
+            const images = getPackageImageUrls(pkg);
             const oneAdult = Number(pkg.price_one_adult) || 0;
             const moreAdult = Number(pkg.price_more_adult) || 0;
 
@@ -434,11 +440,8 @@ export default function App() {
                 oneAdult > 0 && moreAdult > 0
                   ? Math.min(oneAdult, moreAdult)
                   : oneAdult || moreAdult,
-              img: pkg.Image
-                ? pkg.Image.startsWith("http")
-                  ? pkg.Image
-                  : `${backendUrl}/storage/${pkg.Image}`
-                : fallbackImage,
+              images,
+              img: images[0] || FALLBACK_PACKAGE_IMAGE,
               popular:
                 Number(pkg.bookings_count || 0) === maxBookings &&
                 maxBookings > 0,
@@ -1313,11 +1316,11 @@ export default function App() {
             {/* Cards Grid: 2 per row */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10 max-w-5xl mx-auto">
               {packagesLoading && packages.length === 0 ? (
-                Array.from({ length: 4 }).map((_, idx) => (
+                Array.from({ length: HOME_PACKAGE_LIMIT }).map((_, idx) => (
                   <PackageCardSkeleton key={`pkg-skeleton-${idx}`} />
                 ))
               ) : packages.length > 0 ? (
-                packages.map((pkg, idx) => {
+                visiblePackages.map((pkg, idx) => {
                   const relatedSection = getStaticBlogPackageSection(
                     pkg.blog_id || pkg.related_package
                   );
@@ -1346,12 +1349,7 @@ export default function App() {
                       <div className="absolute bottom-0 inset-x-6 h-[2px] bg-gradient-to-r from-transparent via-white/80 dark:via-emerald-300/80 to-transparent pointer-events-none z-20 shadow-[0_0_8px_rgba(255,255,255,0.6)]" />
                       {/* Image */}
                       <div className="relative h-64 sm:h-72 overflow-hidden bg-gray-50 dark:bg-neutral-800">
-                        <img
-                          src={pkg.img}
-                          alt={pkg.title}
-                          loading="lazy"
-                          className="w-full h-full object-cover object-center transition-transform duration-500 hover:scale-105"
-                        />
+                        <PackageImageCarousel images={pkg.images} fallbackSrc={pkg.img} alt={pkg.title} />
 
                         {pkg.popular && (
                           <span className="absolute top-4 right-4 bg-pink-600 text-white text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full border border-pink-500 shadow-md hover:scale-105 transition-all duration-300">
@@ -1460,6 +1458,18 @@ export default function App() {
                 </div>
               )}
             </div>
+
+            {orderedPackages.length > HOME_PACKAGE_LIMIT && (
+              <div className="mt-10 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => setShowAllPackages((showAll) => !showAll)}
+                  className="rounded-xl bg-[#2E7D32] px-6 py-3 font-bold text-white shadow-md transition-all hover:bg-[#1B5E20] hover:shadow-lg dark:bg-[#43A047] dark:hover:bg-[#66BB6A]"
+                >
+                  {showAllPackages ? "Show Less" : "Show More Packages"}
+                </button>
+              </div>
+            )}
           </div>
         </section>
 
