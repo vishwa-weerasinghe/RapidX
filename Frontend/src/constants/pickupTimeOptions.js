@@ -250,7 +250,7 @@ export function getPickupTimeOptions(pkgOrName) {
     if (lower.includes("half day")) {
       return ECO_PARK_HALFDAY_TIMES;
     }
-    return HURULU_ECO_TIMES;
+    return HURULU_ECO_MORNING_OR_EVENING_TIMES;
   }
 
   // ── Eco Park Half Day ──────────────────────────────────────────────────────
@@ -280,7 +280,7 @@ export function getPickupTimeOptions(pkgOrName) {
 
   // ── Wasgamuwa ──────────────────────────────────────────────────────────────
   if (lower.includes("wasgamuwa")) {
-    return WASGAMUWA_TIMES;
+    return WASGAMUWA_MORNING_OR_EVENING_TIMES;
   }
 
   // ── Generic half day / morning or evening / morning / evening ─────────────
@@ -293,7 +293,7 @@ export function getPickupTimeOptions(pkgOrName) {
   }
 
   if (lower.includes("morning")) {
-    return MORNING_PICKUP_TIMES;
+    return MINNERIYA_MORNING_PICKUP_TIMES;
   }
 
   if (lower.includes("evening") || lower.includes("afternoon")) {
@@ -302,7 +302,7 @@ export function getPickupTimeOptions(pkgOrName) {
 
   // ── Pidurangala / Sigiriya (eco or combined) ───────────────────────────────
   if (lower.includes("pidurangala") || lower.includes("sigiriya")) {
-    return SIGIRIYA_PIDURANGALA_TIMES;
+    return SIGIRIYA_PIDURANGALA_ECOPARK_SAFARI_TIMES;
   }
 
   // ── Polonnaruwa ────────────────────────────────────────────────────────────
@@ -312,7 +312,7 @@ export function getPickupTimeOptions(pkgOrName) {
 
   // ── Dambulla ───────────────────────────────────────────────────────────────
   if (lower.includes("dambulla")) {
-    return DAMBULLA_SAFARI_TIMES;
+    return DAMBULLA_TOUR_SAFARI_TIMES;
   }
 
   // ── Village Tour ───────────────────────────────────────────────────────────
