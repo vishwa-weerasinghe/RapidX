@@ -1085,23 +1085,23 @@ export default function Bookings() {
 
       <div className="overflow-hidden rounded-3xl bg-white dark:bg-[#16231c] border border-border-light dark:border-border-dark/60 shadow-sm">
         <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
+          <table className="booking-table min-w-full text-sm">
             <thead>
-              <tr className="bg-slate-50/70 dark:bg-surface-2/40 text-[11px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider border-b border-border-light/60 dark:border-border-dark/40">
-                <th className="px-4 py-3.5 text-left">Booking ID</th>
-                <th className="px-4 py-3 text-left">Customer</th>
-                <th className="px-4 py-3 text-left">Package</th>
-                <th className="px-4 py-3 text-left">Booking Date</th>
-                <th className="px-4 py-3 text-left">Pickup Time</th>
-                <th className="px-4 py-3 text-left">Pickup Area</th>
-                <th className="px-4 py-3 text-left">Pickup Location</th>
-                <th className="px-4 py-3 text-center">Adults</th>
-                <th className="px-4 py-3 text-center">Children</th>
-                <th className="px-4 py-3 text-right">Payment</th>
-                <th className="px-4 py-3 text-center">Status</th>
-                <th className="px-4 py-3 text-left">Vehicle</th>
-                <th className="px-4 py-3 text-left">Driver</th>
-                <th className="px-4 py-3 text-center">Actions</th>
+              <tr className="bg-slate-100 dark:bg-[#22352a] border-b border-slate-200 dark:border-[#34483b]">
+                <th className="px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-100">Booking ID</th>
+                <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-100">Customer</th>
+                <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-100">Package</th>
+                <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-100">Booking Date</th>
+                <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-100">Pickup Time</th>
+                <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-100">Pickup Area</th>
+                <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-100">Pickup Location</th>
+                <th className="px-4 py-3 text-center text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-100">Adults</th>
+                <th className="px-4 py-3 text-center text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-100">Children</th>
+                <th className="px-4 py-3 text-right text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-100">Payment</th>
+                <th className="px-4 py-3 text-center text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-100">Status</th>
+                <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-100">Vehicle</th>
+                <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-100">Driver</th>
+                <th className="px-4 py-3 text-center text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-100">Actions</th>
               </tr>
             </thead>
 
@@ -1120,7 +1120,7 @@ export default function Bookings() {
                 </tr>
               ) : (
                 filteredBookings.map((booking) => (
-                  <tr key={booking.Booking_ID} className="table-row">
+                  <tr key={booking.Booking_ID} className="table-row hover:bg-slate-50/60 dark:hover:bg-surface-2/20 transition-colors">
                     <td className="px-4 py-3 text-charcoal dark:text-white">{booking.Booking_ID}</td>
                     <td className="px-4 py-3 text-charcoal/80 dark:text-white/80">
                       {booking.customer
