@@ -55,21 +55,28 @@ class PackageController extends Controller
             return $this->imageValidationError('A package can have no more than 3 images.');
         }
 
-        unset($validated['Image'], $validated['Images']);
+        unset($validated['Image'], $validated['Images'], $validated['retain_image_ids'], $validated['keep_legacy_image'], $validated['manage_images']);
         $uploaded = [];
 
         try {
             $uploaded = $this->uploadImages($files);
             $package = DB::transaction(function () use ($validated, $uploaded) {
-                $package = Package::create($validated);
+                $package = new Package();
+                $package->fill($validated);
+
+                $urls = [];
+                foreach ($uploaded as $image) {
+                    $urls[] = $image['url'];
+                }
+                $package->Image = $urls[0] ?? null;
+                $package->save();
+
                 foreach ($uploaded as $image) {
                     $package->images()->create([
                         'image_url' => $image['url'],
                         'cloudinary_public_id' => $image['public_id'],
                     ]);
                 }
-                $package->Image = $uploaded[0]['url'] ?? null;
-                $package->save();
 
                 return $package->load('images');
             });
@@ -266,12 +273,24 @@ class PackageController extends Controller
         return is_array($files) ? array_values($files) : [$files];
     }
 
+    private function cloudinary(): \Cloudinary\Cloudinary
+    {
+        $rawUrl = config('filesystems.disks.cloudinary.url')
+            ?: config('cloudinary.cloud_url')
+            ?: env('CLOUDINARY_URL')
+            ?: getenv('CLOUDINARY_URL');
+        $cleanUrl = str_replace(['<', '>'], '', (string) $rawUrl);
+
+        return new \Cloudinary\Cloudinary($cleanUrl);
+    }
+
     private function uploadImages(array $files): array
     {
         $uploaded = [];
         try {
+            $cloudinary = $this->cloudinary();
             foreach ($files as $file) {
-                $result = cloudinary()->uploadApi()->upload($file->getRealPath(), [
+                $result = $cloudinary->uploadApi()->upload($file->getRealPath(), [
                     'folder' => 'package-images',
                 ]);
                 $url = $result['secure_url'] ?? null;
@@ -364,7 +383,7 @@ class PackageController extends Controller
             }
 
             try {
-                cloudinary()->uploadApi()->destroy($publicId);
+                $this->cloudinary()->uploadApi()->destroy($publicId);
             } catch (Throwable $exception) {
                 report($exception);
             }
