@@ -430,7 +430,7 @@ const blogSections = [
     ],
     tourPackages: [
       {
-        name: "Dambulla Tour & Evening Safari",
+        name: "Dambulla Cave Temple & Evening Safari",
         price: "$110.00",
         duration: "9 - 10 Hours",
         guests: "Max 6 Guests per Jeep",
