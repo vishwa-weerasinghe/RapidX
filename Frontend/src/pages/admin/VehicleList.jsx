@@ -312,7 +312,7 @@ export default function Vehicles() {
           {/* Desktop & Tablet Table (visible on sm and larger screens) */}
           <div className="hidden sm:block overflow-hidden rounded-3xl bg-white dark:bg-[#16231c] border border-border-light dark:border-border-dark/60 shadow-sm">
             <div className="overflow-x-auto">
-              <table className="min-w-full text-sm">
+              <table className="admin-table min-w-full text-sm">
                 <thead>
                   <tr className="bg-slate-50/70 dark:bg-surface-2/40 text-[11px] text-slate-400 dark:text-slate-200 font-bold uppercase tracking-wider border-b border-border-light/60 dark:border-border-dark/40">
                     <th className="px-5 py-3.5 text-left">Vehicle ID</th>
