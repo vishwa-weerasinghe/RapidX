@@ -57,7 +57,7 @@ export default function MediaList() {
           <button
             onClick={fetchMedia}
             disabled={loading}
-            className="p-2.5 rounded-xl bg-white dark:bg-[#16231c] border border-border-light dark:border-border-dark text-slate-600 dark:text-slate-300 hover:text-sacramento transition-colors"
+            className="p-2.5 rounded-xl bg-white dark:bg-[#16231c] border border-border-light dark:border-border-dark text-slate-600 dark:text-slate-300 hover:text-sacramento dark:hover:text-sacramento-300 transition-colors"
             title="Refresh Media"
           >
             <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
@@ -127,7 +127,7 @@ export default function MediaList() {
                 <div className="flex items-center justify-end gap-2 pt-3 mt-3 border-t border-border-light/60 dark:border-border-dark/40">
                   <Link
                     to={`/admin/media/${item.id}/edit`}
-                    className="p-1.5 rounded-lg text-slate-500 hover:text-sacramento hover:bg-slate-100 dark:hover:bg-surface-2 transition-colors"
+                    className="p-1.5 rounded-lg text-slate-500 hover:text-sacramento dark:hover:text-sacramento-300 hover:bg-slate-100 dark:hover:bg-surface-2 transition-colors"
                     title="Edit Media"
                   >
                     <Edit3 size={15} />

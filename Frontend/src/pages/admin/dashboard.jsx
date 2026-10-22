@@ -98,7 +98,7 @@ function ModernInteractiveChart({ data }) {
   if (!data || data.length === 0) {
     return (
       <div className="h-64 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 text-sm gap-2">
-        <Activity size={28} className="opacity-40 animate-pulse text-sacramento" />
+        <Activity size={28} className="opacity-40 animate-pulse text-sacramento dark:text-emerald-400" />
         <span>No monthly booking volume recorded yet</span>
       </div>
     );
@@ -189,7 +189,7 @@ function ModernInteractiveChart({ data }) {
           {[0, 0.33, 0.66, 1].map((ratio, index) => {
             const yVal = chartHeight - paddingBottom - ratio * height;
             return (
-              <g key={index} className="opacity-25 dark:opacity-15">
+              <g key={index} className="opacity-40 dark:opacity-60">
                 <line
                   x1={paddingLeft}
                   y1={yVal}
@@ -203,7 +203,7 @@ function ModernInteractiveChart({ data }) {
                   x={paddingLeft - 8}
                   y={yVal + 3.5}
                   textAnchor="end"
-                  className="text-[9px] fill-slate-400 dark:fill-slate-500 font-medium"
+                  className="text-[10px] fill-slate-500 dark:fill-slate-300 font-semibold"
                 >
                   {Math.round(ratio * maxVal)}
                 </text>
@@ -290,10 +290,10 @@ function ModernInteractiveChart({ data }) {
                   x={p.x}
                   y={chartHeight - 12}
                   textAnchor="middle"
-                  className={`text-[10px] transition-colors font-semibold ${
+                  className={`text-[10px] transition-colors font-bold ${
                     isHovered
-                      ? "fill-emerald-600 dark:fill-emerald-400 font-bold"
-                      : "fill-slate-500 dark:fill-slate-400"
+                      ? "fill-emerald-600 dark:fill-emerald-400"
+                      : "fill-slate-500 dark:fill-slate-300"
                   }`}
                 >
                   {label}
@@ -381,7 +381,7 @@ function StatCard({ icon: Icon, label, value, sub, badgeText, color = "emerald",
           </span>
         )}
         {link && !badgeText && (
-          <span className="p-1.5 rounded-lg bg-slate-50 dark:bg-surface-2 text-slate-400 group-hover:text-sacramento dark:group-hover:text-sacramento-300 transition-colors">
+          <span className="p-1.5 rounded-lg bg-slate-50 dark:bg-[#101813] text-slate-400 group-hover:text-sacramento dark:group-hover:text-sacramento-300 transition-colors">
             <ArrowUpRight size={15} />
           </span>
         )}
@@ -572,15 +572,15 @@ export default function AdminDashboard({ user }) {
             <button
               onClick={() => fetchStats(true)}
               disabled={refreshing}
-              className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-white dark:bg-surface-2 border border-slate-200 dark:border-border-dark text-slate-600 dark:text-slate-300 hover:text-sacramento dark:hover:text-sacramento-300 hover:border-sacramento/30 dark:hover:border-sacramento-700/50 hover:shadow-sm active:scale-95 transition-all text-xs font-bold"
+              className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-white dark:bg-[#101813] border border-slate-200 dark:border-border-dark text-slate-600 dark:text-slate-300 hover:text-sacramento dark:hover:text-sacramento-300 hover:border-sacramento/30 dark:hover:border-sacramento-700/50 hover:shadow-sm active:scale-95 transition-all text-xs font-bold"
               title="Reload Statistics"
             >
-              <RefreshCw size={15} className={refreshing ? "animate-spin text-sacramento" : ""} />
+              <RefreshCw size={15} className={refreshing ? "animate-spin text-sacramento dark:text-emerald-400" : ""} />
               <span>{refreshing ? "Updating..." : "Refresh"}</span>
             </button>
 
             {/* Date Indicator */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-surface-2/60 border border-slate-200/80 dark:border-border-dark text-xs font-bold text-slate-600 dark:text-slate-300">
+            <div className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#101813] border border-slate-200/80 dark:border-border-dark text-xs font-bold text-slate-600 dark:text-slate-300">
               <Clock size={15} className="text-sacramento dark:text-sacramento-300" />
               <span>
                 {new Date().toLocaleDateString("en-US", {
@@ -675,7 +675,7 @@ export default function AdminDashboard({ user }) {
                 </div>
               </div>
 
-              <span className="hidden sm:inline-flex items-center gap-1 px-3 py-1 bg-slate-50 dark:bg-surface-2 border border-slate-200/60 dark:border-border-dark rounded-full text-xs font-semibold text-slate-600 dark:text-slate-400">
+              <span className="hidden sm:inline-flex items-center gap-1 px-3 py-1 bg-slate-50 dark:bg-[#101813] border border-slate-200/60 dark:border-border-dark rounded-full text-xs font-semibold text-slate-600 dark:text-slate-300">
                 <Sparkles size={12} className="text-emerald-500" />
                 Live Data
               </span>
@@ -713,7 +713,7 @@ export default function AdminDashboard({ user }) {
             </div>
 
             {/* Segmented Visual Bar */}
-            <div className="w-full h-3 rounded-full bg-slate-100 dark:bg-surface-2 overflow-hidden flex my-4 shadow-inner">
+            <div className="w-full h-3 rounded-full bg-slate-100 dark:bg-[#101813] overflow-hidden flex my-4 shadow-inner">
               {pipelineMetrics.items.map((item) => (
                 <div
                   key={item.key}
@@ -729,14 +729,14 @@ export default function AdminDashboard({ user }) {
               {pipelineMetrics.items.map((item) => (
                 <div
                   key={item.key}
-                  className="p-3.5 rounded-2xl bg-slate-50/70 dark:bg-surface-2/40 border border-slate-200/50 dark:border-border-dark/40 flex flex-col gap-1"
+                  className="p-3.5 rounded-2xl bg-slate-50 dark:bg-[#101813] border border-slate-200/50 dark:border-border-dark/60 flex flex-col gap-1 shadow-xs"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
                       <span className={`w-2 h-2 rounded-full ${item.styles.dot}`} />
                       {item.key}
                     </span>
-                    <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500">
+                    <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
                       {item.percentage}%
                     </span>
                   </div>
@@ -798,13 +798,13 @@ export default function AdminDashboard({ user }) {
               <div className="overflow-x-auto">
                 <table className="min-w-full text-sm">
                   <thead>
-                    <tr className="bg-slate-50/70 dark:bg-surface-2/40 text-[11px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">
-                      <th className="px-6 py-3.5 text-left">Customer</th>
-                      <th className="px-6 py-3.5 text-left">Safari Tour</th>
-                      <th className="px-6 py-3.5 text-left">Target Date</th>
-                      <th className="px-6 py-3.5 text-left">Status</th>
-                      <th className="px-6 py-3.5 text-right">Value</th>
-                      <th className="px-6 py-3.5 text-right">Action</th>
+                    <tr className="bg-slate-100 dark:bg-[#101813] text-[11px] text-slate-600 dark:text-slate-200 font-extrabold uppercase tracking-wider border-b border-border-light dark:border-border-dark/60">
+                      <th className="px-6 py-3.5 text-left text-slate-600 dark:text-slate-200">Customer</th>
+                      <th className="px-6 py-3.5 text-left text-slate-600 dark:text-slate-200">Safari Tour</th>
+                      <th className="px-6 py-3.5 text-left text-slate-600 dark:text-slate-200">Target Date</th>
+                      <th className="px-6 py-3.5 text-left text-slate-600 dark:text-slate-200">Status</th>
+                      <th className="px-6 py-3.5 text-right text-slate-600 dark:text-slate-200">Value</th>
+                      <th className="px-6 py-3.5 text-right text-slate-600 dark:text-slate-200">Action</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border-light/60 dark:divide-border-dark/40">
@@ -814,7 +814,7 @@ export default function AdminDashboard({ user }) {
                       return (
                         <tr
                           key={b.id}
-                          className="hover:bg-slate-50/70 dark:hover:bg-surface-2/30 transition-colors"
+                          className="hover:bg-slate-50/70 dark:hover:bg-[#101813]/60 transition-colors"
                         >
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
@@ -909,7 +909,7 @@ export default function AdminDashboard({ user }) {
                 {recent_reviews.map((r) => (
                   <div
                     key={r.id}
-                    className="p-5 hover:bg-slate-50/60 dark:hover:bg-surface-2/30 transition-colors"
+                    className="p-5 hover:bg-slate-50/60 dark:hover:bg-[#101813]/60 transition-colors"
                   >
                     <div className="flex items-center justify-between gap-3 mb-2">
                       <div className="flex items-center gap-2">
@@ -993,7 +993,7 @@ export default function AdminDashboard({ user }) {
             <Link
               key={to}
               to={to}
-              className={`flex flex-col items-start p-5 rounded-2xl border border-border-light dark:border-border-dark/60 bg-white dark:bg-surface-2/40 ${gradient} hover:shadow-md hover:-translate-y-0.5 active:scale-98 transition-all duration-300 group`}
+              className={`flex flex-col items-start p-5 rounded-2xl border border-border-light dark:border-border-dark/60 bg-white dark:bg-[#101813]/60 ${gradient} hover:shadow-md hover:-translate-y-0.5 active:scale-98 transition-all duration-300 group`}
             >
               <div className="flex items-center justify-between w-full mb-3">
                 <div className={`p-2.5 rounded-xl ${iconBg} shadow-sm group-hover:scale-110 transition-transform duration-300`}>

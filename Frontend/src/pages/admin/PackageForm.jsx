@@ -100,8 +100,8 @@ export default function PackageForm() {
   }
 
   return (
-    <div className="p-6 w-full">
-      <h1 className="text-2xl font-bold text-charcoal dark:text-white mb-6">
+    <div className="max-w-3xl mx-auto rounded-3xl bg-white dark:bg-[#16231c] border border-border-light dark:border-border-dark/60 p-6 sm:p-8 mt-6 shadow-sm">
+      <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">
         {isEdit ? "Edit Package" : "Add Package"}
       </h1>
 
@@ -219,9 +219,9 @@ export default function PackageForm() {
             onChange={handleChange}
             className="form-input"
           >
-            <option value="">None</option>
+            <option value="" className="bg-white dark:bg-[#16231c] text-charcoal dark:text-white">None</option>
             {STATIC_BLOG_PACKAGES.map((pkg) => (
-              <option key={pkg.id} value={pkg.id}>
+              <option key={pkg.id} value={pkg.id} className="bg-white dark:bg-[#16231c] text-charcoal dark:text-white">
                 {pkg.name}
               </option>
             ))}

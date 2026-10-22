@@ -102,7 +102,7 @@ export default function Drivers() {
           <button
             onClick={fetchDrivers}
             disabled={loading}
-            className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-surface-2 text-slate-500 hover:text-sacramento transition-colors"
+            className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-surface-2 text-slate-500 hover:text-sacramento dark:hover:text-sacramento-300 transition-colors"
             title="Refresh List"
           >
             <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
@@ -169,7 +169,7 @@ export default function Drivers() {
                     <div className="flex items-center gap-1.5">
                       <Link
                         to={`/admin/drivers/${driver.Driver_ID}/edit`}
-                        className="p-2 rounded-lg bg-slate-50 dark:bg-surface-2 text-slate-600 dark:text-slate-300 hover:text-sacramento transition-colors"
+                        className="p-2 rounded-lg bg-slate-50 dark:bg-surface-2 text-slate-600 dark:text-slate-300 hover:text-sacramento dark:hover:text-sacramento-300 transition-colors"
                         title="Edit Driver"
                       >
                         <Edit3 size={15} />
@@ -188,7 +188,7 @@ export default function Drivers() {
                     {driver.Phone_Number && (
                       <a
                         href={`tel:${driver.Phone_Number}`}
-                        className="flex items-center gap-2 text-slate-600 dark:text-slate-300 hover:text-sacramento"
+                        className="flex items-center gap-2 text-slate-600 dark:text-slate-300 hover:text-sacramento dark:hover:text-sacramento-300"
                       >
                         <Phone size={13} className="text-sacramento dark:text-sacramento-300 shrink-0" />
                         <span className="font-mono">{driver.Phone_Number}</span>
@@ -197,7 +197,7 @@ export default function Drivers() {
                     {driver.Email && (
                       <a
                         href={`mailto:${driver.Email}`}
-                        className="flex items-center gap-2 text-slate-600 dark:text-slate-300 hover:text-sacramento truncate"
+                        className="flex items-center gap-2 text-slate-600 dark:text-slate-300 hover:text-sacramento dark:hover:text-sacramento-300 truncate"
                       >
                         <Mail size={13} className="text-sacramento dark:text-sacramento-300 shrink-0" />
                         <span className="truncate">{driver.Email}</span>
@@ -273,7 +273,7 @@ export default function Drivers() {
                           <div className="inline-flex items-center gap-2">
                             <Link
                               to={`/admin/drivers/${driver.Driver_ID}/edit`}
-                              className="p-1.5 rounded-lg text-slate-500 hover:text-sacramento hover:bg-slate-100 dark:hover:bg-surface-2 transition-colors"
+                              className="p-1.5 rounded-lg text-slate-500 hover:text-sacramento dark:hover:text-sacramento-300 hover:bg-slate-100 dark:hover:bg-surface-2 transition-colors"
                               title="Edit Driver"
                             >
                               <Edit3 size={15} />

@@ -30,6 +30,7 @@ import {
 import { getStaticBlogPackageSection } from "./constants/staticBlogPackages";
 import TripAdvisorWidget from "./components/TripAdvisorWidget";
 import { STATIC_TRIPADVISOR_REVIEWS } from "./constants/staticTripadvisorReviews";
+import ReserveNowNotice from "./components/ReserveNowNotice";
 
 // Presentational review card used inside the auto-sliding carousel
 function ReviewCardContent({ rev }) {
@@ -1234,7 +1235,7 @@ export default function App() {
 
               {/* Description */}
               <p className="text-neutral-100 dark:text-neutral-300 font-medium tracking-wide text-sm sm:text-base mb-8 drop-shadow-md max-w-xl leading-relaxed">
-                Book official <strong>Minneriya safari</strong>, <strong>Kaudulla jeep safari</strong>, <strong>Hurulu Eco Park</strong>, and <strong>Wasgamuwa</strong> safaries online. Witness the famous Sri Lanka Elephant Gathering and wild leopards with licensed local drivers, guaranteed wildlife sightings, and hotel pickup in Habarana, Sigiriya, Kandalama &amp; Dambulla.
+                Book official <strong>Minneriya safari</strong>, <strong>Kaudulla jeep safari</strong>, <strong>Hurulu Eco Park</strong>, and <strong>Wasgamuwa</strong> safaries online. Witness the famous Sri Lanka Elephant Gathering and wild leopards with licensed local drivers and hotel pickup in Habarana, Sigiriya, Kandalama &amp; Dambulla.
               </p>
 
               {/* Action Buttons */}
@@ -1306,6 +1307,9 @@ export default function App() {
               </p>
             </div>
 
+            {/* Reserve Now & Pay Later Notice */}
+            <ReserveNowNotice className="mb-12 max-w-5xl mx-auto" />
+
             {/* Cards Grid: 2 per row */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10 max-w-5xl mx-auto">
               {packagesLoading && packages.length === 0 ? (
@@ -1333,8 +1337,13 @@ export default function App() {
                   return (
                     <div
                       key={idx}
-                      className="w-full bg-white dark:bg-neutral-900 rounded-3xl overflow-hidden border border-gray-200 dark:border-neutral-800 shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col"
+                      className="relative group w-full bg-white dark:bg-neutral-900 rounded-3xl overflow-hidden border-2 border-black shadow-[0_0_0_1px_rgba(0,0,0,0.9),inset_0_1.5px_1px_rgba(255,255,255,0.45),inset_0_-1.5px_2px_rgba(255,255,255,0.15),0_20px_45px_-12px_rgba(0,0,0,0.35)] hover:shadow-[0_0_0_1px_rgba(0,0,0,1),inset_0_2px_1.5px_rgba(255,255,255,0.7),inset_0_-1.5px_2px_rgba(255,255,255,0.25),0_30px_60px_-15px_rgba(0,0,0,0.5)] hover:-translate-y-1 transition-all duration-300 flex flex-col"
                     >
+                      {/* Specular top border highlight */}
+                      <div className="absolute top-0 inset-x-8 h-[1.5px] bg-gradient-to-r from-transparent via-white/70 to-transparent pointer-events-none z-20" />
+
+                      {/* Luminous bottom rim reflection */}
+                      <div className="absolute bottom-0 inset-x-6 h-[2px] bg-gradient-to-r from-transparent via-white/80 dark:via-emerald-300/80 to-transparent pointer-events-none z-20 shadow-[0_0_8px_rgba(255,255,255,0.6)]" />
                       {/* Image */}
                       <div className="relative h-64 sm:h-72 overflow-hidden bg-gray-50 dark:bg-neutral-800">
                         <img
@@ -1607,7 +1616,7 @@ export default function App() {
               </h2>
             </div>
 
-            <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 xl:gap-6">
               {[
                 {
                   title: "Local Experts",
@@ -1685,18 +1694,37 @@ export default function App() {
                     </svg>
                   ),
                 },
+                {
+                  title: "Book Now & Pay Later",
+                  desc: "Reserve your safari slot today with zero upfront payment and pay later.",
+                  icon: (
+                    <svg
+                      className="w-8 h-8"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                      />
+                    </svg>
+                  ),
+                },
               ].map((reason, idx) => (
                 <div
                   key={idx}
-                  className="p-12 rounded-3xl text-center shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 bg-gray-50 border border-gray-100 group"
+                  className="p-6 sm:p-8 lg:p-6 xl:p-8 rounded-3xl text-center shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 bg-gray-50 border border-gray-100 group flex flex-col items-center"
                 >
-                  <div className="w-20 h-20 bg-white text-castleton border border-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm group-hover:scale-110 transition-transform duration-300">
+                  <div className="w-16 h-16 xl:w-20 xl:h-20 bg-white text-castleton border border-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm group-hover:scale-110 transition-transform duration-300 shrink-0">
                     {reason.icon}
                   </div>
-                  <h3 className="text-xl font-bold mb-3 text-gray-900">
+                  <h3 className="text-lg xl:text-xl font-bold mb-3 text-gray-900 leading-snug">
                     {reason.title}
                   </h3>
-                  <p className="text-gray-500 text-base leading-relaxed">
+                  <p className="text-gray-500 text-sm xl:text-base leading-relaxed">
                     {reason.desc}
                   </p>
                 </div>
