@@ -162,7 +162,7 @@ export default function AdminReviews() {
             className={`relative p-2.5 rounded-xl border transition-all ${
               newReviewIds.size > 0
                 ? "bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400"
-                : "bg-white dark:bg-[#16231c] border-border-light dark:border-border-dark text-slate-600 dark:text-slate-300 hover:text-sacramento"
+                : "bg-white dark:bg-[#16231c] border-border-light dark:border-border-dark text-slate-600 dark:text-slate-300 hover:text-sacramento dark:hover:text-sacramento-300"
             }`}
             title={showNewOnly ? "Show all reviews" : "Show new reviews"}
           >
@@ -299,7 +299,7 @@ export default function AdminReviews() {
           {showNewOnly && (
             <button
               onClick={() => setShowNewOnly(false)}
-              className="text-xs font-bold text-sacramento underline"
+              className="text-xs font-bold text-sacramento dark:text-sacramento-300 underline"
             >
               Show all reviews
             </button>

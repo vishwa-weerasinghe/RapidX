@@ -651,13 +651,13 @@ export default function Bookings() {
                         onClick={() => setShowNotifications(false)}
                         className="w-full rounded-lg border border-border-light p-3 text-left hover:bg-offwhite-100 dark:border-border-dark dark:hover:bg-surface-2"
                       >
-                        <p className="text-xs font-bold text-sacramento">
+                        <p className="text-xs font-bold text-sacramento dark:text-emerald-400">
                           {booking.package?.Package_Name || "Safari package"} - {booking.Status}
                         </p>
                         <p className="mt-1 text-sm text-charcoal dark:text-white">
                           {booking.Admin_Message || "A new booking has been received."}
                         </p>
-                        <p className="mt-1 text-xs text-muted">
+                        <p className="mt-1 text-xs text-muted dark:text-slate-400">
                           Safari date: {booking.Booking_Date}
                         </p>
                       </button>
@@ -703,7 +703,7 @@ export default function Bookings() {
             aria-label="Booking period"
           >
             {PERIOD_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
+              <option key={option.value} value={option.value} className="bg-white dark:bg-[#16231c] text-charcoal dark:text-white">
                 {option.label}
               </option>
             ))}
@@ -782,16 +782,16 @@ export default function Bookings() {
 
         return (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="w-full max-w-lg rounded-xl card p-6 shadow-xl max-h-[90vh] overflow-y-auto">
+            <div className="w-full max-w-lg rounded-xl card bg-white dark:bg-[#16231c] border border-border-light dark:border-border-dark/60 p-6 shadow-xl max-h-[90vh] overflow-y-auto">
               <h2 className="text-xl font-bold text-charcoal dark:text-white">Assign Vehicles</h2>
-              <p className="text-sm text-muted mb-4">
+              <p className="text-sm text-muted dark:text-slate-400 mb-4">
                 Booking #{modalBooking.Booking_ID} ·{" "}
                 {modalBooking.customer
                   ? `${modalBooking.customer.First_Name} ${modalBooking.customer.Last_Name}`
                   : "Guest"}
               </p>
 
-              <div className="rounded-lg bg-sacramento/10 p-3 text-sm text-sacramento mb-4">
+              <div className="rounded-lg bg-emerald-500/10 dark:bg-emerald-950/40 border border-emerald-500/20 p-3 text-sm text-emerald-800 dark:text-emerald-300 mb-4">
                 Passengers: <strong>{getPassengerTotal(modalBooking)}</strong> ({modalBooking.No_of_adults} adults +{" "}
                 {modalBooking.No_of_child} children) →{" "}
                 <strong>
@@ -817,12 +817,13 @@ export default function Bookings() {
                         className="form-input"
                         aria-label={`Vehicle ${slotIndex + 1} of ${required} for booking ${modalBooking.Booking_ID}`}
                       >
-                        <option value="">Select a vehicle…</option>
+                        <option value="" className="bg-white dark:bg-[#16231c] text-charcoal dark:text-white">Select a vehicle…</option>
                         {vehicles.map((vehicle) => (
                           <option
                             key={vehicle.Vehicle_ID}
                             value={vehicle.Vehicle_ID}
                             disabled={takenElsewhere.has(String(vehicle.Vehicle_ID))}
+                            className="bg-white dark:bg-[#16231c] text-charcoal dark:text-white"
                           >
                             {vehicle.Vehicle_No} ({vehicle.Vehicle_Type}, {vehicle.No_of_Seats} seats)
                           </option>
@@ -867,11 +868,11 @@ export default function Bookings() {
 
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl card p-6 shadow-2xl">
+          <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl card bg-white dark:bg-[#16231c] border border-border-light dark:border-border-dark/60 p-6 shadow-2xl">
             <div className="mb-4 flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold text-sacramento">Add New Booking</h2>
-                <p className="text-sm text-muted">Create a booking for a registered customer or a guest/unregistered customer.</p>
+                <h2 className="text-xl font-bold text-sacramento dark:text-emerald-400">Add New Booking</h2>
+                <p className="text-sm text-muted dark:text-slate-400">Create a booking for a registered customer or a guest/unregistered customer.</p>
               </div>
               <button
                 type="button"
@@ -905,7 +906,7 @@ export default function Bookings() {
                     required
                   >
                     {getPickupTimeOptions(selectedPackage).map((option) => (
-                      <option key={option.value} value={option.value}>
+                      <option key={option.value} value={option.value} className="bg-white dark:bg-[#16231c] text-charcoal dark:text-white">
                         {option.label}
                       </option>
                     ))}
@@ -955,9 +956,9 @@ export default function Bookings() {
                     className="form-input"
                     required
                   >
-                    <option value="">Select a package</option>
+                    <option value="" className="bg-white dark:bg-[#16231c] text-charcoal dark:text-white">Select a package</option>
                     {packages.map((item) => (
-                      <option key={item.Package_ID || item.id} value={item.Package_ID || item.id}>
+                      <option key={item.Package_ID || item.id} value={item.Package_ID || item.id} className="bg-white dark:bg-[#16231c] text-charcoal dark:text-white">
                         {item.Package_Name} - 1 Adult: $ {item.price_one_adult} / Adult (2+): $ {item.price_more_adult} / Child: $ {item.price_child}
                       </option>
                     ))}
@@ -971,9 +972,9 @@ export default function Bookings() {
                     onChange={handleCreateInputChange}
                     className="form-input"
                   >
-                    <option value="Confirmed">Confirmed</option>
-                    <option value="Completed">Completed</option>
-                    <option value="Cancelled">Cancelled</option>
+                    <option value="Confirmed" className="bg-white dark:bg-[#16231c] text-charcoal dark:text-white">Confirmed</option>
+                    <option value="Completed" className="bg-white dark:bg-[#16231c] text-charcoal dark:text-white">Completed</option>
+                    <option value="Cancelled" className="bg-white dark:bg-[#16231c] text-charcoal dark:text-white">Cancelled</option>
                   </select>
                 </div>
               </div>
@@ -1058,7 +1059,7 @@ export default function Bookings() {
                 )}
               </div>
 
-              <div className="rounded-lg bg-sacramento/10 p-3 text-sm text-sacramento">
+              <div className="rounded-lg bg-emerald-500/10 dark:bg-emerald-950/40 border border-emerald-500/20 p-3 text-sm text-emerald-800 dark:text-emerald-300 font-semibold">
                 Estimated payment: $ {calculateCreatePayment().toLocaleString()}
               </div>
 
@@ -1195,7 +1196,7 @@ export default function Bookings() {
                             <button
                               type="button"
                               onClick={() => openAssignModal(booking)}
-                              className="text-sm font-medium text-sacramento hover:underline"
+                              className="text-sm font-medium text-sacramento hover:underline dark:text-emerald-400 dark:hover:text-emerald-300"
                               aria-label={`Assign vehicles for booking ${booking.Booking_ID}`}
                             >
                               Assign vehicles

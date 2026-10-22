@@ -160,8 +160,8 @@ export default function PackageForm() {
   const selectedImageCount = existingImages.length + newImages.length;
 
   return (
-    <div className="p-4 sm:p-6 w-full max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold text-charcoal dark:text-white mb-6">
+    <div className="max-w-3xl mx-auto rounded-3xl bg-white dark:bg-[#16231c] border border-border-light dark:border-border-dark/60 p-6 sm:p-8 mt-6 shadow-sm">
+      <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">
         {isEdit ? "Edit Package" : "Add Package"}
       </h1>
 
@@ -224,8 +224,12 @@ export default function PackageForm() {
         <div>
           <label className="block text-sm font-medium text-charcoal dark:text-white mb-1">Related Blog Package</label>
           <select name="blog_id" value={form.blog_id} onChange={handleChange} className="form-input">
-            <option value="">None</option>
-            {STATIC_BLOG_PACKAGES.map((pkg) => <option key={pkg.id} value={pkg.id}>{pkg.name}</option>)}
+            <option value="" className="bg-white dark:bg-[#16231c] text-charcoal dark:text-white">None</option>
+            {STATIC_BLOG_PACKAGES.map((pkg) => (
+              <option key={pkg.id} value={pkg.id} className="bg-white dark:bg-[#16231c] text-charcoal dark:text-white">
+                {pkg.name}
+              </option>
+            ))}
           </select>
           {errors.blog_id && <p className="text-red-500 text-xs mt-1">{errors.blog_id[0]}</p>}
         </div>

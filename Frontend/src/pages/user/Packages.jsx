@@ -13,6 +13,7 @@ import {
 import api from "../../axios";
 import { Link, useNavigate } from "react-router-dom";
 import { getStaticBlogPackageSection } from "../../constants/staticBlogPackages";
+import ReserveNowNotice from "../../components/ReserveNowNotice";
 import PackageImageCarousel from "../../components/PackageImageCarousel";
 import { FALLBACK_PACKAGE_IMAGE, getPackageImageUrls } from "../../utils/packageImages";
 
@@ -128,6 +129,9 @@ export default function Packages() {
             </div>
           </div>
         </div>
+
+        {/* Reserve Now & Pay Later Notice */}
+        <ReserveNowNotice className="mb-10" />
 
         {/* Packages Grid */}
         {filteredPackages.length === 0 ? (

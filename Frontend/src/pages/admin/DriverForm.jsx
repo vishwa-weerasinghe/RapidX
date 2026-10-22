@@ -57,8 +57,8 @@ export default function DriverForm() {
   if (loading) return <div className="p-6 text-muted">Loading...</div>;
 
   return (
-    <div className="p-6 w-full">
-      <h1 className="text-2xl font-bold text-charcoal dark:text-white mb-6">
+    <div className="max-w-2xl mx-auto rounded-3xl bg-white dark:bg-[#16231c] border border-border-light dark:border-border-dark/60 p-6 sm:p-8 mt-6 shadow-sm">
+      <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">
         {isEdit ? "Edit Driver" : "Add Driver"}
       </h1>
 
