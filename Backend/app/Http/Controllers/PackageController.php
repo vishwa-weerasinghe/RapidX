@@ -275,6 +275,10 @@ class PackageController extends Controller
 
     private function cloudinary(): \Cloudinary\Cloudinary
     {
+        if (app()->bound(\Cloudinary\Cloudinary::class)) {
+            return app(\Cloudinary\Cloudinary::class);
+        }
+
         $rawUrl = config('filesystems.disks.cloudinary.url')
             ?: config('cloudinary.cloud_url')
             ?: env('CLOUDINARY_URL')
