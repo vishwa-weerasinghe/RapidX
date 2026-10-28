@@ -34,6 +34,8 @@ import { HOME_PACKAGE_LIMIT, orderHomePackages } from "./utils/homePackageOrderi
 import TripAdvisorWidget from "./components/TripAdvisorWidget";
 import { STATIC_TRIPADVISOR_REVIEWS } from "./constants/staticTripadvisorReviews";
 import ReserveNowNotice from "./components/ReserveNowNotice";
+import { getHomepageStructuredData } from "./utils/seoSchema";
+import { applyPopularPackageBadge } from "./constants/popularPackageConfig";
 
 // Presentational review card used inside the auto-sliding carousel
 function ReviewCardContent({ rev }) {
@@ -419,11 +421,6 @@ export default function App() {
       .then((res) => {
         if (res.data && res.data.length > 0) {
 
-          const maxBookings = Math.max(
-            0,
-            ...res.data.map((pkg) => Number(pkg.bookings_count || 0)),
-          );
-
           const mapped = res.data.map((pkg) => {
             const images = getPackageImageUrls(pkg);
             const oneAdult = Number(pkg.price_one_adult) || 0;
@@ -442,16 +439,14 @@ export default function App() {
                   : oneAdult || moreAdult,
               images,
               img: images[0] || FALLBACK_PACKAGE_IMAGE,
-              popular:
-                Number(pkg.bookings_count || 0) === maxBookings &&
-                maxBookings > 0,
               price_one_adult: oneAdult,
               price_more_adult: moreAdult,
               price_child: Number(pkg.price_child) || 0,
               Package_Name: pkg.Package_Name,
+              bookings_count: pkg.bookings_count,
             };
           });
-          setPackages(mapped);
+          setPackages(applyPopularPackageBadge(mapped));
         }
       })
       .catch((err) => console.error("Error loading packages:", err))
@@ -761,6 +756,7 @@ export default function App() {
       systemReviews.length
       : 0;
   const systemFullStars = Math.round(systemAverageRating);
+  const homepageStructuredData = getHomepageStructuredData(systemReviews);
 
   return (
     <>
@@ -769,6 +765,7 @@ export default function App() {
         description="Book official Minneriya jeep safari online. Experience the famous Minneriya Elephant Gathering, Kaudulla, Hurulu &amp; Wasgamuwa with best rates, prices &amp; certified drivers."
         keywords="minneriya jeep safari, minneriya safari, minneriya safari price, minneriya national park jeep safari price, minneriya jeep safari &amp; tours, minneriya national park safari, minneriya elephant gathering, sri lanka jeep safari, kaudulla jeep safari, hurulu eco park safari, wasgamuwa safari"
         canonical="https://www.minneriyawildjeepsafari.com"
+        structuredData={homepageStructuredData}
       />
       <div
         className={`font-sans antialiased overflow-x-hidden selection:bg-[var(--primary)] selection:text-white transition-colors duration-200 ${theme === "dark"
