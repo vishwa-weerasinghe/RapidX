@@ -170,7 +170,7 @@ export default function PromotionCodes() {
                   <div className="flex items-center gap-1.5">
                     <button
                       onClick={() => handleOpenModal(code)}
-                      className="p-2 rounded-lg bg-slate-50 dark:bg-surface-2 text-slate-600 dark:text-slate-300 hover:text-sacramento transition-colors"
+                      className="p-2 rounded-lg bg-slate-50 dark:bg-surface-2 text-slate-600 dark:text-slate-300 hover:text-sacramento dark:hover:text-sacramento-300 transition-colors"
                       title="Edit Code"
                     >
                       <Edit3 size={15} />
@@ -249,7 +249,7 @@ export default function PromotionCodes() {
                       <td className="px-5 py-4 text-xs text-slate-500 dark:text-slate-400">
                         {code.valid_until ? (
                           <span className="flex items-center gap-1.5 font-mono">
-                            <Calendar size={13} className="text-sacramento" />
+                            <Calendar size={13} className="text-sacramento dark:text-sacramento-300" />
                             {code.valid_until.split("T")[0]}
                           </span>
                         ) : (
@@ -282,7 +282,7 @@ export default function PromotionCodes() {
                         <div className="inline-flex items-center gap-2">
                           <button
                             onClick={() => handleOpenModal(code)}
-                            className="p-1.5 rounded-lg text-slate-500 hover:text-sacramento hover:bg-slate-100 dark:hover:bg-surface-2 transition-colors"
+                            className="p-1.5 rounded-lg text-slate-500 hover:text-sacramento dark:hover:text-sacramento-300 hover:bg-slate-100 dark:hover:bg-surface-2 transition-colors"
                             title="Edit Code"
                           >
                             <Edit3 size={15} />

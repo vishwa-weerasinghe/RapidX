@@ -107,17 +107,17 @@ export default function MediaForm() {
   }
 
   return (
-    <div className="p-6 max-w-xl">
+    <div className="p-6 max-w-2xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-charcoal dark:text-white">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
           {isEdit ? "Edit Media Item" : "Upload New Media"}
         </h1>
-        <p className="text-sm text-muted mt-1">
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
           {isEdit ? "Update details or replace the media file." : "Add a photo to the public safari booking gallery."}
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-5 card p-6">
+      <form onSubmit={handleSubmit} className="space-y-5 rounded-3xl bg-white dark:bg-[#16231c] border border-border-light dark:border-border-dark/60 p-6 sm:p-8 shadow-sm">
         <div>
           <label className="block text-sm font-medium text-charcoal dark:text-white mb-1">
             Media Title
@@ -163,9 +163,9 @@ export default function MediaForm() {
             onChange={handleChange}
             className="form-input"
           >
-            <option value="">No Related Blog</option>
+            <option value="" className="bg-white dark:bg-[#16231c] text-charcoal dark:text-white">No Related Blog</option>
             {STATIC_BLOGS.map((blog) => (
-              <option key={blog.blogId} value={blog.blogId}>
+              <option key={blog.blogId} value={blog.blogId} className="bg-white dark:bg-[#16231c] text-charcoal dark:text-white">
                 {blog.title}
               </option>
             ))}

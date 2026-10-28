@@ -186,13 +186,13 @@ export default function Appointments() {
                   key={getAppointmentId(appointment)}
                   className="rounded-lg border border-border-light bg-offwhite-100 p-3 dark:border-border-dark dark:bg-surface-2"
                 >
-                  <p className="text-xs font-bold text-sacramento">
+                  <p className="text-xs font-bold text-sacramento dark:text-emerald-400">
                     {appointment?.Package_Name || "Safari package"}
                   </p>
                   <p className="mt-1 text-sm text-charcoal dark:text-white">
                     {appointment?.Status || "Pending review"}
                   </p>
-                  <p className="mt-1 text-xs text-muted">
+                  <p className="mt-1 text-xs text-muted dark:text-slate-400">
                     Booking ID: {getAppointmentId(appointment)}
                   </p>
                 </div>
@@ -206,28 +206,28 @@ export default function Appointments() {
       {!loading && !error && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
           <div className="card flex flex-col p-4">
-            <p className="text-xs uppercase tracking-wide text-muted">Total Confirmed Appointments</p>
+            <p className="text-xs uppercase tracking-wide text-muted dark:text-slate-400">Total Confirmed Appointments</p>
             <p className="mt-auto w-full self-start pt-2 text-left text-2xl font-bold text-charcoal dark:text-white">{summary.total_confirmed}</p>
           </div>
           <div className="card flex flex-col p-4">
-            <p className="text-xs uppercase tracking-wide text-muted">Total Unconfirmed (In Cart, Pendings) Appointments</p>
+            <p className="text-xs uppercase tracking-wide text-muted dark:text-slate-400">Total Unconfirmed (In Cart, Pendings) Appointments</p>
             <p className="mt-auto w-full self-start pt-2 text-left text-2xl font-bold text-charcoal dark:text-white">{summary.total_unconfirmed}</p>
           </div>
           <div className="card flex flex-col p-4">
-            <p className="text-xs uppercase tracking-wide text-muted">Total Earnings (Confirmed)</p>
-            <p className="mt-auto w-full self-start pt-2 text-left text-2xl font-bold text-sacramento dark:text-[#e6c15a]">$ {Number(summary.total_earnings_confirmed).toLocaleString()}</p>
+            <p className="text-xs uppercase tracking-wide text-muted dark:text-slate-400">Total Earnings (Confirmed)</p>
+            <p className="mt-auto w-full self-start pt-2 text-left text-2xl font-bold text-sacramento dark:text-emerald-400">$ {Number(summary.total_earnings_confirmed).toLocaleString()}</p>
           </div>
           <div className="card flex flex-col p-4">
-            <p className="text-xs uppercase tracking-wide text-muted">Total Earnings (Unconfirmed)</p>
-            <p className="mt-auto w-full self-start pt-2 text-left text-2xl font-bold text-muted">$ {Number(summary.total_earnings_unconfirmed).toLocaleString()}</p>
+            <p className="text-xs uppercase tracking-wide text-muted dark:text-slate-400">Total Earnings (Unconfirmed)</p>
+            <p className="mt-auto w-full self-start pt-2 text-left text-2xl font-bold text-slate-800 dark:text-slate-200">$ {Number(summary.total_earnings_unconfirmed).toLocaleString()}</p>
           </div>
           <div className="card flex flex-col p-4">
-            <p className="text-xs uppercase tracking-wide text-muted">Total Refunds</p>
-            <p className="mt-auto w-full self-start pt-2 text-left text-2xl font-bold text-muted">$ {Number(summary.total_refunds || 0).toLocaleString()}</p>
+            <p className="text-xs uppercase tracking-wide text-muted dark:text-slate-400">Total Refunds</p>
+            <p className="mt-auto w-full self-start pt-2 text-left text-2xl font-bold text-rose-600 dark:text-rose-400">$ {Number(summary.total_refunds || 0).toLocaleString()}</p>
           </div>
           <div className="card flex flex-col p-4">
-            <p className="text-xs uppercase tracking-wide text-muted">Total Estimated Earnings</p>
-            <p className="mt-auto w-full self-start pt-2 text-left text-2xl font-bold text-sacramento dark:text-[#e6c15a]">
+            <p className="text-xs uppercase tracking-wide text-muted dark:text-slate-400">Total Estimated Earnings</p>
+            <p className="mt-auto w-full self-start pt-2 text-left text-2xl font-bold text-sacramento dark:text-emerald-400">
               $ {Number(Number(summary.total_earnings_confirmed) + Number(summary.total_earnings_unconfirmed)).toLocaleString()}
             </p>
           </div>

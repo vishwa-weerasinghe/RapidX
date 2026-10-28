@@ -103,7 +103,7 @@ export default function Packages() {
           <button
             onClick={fetchPackages}
             disabled={loading}
-            className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-surface-2 text-slate-500 hover:text-sacramento transition-colors"
+            className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-surface-2 text-slate-500 hover:text-sacramento dark:hover:text-sacramento-300 transition-colors"
             title="Refresh List"
           >
             <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
@@ -168,7 +168,7 @@ export default function Packages() {
                   <div className="flex items-center gap-1.5 shrink-0">
                     <Link
                       to={`/admin/packages/${pkg.id}/edit`}
-                      className="p-2 rounded-lg bg-slate-50 dark:bg-surface-2 text-slate-600 dark:text-slate-300 hover:text-sacramento transition-colors"
+                      className="p-2 rounded-lg bg-slate-50 dark:bg-surface-2 text-slate-600 dark:text-slate-300 hover:text-sacramento dark:hover:text-sacramento-300 transition-colors"
                       title="Edit Package"
                     >
                       <Edit3 size={15} />
@@ -217,7 +217,7 @@ export default function Packages() {
           {/* Desktop & Tablet Table (visible on sm and larger screens) */}
           <div className="hidden sm:block overflow-hidden rounded-3xl bg-white dark:bg-[#16231c] border border-border-light dark:border-border-dark/60 shadow-sm">
             <div className="overflow-x-auto">
-              <table className="min-w-full text-sm">
+              <table className="admin-table min-w-full text-sm">
                 <thead>
                   <tr className="bg-slate-50/70 dark:bg-surface-2/40 text-[11px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider border-b border-border-light/60 dark:border-border-dark/40">
                     <th className="px-5 py-3.5 text-left">Package Name</th>
@@ -263,7 +263,7 @@ export default function Packages() {
                         <div className="inline-flex items-center gap-2">
                           <Link
                             to={`/admin/packages/${pkg.id}/edit`}
-                            className="p-1.5 rounded-lg text-slate-500 hover:text-sacramento hover:bg-slate-100 dark:hover:bg-surface-2 transition-colors"
+                            className="p-1.5 rounded-lg text-slate-500 hover:text-sacramento dark:hover:text-sacramento-300 hover:bg-slate-100 dark:hover:bg-surface-2 transition-colors"
                             title="Edit Package"
                           >
                             <Edit3 size={15} />

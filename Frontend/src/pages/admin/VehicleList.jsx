@@ -135,6 +135,15 @@ export default function Vehicles() {
             )}
           </div>
 
+          <button
+            type="button"
+            onClick={handleSeeVehicle}
+            aria-label="All Vehicles"
+            className="inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl border border-border-light dark:border-border-dark bg-slate-50 dark:bg-surface-2 hover:bg-slate-100 dark:hover:bg-surface-2/80 text-xs font-bold text-slate-700 dark:text-slate-200 transition-colors"
+          >
+            <Eye size={14} className="text-sacramento dark:text-sacramento-300" />
+            <span>All Vehicles</span>
+          </button>
         </div>
 
         <div className="flex items-center justify-between sm:justify-end gap-3 text-xs text-slate-500 dark:text-slate-400">
@@ -145,7 +154,7 @@ export default function Vehicles() {
             type="button"
             onClick={fetchVehicles}
             disabled={loading}
-            className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-surface-2 text-slate-500 hover:text-sacramento transition-colors"
+            className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-surface-2 text-slate-500 hover:text-sacramento dark:hover:text-sacramento-300 transition-colors"
             title="Refresh List"
           >
             <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
@@ -198,7 +207,7 @@ export default function Vehicles() {
                   </p>
                   {vehicle.driver ? (
                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1">
-                      <Users size={12} className="text-sacramento" />
+                      <Users size={12} className="text-sacramento dark:text-sacramento-300" />
                       <span>{vehicle.driver.Driver_Name}</span>
                     </p>
                   ) : (
@@ -270,7 +279,7 @@ export default function Vehicles() {
                   <div className="flex items-center gap-1.5">
                     <Link
                       to={`/admin/vehicles/${vehicle.Vehicle_ID}/edit`}
-                      className="p-2 rounded-lg bg-slate-50 dark:bg-surface-2 text-slate-600 dark:text-slate-300 hover:text-sacramento transition-colors"
+                      className="p-2 rounded-lg bg-slate-50 dark:bg-surface-2 text-slate-600 dark:text-slate-300 hover:text-sacramento dark:hover:text-sacramento-300 transition-colors"
                       title="Edit Vehicle"
                     >
                       <Edit3 size={15} />
@@ -312,7 +321,7 @@ export default function Vehicles() {
           {/* Desktop & Tablet Table (visible on sm and larger screens) */}
           <div className="hidden sm:block overflow-hidden rounded-3xl bg-white dark:bg-[#16231c] border border-border-light dark:border-border-dark/60 shadow-sm">
             <div className="overflow-x-auto">
-              <table className="min-w-full text-sm">
+              <table className="admin-table min-w-full text-sm">
                 <thead>
                   <tr className="bg-slate-50/70 dark:bg-surface-2/40 text-[11px] text-slate-400 dark:text-slate-200 font-bold uppercase tracking-wider border-b border-border-light/60 dark:border-border-dark/40">
                     <th className="px-5 py-3.5 text-left">Vehicle ID</th>
@@ -357,7 +366,7 @@ export default function Vehicles() {
                         <div className="inline-flex items-center gap-2">
                           <Link
                             to={`/admin/vehicles/${vehicle.Vehicle_ID}/edit`}
-                            className="p-1.5 rounded-lg text-slate-500 hover:text-sacramento hover:bg-slate-100 dark:hover:bg-surface-2 transition-colors"
+                            className="p-1.5 rounded-lg text-slate-500 hover:text-sacramento dark:hover:text-sacramento-300 hover:bg-slate-100 dark:hover:bg-surface-2 transition-colors"
                             title="Edit Vehicle"
                           >
                             <Edit3 size={15} />

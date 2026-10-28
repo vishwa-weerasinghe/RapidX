@@ -61,14 +61,14 @@ describe("ThemeProvider mode persistence", () => {
     expect(localStorage.getItem("theme")).toBe("light");
   });
 
-  it("uses the machine dark mode when no saved mode exists", () => {
+  it("defaults to light mode even if machine prefers dark when no saved mode exists", () => {
     vi.stubGlobal("matchMedia", vi.fn().mockReturnValue({ matches: true }));
 
     renderTheme();
 
-    expect(screen.getByTestId("theme").textContent).toBe("dark");
-    expect(document.documentElement.classList.contains("dark")).toBe(true);
-    expect(localStorage.getItem("theme")).toBe("dark");
+    expect(screen.getByTestId("theme").textContent).toBe("light");
+    expect(document.documentElement.classList.contains("light")).toBe(true);
+    expect(localStorage.getItem("theme")).toBe("light");
   });
 
   it("saves a manually changed mode", () => {
@@ -122,11 +122,17 @@ describe("ThemeProvider on a mobile viewport", () => {
     expect(localStorage.getItem("theme")).toBe("light");
   });
 
-  it("honours a mobile dark-mode preference and persists it", () => {
+  it("defaults to light mode on mobile even if machine prefers dark mode and persists user toggle", () => {
     vi.stubGlobal("matchMedia", vi.fn().mockReturnValue({ matches: true }));
 
     renderTheme();
 
+    expect(screen.getByTestId("theme").textContent).toBe("light");
+    expect(document.documentElement.classList.contains("light")).toBe(true);
+    expect(localStorage.getItem("theme")).toBe("light");
+
+    // When the user manually toggles mode on mobile, it persists as dark
+    fireEvent.click(screen.getByRole("button", { name: "Toggle mode" }));
     expect(screen.getByTestId("theme").textContent).toBe("dark");
     expect(document.documentElement.classList.contains("dark")).toBe(true);
     expect(localStorage.getItem("theme")).toBe("dark");
