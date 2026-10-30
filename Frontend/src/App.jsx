@@ -490,6 +490,7 @@ export default function App() {
         "safaris",
         "reviews",
         "gallery",
+        "guide",
         "contact",
       ];
 
@@ -840,6 +841,7 @@ export default function App() {
                   "safaris",
                   "reviews",
                   "gallery",
+                  "guide",
                   "contact",
                 ].map((section) => (
                   <li key={section}>
@@ -1030,6 +1032,7 @@ export default function App() {
                     "safaris",
                     "reviews",
                     "gallery",
+                    "guide",
                     "contact",
                   ].map((section) => (
                     <button
@@ -2123,17 +2126,17 @@ export default function App() {
         )}
 
         {/* --- SEO FAQ & TRAVEL GUIDE SECTION --- */}
-        <section id="faq" className="py-20 md:py-28 bg-white border-t border-gray-100 transition-colors duration-200">
+        <section id="guide" className="py-20 md:py-28 bg-white dark:bg-[#132E24] border-t border-[#D8D3C9] dark:border-[#244236] transition-colors duration-200">
           <div className="max-w-4xl mx-auto px-4 md:px-6">
             <div className="text-center max-w-2xl mx-auto mb-14">
-              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-50 text-castleton text-xs font-bold uppercase tracking-widest mb-4 border border-gray-100">
-                <span className="w-2 h-2 rounded-full bg-castleton"></span>
+              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#EFEEE9] text-[#152A44] text-xs font-bold uppercase tracking-widest mb-4 border border-[#D8D3C9] dark:bg-[#244236] dark:text-[#F3F3F1] dark:border-[#244236]">
+                <span className="w-2 h-2 rounded-full bg-[#152A44] dark:bg-[#F3F3F1]"></span>
                 Safari Travel Guide &amp; FAQs
               </span>
-              <h2 className="font-outfit text-3xl sm:text-5xl font-bold text-gray-900 mb-4">
+              <h2 className="font-outfit text-3xl sm:text-5xl font-bold text-[#152A44] mb-4 dark:text-[#F3F3F1]">
                 Safari Travel Guide &amp; Questions
               </h2>
-              <p className="text-gray-600 text-sm sm:text-base">
+              <p className="text-[#5B6E87] text-sm sm:text-base dark:text-[#D8D5B5]">
                 Everything you need to know about booking private jeep safaris to Minneriya, Kaudulla, Hurulu Eco Park, and Wasgamuwa National Parks.
               </p>
             </div>
@@ -2163,12 +2166,12 @@ export default function App() {
               ].map((item, idx) => (
                 <div
                   key={idx}
-                  className="rounded-2xl border border-gray-200 bg-gray-50/50 overflow-hidden transition-all duration-200"
+                  className="rounded-2xl border border-[#D8D3C9] bg-[#EFEEE9] dark:border-[#244236] dark:bg-[#00140F] overflow-hidden transition-all duration-200"
                 >
                   <button
                     type="button"
                     onClick={() => setOpenFaq(openFaq === idx ? -1 : idx)}
-                    className="w-full py-5 px-6 text-left font-bold text-gray-900 flex items-center justify-between gap-4 hover:text-castleton transition-colors"
+                    className="w-full py-5 px-6 text-left font-bold text-[#152A44] flex items-center justify-between gap-4 hover:bg-[rgba(0,0,0,0.08)] dark:text-[#F3F3F1] dark:hover:text-[#D8D5B5] transition-colors"
                   >
                     <span className="text-base sm:text-lg">{item.q}</span>
                     <ChevronDown
@@ -2177,7 +2180,7 @@ export default function App() {
                     />
                   </button>
                   {openFaq === idx && (
-                    <div className="px-6 pb-6 text-sm sm:text-base text-gray-600 leading-relaxed border-t border-gray-100 pt-4">
+                    <div className="px-6 pb-6 text-sm sm:text-base text-[#5B6E87] dark:text-[#D8D5B5] leading-relaxed border-t border-[#D8D3C9] dark:border-[#244236] pt-4">
                       {item.a}
                     </div>
                   )}
