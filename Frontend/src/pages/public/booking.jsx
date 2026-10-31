@@ -6,6 +6,7 @@ import { useTheme } from "../../context/ThemeContext";
 import { startPayHerePayment } from "../../utils/payhere";
 import { pickupTimeOptions, getPickupTimeOptions, getDefaultPickupTime } from "../../constants/pickupTimeOptions";
 import { getCountries, getCountryCallingCode, parsePhoneNumberFromString } from "libphonenumber-js";
+import { getSriLankaToday, isSriLankaBookingTimeInFuture, isSriLankaPickupTimePast } from "../../utils/bookingSchedule";
 
 const countryDisplayNames = new Intl.DisplayNames(["en"], { type: "region" });
 const countryOptions = getCountries()
@@ -95,6 +96,7 @@ export default function Booking() {
     const [showCountryMenu, setShowCountryMenu] = useState(false);
     const [phoneError, setPhoneError] = useState("");
     const [countryError, setCountryError] = useState("");
+    const [scheduleError, setScheduleError] = useState("");
     const countryMenuRef = useRef(null);
 
     const selectedCountry = countryOptions.find((c) => c.code === countryCode);
@@ -328,6 +330,7 @@ export default function Booking() {
 
     // handle input change
     const handleChange = (e) => {
+        setScheduleError("");
         setForm({
             ...form,
             [e.target.name]: e.target.value,
@@ -438,6 +441,11 @@ export default function Booking() {
             return;
         }
 
+        if (!isSriLankaBookingTimeInFuture(form.Booking_Date, form.Pickup_Time)) {
+            setScheduleError("Choose a booking date and pickup time later than the current time.");
+            return;
+        }
+
         let fullPhone = form.Phone_No;
         if (!user?.Customer_ID) {
             if (!form.Country || !countryCode) {
@@ -503,8 +511,11 @@ export default function Booking() {
         } catch (err) {
             console.log(err);
             setIsSubmitting(false);
+            const scheduleMessage = err.response?.data?.errors?.Booking_Date?.[0]
+                || err.response?.data?.errors?.Pickup_Time?.[0];
+            if (scheduleMessage) setScheduleError(scheduleMessage);
             alert(
-                err.response?.data?.message ||
+                scheduleMessage || err.response?.data?.message ||
                 err.response?.data?.error ||
                 "Unable to complete booking"
             );
@@ -693,7 +704,7 @@ export default function Booking() {
                                             type="date"
                                             name="Booking_Date"
                                             value={form.Booking_Date}
-                                            min={new Date().toISOString().split("T")[0]}
+                                            min={getSriLankaToday()}
                                             onChange={handleChange}
                                             className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs sm:text-sm font-bold py-3 px-3.5 sm:px-4 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all min-h-[44px]"
                                             required
@@ -713,7 +724,7 @@ export default function Booking() {
                                                 required
                                             >
                                                 {getPickupTimeOptions(pkg).map((option) => (
-                                                    <option key={option.value} value={option.value}>
+                                                    <option key={option.value} value={option.value} disabled={isSriLankaPickupTimePast(form.Booking_Date, option.value)}>
                                                         {option.label}
                                                     </option>
                                                 ))}
@@ -724,6 +735,7 @@ export default function Booking() {
                                                 </svg>
                                             </div>
                                         </div>
+                                        {scheduleError && <p className="text-xs text-red-600" role="alert">{scheduleError}</p>}
                                     </div>
                                 </div>
 

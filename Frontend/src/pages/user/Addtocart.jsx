@@ -17,6 +17,7 @@ import {
   Compass,
 } from "lucide-react";
 import api from "../../axios";
+import { getSriLankaToday, isSriLankaBookingTimeInFuture, isSriLankaPickupTimePast } from "../../utils/bookingSchedule";
 
 export default function Booking() {
   const { id } = useParams();
@@ -46,6 +47,7 @@ export default function Booking() {
 
   const location = useLocation();
   const [action, setAction] = useState(location.state?.action || "book");
+  const [scheduleError, setScheduleError] = useState("");
 
   // Load package
   useEffect(() => {
@@ -103,6 +105,7 @@ export default function Booking() {
 
   // handle input change
   const handleChange = (e) => {
+    setScheduleError("");
     setForm({
       ...form,
       [e.target.name]: e.target.value,
@@ -147,6 +150,11 @@ export default function Booking() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!isSriLankaBookingTimeInFuture(form.Booking_Date, form.Pickup_Time)) {
+      setScheduleError("Choose a booking date and pickup time later than the current time.");
+      return;
+    }
+
     const payload = {
       Booking_Date: form.Booking_Date,
       Pickup_Time: form.Pickup_Time,
@@ -182,8 +190,11 @@ export default function Booking() {
         }
       } catch (err) {
         console.log(err);
+        const scheduleMessage = err.response?.data?.errors?.Booking_Date?.[0]
+          || err.response?.data?.errors?.Pickup_Time?.[0];
+        if (scheduleMessage) setScheduleError(scheduleMessage);
         alert(
-          err.response?.data?.message ||
+          scheduleMessage || err.response?.data?.message ||
           err.response?.data?.error ||
           "Unable to add safari to cart"
         );
@@ -256,7 +267,7 @@ export default function Booking() {
                       type="date"
                       name="Booking_Date"
                       value={form.Booking_Date}
-                      min={new Date().toISOString().split("T")[0]}
+                      min={getSriLankaToday()}
                       onChange={handleChange}
                       className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 px-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all"
                       required
@@ -275,11 +286,12 @@ export default function Booking() {
                       required
                     >
                       {getPickupTimeOptions(pkg).map((option) => (
-                        <option key={option.value} value={option.value}>
+                        <option key={option.value} value={option.value} disabled={isSriLankaPickupTimePast(form.Booking_Date, option.value)}>
                           {option.label}
                         </option>
                       ))}
                     </select>
+                    {scheduleError && <p className="text-xs text-red-600" role="alert">{scheduleError}</p>}
                   </div>
                 </div>
 
