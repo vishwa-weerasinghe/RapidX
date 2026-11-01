@@ -195,7 +195,7 @@ class BookingControllerTest extends TestCase
         $package = $this->createPackage();
 
         $response = $this->actingAs($user, 'sanctum')->postJson('/api/bookings', [
-            'Booking_Date' => '2026-07-14',
+            'Booking_Date' => now('Asia/Colombo')->addDays(30)->toDateString(),
             'Pickup_Time' => '13:00:00',
             'Area' => 'Habarana',
             'Pickup_Location' => 'Negombo',
@@ -223,7 +223,7 @@ class BookingControllerTest extends TestCase
         $package = $this->createPackage();
 
         $response = $this->postJson('/api/bookings', [
-            'Booking_Date' => '2026-07-15',
+            'Booking_Date' => now('Asia/Colombo')->addDays(30)->toDateString(),
             'Pickup_Time' => '14:00:00',
             'Area' => 'Sigiriya',
             'Pickup_Location' => 'Ella',
@@ -266,7 +266,7 @@ class BookingControllerTest extends TestCase
 
         $this->actingAs($admin, 'sanctum')
             ->postJson('/api/bookings', [
-                'Booking_Date' => '2026-07-16',
+                'Booking_Date' => now('Asia/Colombo')->addDays(30)->toDateString(),
                 'Pickup_Time' => '13:00:00',
                 'Area' => 'Habarana',
                 'Pickup_Location' => 'Negombo',
@@ -282,6 +282,27 @@ class BookingControllerTest extends TestCase
             'Customer_ID' => $customer->Customer_ID,
             'Admin_Message' => 'New booking successfully placed by you.',
         ]);
+    }
+
+    public function test_store_rejects_a_booking_schedule_in_the_past(): void
+    {
+        $package = $this->createPackage();
+        $pastSchedule = now('Asia/Colombo')->subMinute();
+
+        $response = $this->postJson('/api/bookings', [
+            'Booking_Date' => $pastSchedule->toDateString(),
+            'Pickup_Time' => $pastSchedule->format('H:i:s'),
+            'Area' => 'Habarana',
+            'Pickup_Location' => 'Negombo',
+            'No_of_adults' => 2,
+            'No_of_child' => 0,
+            'Package_ID' => $package->id,
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['Booking_Date'])
+            ->assertJsonPath('errors.Booking_Date.0', 'The booking date and time must be later than the current date and time.');
+        $this->assertDatabaseCount('bookings', 0);
     }
 
     public function test_store_returns_validation_errors_for_missing_required_fields(): void

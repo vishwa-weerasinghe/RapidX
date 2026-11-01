@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Cart;
 use App\Models\Booking;
+use App\Services\BookingSchedule;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class CartController extends Controller
 {
@@ -57,6 +59,12 @@ class CartController extends Controller
         }
 
         $request->validate($rules);
+
+        if (!BookingSchedule::isInFuture($request->Booking_Date, $request->Pickup_Time)) {
+            throw ValidationException::withMessages([
+                'Booking_Date' => 'The booking date and time must be later than the current date and time.',
+            ]);
+        }
 
         if (!$request->has('Customer_ID') || !$request->Customer_ID) {
             // Create customer on the fly

@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Services\CancellationService;
+use App\Services\BookingSchedule;
 use Carbon\WeekDay;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class BookingController extends Controller
 {
@@ -180,6 +182,12 @@ class BookingController extends Controller
             'Customer_ID' => 'nullable',
             'Package_ID' => 'required',
         ]);
+
+        if (!BookingSchedule::isInFuture($request->Booking_Date, $request->Pickup_Time)) {
+            throw ValidationException::withMessages([
+                'Booking_Date' => 'The booking date and time must be later than the current date and time.',
+            ]);
+        }
 
         $user = request()->user('sanctum') ?? auth('sanctum')->user();
         $customerId = $user ? $request->Customer_ID : null;
