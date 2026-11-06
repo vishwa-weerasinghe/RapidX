@@ -61,15 +61,23 @@ class CancellationController extends Controller
             'agreed' => ['required', 'accepted'],
         ]);
 
-        $result = $this->cancellationService->cancel($booking);
+        $refundPercentage = $request->input('refund_percentage');
+
+        $result = $this->cancellationService->cancel($booking, $refundPercentage);
 
         if (!$result['ok']) {
             return response()->json(['message' => $result['message']], $result['http_status']);
         }
 
+        $refundAmount = 0;
+        if ($result['refund_percentage'] > 0 && $booking->Payment > 0) {
+            $refundAmount = ($booking->Payment * $result['refund_percentage']) / 100;
+        }
+
         return response()->json([
             'message' => $result['message'],
             'refund_percentage' => $result['refund_percentage'],
+            'refund_amount' => $refundAmount,
             'booking' => $booking,
         ]);
     }
