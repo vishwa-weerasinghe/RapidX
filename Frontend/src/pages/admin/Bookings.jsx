@@ -1121,7 +1121,7 @@ export default function Bookings() {
                 </tr>
               ) : (
                 filteredBookings.map((booking) => (
-                  <tr key={booking.Booking_ID} className="table-row hover:bg-slate-50/60 dark:hover:bg-surface-2/20 transition-colors">
+                  <tr key={booking.Booking_ID} className="table-row hover:bg-slate-100/80 dark:hover:bg-slate-700/50 transition-colors">
                     <td className="px-4 py-3 text-charcoal dark:text-white">{booking.Booking_ID}</td>
                     <td className="px-4 py-3 text-charcoal/80 dark:text-white/80">
                       {booking.customer
@@ -1139,11 +1139,11 @@ export default function Bookings() {
                       <div className="font-bold text-charcoal dark:text-white">$ {booking.Payment}</div>
                       <div className="mt-0.5">
                         {booking.payment?.payment_method === "Pay Later" ? (
-                          <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/50">
+                          <span className="inline-block whitespace-nowrap text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/50">
                             Pay Later
                           </span>
                         ) : (
-                          <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/50">
+                          <span className="inline-block whitespace-nowrap text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/50">
                             {booking.payment?.payment_method || "Online"}
                           </span>
                         )}
@@ -1220,7 +1220,7 @@ export default function Bookings() {
                           <button
                             type="button"
                             onClick={() => handleCollectPayment(booking)}
-                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 hover:bg-emerald-600 hover:text-white transition-all shadow-sm active:scale-95"
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 hover:bg-emerald-600 hover:text-white dark:hover:bg-emerald-500 dark:hover:text-white transition-all shadow-sm active:scale-95"
                             title="Collect payment and confirm booking"
                           >
                             <CreditCard size={13} />

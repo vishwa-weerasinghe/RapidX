@@ -92,7 +92,7 @@ export default function BookingSummary() {
                 <table className="min-w-full bg-surface text-sm">
                   <thead className="bg-slate-50/70 dark:bg-surface-2/40 text-[11px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider border-b border-border-light/60 dark:border-border-dark/40"><tr><th className="px-4 py-3 text-left">Booking ID</th><th className="px-4 py-3 text-left">Name</th><th className="px-4 py-3 text-left">Package</th><th className="px-4 py-3 text-left">Date</th><th className="px-4 py-3 text-right">Price</th></tr></thead>
                   <tbody className="divide-y divide-border-light dark:divide-border-dark">
-                    {monthlyBookings.length === 0 ? <tr><td colSpan="5" className="px-4 py-6 text-center text-muted dark:text-slate-400">No bookings for this month.</td></tr> : monthlyBookings.map((booking) => <tr key={booking.Booking_ID} className="hover:bg-slate-50/50 dark:hover:bg-surface-2/20"><td className="px-4 py-3 font-mono text-charcoal dark:text-white">#{booking.Booking_ID}</td><td className="px-4 py-3 font-medium text-charcoal dark:text-white">{booking.First_Name} {booking.Last_Name}</td><td className="px-4 py-3 text-charcoal/80 dark:text-white/80">{booking.Package_Name || "Booking"}</td><td className="px-4 py-3 text-charcoal/80 dark:text-white/80">{booking.Booking_Date}</td><td className="px-4 py-3 text-right font-mono font-bold text-sacramento dark:text-emerald-400">$ {Number(booking.Payment || 0).toLocaleString()}</td></tr>)}
+                    {monthlyBookings.length === 0 ? <tr><td colSpan="5" className="px-4 py-6 text-center text-muted dark:text-slate-400">No bookings for this month.</td></tr> : monthlyBookings.map((booking) => <tr key={booking.Booking_ID} className="hover:bg-slate-50/50 dark:hover:bg-slate-700/50"><td className="px-4 py-3 font-mono text-charcoal dark:text-white">#{booking.Booking_ID}</td><td className="px-4 py-3 font-medium text-charcoal dark:text-white">{booking.First_Name} {booking.Last_Name}</td><td className="px-4 py-3 text-charcoal/80 dark:text-white/80">{booking.Package_Name || "Booking"}</td><td className="px-4 py-3 text-charcoal/80 dark:text-white/80">{booking.Booking_Date}</td><td className="px-4 py-3 text-right font-mono font-bold text-sacramento dark:text-emerald-400">$ {Number(booking.Payment || 0).toLocaleString()}</td></tr>)}
                   </tbody>
                 </table>
               </div>
@@ -123,7 +123,7 @@ export default function BookingSummary() {
                   </thead>
                   <tbody className="divide-y divide-border-light dark:divide-border-dark">
                     {report.rows.map((row) => (
-                      <tr key={row.month} className="hover:bg-slate-50/50 dark:hover:bg-surface-2/20">
+                      <tr key={row.month} className="hover:bg-slate-50/50 dark:hover:bg-slate-700/50">
                         <td className="px-4 py-2 font-medium text-charcoal dark:text-white">{row.label}</td>
                         <td className="px-4 py-2 text-center text-charcoal/90 dark:text-white/90">{row.total_confirmed}</td>
                         <td className="px-4 py-2 text-center text-charcoal/90 dark:text-white/90">{row.total_in_cart}</td>
