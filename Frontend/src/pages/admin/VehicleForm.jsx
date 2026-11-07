@@ -44,10 +44,17 @@ export default function VehicleForm() {
     e.preventDefault();
     setSaving(true);
     setErrors({});
+
+    if (!form.Driver_ID) {
+      setErrors({ Driver_ID: ["Please assign a driver before creating this vehicle."] });
+      setSaving(false);
+      return;
+    }
+
     try {
       const payload = {
         ...form,
-        Driver_ID: form.Driver_ID || null,
+        Driver_ID: Number(form.Driver_ID),
       };
 
       if (isEdit) {
@@ -137,6 +144,7 @@ export default function VehicleForm() {
             value={form.Driver_ID}
             onChange={handleChange}
             className="form-input"
+            required
           >
             <option value="" className="bg-white dark:bg-[#16231c] text-charcoal dark:text-white">-- Select a Driver --</option>
             {drivers.map((driver) => (
