@@ -6,8 +6,10 @@ export function generateAnnualEarningsPdf(report) {
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 14;
   const totals = report.totals;
-  const calculateTotal = (item) =>
-    Number(item.earnings_confirmed || 0) - Number(item.refunds || 0);
+  const calculateTotal = (item) => Math.max(
+    0,
+    Number(item.earnings_confirmed || 0) - Number(item.refunds || 0),
+  );
 
   doc.setFillColor(41, 171, 135);
   doc.rect(0, 0, pageWidth, 32, "F");

@@ -79,12 +79,23 @@ class AppointmentController extends Controller
         $totalConfirmed = (clone $query)->where('Status', 'Confirmed')->count();
         $totalUnconfirmed = (clone $query)->whereIn('Status', ['In Cart', 'Pending'])->count();
         $totalCancelled = (clone $query)->where('Status', 'Cancelled')->count();
-        $totalEarningsConfirmed = (clone $query)->where('Status', 'Confirmed')->sum('Payment');
+        $totalEarningsConfirmed = (clone $query)
+            ->where(function ($bookingQuery) {
+                $bookingQuery->where('Status', 'Confirmed')
+                    ->orWhere(function ($cancelledQuery) {
+                        $cancelledQuery->where('Status', 'Cancelled')
+                            ->whereHas('payment', fn ($paymentQuery) => $paymentQuery->where('status', 'Success'));
+                    });
+            })
+            ->sum('Payment');
         $totalEarningsUnconfirmed = (clone $query)->whereIn('Status', ['In Cart', 'Pending'])->sum('Payment');
         $totalRefunds = (clone $query)
             ->where('Status', 'Cancelled')
             ->whereHas('payment', fn ($paymentQuery) => $paymentQuery->where('status', 'Success'))
-            ->sum('Payment');
+            ->selectRaw('SUM(Payment * COALESCE(Refund_Percentage, 0) / 100) as total_refunds')
+            ->value('total_refunds');
+        $totalRefunds = (float) ($totalRefunds ?? 0);
+        $netEarnings = max(0, (float) $totalEarningsConfirmed - (float) $totalRefunds);
 
         return response()->json([
             'total_confirmed' => $totalConfirmed,
@@ -94,6 +105,8 @@ class AppointmentController extends Controller
             'total_earnings_confirmed' => $totalEarningsConfirmed,
             'total_earnings_unconfirmed' => $totalEarningsUnconfirmed,
             'total_refunds' => $totalRefunds,
+            'net_earnings' => $netEarnings,
+            'total_net_earnings' => $netEarnings,
         ]);
     }
 
@@ -122,9 +135,9 @@ class AppointmentController extends Controller
             ->selectRaw("SUM(CASE WHEN Status = 'In Cart' THEN 1 ELSE 0 END) as total_in_cart")
             ->selectRaw("SUM(CASE WHEN Status = 'Pending' THEN 1 ELSE 0 END) as total_pending")
             ->selectRaw("SUM(CASE WHEN Status = 'Cancelled' THEN 1 ELSE 0 END) as total_cancelled")
-            ->selectRaw("SUM(CASE WHEN Status = 'Confirmed' THEN Payment ELSE 0 END) as earnings_confirmed")
+            ->selectRaw("SUM(CASE WHEN Status = 'Confirmed' OR (Status = 'Cancelled' AND Payment_ID IN (SELECT Payment_ID FROM payments WHERE status = 'Success')) THEN Payment ELSE 0 END) as earnings_confirmed")
             ->selectRaw("SUM(CASE WHEN Status IN ('In Cart', 'Pending') THEN Payment ELSE 0 END) as earnings_unconfirmed")
-            ->selectRaw("SUM(CASE WHEN Status = 'Cancelled' AND Payment_ID IN (SELECT Payment_ID FROM payments WHERE status = 'Success') THEN Payment ELSE 0 END) as refunds")
+            ->selectRaw("SUM(CASE WHEN Status = 'Cancelled' AND Payment_ID IN (SELECT Payment_ID FROM payments WHERE status = 'Success') THEN (Payment * COALESCE(Refund_Percentage, 0) / 100) ELSE 0 END) as refunds")
             ->whereYear('Booking_Date', $year)
             ->groupBy('month')
             ->get()
@@ -139,6 +152,7 @@ class AppointmentController extends Controller
             'earnings_unconfirmed' => 0,
             'refunds'            => 0,
             'total'              => 0,
+            'net_earnings'       => 0,
         ];
 
         $rows = [];
@@ -157,10 +171,11 @@ class AppointmentController extends Controller
                 'earnings_unconfirmed' => (float) ($row->earnings_unconfirmed ?? 0),
                 'refunds'            => (float) ($row->refunds ?? 0),
             ];
-            $item['total'] = round($item['earnings_confirmed'] + $item['earnings_unconfirmed'] - $item['refunds'], 2);
+            $item['total'] = round(max(0, $item['earnings_confirmed'] - $item['refunds']), 2);
+            $item['net_earnings'] = $item['total'];
 
             foreach ($totals as $k => $v) {
-                $totals[$k] = round($v + $item[$k], 2);
+                $totals[$k] = round($v + ($item[$k] ?? 0), 2);
             }
 
             $rows[] = $item;

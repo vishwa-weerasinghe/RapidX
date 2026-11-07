@@ -4,6 +4,12 @@ import api from "../../axios";
 import { useTheme } from "../../context/ThemeContext";
 import PackagePopularityChart from "../../components/admin-dashboard/PackagePopularityChart";
 
+const calculateNetEarnings = (confirmed, refunds) => {
+  const confirmedAmount = Number(confirmed || 0);
+  const refundAmount = Number(refunds || 0);
+  return Math.max(0, confirmedAmount - refundAmount);
+};
+
 export default function Appointments() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
@@ -13,6 +19,7 @@ export default function Appointments() {
     total_unconfirmed: 0,
     total_earnings_confirmed: 0,
     total_earnings_unconfirmed: 0,
+    total_refunds: 0,
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -52,6 +59,7 @@ export default function Appointments() {
         total_unconfirmed: 0,
         total_earnings_confirmed: 0,
         total_earnings_unconfirmed: 0,
+        total_refunds: 0,
       });
 
       const storedLastId = parseInt(localStorage.getItem("lastSeenAppointmentId") || "0", 10);
@@ -228,7 +236,7 @@ export default function Appointments() {
           <div className="card flex flex-col p-4">
             <p className="text-xs uppercase tracking-wide text-muted">Total Estimated Earnings</p>
             <p className="mt-auto w-full self-start pt-2 text-left text-2xl font-bold text-sacramento dark:text-[#e6c15a]">
-              $ {Number(Number(summary.total_earnings_confirmed) + Number(summary.total_earnings_unconfirmed)).toLocaleString()}
+              $ {calculateNetEarnings(summary.total_earnings_confirmed, summary.total_refunds || 0).toLocaleString()}
             </p>
           </div>
         </div>
