@@ -100,7 +100,14 @@ describe("Annual earning totals", () => {
       target: { value: "monthly" },
     });
 
-    const monthlyTotal = await screen.findByText("$ 150");
+    const monthlyTotal = await waitFor(() => {
+      const found = [...document.querySelectorAll("td")].find(
+        (cell) => cell.textContent.trim() === "$ 100" && cell.classList.contains("font-bold"),
+      );
+      if (!found) throw new Error("Monthly total not rendered");
+      return found;
+    });
+
     expect(monthlyTotal.classList.contains("dark:text-[#e6c15a]")).toBe(true);
     expect(monthlyTotal.classList.contains("text-sacramento")).toBe(false);
   });

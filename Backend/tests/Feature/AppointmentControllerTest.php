@@ -278,7 +278,10 @@ class AppointmentControllerTest extends TestCase
             'currency' => 'USD',
             'status' => 'Success',
         ]);
-        $confirmedCancelled->update(['Payment_ID' => $successfulPayment->Payment_ID]);
+        $confirmedCancelled->update([
+            'Payment_ID' => $successfulPayment->Payment_ID,
+            'Refund_Percentage' => 100,
+        ]);
         $this->createBookingForDate(now()->format('Y-m-30'), 'Cancelled', 900);
 
         $response = $this->actingAs($this->adminUser(), 'sanctum')
@@ -289,8 +292,8 @@ class AppointmentControllerTest extends TestCase
                 'total_confirmed' => 3,
                 'total_unconfirmed' => 2,
                 'total_cancelled' => 2,
-                'total_earnings' => 3500,
-                'total_earnings_confirmed' => 3500,
+                'total_earnings' => 3900,
+                'total_earnings_confirmed' => 3900,
                 'total_earnings_unconfirmed' => 1500,
                 'total_refunds' => 400,
             ]);
@@ -377,6 +380,34 @@ class AppointmentControllerTest extends TestCase
                 'total_earnings' => 1000,
                 'total_earnings_confirmed' => 1000,
                 'total_earnings_unconfirmed' => 500,
+            ]);
+    }
+
+    public function test_summary_uses_percentage_based_refund_amounts(): void
+    {
+        $this->createBookingForDate('2026-07-10', 'Confirmed', 200);
+        $cancelled = $this->createBookingForDate('2026-07-12', 'Cancelled', 200);
+        $payment = Payment::create([
+            'order_id' => 'refund-percent-' . $cancelled->Booking_ID,
+            'Customer_ID' => $cancelled->Customer_ID,
+            'amount' => 200,
+            'currency' => 'USD',
+            'status' => 'Success',
+        ]);
+        $cancelled->update([
+            'Payment_ID' => $payment->Payment_ID,
+            'Refund_Percentage' => 50,
+        ]);
+
+        $response = $this->actingAs($this->adminUser(), 'sanctum')
+            ->getJson('/api/appointments/summary?month=2026-07');
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'total_confirmed' => 1,
+                'total_earnings_confirmed' => 400,
+                'total_refunds' => 100,
+                'net_earnings' => 300,
             ]);
     }
 
