@@ -33,7 +33,7 @@ class VehicleController extends Controller
             'Vehicle_No'   => 'required|string|max:20',
             'Vehicle_Type' => 'required|string|max:50',
             'No_of_Seats'  => 'required|integer|min:1',
-            'Driver_ID'    => 'nullable|exists:drivers,Driver_ID',
+            'Driver_ID'    => 'required|exists:drivers,Driver_ID',
         ]);
 
         $vehicle = Vehicle::create($validated);
@@ -60,7 +60,7 @@ class VehicleController extends Controller
             'Vehicle_No'   => 'sometimes|required|string|max:20',
             'Vehicle_Type' => 'sometimes|required|string|max:50',
             'No_of_Seats'  => 'sometimes|required|integer|min:1',
-            'Driver_ID'    => 'nullable|exists:drivers,Driver_ID',
+            'Driver_ID'    => 'sometimes|required|exists:drivers,Driver_ID',
         ]);
 
         $vehicle->update($validated);
