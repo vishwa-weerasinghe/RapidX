@@ -149,57 +149,70 @@ export default function Cart() {
 
   if (loading) {
     return (
-      <div className={`flex justify-center items-center h-screen transition-colors duration-300 ${theme === "dark" ? "bg-bg-dark" : "bg-offwhite"}`}>
-        <div className="w-14 h-14 border-[5px] border-sacramento border-t-transparent rounded-full animate-spin"></div>
+      <div className={`flex flex-col justify-center items-center h-screen gap-3 transition-colors duration-300 ${theme === "dark" ? "bg-bg-dark" : "bg-offwhite"}`}>
+        <div className="w-12 h-12 rounded-full border-4 border-emerald-100 dark:border-emerald-950/40 border-t-sacramento dark:border-t-sacramento-300 animate-spin" />
+        <p className="text-sm font-semibold text-slate-400 dark:text-slate-500 animate-pulse">Loading your cart...</p>
       </div>
     );
   }
 
   return (
-    <div className={`min-h-screen py-12 px-6 transition-colors duration-300 ${theme === "dark" ? "bg-bg-dark text-white" : "bg-offwhite text-charcoal"}`}>
-      <div className="max-w-5xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-8">
-          <div className="p-3 bg-sacramento text-white rounded-2xl shadow-md">
-            <ShoppingBag size={28} />
-          </div>
-          <div>
-            <h1 className={`text-3xl font-black ${theme === "dark" ? "text-white" : "text-sacramento"}`}>
-              My Booking Cart
-            </h1>
-            <p className={`text-sm ${theme === "dark" ? "text-muted" : "text-muted"}`}>
-              Review your selected safaris before final confirmation.
-            </p>
+    <div className={`min-h-screen py-6 sm:py-10 px-4 sm:px-6 lg:px-8 transition-colors duration-300 ${theme === "dark" ? "bg-bg-dark text-white" : "bg-slate-50/50 text-charcoal"}`}>
+      <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
+        {/* Modern Header Banner */}
+        <div className="relative overflow-hidden rounded-3xl border border-border-light dark:border-border-dark/60 bg-white dark:bg-[#16231c] p-6 sm:p-8 shadow-sm">
+          <div className="absolute -top-14 -right-14 w-48 h-48 bg-sacramento/10 dark:bg-sacramento-900/30 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="p-3 bg-sacramento text-white rounded-2xl shadow-sm shrink-0">
+                <ShoppingBag size={24} />
+              </div>
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                  My Booking Cart
+                </h1>
+                <p className="mt-0.5 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                  Review your selected safaris and apply vouchers before checkout.
+                </p>
+              </div>
+            </div>
+
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-surface-2 border border-slate-200/80 dark:border-border-dark text-xs font-bold text-slate-700 dark:text-slate-300 self-start sm:self-auto">
+              <span>{cartItems.length} {cartItems.length === 1 ? "Adventure" : "Adventures"} queued</span>
+            </div>
           </div>
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 dark:bg-red-950/30 dark:border-red-900/30 dark:text-red-400 rounded-xl p-4 mb-6 text-center">
+          <div className="bg-red-50 border border-red-200 text-red-700 dark:bg-red-950/30 dark:border-red-900/30 dark:text-red-400 rounded-2xl p-4 text-center text-sm font-semibold">
             {error}
           </div>
         )}
 
         {cartItems.length === 0 ? (
-          <div className={`card p-12 text-center border shadow-md backdrop-blur-md`}>
-            <div className="text-6xl mb-4">🛒</div>
-            <h2 className={`text-2xl font-bold mb-2 ${theme === "dark" ? "text-white" : "text-sacramento"}`}>
+          <div className="card rounded-3xl p-12 text-center border border-border-light dark:border-border-dark/60 shadow-sm max-w-lg mx-auto">
+            <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-surface-2 flex items-center justify-center mx-auto mb-4 text-slate-400">
+              <ShoppingBag size={28} />
+            </div>
+            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-1">
               Your Cart is Empty
             </h2>
-            <p className={`mb-6 ${theme === "dark" ? "text-muted" : "text-muted"}`}>
+            <p className="text-xs sm:text-sm text-slate-400 dark:text-slate-500 mb-6">
               You haven't added any safari adventures to your cart yet.
             </p>
             <button
-              onClick={() => navigate("/#packages")}
-              className="btn-primary px-6 py-3 rounded-full"
+              onClick={() => navigate("/user/packages")}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-sacramento hover:bg-sacramento-600 text-white font-bold text-sm shadow-sm transition active:scale-95"
             >
-              Explore Safari Packages
-              <ArrowRight size={18} />
+              <span>Explore Safari Packages</span>
+              <ArrowRight size={16} />
             </button>
           </div>
         ) : (
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Cart Items List */}
-            <div className="lg:col-span-2 space-y-6">
+            <div className="lg:col-span-2 space-y-4 sm:space-y-5">
               {cartItems.map((item) => {
                 const booking = item.booking;
                 const pkg = booking?.package;
@@ -208,46 +221,44 @@ export default function Cart() {
                 return (
                   <div
                     key={item.Cart_ID}
-                    className={`card p-6 shadow-md border hover:shadow-xl transition duration-300 relative flex flex-col md:flex-row gap-6 justify-between items-start md:items-center`}
+                    className="relative overflow-hidden rounded-3xl border border-border-light dark:border-border-dark/60 bg-white dark:bg-[#16231c] p-5 sm:p-6 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col md:flex-row gap-6 justify-between items-start md:items-center"
                   >
                     {/* Booking Details */}
                     <div className="flex-1 space-y-3">
                       <div className="flex items-center gap-2">
-                        <span className={`text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider bg-sacramento/10 text-sacramento`}>
-                          Safari Booked
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-sacramento/10 dark:bg-sacramento-900/40 text-sacramento dark:text-castleton-300 border border-sacramento/20">
+                          Safari Tour
+                        </span>
+                        <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">
+                          Ref #{booking.Booking_ID}
                         </span>
                       </div>
 
-                      <h3 className={`text-xl font-bold transition ${theme === "dark" ? "text-white" : "text-sacramento"}`}>
+                      <h3 className="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                         {pkg.Package_Name}
                       </h3>
 
-                      <div className={`grid grid-cols-2 gap-y-2 gap-x-4 text-sm text-muted`}>
-                        <div className="flex items-center gap-1.5">
-                          <Calendar size={16} className="text-sacramento dark:text-castleton-300" />
-                          <span>{booking.Booking_Date}</span>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs text-slate-600 dark:text-slate-300">
+                        <div className="flex items-center gap-2 p-2 rounded-xl bg-slate-50 dark:bg-surface-2/60 border border-slate-100 dark:border-border-dark/40">
+                          <Calendar size={15} className="text-sacramento dark:text-castleton-300 shrink-0" />
+                          <span className="font-semibold">{booking.Booking_Date}</span>
                         </div>
-                        <div className="flex items-center gap-1.5">
-                          <Clock size={16} className="text-sacramento dark:text-castleton-300" />
-                          <span>{booking.Pickup_Time}</span>
+                        <div className="flex items-center gap-2 p-2 rounded-xl bg-slate-50 dark:bg-surface-2/60 border border-slate-100 dark:border-border-dark/40">
+                          <Clock size={15} className="text-sacramento dark:text-castleton-300 shrink-0" />
+                          <span className="font-semibold">{booking.Pickup_Time}</span>
                         </div>
-                        <div className="flex items-center gap-1.5 col-span-2">
-                          <MapPin
-                            size={16}
-                            className="text-sacramento dark:text-castleton-300 flex-shrink-0"
-                          />
-                          <span className="truncate">
-                            {booking.Pickup_Location}
-                          </span>
+                        <div className="flex items-center gap-2 sm:col-span-2 p-2 rounded-xl bg-slate-50 dark:bg-surface-2/60 border border-slate-100 dark:border-border-dark/40">
+                          <MapPin size={15} className="text-sacramento dark:text-castleton-300 shrink-0" />
+                          <span className="font-medium truncate">{booking.Pickup_Location || "Pickup to be confirmed"}</span>
                         </div>
                       </div>
 
-                      <div className={`flex gap-4 pt-1 border-t text-xs text-muted border-border-light dark:border-border-dark`}>
-                        <span className="flex items-center gap-1">
+                      <div className="flex items-center gap-4 pt-1 text-xs text-slate-500 dark:text-slate-400 font-medium">
+                        <span className="inline-flex items-center gap-1.5">
                           <Users size={14} className="text-sacramento dark:text-castleton-300" />
                           {booking.No_of_adults} Adults
                         </span>
-                        <span className="flex items-center gap-1">
+                        <span className="inline-flex items-center gap-1.5">
                           <Baby size={14} className="text-sacramento dark:text-castleton-300" />
                           {booking.No_of_child} Children
                         </span>
@@ -255,22 +266,23 @@ export default function Cart() {
                     </div>
 
                     {/* Price and Action */}
-                    <div className="flex md:flex-col items-end justify-between w-full md:w-auto pt-4 md:pt-0 border-t md:border-t-0 border-border-light dark:border-border-dark">
-                      <div className="text-right">
-                        <span className={`text-xs block text-muted`}>
+                    <div className="flex md:flex-col items-center md:items-end justify-between w-full md:w-auto pt-4 md:pt-0 border-t md:border-t-0 border-slate-100 dark:border-border-dark/60 gap-4">
+                      <div className="text-left md:text-right">
+                        <span className="text-[11px] uppercase tracking-wider font-semibold text-slate-400 block">
                           Total Price
                         </span>
-                        <span className={`text-lg font-black ${theme === "dark" ? "text-castleton-300" : "text-sacramento"}`}>
-                          $ {Number(booking.Payment).toLocaleString()}
+                        <span className="text-2xl font-black text-sacramento dark:text-castleton-300">
+                          ${Number(booking.Payment).toLocaleString()}
                         </span>
                       </div>
 
                       <button
                         onClick={() => handleRemove(booking.Booking_ID)}
-                        className="mt-2 p-2 bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-300 hover:bg-red-600 hover:text-white rounded-xl transition duration-300 shadow-sm"
+                        className="inline-flex items-center gap-1.5 px-3 py-2 bg-red-50 hover:bg-red-500 dark:bg-red-950/30 text-red-600 dark:text-red-400 hover:text-white rounded-xl transition duration-200 text-xs font-bold border border-red-200 dark:border-red-900/40 cursor-pointer shadow-sm active:scale-95"
                         title="Remove booking"
                       >
-                        <Trash2 size={18} />
+                        <Trash2 size={15} />
+                        <span>Remove</span>
                       </button>
                     </div>
                   </div>
@@ -279,21 +291,26 @@ export default function Cart() {
             </div>
 
             {/* Cart Summary */}
-            <div className={`card rounded-3xl p-6 shadow-lg border h-fit space-y-6`}>
-              <h2 className={`text-lg font-bold border-b pb-3 border-border-light dark:border-border-dark ${theme === "dark" ? "text-white" : "text-sacramento"}`}>
-                Booking Summary
-              </h2>
+            <div className="rounded-3xl border border-border-light dark:border-border-dark/60 bg-white dark:bg-[#16231c] p-6 sm:p-7 shadow-sm space-y-6 h-fit sticky top-24">
+              <div className="border-b border-slate-100 dark:border-border-dark/60 pb-4">
+                <h2 className="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight">
+                  Booking Summary
+                </h2>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Review payment breakdown and options
+                </p>
+              </div>
 
-              <div className={`space-y-3 text-sm text-muted`}>
-                <div className="flex justify-between">
-                  <span>Safari Bookings</span>
-                  <span className={`font-semibold ${theme === "dark" ? "text-castleton-300" : "text-sacramento"}`}>
+              <div className="space-y-3.5 text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+                <div className="flex justify-between items-center">
+                  <span>Safari Adventures</span>
+                  <span className="font-bold text-slate-900 dark:text-white">
                     {cartItems.length}
                   </span>
                 </div>
-                <div className="flex justify-between">
-                  <span>Taxes & Service Fees</span>
-                  <span className={`font-semibold ${theme === "dark" ? "text-castleton-300" : "text-sacramento"}`}>Included</span>
+                <div className="flex justify-between items-center">
+                  <span>Taxes & Park Entrance</span>
+                  <span className="font-bold text-emerald-600 dark:text-emerald-400">Included</span>
                 </div>
 
                 {/* Promo Code Input */}
@@ -302,94 +319,97 @@ export default function Cart() {
                     <input
                       type="text"
                       placeholder="Promo Code"
-                      className={`flex-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sacramento/50 ${theme === "dark" ? "bg-bg-dark border-border-dark text-white" : "bg-white border-border-light text-charcoal"}`}
+                      className="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-border-dark bg-slate-50 dark:bg-surface-2 text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sacramento/30 focus:border-sacramento transition"
                       value={promoCode}
                       onChange={(e) => setPromoCode(e.target.value)}
                     />
                     <button
                       onClick={validatePromoCode}
                       disabled={validatingPromo || !promoCode.trim()}
-                      className="px-4 py-2 bg-sacramento text-white text-sm font-semibold rounded-lg disabled:opacity-50"
+                      className="px-4 py-2.5 bg-sacramento hover:bg-sacramento-600 text-white text-xs sm:text-sm font-bold rounded-xl disabled:opacity-50 transition cursor-pointer shadow-sm active:scale-95"
                     >
                       {validatingPromo ? "..." : "Apply"}
                     </button>
                   </div>
-                  {promoError && <p className="text-red-500 text-xs mt-1">{promoError}</p>}
+                  {promoError && <p className="text-red-500 text-xs mt-1.5 font-medium">{promoError}</p>}
                   {promoDiscount && (
-                    <p className="text-green-500 text-xs mt-1">
-                      Code applied! {promoDiscount.discount_value}% off
+                    <p className="text-emerald-600 dark:text-emerald-400 text-xs mt-1.5 font-bold flex items-center gap-1">
+                      ✓ Promo applied! {promoDiscount.discount_value}% discount
                     </p>
                   )}
                 </div>
 
-                <div className={`flex justify-between items-center pt-3 border-t font-bold text-base border-border-light dark:border-border-dark ${theme === "dark" ? "text-white" : "text-charcoal"}`}>
+                <div className="flex justify-between items-center pt-4 border-t border-slate-100 dark:border-border-dark/60 font-bold text-base text-slate-900 dark:text-white">
                   <div>
-                    <span className="block">Total Amount</span>
-                    <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100/90 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800/80 px-2 py-0.5 rounded-full mt-1">
+                    <span className="block text-sm font-bold">Total Amount</span>
+                    <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100/90 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800/80 px-2 py-0.5 rounded-full mt-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                      No Hidden Charges
+                      Guaranteed Rate
                     </span>
                   </div>
-                  <span className={`text-xl ${theme === "dark" ? "text-castleton-300" : "text-sacramento"}`}>
-                    $ {getCartTotal().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  <span className="text-2xl font-black text-sacramento dark:text-castleton-300">
+                    ${getCartTotal().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </span>
                 </div>
               </div>
 
               {/* Payment Method Selector */}
-              <div className="pt-2 space-y-2 border-t border-border-light dark:border-border-dark">
-                <span className={`text-xs font-bold uppercase tracking-wider block ${theme === "dark" ? "text-slate-300" : "text-slate-600"}`}>
+              <div className="pt-2 space-y-2.5 border-t border-slate-100 dark:border-border-dark/60">
+                <span className="text-xs font-bold uppercase tracking-wider block text-slate-500 dark:text-slate-400">
                   Payment Method
                 </span>
                 <div className="grid grid-cols-2 gap-2.5">
                   <button
                     type="button"
                     onClick={() => setPaymentMethod("PayHere")}
-                    className={`p-3 rounded-xl border text-left transition text-xs flex flex-col justify-between cursor-pointer ${paymentMethod === "PayHere"
-                      ? "border-sacramento bg-sacramento/10 text-sacramento font-bold ring-1 ring-sacramento"
-                      : "border-border-light dark:border-border-dark text-muted hover:border-slate-400"
-                      }`}
+                    className={`p-3.5 rounded-2xl border text-left transition text-xs flex flex-col justify-between cursor-pointer ${
+                      paymentMethod === "PayHere"
+                        ? "border-sacramento bg-sacramento/10 text-sacramento font-bold ring-2 ring-sacramento/20"
+                        : "border-slate-200 dark:border-border-dark text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700"
+                    }`}
                   >
-                    <div className="flex items-center justify-between w-full mb-1.5">
-                      <CreditCard size={16} className="text-sacramento" />
-                      <div className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${paymentMethod === "PayHere" ? "border-sacramento" : "border-slate-400"}`}>
+                    <div className="flex items-center justify-between w-full mb-2">
+                      <CreditCard size={18} className="text-sacramento" />
+                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${paymentMethod === "PayHere" ? "border-sacramento" : "border-slate-300 dark:border-slate-600"}`}>
                         {paymentMethod === "PayHere" && <div className="w-2 h-2 rounded-full bg-sacramento"></div>}
                       </div>
                     </div>
-                    <span>Pay Online</span>
-                    <span className="text-[10px] font-normal opacity-75">Card / PayHere</span>
+                    <span className="font-bold">Pay Online</span>
+                    <span className="text-[10px] font-normal opacity-75 mt-0.5">Card / PayHere</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setPaymentMethod("Pay Later")}
-                    className={`p-3 rounded-xl border text-left transition text-xs flex flex-col justify-between cursor-pointer ${paymentMethod === "Pay Later"
-                      ? "border-amber-500 bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 font-bold ring-1 ring-amber-500"
-                      : "border-border-light dark:border-border-dark text-muted hover:border-slate-400"
-                      }`}
+                    className={`p-3.5 rounded-2xl border text-left transition text-xs flex flex-col justify-between cursor-pointer ${
+                      paymentMethod === "Pay Later"
+                        ? "border-amber-500 bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 font-bold ring-2 ring-amber-500/20"
+                        : "border-slate-200 dark:border-border-dark text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700"
+                    }`}
                   >
-                    <div className="flex items-center justify-between w-full mb-1.5">
-                      <Clock3 size={16} className="text-amber-500" />
-                      <div className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${paymentMethod === "Pay Later" ? "border-amber-500" : "border-slate-400"}`}>
+                    <div className="flex items-center justify-between w-full mb-2">
+                      <Clock3 size={18} className="text-amber-500" />
+                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${paymentMethod === "Pay Later" ? "border-amber-500" : "border-slate-300 dark:border-slate-600"}`}>
                         {paymentMethod === "Pay Later" && <div className="w-2 h-2 rounded-full bg-amber-500"></div>}
                       </div>
                     </div>
-                    <span>Pay Later</span>
+                    <span className="font-bold">Pay Later</span>
+                    <span className="text-[10px] font-normal opacity-75 mt-0.5">Reserve Now</span>
                   </button>
                 </div>
               </div>
 
               {paymentMethod === "Pay Later" ? (
                 <div className="p-3.5 rounded-2xl flex items-start gap-2.5 text-xs leading-relaxed bg-amber-50 dark:bg-amber-950/30 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/40">
-                  <Info size={18} className="flex-shrink-0 mt-0.5" />
+                  <Info size={18} className="shrink-0 mt-0.5" />
                   <span>
                     Your bookings will be placed with <strong>Pending</strong> status, and confirmation emails will be sent immediately. Payment will be collected by our admin near the tour date.
                   </span>
                 </div>
               ) : (
-                <div className="p-3.5 rounded-2xl flex flex-col gap-2.5 text-xs leading-relaxed bg-sacramento/10 text-sacramento">
+                <div className="p-3.5 rounded-2xl flex flex-col gap-2.5 text-xs leading-relaxed bg-sacramento/10 text-sacramento border border-sacramento/20">
                   <div className="flex items-start gap-2.5">
-                    <ShieldCheck size={18} className="flex-shrink-0 mt-0.5" />
+                    <ShieldCheck size={18} className="shrink-0 mt-0.5" />
                     <span>
                       Pay securely online using PayHere payment gateway. Instant booking confirmation is provided.
                     </span>
@@ -405,16 +425,17 @@ export default function Cart() {
               <button
                 onClick={handleCheckout}
                 disabled={checkingOut}
-                className={`w-full py-3.5 rounded-full font-bold flex items-center justify-center gap-2 transition duration-200 cursor-pointer ${paymentMethod === "Pay Later"
-                  ? "bg-amber-600 hover:bg-amber-700 text-white shadow-lg shadow-amber-600/20"
-                  : "btn-primary"
-                  }`}
+                className={`w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition duration-200 cursor-pointer shadow-md active:scale-98 ${
+                  paymentMethod === "Pay Later"
+                    ? "bg-amber-600 hover:bg-amber-700 text-white shadow-amber-600/20"
+                    : "bg-sacramento hover:bg-sacramento-600 text-white shadow-sacramento/20"
+                }`}
               >
                 {checkingOut ? (
                   <div className="w-5 h-5 border-[3px] border-white border-t-transparent rounded-full animate-spin"></div>
                 ) : (
                   <>
-                    {paymentMethod === "Pay Later" ? "Confirm & Reserve (Pay Later)" : "Pay Online & Confirm"}
+                    <span>{paymentMethod === "Pay Later" ? "Confirm & Reserve (Pay Later)" : "Pay Online & Confirm"}</span>
                     <ArrowRight size={18} />
                   </>
                 )}

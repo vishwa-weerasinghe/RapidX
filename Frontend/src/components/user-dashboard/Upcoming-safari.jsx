@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { differenceInDays, format } from 'date-fns'
+import { differenceInDays, format, parse } from 'date-fns'
 import { MapPin, Calendar, Compass, Phone } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import api from '../../axios'
@@ -53,8 +53,9 @@ export function HeroCountdown({ user }) {
 
   if (loading) {
     return (
-      <section className={`${cardClass} p-6 sm:p-10 lg:p-12`}>
-        <p className={`text-lg font-medium ${labelClass}`}>
+      <section className={`${cardClass} p-8 sm:p-12 flex flex-col items-center justify-center gap-3`}>
+        <div className="w-10 h-10 rounded-full border-3 border-emerald-100 dark:border-emerald-950/40 border-t-sacramento dark:border-t-sacramento-300 animate-spin" />
+        <p className="text-sm font-semibold text-slate-400 dark:text-slate-500 animate-pulse">
           Loading your upcoming safari...
         </p>
       </section>
@@ -132,6 +133,9 @@ export function HeroCountdown({ user }) {
   }
 
   const daysUntil = differenceInDays(safariDate, new Date())
+  const hoursUntil = Math.round(
+    (safariDate - new Date()) / (1000 * 60 * 60)
+  )
   const pkg = booking.package
 
   return (
@@ -180,7 +184,7 @@ export function HeroCountdown({ user }) {
                   isDark ? 'text-white' : 'text-sacramento'
                 }`}
               >
-                {daysUntil > 0 ? daysUntil : 0}
+                {daysUntil > 0 ? daysUntil : hoursUntil > 0 ? hoursUntil : 0}
               </span>
 
               <span
@@ -188,7 +192,7 @@ export function HeroCountdown({ user }) {
                   isDark ? 'text-sacramento-300' : 'text-sacramento'
                 } uppercase tracking-widest`}
               >
-                {daysUntil > 0 ? 'Days to go' : 'Today is the day!'}
+                {daysUntil > 0 ? 'Days to go' : hoursUntil > 0 ? `${hoursUntil} Hours` : 'Today is the day!'}
               </span>
             </div>
 
@@ -205,7 +209,7 @@ export function HeroCountdown({ user }) {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className={`grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 ${panelClass}`}
+          className={`space-y-4 ${panelClass}`}
         >
           {/* Date */}
           <div className="flex flex-col gap-1">

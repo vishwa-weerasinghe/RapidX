@@ -162,7 +162,7 @@ export default function AdminReviews() {
             className={`relative p-2.5 rounded-xl border transition-all ${
               newReviewIds.size > 0
                 ? "bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400"
-                : "bg-white dark:bg-[#16231c] border-border-light dark:border-border-dark text-slate-600 dark:text-slate-300 hover:text-sacramento"
+                : "bg-white dark:bg-[#16231c] border-border-light dark:border-border-dark text-slate-600 dark:text-slate-300 hover:text-sacramento dark:hover:text-sacramento-300"
             }`}
             title={showNewOnly ? "Show all reviews" : "Show new reviews"}
           >
@@ -217,13 +217,13 @@ export default function AdminReviews() {
 
           {/* Metric KPI cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            <div className="p-4 rounded-2xl bg-slate-50/70 dark:bg-surface-2/40 border border-slate-200/50 dark:border-border-dark/40">
+            <div className="p-4 rounded-2xl bg-blue-100 dark:bg-blue-900/40 border border-blue-200 dark:border-blue-700/40">
               <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
                 {analytics.average_rating} <span className="text-sm font-semibold text-slate-400">/ 5</span>
               </span>
               <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1">Average Score</p>
             </div>
-            <div className="p-4 rounded-2xl bg-slate-50/70 dark:bg-surface-2/40 border border-slate-200/50 dark:border-border-dark/40">
+            <div className="p-4 rounded-2xl bg-yellow-100 dark:bg-yellow-900/40 border border-yellow-200 dark:border-yellow-700/40">
               <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
                 {analytics.total_reviews}
               </span>
@@ -299,7 +299,7 @@ export default function AdminReviews() {
           {showNewOnly && (
             <button
               onClick={() => setShowNewOnly(false)}
-              className="text-xs font-bold text-sacramento underline"
+              className="text-xs font-bold text-sacramento dark:text-sacramento-300 underline"
             >
               Show all reviews
             </button>

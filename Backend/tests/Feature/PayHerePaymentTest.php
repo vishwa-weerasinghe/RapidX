@@ -140,7 +140,7 @@ class PayHerePaymentTest extends TestCase
         $package = $this->createPackage();
 
         $response = $this->postJson('/api/payhere/initiate', [
-            'Booking_Date'    => '2026-09-15',
+            'Booking_Date'    => now('Asia/Colombo')->addDays(30)->toDateString(),
             'Pickup_Time'     => '06:30',
             'Pickup_Location' => 'Heritance Kandalama',
             'Area'            => 'Kandalama',
@@ -203,6 +203,32 @@ class PayHerePaymentTest extends TestCase
 
         $this->assertDatabaseCount('payments', 0);
         $this->assertDatabaseCount('bookings', 0);
+    }
+
+    public function test_single_booking_initiation_rejects_a_schedule_in_the_past(): void
+    {
+        $package = $this->createPackage();
+
+        $response = $this->postJson('/api/payhere/initiate', [
+            'Booking_Date' => now('Asia/Colombo')->subDay()->toDateString(),
+            'Pickup_Time' => '06:00',
+            'Pickup_Location' => 'Hotel Sigiriya',
+            'No_of_adults' => 2,
+            'No_of_child' => 0,
+            'Package_ID' => $package->id,
+            'Payment' => 300.00,
+            'First_Name' => 'Guest',
+            'Last_Name' => 'Customer',
+            'Email' => 'guest@example.com',
+            'Phone_No' => '0771234567',
+            'NIC' => '123456789V',
+            'Country' => 'Sri Lanka',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['Booking_Date']);
+        $this->assertDatabaseCount('bookings', 0);
+        $this->assertDatabaseCount('payments', 0);
     }
 
     // -------------------------------------------------------------------------
@@ -606,7 +632,7 @@ class PayHerePaymentTest extends TestCase
 
         // Attempt to pass 1.00 USD instead of (2 * 100) + (1 * 50) = 250.00
         $response = $this->postJson('/api/payhere/initiate', [
-            'Booking_Date'    => '2026-09-15',
+            'Booking_Date'    => now('Asia/Colombo')->addDays(30)->toDateString(),
             'Pickup_Time'     => '06:30',
             'Pickup_Location' => 'Heritance Kandalama',
             'Area'            => 'Kandalama',
@@ -642,7 +668,7 @@ class PayHerePaymentTest extends TestCase
         $package = $this->createPackage();
 
         $response = $this->postJson('/api/payhere/initiate', [
-            'Booking_Date'    => '2026-09-10',
+            'Booking_Date'    => now('Asia/Colombo')->addDays(30)->toDateString(),
             'Pickup_Time'     => '06:00',
             'Pickup_Location' => 'Hotel Sigiriya',
             'Area'            => 'Sigiriya',

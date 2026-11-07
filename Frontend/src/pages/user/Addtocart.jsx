@@ -2,21 +2,22 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { pickupTimeOptions, getPickupTimeOptions, getDefaultPickupTime } from "../../constants/pickupTimeOptions";
 import {
-    Calendar,
-    Clock,
-    MapPin,
-    Users,
-    User,
-    Mail,
-    Phone,
-    FileText,
-    Globe,
-    ShoppingCart,
-    ChevronLeft,
-    Info,
-    Compass,
+  Calendar,
+  Clock,
+  MapPin,
+  Users,
+  User,
+  Mail,
+  Phone,
+  FileText,
+  Globe,
+  ShoppingCart,
+  ChevronLeft,
+  Info,
+  Compass,
 } from "lucide-react";
 import api from "../../axios";
+import { getSriLankaToday, isSriLankaBookingTimeInFuture, isSriLankaPickupTimePast } from "../../utils/bookingSchedule";
 
 export default function Booking() {
   const { id } = useParams();
@@ -46,6 +47,7 @@ export default function Booking() {
 
   const location = useLocation();
   const [action, setAction] = useState(location.state?.action || "book");
+  const [scheduleError, setScheduleError] = useState("");
 
   // Load package
   useEffect(() => {
@@ -103,6 +105,7 @@ export default function Booking() {
 
   // handle input change
   const handleChange = (e) => {
+    setScheduleError("");
     setForm({
       ...form,
       [e.target.name]: e.target.value,
@@ -124,8 +127,9 @@ export default function Booking() {
   const areaExtraMap = {
     Dambulla: 12,
     Sigiriya: 10,
-    Habarana: 3,
+    Habarana: 0,
     Kandalama: 16,
+    "At the Entrance": 0,
   };
 
   const getAreaExtra = () => {
@@ -145,6 +149,11 @@ export default function Booking() {
   // submit booking
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!isSriLankaBookingTimeInFuture(form.Booking_Date, form.Pickup_Time)) {
+      setScheduleError("Choose a booking date and pickup time later than the current time.");
+      return;
+    }
 
     const payload = {
       Booking_Date: form.Booking_Date,
@@ -181,8 +190,11 @@ export default function Booking() {
         }
       } catch (err) {
         console.log(err);
+        const scheduleMessage = err.response?.data?.errors?.Booking_Date?.[0]
+          || err.response?.data?.errors?.Pickup_Time?.[0];
+        if (scheduleMessage) setScheduleError(scheduleMessage);
         alert(
-          err.response?.data?.message ||
+          scheduleMessage || err.response?.data?.message ||
           err.response?.data?.error ||
           "Unable to add safari to cart"
         );
@@ -208,14 +220,6 @@ export default function Booking() {
   return (
     <div className="min-h-screen bg-offwhite dark:bg-[#050505] text-[#1f2b20] dark:text-[#f5f7f2] py-12 px-4 md:px-6 transition-colors duration-300">
       <div className="max-w-4xl mx-auto space-y-6">
-        {/* Navigation Action */}
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-slate-500 hover:text-sacramento dark:text-slate-400 dark:hover:text-castleton-300 transition-colors"
-        >
-          <ChevronLeft size={16} />
-          Back
-        </button>
 
         <div className="flex justify-center">
           <div className="w-full max-w-2xl bg-[#fcfaf5] dark:bg-[#0d0d0d] border border-[#dce8d7] dark:border-[#15311f] rounded-3xl shadow-xl p-6 md:p-8 space-y-8">
@@ -229,7 +233,7 @@ export default function Booking() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              
+
               {pkg && (
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 pb-2 border-b border-slate-50 dark:border-slate-800/40">
@@ -263,7 +267,7 @@ export default function Booking() {
                       type="date"
                       name="Booking_Date"
                       value={form.Booking_Date}
-                      min={new Date().toISOString().split("T")[0]}
+                      min={getSriLankaToday()}
                       onChange={handleChange}
                       className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs font-bold py-3 px-4 rounded-xl border border-slate-100 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all"
                       required
@@ -282,11 +286,12 @@ export default function Booking() {
                       required
                     >
                       {getPickupTimeOptions(pkg).map((option) => (
-                        <option key={option.value} value={option.value}>
+                        <option key={option.value} value={option.value} disabled={isSriLankaPickupTimePast(form.Booking_Date, option.value)}>
                           {option.label}
                         </option>
                       ))}
                     </select>
+                    {scheduleError && <p className="text-xs text-red-600" role="alert">{scheduleError}</p>}
                   </div>
                 </div>
 
@@ -302,9 +307,10 @@ export default function Booking() {
                     required
                   >
                     <option value="">-- Select area --</option>
-                    <option value="Dambulla">Dambulla (+ $12.00)</option>
+                    <option value="Habarana">Habarana (Free Around 4km)</option>
+                    <option value="At the Entrance">At the Entrance (Free)</option>
                     <option value="Sigiriya">Sigiriya (+ $10.00)</option>
-                    <option value="Habarana">Habarana (+ $3.00)</option>
+                    <option value="Dambulla">Dambulla (+ $12.00)</option>
                     <option value="Kandalama">Kandalama (+ $16.00)</option>
                   </select>
                 </div>

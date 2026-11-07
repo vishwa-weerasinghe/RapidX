@@ -430,7 +430,7 @@ const blogSections = [
     ],
     tourPackages: [
       {
-        name: "Dambulla Tour & Evening Safari",
+        name: "Dambulla Cave Temple & Evening Safari",
         price: "$110.00",
         duration: "9 - 10 Hours",
         guests: "Max 6 Guests per Jeep",
@@ -593,18 +593,18 @@ const blogSections = [
     ],
     tourPackages: [
       {
-        name: "Sigiriya or Pidurangala & Evening Safari",
-        price: "$120.00",
+        name: "Sigiriya / Pidurangala & Evening Hurulu Eco Park Safari",
+        price: "$110.00",
         duration: "9 - 10 Hours",
         guests: "Max 6 Guests per Jeep",
         startTime: "Flex: 4:30 AM (Sunrise) or 7:30/8:30 AM",
-        description: "A perfect blend of active hiking and serene wildlife observation. Start the day scaling either the famous Sigiriya Lion Rock fortress or the rugged Pidurangala rock for stunning views. After a lunch break, head out for a thrilling evening safari at Minneriya, Kaudulla, or Hurulu Eco Park to witness the spectacular gatherings of wild elephants and diverse wildlife.",
-        departureLocations: "Hotels in Dambulla, Kandalama, Sigiriya, Minneriya, and Habarana",
+        description: "A perfect combination of iconic rock hiking and an intimate wildlife experience at Hurulu Eco Park. Start your day ascending either the legendary Sigiriya Lion Rock fortress — a UNESCO World Heritage Site filled with ancient frescoes and royal gardens — or the rugged Pidurangala rock, which offers stunning panoramic views including a breathtaking perspective of Sigiriya itself. After a refreshing lunch break, head to Hurulu Eco Park, a UNESCO biosphere reserve and key elephant corridor. Here you'll witness herds of Asian elephants migrating through dense scrub forest, alongside wildlife such as spotted deer, toque macaques, peacocks, and a rich variety of birds. Hurulu offers a quieter, more intimate safari atmosphere compared to the larger parks.",
+        departureLocations: "Hotels in Dambulla, Kandalama, Sigiriya, and Habarana",
         included: [
           "Private Safari Jeep Hire",
           "Experienced & Professional Driver",
           "Pidurangala or Sigiriya hiking transport",
-          "Safari Park Entrance Tickets",
+          "Hurulu Eco Park Entrance Ticket",
           "Park Service Fee ($10) & Jeep/Driver Fees",
           "Government Tax (18%)",
           "Hotel Pickup & Drop-off",
@@ -613,7 +613,46 @@ const blogSections = [
         excluded: [
           "Sigiriya Entrance Tickets ($35 per person)",
           "Tips for driver & park ranger (Recommended)",
-          "Food & Drinks & Lunch"
+          "Food, Drinks & Lunch"
+        ],
+        whatToBring: [
+          "Light-colored clothing",
+          "Cap or hat & Sunscreen",
+          "Drinking water",
+          "Camera"
+        ],
+        additionalInfo: [
+          "Tour Plan: 9:00 AM (Rock Hike) -> 12:30 PM (Lunch) -> 1:30 PM (Hurulu Safari) -> 5:00 PM (Return)",
+          "Sunrise Option: Start at 4:30 AM if you prefer a cooler hike and a stunning sunrise.",
+          "Best Period for Hurulu: Dec – June when elephant herds migrate here; also good May – Oct.",
+          "Children Policy: Free for under 5 years | Child Rate for 5–11 years | Adult Rate for 12+ years",
+          "For same-day bookings: Contact WhatsApp +94778902811",
+          "Not recommended for pregnant women or participants with serious medical conditions"
+        ],
+        cancellation: "20+ days: 15% fee, 15+ days: 10% fee, 10+ days: 40% fee, 8+ days: 60% fee, 2 days or less: 100% fee. Unusable features are non-refundable."
+      },
+      {
+        name: "Sigiriya / Pidurangala & Evening Safari (Minneriya or Kaudulla)",
+        price: "$120.00",
+        duration: "9 - 10 Hours",
+        guests: "Max 6 Guests per Jeep",
+        startTime: "Flex: 4:30 AM (Sunrise) or 7:30/8:30 AM",
+        description: "The ultimate adventure day — combine a thrilling rock hike with the spectacular elephant gathering at Minneriya or Kaudulla National Park. Scale either the iconic Sigiriya Lion Rock, with its breathtaking frescoes and panoramic views, or the dramatic Pidurangala rock overlooking Sigiriya. After lunch, head out for an evening safari at whichever park is best that day — Minneriya or Kaudulla. During the dry season (July–October), these parks host hundreds of wild Asian elephants congregating around ancient tanks in one of nature's most awe-inspiring spectacles. You may also spot sambar deer, wild boar, crocodiles, peacocks, and a rich variety of bird species.",
+        departureLocations: "Hotels in Dambulla, Kandalama, Sigiriya, Minneriya, and Habarana",
+        included: [
+          "Private Safari Jeep Hire",
+          "Experienced & Professional Driver",
+          "Pidurangala or Sigiriya hiking transport",
+          "Safari Park Entrance Tickets (Minneriya or Kaudulla)",
+          "Park Service Fee ($10) & Jeep/Driver Fees",
+          "Government Tax (18%)",
+          "Hotel Pickup & Drop-off",
+          "Binoculars & Water Bottles"
+        ],
+        excluded: [
+          "Sigiriya Entrance Tickets ($35 per person)",
+          "Tips for driver & park ranger (Recommended)",
+          "Food, Drinks & Lunch"
         ],
         whatToBring: [
           "Light-colored clothing",
@@ -624,64 +663,11 @@ const blogSections = [
         additionalInfo: [
           "Tour Plan: 9:00 AM (Rock Hike) -> 12:30 PM (Lunch) -> 2:30 PM (Safari Tour) -> 6:00 PM (Return)",
           "Sunrise Option: Start at 4:30 AM if you prefer a cooler hike and a stunning sunrise.",
-          "Safari Park Selection: We will choose Minneriya, Kaudulla, or Eco Park based on where elephant sightings are best that day.",
+          "Safari Park Selection: We will choose Minneriya or Kaudulla based on where elephant sightings are best that day.",
+          "Best Period for Elephant Gathering: July – October. Peak months: August & September.",
           "Children Policy: Free for under 5 years | Child Rate for 5–11 years | Adult Rate for 12+ years",
           "For same-day bookings: Contact WhatsApp +94778902811",
           "Not recommended for pregnant women or participants with serious medical conditions"
-        ],
-        cancellation: "20+ days: 15% fee, 15+ days: 10% fee, 10+ days: 40% fee, 8+ days: 60% fee, 2 days or less: 100% fee. Unusable features are non-refundable."
-      }
-    ]
-  },
-  {
-    id: "sigiriya-village-tour",
-    blogId: STATIC_BLOGS[9].blogId,
-    title: "Sigiriya Village Tour",
-    subtitle: "Experience Authentic Sri Lankan Rural Life",
-    tags: ["Culture", "Village Life", "Eco Tourism"],
-    readTime: "4 min read",
-    date: "May 10, 2027",
-    img: huruluImg,
-    paragraphs: [
-      "A Sigiriya village tour offers an authentic glimpse into traditional Sri Lankan rural life, set amidst the scenic countryside of the island's cultural triangle. The tour provides a meaningful opportunity to connect with the local community, appreciate their warm hospitality, and understand age-old customs that have remained unchanged for generations.",
-      "The experience typically includes a peaceful bullock cart ride through rustic village paths, giving you an authentic taste of rural life passing lush paddy fields and mud huts. Following this, you will enjoy a calm catamaran boat ride across a tranquil lake surrounded by lotus and water lilies.",
-      "As part of the village safari, guests can take part in hands-on activities like grinding rice, weaving palm leaves, and observing a live cooking demonstration. The highlight is participating in preparing a simple, delicious Sri Lankan lunch cooked over a wood-fired clay stove, followed by a hearty traditional buffet lunch."
-    ],
-    tourPackages: [
-      {
-        name: "Sigiriya Village Safari",
-        price: "$40.00",
-        duration: "2 Hours 30 Minutes",
-        guests: "Max 6 Guests",
-        startTime: "8:30 AM - 2:00 PM",
-        description: "Immerse yourself in traditional Sri Lankan village life near Sigiriya. This tour includes a tuk-tuk pickup, a scenic bullock cart ride through paddy fields, and a serene catamaran boat ride across a lotus-filled lake. You will then arrive at a local village home for traditional activities, a cooking demonstration, a local snack, and a freshly prepared authentic Sri Lankan buffet lunch cooked over a wood-fired clay stove.",
-        departureLocations: "Hotels in Sigiriya / Habarana city area (Additional fee applies for Dambulla/Kandalama)",
-        included: [
-          "Hotel Pickup & Drop-off (Sigiriya area)",
-          "Driver Cum Guide",
-          "Bullock Cart Ride Fee",
-          "Catamaran Boat Ride Fee",
-          "Authentic Sri Lankan Buffet Lunch",
-          "Snack at Village house",
-          "Tuk-Tuk Ride",
-          "Village House Activity"
-        ],
-        excluded: [
-          "Tips for driver & village locals (Recommended)",
-          "Additional Food & Drinks"
-        ],
-        whatToBring: [
-          "Cap or hat",
-          "Sunscreen",
-          "Drinking water",
-          "Camera"
-        ],
-        additionalInfo: [
-          "Tour Plan: Tuk-Tuk Pickup -> Bullock Cart Ride -> Catamaran Boat Ride -> Village Cooking Demo & Snack -> Buffet Lunch -> Tuk-Tuk Return.",
-          "Children must be accompanied by an adult.",
-          "Please include your Mobile/Local Contact number & Hotel pickup details in the booking.",
-          "Not recommended for pregnant women or participants with heart complaints / serious medical conditions.",
-          "For same-day & next-day bookings: Contact WhatsApp +94778902811"
         ],
         cancellation: "20+ days: 15% fee, 15+ days: 10% fee, 10+ days: 40% fee, 8+ days: 60% fee, 2 days or less: 100% fee. Unusable features are non-refundable."
       }

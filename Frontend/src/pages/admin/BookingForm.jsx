@@ -80,9 +80,9 @@ export default function BookingForm() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto card p-6 mt-6">
+    <div className="max-w-3xl mx-auto rounded-3xl bg-white dark:bg-[#16231c] border border-border-light dark:border-border-dark/60 p-6 sm:p-8 mt-6 shadow-sm">
 
-      <h2 className="text-2xl font-bold text-sacramento mb-6">
+      <h2 className="text-2xl font-bold text-sacramento dark:text-emerald-400 mb-6">
         Edit Booking
       </h2>
 
@@ -90,27 +90,27 @@ export default function BookingForm() {
 
         {/* Date */}
         <div>
-          <label className="font-semibold text-charcoal dark:text-white">Booking Date</label>
+          <label className="block text-sm font-semibold text-charcoal dark:text-white mb-1">Booking Date</label>
           <input
             type="date"
             name="Booking_Date"
             value={form.Booking_Date}
             onChange={handleChange}
-            className="form-input mt-1"
+            className="form-input"
           />
         </div>
 
         {/* Time */}
         <div>
-          <label className="font-semibold text-charcoal dark:text-white">Pickup Time</label>
+          <label className="block text-sm font-semibold text-charcoal dark:text-white mb-1">Pickup Time</label>
           <select
             name="Pickup_Time"
             value={form.Pickup_Time}
             onChange={handleChange}
-            className="form-input mt-1"
+            className="form-input"
           >
             {getPickupTimeOptions(pkg).map((option) => (
-              <option key={option.value} value={option.value}>
+              <option key={option.value} value={option.value} className="bg-white dark:bg-[#16231c] text-charcoal dark:text-white">
                 {option.label}
               </option>
             ))}
@@ -170,27 +170,36 @@ export default function BookingForm() {
 
         {/* Status */}
         <div>
-          <label className="font-semibold text-charcoal dark:text-white">Status</label>
+          <label className="block text-sm font-semibold text-charcoal dark:text-white mb-1">Status</label>
           <select
             name="Status"
             value={form.Status}
             onChange={handleChange}
-            className="form-input mt-1"
+            className="form-input"
           >
-            <option value="Pending">Pending</option>
-            <option value="Confirmed">Confirmed</option>
-            <option value="Completed">Completed</option>
-            <option value="Cancelled">Cancelled</option>
+            <option value="Pending" className="bg-white dark:bg-[#16231c] text-charcoal dark:text-white">Pending</option>
+            <option value="Confirmed" className="bg-white dark:bg-[#16231c] text-charcoal dark:text-white">Confirmed</option>
+            <option value="Completed" className="bg-white dark:bg-[#16231c] text-charcoal dark:text-white">Completed</option>
+            <option value="Cancelled" className="bg-white dark:bg-[#16231c] text-charcoal dark:text-white">Cancelled</option>
           </select>
         </div>
 
         {/* Submit */}
-        <button
-          type="submit"
-          className="btn-primary w-full py-2.5"
-        >
-          Update Booking
-        </button>
+        <div className="flex gap-3 pt-2">
+          <button
+            type="submit"
+            className="btn-primary flex-1 py-2.5"
+          >
+            Update Booking
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate("/admin/bookings")}
+            className="btn-secondary"
+          >
+            Cancel
+          </button>
+        </div>
 
       </form>
     </div>

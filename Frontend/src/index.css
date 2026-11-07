@@ -194,6 +194,16 @@ body {
   .dark .text-sacramento-200 {
     color: var(--primary) !important;
   }
+
+  .logged-in .booking-table thead tr,
+  .logged-in .admin-table thead tr {
+    background-color: #E8F2E8 !important;
+  }
+
+  html.dark .logged-in .booking-table thead tr,
+  html.dark .logged-in .admin-table thead tr {
+    background-color: #006854 !important;
+  }
 }
 
 /* ─── New Theme (scoped to logged-in pages only) ─── */
@@ -430,7 +440,7 @@ body {
     background-color: var(--surface);
   }
 
-  /* Table row */
+/* Table row */
   .table-row {
     @apply border-b transition-colors;
     border-color: var(--border);
@@ -503,4 +513,14 @@ input::-ms-reveal,
 input::-ms-clear {
   display: none;
 }
+
+/* Keep booking table headings readable above the logged-in slate color overrides. */
+.logged-in .booking-table thead th {
+  color: #1B5E20 !important;
+}
+
+html.dark .logged-in .booking-table thead th {
+  color: #B7E4C7 !important;
+}
+
 

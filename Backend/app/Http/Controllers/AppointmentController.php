@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Booking;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AppointmentController extends Controller
 {
@@ -129,8 +130,12 @@ class AppointmentController extends Controller
             $year = $request->year;
         }
 
+        $monthExpression = DB::connection()->getDriverName() === 'sqlite'
+            ? "strftime('%Y-%m', Booking_Date)"
+            : "DATE_FORMAT(Booking_Date, '%Y-%m')";
+
         $byMonth = Booking::query()
-            ->selectRaw("DATE_FORMAT(Booking_Date, '%Y-%m') as month")
+            ->selectRaw("{$monthExpression} as month")
             ->selectRaw("SUM(CASE WHEN Status = 'Confirmed' THEN 1 ELSE 0 END) as total_confirmed")
             ->selectRaw("SUM(CASE WHEN Status = 'In Cart' THEN 1 ELSE 0 END) as total_in_cart")
             ->selectRaw("SUM(CASE WHEN Status = 'Pending' THEN 1 ELSE 0 END) as total_pending")

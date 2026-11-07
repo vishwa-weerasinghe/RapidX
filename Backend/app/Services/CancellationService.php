@@ -27,7 +27,7 @@ class CancellationService
      * Returns a result array (instead of an HTTP response) so the controller
      * stays thin and only maps the outcome to a status code.
      */
-    public function cancel(Booking $booking): array
+    public function cancel(Booking $booking, ?int $overridePercentage = null): array
     {
         $status = $this->refundCalculator->normalizeStatus($booking->Status);
 
@@ -53,7 +53,7 @@ class CancellationService
 
         // 4. Percentage from the single-source-of-truth tier service. This
         //    also pushes the real PayHere refund when the booking was paid.
-        $refundPercentage = $this->processRefund($booking);
+        $refundPercentage = $this->processRefund($booking, $overridePercentage);
 
         // 5. Persist the cancellation + refund bookkeeping atomically. A cart
         //    entry only ever exists for an "In Cart" booking, so dropping it

@@ -9,6 +9,9 @@ import {
   CreditCard,
   Pencil,
   XCircle,
+  Search,
+  Clock,
+  CheckCircle2,
 } from "lucide-react";
 import api from "../../axios";
 import {
@@ -19,18 +22,10 @@ import {
 export default function MyBookings() {
   const user = JSON.parse(localStorage.getItem("user"));
   const navigate = useNavigate();
-  const customerId = user?.Customer_ID;
 
   const [bookings, setBookings] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
-
-  // Booking notification bell — mirrors the admin Bookings screen. Unseen
-  // customer notifications (e.g. a booking cancelled by the staff) show as a
-  // badge until the panel is opened.
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [bookingNotifications, setBookingNotifications] = useState([]);
-  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     fetchBookings();
@@ -45,52 +40,6 @@ export default function MyBookings() {
       alert("Failed to load bookings.");
     } finally {
       setLoading(false);
-    }
-  };
-
-  // Poll the unseen customer-notification count so a booking cancelled by the
-  // staff shows up on the bell without a manual reload (mirrors the Header).
-  const fetchUnreadCount = async () => {
-    if (!customerId) return;
-
-    try {
-      const response = await api.get(
-        `/customer/${customerId}/booking-notifications/unread-count`
-      );
-      setUnreadCount(response.data.count || 0);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  useEffect(() => {
-    if (!customerId) return;
-    fetchUnreadCount();
-    const interval = setInterval(fetchUnreadCount, 30000);
-    return () => clearInterval(interval);
-  }, [customerId]);
-
-  // Open the notification panel, load the unseen notifications and mark them
-  // seen so the badge clears (same flow as the admin Bookings bell).
-  const handleBellClick = async () => {
-    if (showNotifications) {
-      setShowNotifications(false);
-      return;
-    }
-
-    try {
-      const response = await api.get(
-        `/customer/${customerId}/booking-notifications`
-      );
-      setBookingNotifications(response.data || []);
-      setShowNotifications(true);
-      await api.post(
-        `/customer/${customerId}/booking-notifications/mark-seen`
-      );
-      setUnreadCount(0);
-    } catch (err) {
-      console.error(err);
-      setShowNotifications(true);
     }
   };
 
@@ -145,98 +94,64 @@ export default function MyBookings() {
   // Loading
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="h-14 w-14 animate-spin rounded-full border-4 border-sacramento border-t-transparent"></div>
+      <div className="flex flex-col items-center justify-center h-screen gap-3 bg-slate-50/50 dark:bg-bg-dark">
+        <div className="w-12 h-12 rounded-full border-4 border-emerald-100 dark:border-emerald-950/40 border-t-sacramento dark:border-t-sacramento-300 animate-spin" />
+        <p className="text-sm font-semibold text-slate-400 dark:text-slate-500 animate-pulse">Loading your bookings...</p>
       </div>
     );
   }
 
   return (
-    <div className="p-4 sm:p-6 md:p-8">
+    <div className="min-h-screen bg-slate-50/50 dark:bg-bg-dark py-6 sm:py-8 px-4 sm:px-6 lg:px-8 text-charcoal dark:text-white transition-colors duration-300">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Modern Header Banner */}
+        <div className="relative overflow-hidden rounded-3xl border border-border-light dark:border-border-dark/60 bg-white dark:bg-[#16231c] p-6 sm:p-8 shadow-sm">
+          <div className="absolute -top-14 -right-14 w-48 h-48 bg-sacramento/10 dark:bg-sacramento-900/30 rounded-full blur-3xl pointer-events-none" />
 
-      {/* Page Header */}
-      <div className="mb-6 flex items-start justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-sacramento">
-            My Bookings
-          </h1>
-
-          <p className="mt-1 text-sm text-muted">
-            View and manage your safari bookings
-          </p>
-        </div>
-
-        {/* Booking notifications bell — mirrors the admin Bookings screen */}
-        <div className="relative">
-          <button
-            type="button"
-            onClick={handleBellClick}
-            className="relative rounded-full card p-2 shadow-sm hover:bg-offwhite-100 dark:hover:bg-surface-2"
-            title="Booking notifications"
-            aria-label="Booking notifications"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-            </svg>
-            {unreadCount > 0 && (
-              <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-bold text-white">
-                {unreadCount}
-              </span>
-            )}
-          </button>
-
-          {showNotifications && (
-            <div className="absolute right-0 top-14 z-50 w-96 max-w-[calc(100vw-2rem)] rounded-xl border border-border-light bg-white p-3 shadow-xl dark:border-border-dark dark:bg-bg-dark">
-              <div className="mb-2 flex items-center justify-between">
-                <h2 className="text-sm font-bold text-charcoal dark:text-white">Booking notifications</h2>
-                <button
-                  type="button"
-                  onClick={() => setShowNotifications(false)}
-                  className="rounded-md px-2 py-1 text-lg leading-none text-muted hover:bg-offwhite-100 dark:hover:bg-surface-2"
-                  aria-label="Close booking notifications"
-                  title="Close"
-                >
-                  x
-                </button>
+          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sacramento/10 dark:bg-sacramento-900/40 text-sacramento dark:text-sacramento-300 text-xs font-bold mb-2.5 border border-sacramento/20">
+                <CalendarDays size={13} />
+                <span>Customer Reservation History</span>
               </div>
-              {bookingNotifications.length === 0 ? (
-                <p className="py-3 text-sm text-muted">No booking notifications.</p>
-              ) : (
-                <div className="max-h-72 space-y-2 overflow-y-auto">
-                  {bookingNotifications.map((notification) => (
-                    <div
-                      key={notification.Booking_ID}
-                      className="rounded-lg border border-border-light p-3 text-left dark:border-border-dark"
-                    >
-                      <p className="text-xs font-bold text-red-600 dark:text-red-400">
-                        {notification.package?.Package_Name || "Safari package"} - {notification.Status}
-                      </p>
-                      <p className="mt-1 break-words whitespace-pre-line text-sm text-charcoal dark:text-white">
-                        {notification.Customer_Message}
-                      </p>
-                      <p className="mt-1 text-xs text-muted">
-                        Safari date: {notification.Booking_Date}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                My Safari Bookings
+              </h1>
+              <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                Inspect reservation progress, view driver allocations, and review past trips.
+              </p>
             </div>
-          )}
-        </div>
-      </div>
 
-      {/* Search */}
-      <div className="mb-6">
-        <input
-          type="search"
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          placeholder="Search by package, date, pickup location, or status..."
-          aria-label="Search my bookings"
-          className="form-input w-full max-w-xl"
-        />
-      </div>
+          </div>
+        </div>
+
+        {/* Modern Search & Stats Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#16231c] p-3.5 sm:p-4 rounded-2xl border border-border-light dark:border-border-dark/60 shadow-sm">
+          <div className="relative flex-1 max-w-md">
+            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            <input
+              type="search"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search by tour, date, location, or status..."
+              aria-label="Search my bookings"
+              className="w-full pl-10 pr-9 py-2 rounded-xl text-sm bg-slate-50 dark:bg-surface-2 border border-slate-200/80 dark:border-border-dark text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sacramento/30"
+            />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+              >
+                <XCircle size={15} />
+              </button>
+            )}
+          </div>
+
+          <div className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+            {filteredBookings.length} of {bookings.length} reservations
+          </div>
+        </div>
 
       {/* No Results */}
       {filteredBookings.length === 0 ? (
@@ -610,6 +525,7 @@ export default function MyBookings() {
         onClose={closeCancelPolicy}
         onConfirm={handleCancelBooking}
       />
+      </div>
     </div>
   );
 }
@@ -633,7 +549,7 @@ function BookingActions({
         type="button"
         title="Reschedule this booking"
         onClick={onEdit}
-        className="flex items-center gap-1 rounded-lg bg-sacramento px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-sacramento/90"
+        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-surface-2 hover:bg-sacramento hover:text-white dark:hover:bg-sacramento dark:hover:text-white border border-slate-200/80 dark:border-border-dark transition-all active:scale-95"
       >
         <Pencil size={14} />
         Edit
@@ -645,7 +561,7 @@ function BookingActions({
         title="Cancel this booking"
         onClick={onCancel}
         disabled={isCancelled || isCancelling}
-        className="flex items-center gap-1 rounded-lg bg-red-600 px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 hover:bg-amber-500 hover:text-white dark:hover:bg-amber-500 dark:hover:text-white border border-amber-200/80 dark:border-amber-800/40 transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
       >
         <XCircle size={14} />
 

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Mail, Phone, RefreshCw, Search, Users, X, Globe, Calendar } from "lucide-react";
+import { Mail, Phone, RefreshCw, Search, Users, X } from "lucide-react";
 import api from "../../axios";
 
 const formatDate = (value) => {
@@ -16,6 +16,7 @@ export default function CustomerManagement() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [actionMessage, setActionMessage] = useState("");
 
   const fetchCustomers = async () => {
     try {
@@ -92,6 +93,7 @@ export default function CustomerManagement() {
           </label>
           {search && (
             <button
+              type="button"
               onClick={() => setSearch("")}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
             >
@@ -108,13 +110,27 @@ export default function CustomerManagement() {
             type="button"
             onClick={fetchCustomers}
             disabled={loading}
-            className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-surface-2 text-slate-500 hover:text-sacramento transition-colors"
+            className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-surface-2 text-slate-500 hover:text-sacramento dark:hover:text-sacramento-300 transition-colors"
             title="Refresh List"
           >
             <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
           </button>
         </div>
       </div>
+
+      {/* Success Notification */}
+      {actionMessage && (
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 dark:border-emerald-900/40 dark:bg-emerald-950/20 p-4 text-xs font-semibold text-emerald-800 dark:text-emerald-300 flex items-center justify-between">
+          <span>{actionMessage}</span>
+          <button
+            type="button"
+            onClick={() => setActionMessage("")}
+            className="text-emerald-600 hover:text-emerald-800 dark:hover:text-emerald-200"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      )}
 
       {/* Error Alert */}
       {error && (
@@ -144,6 +160,7 @@ export default function CustomerManagement() {
             No customers match your search &quot;<span className="font-semibold">{search}</span>&quot;.
           </p>
           <button
+            type="button"
             onClick={() => setSearch("")}
             className="mt-3 text-xs font-bold text-sacramento dark:text-sacramento-300 underline"
           >
@@ -153,7 +170,7 @@ export default function CustomerManagement() {
       ) : (
         <div className="overflow-hidden rounded-3xl bg-white dark:bg-[#16231c] border border-border-light dark:border-border-dark/60 shadow-sm">
           <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
+            <table className="admin-table min-w-full text-sm">
               <thead>
                 <tr className="bg-slate-50/70 dark:bg-surface-2/40 text-[11px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider border-b border-border-light/60 dark:border-border-dark/40">
                   <th className="px-5 py-3.5 text-left">Customer</th>
@@ -161,16 +178,17 @@ export default function CustomerManagement() {
                   <th className="px-5 py-3.5 text-left">NIC / ID</th>
                   <th className="px-5 py-3.5 text-left">Country</th>
                   <th className="px-5 py-3.5 text-center">Bookings</th>
-                  <th className="px-5 py-3.5 text-right">Registered</th>
+                  <th className="px-5 py-3.5 text-left">Registered</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border-light/60 dark:divide-border-dark/40">
                 {filteredCustomers.map((customer) => {
                   const initial = (customer.First_Name?.[0] ?? "C").toUpperCase();
+
                   return (
                     <tr
                       key={customer.Customer_ID}
-                      className="hover:bg-slate-50/60 dark:hover:bg-surface-2/20 transition-colors"
+                      className="hover:bg-slate-50/60 dark:hover:bg-slate-700/50 transition-colors"
                     >
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
@@ -220,7 +238,7 @@ export default function CustomerManagement() {
                           {customer.bookings_count ?? 0}
                         </span>
                       </td>
-                      <td className="px-5 py-4 text-right text-xs text-slate-400 dark:text-slate-500 whitespace-nowrap">
+                      <td className="px-5 py-4 text-xs text-slate-400 dark:text-slate-500 whitespace-nowrap">
                         {formatDate(customer.created_at)}
                       </td>
                     </tr>
