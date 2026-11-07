@@ -345,6 +345,19 @@ class AppointmentControllerTest extends TestCase
             ]);
     }
 
+    public function test_summary_counts_confirmed_bookings_in_a_short_month(): void
+    {
+        $this->createBookingForDate('2026-11-30', 'Confirmed', 1500);
+
+        $response = $this->actingAs($this->adminUser(), 'sanctum')
+            ->getJson('/api/appointments/summary?month=2026-11');
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'total_confirmed' => 1,
+            ]);
+    }
+
     public function test_summary_without_month_parameter_aggregates_all_bookings(): void
     {
         $this->createBookingForDate('2026-05-10', 'Confirmed', 1000);
