@@ -44,7 +44,7 @@ class AppointmentController extends Controller
             if (preg_match('/^\d{4}-\d{2}$/', $month)) {
                 $query->whereBetween('bookings.Booking_Date', [
                     $month . '-01',
-                    $month . '-31',
+                    \Carbon\Carbon::parse($month . '-01')->endOfMonth()->toDateString(),
                 ]);
             }
         }
@@ -72,7 +72,7 @@ class AppointmentController extends Controller
             if (preg_match('/^\d{4}-\d{2}$/', $month)) {
                 $query->whereBetween('Booking_Date', [
                     $month . '-01',
-                    $month . '-31',
+                    \Carbon\Carbon::parse($month . '-01')->endOfMonth()->toDateString(),
                 ]);
             }
         }
