@@ -76,6 +76,9 @@ export default function Register() {
     if (!phoneNumber || !phoneNumber.isValid()) {
       nextErrors.Phone_No = ["Enter a valid phone number for the selected country."];
     }
+    if (!/^[A-Za-z0-9/-]{1,20}$/.test(NIC.trim())) {
+      nextErrors.NIC = ["Enter a valid NIC or passport number using letters, numbers, /, or - only."];
+    }
     if (Password.length < 8 || !/[A-Z]/.test(Password) || !/[a-z]/.test(Password) || !/[0-9]/.test(Password) || !/[^A-Za-z0-9]/.test(Password)) {
       nextErrors.Password = ["Use 8+ characters with uppercase, lowercase, a number, and a special character."];
     }
@@ -449,10 +452,16 @@ export default function Register() {
                   type="text"
                   name="NIC"
                   required
+                  maxLength={20}
+                  pattern="[A-Za-z0-9/-]+"
+                  title="Use letters, numbers, /, or - only."
                   className="auth-glass-input block w-full min-h-[44px] rounded-lg border border-white/20 bg-white/10 py-2.5 pl-10 pr-3 text-white placeholder-gray-400 backdrop-blur-sm transition focus:border-castleton-300 focus:outline-none focus:ring-1 focus:ring-castleton-300 text-base sm:text-sm"
                   placeholder="199512345678 or N1234567"
                   value={NIC}
-                  onChange={(e) => setNIC(e.target.value)}
+                  onChange={(e) => {
+                    setNIC(e.target.value);
+                    setErrors((current) => ({ ...current, NIC: undefined }));
+                  }}
                 />
               </div>
               {errors.NIC && (

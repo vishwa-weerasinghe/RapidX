@@ -109,6 +109,24 @@ class AuthControllerTest extends TestCase
         $response->assertStatus(422)->assertJsonValidationErrors(['First_Name']);
     }
 
+    public function test_registration_rejects_email_as_nic(): void
+    {
+        $response = $this->postJson('/api/register', [
+            'Email'                 => 'invalid-nic@example.com',
+            'Password'              => 'Password@123',
+            'Password_confirmation' => 'Password@123',
+            'First_Name'            => 'John',
+            'Last_Name'             => 'Doe',
+            'Phone_No'              => '0771234567',
+            'NIC'                   => 'john@gmail.com',
+            'Country'               => 'Sri Lanka',
+        ]);
+
+        $response->assertStatus(422)->assertJsonValidationErrors(['NIC']);
+        $this->assertDatabaseCount('customers', 0);
+        $this->assertDatabaseCount('users', 0);
+    }
+
     public function test_registration_rejects_invalid_phone_for_selected_country(): void
     {
         $response = $this->postJson('/api/register', [

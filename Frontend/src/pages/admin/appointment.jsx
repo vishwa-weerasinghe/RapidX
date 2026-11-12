@@ -215,26 +215,32 @@ export default function Appointments() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
           <div className="card flex flex-col p-4">
             <p className="text-xs uppercase tracking-wide text-muted dark:text-slate-400">Total Confirmed Appointments</p>
+            <p className="mt-1 text-[10px] font-medium tracking-wide text-slate-400 dark:text-slate-500">This Month</p>
             <p className="mt-auto w-full self-start pt-2 text-left text-2xl font-bold text-charcoal dark:text-white">{summary.total_confirmed}</p>
           </div>
           <div className="card flex flex-col p-4">
             <p className="text-xs uppercase tracking-wide text-muted dark:text-slate-400">Total Unconfirmed (In Cart, Pendings) Appointments</p>
+            <p className="mt-1 text-[10px] font-medium tracking-wide text-slate-400 dark:text-slate-500">This Month</p>
             <p className="mt-auto w-full self-start pt-2 text-left text-2xl font-bold text-charcoal dark:text-white">{summary.total_unconfirmed}</p>
           </div>
           <div className="card flex flex-col p-4">
             <p className="text-xs uppercase tracking-wide text-muted dark:text-slate-400">Total Earnings (Confirmed)</p>
+            <p className="mt-1 text-[10px] font-medium tracking-wide text-slate-400 dark:text-slate-500">This Month</p>
             <p className="mt-auto w-full self-start pt-2 text-left text-2xl font-bold text-sacramento dark:text-emerald-400">$ {Number(summary.total_earnings_confirmed).toLocaleString()}</p>
           </div>
           <div className="card flex flex-col p-4">
             <p className="text-xs uppercase tracking-wide text-muted dark:text-slate-400">Total Earnings (Unconfirmed)</p>
+            <p className="mt-1 text-[10px] font-medium tracking-wide text-slate-400 dark:text-slate-500">This Month</p>
             <p className="mt-auto w-full self-start pt-2 text-left text-2xl font-bold text-slate-800 dark:text-slate-200">$ {Number(summary.total_earnings_unconfirmed).toLocaleString()}</p>
           </div>
           <div className="card flex flex-col p-4">
             <p className="text-xs uppercase tracking-wide text-muted dark:text-slate-400">Total Refunds</p>
+            <p className="mt-1 text-[10px] font-medium tracking-wide text-slate-400 dark:text-slate-500">This Month</p>
             <p className="mt-auto w-full self-start pt-2 text-left text-2xl font-bold text-rose-600 dark:text-rose-400">$ {Number(summary.total_refunds || 0).toLocaleString()}</p>
           </div>
           <div className="card flex flex-col p-4">
             <p className="text-xs uppercase tracking-wide text-muted">Total Estimated Earnings</p>
+            <p className="mt-1 text-[10px] font-medium tracking-wide text-slate-400 dark:text-slate-500">This Month</p>
             <p className="mt-auto w-full self-start pt-2 text-left text-2xl font-bold text-sacramento dark:text-[#e6c15a]">
               $ {calculateNetEarnings(summary.total_earnings_confirmed, summary.total_refunds || 0).toLocaleString()}
             </p>
