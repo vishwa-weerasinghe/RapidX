@@ -42,10 +42,8 @@ class AppointmentController extends Controller
         if ($request->has('month') && $request->month) {
             $month = $request->month;
             if (preg_match('/^\d{4}-\d{2}$/', $month)) {
-                $query->whereBetween('bookings.Booking_Date', [
-                    $month . '-01',
-                    \Carbon\Carbon::parse($month . '-01')->endOfMonth()->toDateString(),
-                ]);
+                $query->whereYear('bookings.Booking_Date', substr($month, 0, 4))
+                    ->whereMonth('bookings.Booking_Date', (int) substr($month, 5, 2));
             }
         }
 
@@ -70,10 +68,8 @@ class AppointmentController extends Controller
         if ($request->has('month') && $request->month) {
             $month = $request->month;
             if (preg_match('/^\d{4}-\d{2}$/', $month)) {
-                $query->whereBetween('Booking_Date', [
-                    $month . '-01',
-                    \Carbon\Carbon::parse($month . '-01')->endOfMonth()->toDateString(),
-                ]);
+                $query->whereYear('Booking_Date', substr($month, 0, 4))
+                    ->whereMonth('Booking_Date', (int) substr($month, 5, 2));
             }
         }
 
