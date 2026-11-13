@@ -3,7 +3,7 @@ import api from "../../axios";
 import { Link, useParams, useSearchParams, useNavigate } from "react-router-dom";
 import SEO from "../../components/SEO";
 import { Lock, Eye, EyeOff, Loader2, CheckCircle2, AlertCircle, ArrowRight, ShieldCheck } from "lucide-react";
-import loginBg from "../../assets/login_register.png";
+import loginBg from "../../assets/homepage.png";
 
 export default function ResetPassword() {
   const { token } = useParams();
@@ -14,10 +14,10 @@ export default function ResetPassword() {
   const [Email, setEmail] = useState(emailParam);
   const [Password, setPassword] = useState("");
   const [Password_confirmation, setPasswordConfirmation] = useState("");
-  
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
+
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -97,7 +97,7 @@ export default function ResetPassword() {
     } catch (err) {
       setError(
         err.response?.data?.message ||
-          "Failed to reset password. The reset link may be invalid or expired."
+        "Failed to reset password. The reset link may be invalid or expired."
       );
     } finally {
       setLoading(false);
@@ -208,9 +208,8 @@ export default function ResetPassword() {
                       {[1, 2, 3, 4].map((step) => (
                         <div
                           key={step}
-                          className={`h-full flex-1 transition-all duration-300 ${
-                            step <= strength.score ? strength.color : "bg-white/10"
-                          }`}
+                          className={`h-full flex-1 transition-all duration-300 ${step <= strength.score ? strength.color : "bg-white/10"
+                            }`}
                         />
                       ))}
                     </div>

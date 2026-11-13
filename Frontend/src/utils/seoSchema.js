@@ -41,7 +41,10 @@ export function getHomepageStructuredData(systemReviews = []) {
       "latitude": 7.9869,
       "longitude": 80.8315,
     },
-    "sameAs": [TRIPADVISOR_URL],
+    "sameAs": [
+      TRIPADVISOR_URL,
+      "https://www.google.com/maps/place/Minneriya+Wild+Jeep+Safari/@7.8085407,80.6550674,19z/data=!4m6!3m5!1s0x3afcaf192e30672b:0xa857070050b2a78a!8m2!3d7.8084078!4d80.6567679!16s%2Fg%2F11tnl24sn5"
+    ],
     "openingHoursSpecification": {
       "@type": "OpeningHoursSpecification",
       "dayOfWeek": [

@@ -85,10 +85,14 @@ createRoot(document.getElementById("root")).render(
           <Route path="/privacy-policy" element={<PolicyPage />} />
           <Route path="/terms-and-conditions" element={<PolicyPage />} />
           <Route path="/return-refund-policy" element={<PolicyPage />} />
-                <Route path="/write-review" element={<GuestReviewPage layout="standalone" />} />
+          <Route path="/write-review" element={<GuestReviewPage layout="standalone" />} />
           <Route path="/payment/success" element={<PaymentSuccess />} />
           <Route path="/payment/cancel" element={<PaymentCancel />} />
           <Route path="/addtocart/:id" element={<AddToCart />} />
+          <Route path="/appointment" element={<Navigate to="/booking" replace />} />
+          <Route path="/appointments" element={<Navigate to="/booking" replace />} />
+          <Route path="/book" element={<Navigate to="/booking" replace />} />
+          <Route path="/reserve" element={<Navigate to="/booking" replace />} />
 
           {/* Customer Routes */}
           <Route element={<CustomerLayout />}>
@@ -165,13 +169,13 @@ createRoot(document.getElementById("root")).render(
             />
           </Route>
 
-          
-          
-         
-          
 
-          {/* fallback */}
-          <Route path="*" element={<Navigate to="/login" />} />
+
+
+
+
+          {/* fallback — send unknown paths to homepage, not login */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

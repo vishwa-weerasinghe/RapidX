@@ -3,7 +3,7 @@ import api from "../../axios";
 import { Link } from "react-router-dom";
 import SEO from "../../components/SEO";
 import { Mail, ArrowRight, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
-import loginBg from "../../assets/login_register.png";
+import loginBg from "../../assets/homepage.png";
 
 export default function ForgotPassword() {
   const [Email, setEmail] = useState("");
@@ -27,12 +27,12 @@ export default function ForgotPassword() {
       const response = await api.post("/forgot-password", { Email: Email.trim() });
       setMessage(
         response.data.message ||
-          "Password reset link has been sent! Please check your email inbox."
+        "Password reset link has been sent! Please check your email inbox."
       );
     } catch (err) {
       setError(
         err.response?.data?.message ||
-          "Unable to process password reset request. Please check your email address."
+        "Unable to process password reset request. Please check your email address."
       );
     } finally {
       setLoading(false);
