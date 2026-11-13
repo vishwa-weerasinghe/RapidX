@@ -988,12 +988,7 @@ export default function App() {
                     >
                       Log in
                     </Link>
-                    <Link
-                      to="/register"
-                      className="text-xs font-bold px-4 py-2 bg-sacramento hover:bg-sacramento-600 text-white rounded-full shadow"
-                    >
-                      Register
-                    </Link>
+
                   </>
                 )}
               </div>
