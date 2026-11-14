@@ -276,6 +276,8 @@ export function getPickupTimeOptions(pkgOrName) {
     if (lower.includes("evening") || lower.includes("afternoon")) {
       return KAUDULLA_EVENING_TIMES;
     }
+    // Plain Kaudulla Morning Safari
+    return MINNERIYA_MORNING_PICKUP_TIMES;
   }
 
   // ── Minneriya — check BEFORE generic "half day" / "evening" ───────────────
@@ -286,6 +288,8 @@ export function getPickupTimeOptions(pkgOrName) {
     if (lower.includes("evening") || lower.includes("afternoon")) {
       return MINNERIYA_EVENING_PICKUP_TIMES;
     }
+    // Plain Minneriya Morning Safari
+    return MINNERIYA_MORNING_PICKUP_TIMES;
   }
 
   // ── Wasgamuwa ──────────────────────────────────────────────────────────────
@@ -294,7 +298,12 @@ export function getPickupTimeOptions(pkgOrName) {
   }
 
   // ── Pidurangala / Sigiriya — check BEFORE generic "evening" ───────────────
+  // If the package ALSO includes Minneriya or Kaudulla it is the combined
+  // full-day variant; otherwise it is the Eco-park / rock-climb only variant.
   if (lower.includes("pidurangala") || lower.includes("sigiriya")) {
+    if (lower.includes("minneriya") || lower.includes("kaudulla") || lower.includes("kawdulla")) {
+      return SIGIRIYA_PIDURANGALA_MINNERIYA_KAUDULLA_SAFARI_TIMES;
+    }
     return SIGIRIYA_PIDURANGALA_ECOPARK_SAFARI_TIMES;
   }
 
