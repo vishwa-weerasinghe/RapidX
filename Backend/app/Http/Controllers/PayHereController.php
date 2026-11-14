@@ -7,6 +7,7 @@ use App\Models\Cart;
 use App\Models\Customer;
 use App\Models\Package;
 use App\Models\Payment;
+use App\Models\User;
 use App\Services\PayHereService;
 use App\Services\BookingSchedule;
 use Illuminate\Http\Request;
@@ -23,6 +24,30 @@ class PayHereController extends Controller
     public function __construct(PayHereService $payHereService)
     {
         $this->payHereService = $payHereService;
+    }
+
+    private function isAdmin(?User $user): bool
+    {
+        return $user && in_array(strtolower((string) $user->role), ['admin', 'administrator', 'superadmin'], true);
+    }
+
+    private function authorizeCustomer(Request $request, int $customerId)
+    {
+        $user = $request->user('sanctum') ?? auth('sanctum')->user();
+
+        if ($this->isAdmin($user) || ($user && (int) $user->Customer_ID === $customerId)) {
+            return null;
+        }
+
+        // Guest payment flows remain available, but registered customer data
+        // must never be used without the owning authenticated account.
+        if (!$user && !User::where('Customer_ID', $customerId)->exists()) {
+            return null;
+        }
+
+        return response()->json([
+            'message' => $user ? 'Unauthorized' : 'Authentication is required for this customer',
+        ], $user ? 403 : 401);
     }
 
     /**
@@ -68,6 +93,13 @@ class PayHereController extends Controller
         }
 
         $request->validate($rules);
+
+        if (isset($customerId)) {
+            $authorizationError = $this->authorizeCustomer($request, (int) $customerId);
+            if ($authorizationError) {
+                return $authorizationError;
+            }
+        }
 
         if (!BookingSchedule::isInFuture($request->Booking_Date, $request->Pickup_Time)) {
             throw ValidationException::withMessages([
@@ -192,6 +224,10 @@ class PayHereController extends Controller
         ]);
 
         $customerId = $request->Customer_ID;
+        $authorizationError = $this->authorizeCustomer($request, (int) $customerId);
+        if ($authorizationError) {
+            return $authorizationError;
+        }
         $customer = Customer::findOrFail($customerId);
 
         $promo = null;
@@ -518,6 +554,13 @@ class PayHereController extends Controller
         $payment = Payment::with(['bookings.package', 'customer'])
             ->where('order_id', $orderId)
             ->firstOrFail();
+
+        if ($payment->Customer_ID) {
+            $authorizationError = $this->authorizeCustomer(request(), (int) $payment->Customer_ID);
+            if ($authorizationError) {
+                return $authorizationError;
+            }
+        }
 
         return response()->json([
             'order_id'           => $payment->order_id,
