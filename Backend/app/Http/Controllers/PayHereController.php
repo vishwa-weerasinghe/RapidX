@@ -8,7 +8,9 @@ use App\Models\Customer;
 use App\Models\Package;
 use App\Models\Payment;
 use App\Services\PayHereService;
+use App\Services\BookingSchedule;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -66,6 +68,12 @@ class PayHereController extends Controller
         }
 
         $request->validate($rules);
+
+        if (!BookingSchedule::isInFuture($request->Booking_Date, $request->Pickup_Time)) {
+            throw ValidationException::withMessages([
+                'Booking_Date' => 'The booking date and time must be later than the current date and time.',
+            ]);
+        }
 
         return DB::transaction(function () use ($request) {
             if (!$request->has('Customer_ID') || !$request->Customer_ID) {

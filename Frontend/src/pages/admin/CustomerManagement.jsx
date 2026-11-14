@@ -188,7 +188,7 @@ export default function CustomerManagement() {
                   return (
                     <tr
                       key={customer.Customer_ID}
-                      className="hover:bg-slate-50/60 dark:hover:bg-surface-2/20 transition-colors"
+                      className="hover:bg-slate-50/60 dark:hover:bg-slate-700/50 transition-colors"
                     >
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">

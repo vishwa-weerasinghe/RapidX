@@ -43,6 +43,14 @@ export function orderHomePackages(packages) {
   const ordered = [];
   const used = new Set();
 
+  // 1. Put the Popular package at the very top (Position #1)
+  const popularPkg = source.find((pkg) => pkg.popular);
+  if (popularPkg) {
+    ordered.push(popularPkg);
+    used.add(popularPkg);
+  }
+
+  // 2. Follow with the remaining packages in their preferred order
   preferredPackages.forEach((matches, index) => {
     const candidates = source.filter((pkg) => !used.has(pkg));
     const selected =

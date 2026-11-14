@@ -5,8 +5,11 @@ import api from "../../axios";
 import { generateAnnualEarningsPdf } from "../../utils/generateAnnualEarningsPdf";
 import { generateMonthlyEarningsPdf } from "../../utils/generateMonthlyEarningsPdf";
 
-const calculateEarningsTotal = (earningsConfirmed, refunds) =>
-  Number(earningsConfirmed || 0) - Number(refunds || 0);
+const calculateEarningsTotal = (earningsConfirmed, refunds) => {
+  const confirmed = Number(earningsConfirmed || 0);
+  const refundAmount = Number(refunds || 0);
+  return Math.max(0, confirmed - refundAmount);
+};
 
 export default function EarningReports() {
   const [year, setYear] = useState(String(new Date().getFullYear()));
@@ -60,12 +63,14 @@ export default function EarningReports() {
       const payment = Number(booking.Payment || 0);
       if (status === "confirmed") {
         row.confirmed += payment;
-      } else if (status === "cancelled") {
-        if (booking.Payment_Status === "Success") row.refund += payment;
+      } else if (status === "cancelled" && booking.Payment_Status === "Success") {
+        row.confirmed += payment;
+        const refundPercentage = Number(booking.Refund_Percentage || 0);
+        row.refund += payment * (refundPercentage / 100);
       } else {
         row.unconfirmed += payment;
       }
-      row.total = row.confirmed + row.unconfirmed - row.refund;
+      row.total = calculateEarningsTotal(row.confirmed, row.refund);
       packages.set(packageName, row);
     });
     return [...packages.values()];

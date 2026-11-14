@@ -10,7 +10,6 @@ import {
   Pencil,
   XCircle,
   Search,
-  Bell,
   Clock,
   CheckCircle2,
 } from "lucide-react";
@@ -23,18 +22,10 @@ import {
 export default function MyBookings() {
   const user = JSON.parse(localStorage.getItem("user"));
   const navigate = useNavigate();
-  const customerId = user?.Customer_ID;
 
   const [bookings, setBookings] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
-
-  // Booking notification bell — mirrors the admin Bookings screen. Unseen
-  // customer notifications (e.g. a booking cancelled by the staff) show as a
-  // badge until the panel is opened.
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [bookingNotifications, setBookingNotifications] = useState([]);
-  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     fetchBookings();
@@ -49,52 +40,6 @@ export default function MyBookings() {
       alert("Failed to load bookings.");
     } finally {
       setLoading(false);
-    }
-  };
-
-  // Poll the unseen customer-notification count so a booking cancelled by the
-  // staff shows up on the bell without a manual reload (mirrors the Header).
-  const fetchUnreadCount = async () => {
-    if (!customerId) return;
-
-    try {
-      const response = await api.get(
-        `/customer/${customerId}/booking-notifications/unread-count`
-      );
-      setUnreadCount(response.data.count || 0);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  useEffect(() => {
-    if (!customerId) return;
-    fetchUnreadCount();
-    const interval = setInterval(fetchUnreadCount, 30000);
-    return () => clearInterval(interval);
-  }, [customerId]);
-
-  // Open the notification panel, load the unseen notifications and mark them
-  // seen so the badge clears (same flow as the admin Bookings bell).
-  const handleBellClick = async () => {
-    if (showNotifications) {
-      setShowNotifications(false);
-      return;
-    }
-
-    try {
-      const response = await api.get(
-        `/customer/${customerId}/booking-notifications`
-      );
-      setBookingNotifications(response.data || []);
-      setShowNotifications(true);
-      await api.post(
-        `/customer/${customerId}/booking-notifications/mark-seen`
-      );
-      setUnreadCount(0);
-    } catch (err) {
-      console.error(err);
-      setShowNotifications(true);
     }
   };
 
@@ -177,64 +122,6 @@ export default function MyBookings() {
               </p>
             </div>
 
-            {/* Notification Bell */}
-            <div className="relative shrink-0">
-              <button
-                type="button"
-                onClick={handleBellClick}
-                className="relative rounded-2xl border border-slate-200 dark:border-border-dark bg-slate-50 dark:bg-surface-2 p-3 text-slate-600 dark:text-slate-300 hover:text-sacramento dark:hover:text-sacramento-300 transition-all shadow-sm active:scale-95"
-                title="Booking notifications"
-                aria-label="Booking notifications"
-              >
-                <Bell size={20} className={unreadCount > 0 ? "animate-bounce text-sacramento" : ""} />
-                {unreadCount > 0 && (
-                  <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1.5 text-[10px] font-bold text-white shadow-sm ring-2 ring-white dark:ring-slate-900">
-                    {unreadCount}
-                  </span>
-                )}
-              </button>
-
-              {showNotifications && (
-                <div className="absolute right-0 top-14 z-50 w-96 max-w-[calc(100vw-2rem)] rounded-2xl border border-border-light bg-white p-4 shadow-xl dark:border-border-dark dark:bg-slate-900">
-                  <div className="mb-3 flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
-                    <h2 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                      <Bell size={15} className="text-sacramento" />
-                      <span>Booking Notifications</span>
-                    </h2>
-                    <button
-                      type="button"
-                      onClick={() => setShowNotifications(false)}
-                      className="rounded-lg p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-                      aria-label="Close booking notifications"
-                    >
-                      <XCircle size={16} />
-                    </button>
-                  </div>
-                  {bookingNotifications.length === 0 ? (
-                    <p className="py-4 text-center text-xs text-slate-400">No booking notifications yet.</p>
-                  ) : (
-                    <div className="max-h-72 space-y-2.5 overflow-y-auto pr-1">
-                      {bookingNotifications.map((notification) => (
-                        <div
-                          key={notification.Booking_ID}
-                          className="rounded-xl border border-border-light bg-slate-50/50 p-3 text-left dark:border-border-dark dark:bg-surface-2"
-                        >
-                          <p className="text-xs font-bold text-rose-600 dark:text-rose-400">
-                            {notification.package?.Package_Name || "Safari package"} - {notification.Status}
-                          </p>
-                          <p className="mt-1 break-words whitespace-pre-line text-xs text-slate-700 dark:text-slate-300">
-                            {notification.Customer_Message}
-                          </p>
-                          <p className="mt-1.5 text-[10px] text-slate-400">
-                            Safari date: {notification.Booking_Date}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
           </div>
         </div>
 
@@ -662,7 +549,7 @@ function BookingActions({
         type="button"
         title="Reschedule this booking"
         onClick={onEdit}
-        className="flex items-center gap-1 rounded-lg bg-sacramento px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-sacramento/90"
+        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-surface-2 hover:bg-sacramento hover:text-white dark:hover:bg-sacramento dark:hover:text-white border border-slate-200/80 dark:border-border-dark transition-all active:scale-95"
       >
         <Pencil size={14} />
         Edit
@@ -674,7 +561,7 @@ function BookingActions({
         title="Cancel this booking"
         onClick={onCancel}
         disabled={isCancelled || isCancelling}
-        className="flex items-center gap-1 rounded-lg bg-red-600 px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 hover:bg-amber-500 hover:text-white dark:hover:bg-amber-500 dark:hover:text-white border border-amber-200/80 dark:border-amber-800/40 transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
       >
         <XCircle size={14} />
 

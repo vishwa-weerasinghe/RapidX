@@ -184,23 +184,16 @@ class VehicleControllerTest extends TestCase
         ]);
     }
 
-    public function test_admin_can_create_vehicle_without_assigning_a_driver(): void
+    public function test_admin_must_assign_a_driver_when_creating_a_vehicle(): void
     {
-        $response = $this->actingAs($this->createAdmin(), 'sanctum')
+        $this->actingAs($this->createAdmin(), 'sanctum')
             ->postJson('/api/vehicles', [
                 'Vehicle_No' => 'SP-NODRIVER-1',
                 'Vehicle_Type' => 'Coach',
                 'No_of_Seats' => 45,
-            ]);
-
-        $response->assertCreated()
-            ->assertJsonPath('Vehicle_No', 'SP-NODRIVER-1')
-            ->assertJsonPath('Driver_ID', null);
-
-        $this->assertDatabaseHas('vehicles', [
-            'Vehicle_No' => 'SP-NODRIVER-1',
-            'Driver_ID' => null,
-        ]);
+            ])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['Driver_ID']);
     }
 
     public function test_admin_can_update_vehicle_and_persist_updated_values(): void
@@ -226,19 +219,14 @@ class VehicleControllerTest extends TestCase
         ]);
     }
 
-    public function test_admin_can_clear_a_vehicles_driver_assignment(): void
+    public function test_admin_cannot_clear_a_vehicles_driver_assignment(): void
     {
         $vehicle = $this->createVehicle();
 
         $this->actingAs($this->createAdmin(), 'sanctum')
             ->putJson('/api/vehicles/' . $vehicle->Vehicle_ID, ['Driver_ID' => null])
-            ->assertOk()
-            ->assertJsonPath('Driver_ID', null);
-
-        $this->assertDatabaseHas('vehicles', [
-            'Vehicle_ID' => $vehicle->Vehicle_ID,
-            'Driver_ID' => null,
-        ]);
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['Driver_ID']);
     }
 
     public function test_updating_a_non_existing_vehicle_returns_not_found(): void
@@ -257,23 +245,29 @@ class VehicleControllerTest extends TestCase
 
     public function test_store_returns_validation_errors_for_missing_required_fields(): void
     {
+        $driver = $this->createDriver();
+
         $this->actingAs($this->createAdmin(), 'sanctum')
             ->postJson('/api/vehicles', [
                 'Vehicle_No' => '',
                 'Vehicle_Type' => '',
                 'No_of_Seats' => '',
+                'Driver_ID' => '',
             ])
             ->assertUnprocessable()
-            ->assertJsonValidationErrors(['Vehicle_No', 'Vehicle_Type', 'No_of_Seats']);
+            ->assertJsonValidationErrors(['Vehicle_No', 'Vehicle_Type', 'No_of_Seats', 'Driver_ID']);
     }
 
     public function test_store_returns_validation_errors_for_invalid_values(): void
     {
+        $driver = $this->createDriver();
+
         $this->actingAs($this->createAdmin(), 'sanctum')
             ->postJson('/api/vehicles', [
                 'Vehicle_No' => str_repeat('A', 21),
                 'Vehicle_Type' => str_repeat('B', 51),
                 'No_of_Seats' => 0,
+                'Driver_ID' => $driver->Driver_ID,
             ])
             ->assertUnprocessable()
             ->assertJsonValidationErrors(['Vehicle_No', 'Vehicle_Type', 'No_of_Seats']);
@@ -282,12 +276,14 @@ class VehicleControllerTest extends TestCase
     public function test_update_accepts_boundary_values(): void
     {
         $vehicle = $this->createVehicle();
+        $driver = $this->createDriver();
 
         $this->actingAs($this->createAdmin(), 'sanctum')
             ->putJson('/api/vehicles/' . $vehicle->Vehicle_ID, [
                 'Vehicle_No' => str_repeat('A', 20),
                 'Vehicle_Type' => str_repeat('B', 50),
                 'No_of_Seats' => 1,
+                'Driver_ID' => $driver->Driver_ID,
             ])
             ->assertOk();
     }

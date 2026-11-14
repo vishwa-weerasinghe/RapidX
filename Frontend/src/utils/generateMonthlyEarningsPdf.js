@@ -14,6 +14,7 @@ export function generateMonthlyEarningsPdf(packageRows, month) {
     }),
     { confirmed: 0, unconfirmed: 0, refund: 0, total: 0 },
   );
+  totals.total = Math.max(0, totals.confirmed - totals.refund);
 
   doc.setFillColor(41, 171, 135);
   doc.rect(0, 0, pageWidth, 32, "F");

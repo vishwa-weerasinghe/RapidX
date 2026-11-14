@@ -34,6 +34,8 @@ import { HOME_PACKAGE_LIMIT, orderHomePackages } from "./utils/homePackageOrderi
 import TripAdvisorWidget from "./components/TripAdvisorWidget";
 import { STATIC_TRIPADVISOR_REVIEWS } from "./constants/staticTripadvisorReviews";
 import ReserveNowNotice from "./components/ReserveNowNotice";
+import { getHomepageStructuredData } from "./utils/seoSchema";
+import { applyPopularPackageBadge } from "./constants/popularPackageConfig";
 
 // Presentational review card used inside the auto-sliding carousel
 function ReviewCardContent({ rev }) {
@@ -419,11 +421,6 @@ export default function App() {
       .then((res) => {
         if (res.data && res.data.length > 0) {
 
-          const maxBookings = Math.max(
-            0,
-            ...res.data.map((pkg) => Number(pkg.bookings_count || 0)),
-          );
-
           const mapped = res.data.map((pkg) => {
             const images = getPackageImageUrls(pkg);
             const oneAdult = Number(pkg.price_one_adult) || 0;
@@ -442,16 +439,14 @@ export default function App() {
                   : oneAdult || moreAdult,
               images,
               img: images[0] || FALLBACK_PACKAGE_IMAGE,
-              popular:
-                Number(pkg.bookings_count || 0) === maxBookings &&
-                maxBookings > 0,
               price_one_adult: oneAdult,
               price_more_adult: moreAdult,
               price_child: Number(pkg.price_child) || 0,
               Package_Name: pkg.Package_Name,
+              bookings_count: pkg.bookings_count,
             };
           });
-          setPackages(mapped);
+          setPackages(applyPopularPackageBadge(mapped));
         }
       })
       .catch((err) => console.error("Error loading packages:", err))
@@ -495,6 +490,7 @@ export default function App() {
         "safaris",
         "reviews",
         "gallery",
+        "guide",
         "contact",
       ];
 
@@ -761,6 +757,7 @@ export default function App() {
       systemReviews.length
       : 0;
   const systemFullStars = Math.round(systemAverageRating);
+  const homepageStructuredData = getHomepageStructuredData(systemReviews);
 
   return (
     <>
@@ -769,6 +766,7 @@ export default function App() {
         description="Book official Minneriya jeep safari online. Experience the famous Minneriya Elephant Gathering, Kaudulla, Hurulu &amp; Wasgamuwa with best rates, prices &amp; certified drivers."
         keywords="minneriya jeep safari, minneriya safari, minneriya safari price, minneriya national park jeep safari price, minneriya jeep safari &amp; tours, minneriya national park safari, minneriya elephant gathering, sri lanka jeep safari, kaudulla jeep safari, hurulu eco park safari, wasgamuwa safari"
         canonical="https://www.minneriyawildjeepsafari.com"
+        structuredData={homepageStructuredData}
       />
       <div
         className={`font-sans antialiased overflow-x-hidden selection:bg-[var(--primary)] selection:text-white transition-colors duration-200 ${theme === "dark"
@@ -843,6 +841,7 @@ export default function App() {
                   "safaris",
                   "reviews",
                   "gallery",
+                  "guide",
                   "contact",
                 ].map((section) => (
                   <li key={section}>
@@ -989,12 +988,7 @@ export default function App() {
                     >
                       Log in
                     </Link>
-                    <Link
-                      to="/register"
-                      className="text-xs font-bold px-4 py-2 bg-sacramento hover:bg-sacramento-600 text-white rounded-full shadow"
-                    >
-                      Register
-                    </Link>
+
                   </>
                 )}
               </div>
@@ -1033,6 +1027,7 @@ export default function App() {
                     "safaris",
                     "reviews",
                     "gallery",
+                    "guide",
                     "contact",
                   ].map((section) => (
                     <button
@@ -2126,17 +2121,17 @@ export default function App() {
         )}
 
         {/* --- SEO FAQ & TRAVEL GUIDE SECTION --- */}
-        <section id="faq" className="py-20 md:py-28 bg-white border-t border-gray-100 transition-colors duration-200">
+        <section id="guide" className="py-20 md:py-28 bg-white dark:bg-[#132E24] border-t border-[#D8D3C9] dark:border-[#244236] transition-colors duration-200">
           <div className="max-w-4xl mx-auto px-4 md:px-6">
             <div className="text-center max-w-2xl mx-auto mb-14">
-              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-50 text-castleton text-xs font-bold uppercase tracking-widest mb-4 border border-gray-100">
-                <span className="w-2 h-2 rounded-full bg-castleton"></span>
+              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#EFEEE9] text-[#152A44] text-xs font-bold uppercase tracking-widest mb-4 border border-[#D8D3C9] dark:bg-[#244236] dark:text-[#F3F3F1] dark:border-[#244236]">
+                <span className="w-2 h-2 rounded-full bg-[#152A44] dark:bg-[#F3F3F1]"></span>
                 Safari Travel Guide &amp; FAQs
               </span>
-              <h2 className="font-outfit text-3xl sm:text-5xl font-bold text-gray-900 mb-4">
+              <h2 className="font-outfit text-3xl sm:text-5xl font-bold text-[#152A44] mb-4 dark:text-[#F3F3F1]">
                 Safari Travel Guide &amp; Questions
               </h2>
-              <p className="text-gray-600 text-sm sm:text-base">
+              <p className="text-[#5B6E87] text-sm sm:text-base dark:text-[#D8D5B5]">
                 Everything you need to know about booking private jeep safaris to Minneriya, Kaudulla, Hurulu Eco Park, and Wasgamuwa National Parks.
               </p>
             </div>
@@ -2166,12 +2161,12 @@ export default function App() {
               ].map((item, idx) => (
                 <div
                   key={idx}
-                  className="rounded-2xl border border-gray-200 bg-gray-50/50 overflow-hidden transition-all duration-200"
+                  className="rounded-2xl border border-[#D8D3C9] bg-[#EFEEE9] dark:border-[#244236] dark:bg-[#00140F] overflow-hidden transition-all duration-200"
                 >
                   <button
                     type="button"
                     onClick={() => setOpenFaq(openFaq === idx ? -1 : idx)}
-                    className="w-full py-5 px-6 text-left font-bold text-gray-900 flex items-center justify-between gap-4 hover:text-castleton transition-colors"
+                    className="w-full py-5 px-6 text-left font-bold text-[#152A44] flex items-center justify-between gap-4 hover:bg-[rgba(0,0,0,0.08)] dark:text-[#F3F3F1] dark:hover:text-[#D8D5B5] transition-colors"
                   >
                     <span className="text-base sm:text-lg">{item.q}</span>
                     <ChevronDown
@@ -2180,7 +2175,7 @@ export default function App() {
                     />
                   </button>
                   {openFaq === idx && (
-                    <div className="px-6 pb-6 text-sm sm:text-base text-gray-600 leading-relaxed border-t border-gray-100 pt-4">
+                    <div className="px-6 pb-6 text-sm sm:text-base text-[#5B6E87] dark:text-[#D8D5B5] leading-relaxed border-t border-[#D8D3C9] dark:border-[#244236] pt-4">
                       {item.a}
                     </div>
                   )}
@@ -2355,6 +2350,11 @@ export default function App() {
                         label: "YouTube",
                         href: "https://www.youtube.com/@minneriyawildjeepsafari",
                         icon: "M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z",
+                      },
+                      {
+                        label: "Google",
+                        href: "https://www.google.com/maps/place/Minneriya+Wild+Jeep+Safari/@7.8085407,80.6550674,19z/data=!4m6!3m5!1s0x3afcaf192e30672b:0xa857070050b2a78a!8m2!3d7.8084078!4d80.6567679!16s%2Fg%2F11tnl24sn5",
+                        icon: "M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z",
                       },
                     ].map((soc, sIdx) => (
                       <a

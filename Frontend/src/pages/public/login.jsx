@@ -3,7 +3,7 @@ import { Eye, EyeOff } from "lucide-react";
 import SEO from "../../components/SEO";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
-import loginBg from "../../assets/login_register.png";
+import loginBg from "../../assets/homepage.png";
 
 export default function Login() {
   const [Email, setEmail] = useState("");

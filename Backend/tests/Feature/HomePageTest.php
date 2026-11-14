@@ -255,7 +255,7 @@ class HomePageTest extends TestCase
         $package = $this->createPackage(['Package_Name' => 'Minneriya Day Safari']);
 
         $response = $this->postJson('/api/cart', [
-            'Booking_Date'    => '2026-09-15',
+            'Booking_Date'    => now('Asia/Colombo')->addDays(30)->toDateString(),
             'Pickup_Time'     => '07:00',
             'Pickup_Location' => 'Sigiriya Hotel',
             'No_of_adults'    => 2,

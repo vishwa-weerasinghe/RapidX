@@ -6,6 +6,7 @@ import { useTheme } from "../../context/ThemeContext";
 import { startPayHerePayment } from "../../utils/payhere";
 import { pickupTimeOptions, getPickupTimeOptions, getDefaultPickupTime } from "../../constants/pickupTimeOptions";
 import { getCountries, getCountryCallingCode, parsePhoneNumberFromString } from "libphonenumber-js";
+import { getSriLankaToday, isSriLankaBookingTimeInFuture, isSriLankaPickupTimePast } from "../../utils/bookingSchedule";
 
 const countryDisplayNames = new Intl.DisplayNames(["en"], { type: "region" });
 const countryOptions = getCountries()
@@ -95,6 +96,7 @@ export default function Booking() {
     const [showCountryMenu, setShowCountryMenu] = useState(false);
     const [phoneError, setPhoneError] = useState("");
     const [countryError, setCountryError] = useState("");
+    const [scheduleError, setScheduleError] = useState("");
     const countryMenuRef = useRef(null);
 
     const selectedCountry = countryOptions.find((c) => c.code === countryCode);
@@ -328,6 +330,7 @@ export default function Booking() {
 
     // handle input change
     const handleChange = (e) => {
+        setScheduleError("");
         setForm({
             ...form,
             [e.target.name]: e.target.value,
@@ -438,6 +441,11 @@ export default function Booking() {
             return;
         }
 
+        if (!isSriLankaBookingTimeInFuture(form.Booking_Date, form.Pickup_Time)) {
+            setScheduleError("Choose a booking date and pickup time later than the current time.");
+            return;
+        }
+
         let fullPhone = form.Phone_No;
         if (!user?.Customer_ID) {
             if (!form.Country || !countryCode) {
@@ -503,8 +511,11 @@ export default function Booking() {
         } catch (err) {
             console.log(err);
             setIsSubmitting(false);
+            const scheduleMessage = err.response?.data?.errors?.Booking_Date?.[0]
+                || err.response?.data?.errors?.Pickup_Time?.[0];
+            if (scheduleMessage) setScheduleError(scheduleMessage);
             alert(
-                err.response?.data?.message ||
+                scheduleMessage || err.response?.data?.message ||
                 err.response?.data?.error ||
                 "Unable to complete booking"
             );
@@ -619,7 +630,7 @@ export default function Booking() {
                             {isFullDaySafari && (
                                 <div className="space-y-3">
                                     <div className="flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-800/60">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-castleton shrink-0"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-castleton shrink-0"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
                                         <h4 className="text-xs font-extrabold uppercase tracking-widest text-slate-600 dark:text-slate-300">
                                             Village Tour Add-on
                                         </h4>
@@ -631,37 +642,33 @@ export default function Booking() {
                                     {/* Toggle Card */}
                                     <div
                                         onClick={() => setVillageTourEnabled((v) => !v)}
-                                        className={`cursor-pointer rounded-2xl p-4 border-2 transition-all duration-200 ${
-                                            villageTourEnabled
-                                                ? "border-emerald-500 bg-emerald-50/60 dark:bg-emerald-950/20 shadow-sm"
-                                                : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900"
-                                        }`}
+                                        className={`cursor-pointer rounded-2xl p-4 border-2 transition-all duration-200 ${villageTourEnabled
+                                            ? "border-emerald-500 bg-emerald-50/60 dark:bg-emerald-950/20 shadow-sm"
+                                            : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900"
+                                            }`}
                                     >
                                         <div className="flex items-start justify-between gap-3">
                                             <div className="flex items-center gap-3">
-                                                <div className={`p-2 rounded-xl shrink-0 ${
-                                                    villageTourEnabled
-                                                        ? "bg-emerald-500 text-white"
-                                                        : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
-                                                }`}>
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                                                <div className={`p-2 rounded-xl shrink-0 ${villageTourEnabled
+                                                    ? "bg-emerald-500 text-white"
+                                                    : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
+                                                    }`}>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
                                                 </div>
                                                 <div>
                                                     <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white block">
                                                         Add Village Tour
                                                     </span>
                                                     <span className="text-[10px] text-slate-500 dark:text-slate-400">
-                                                        Hiriwadunna Village Experience
+                                                        Combine a village experience after the morning session
                                                     </span>
                                                 </div>
                                             </div>
                                             {/* Toggle Switch */}
-                                            <div className={`relative flex-shrink-0 w-10 h-5 rounded-full transition-colors duration-200 mt-0.5 ${
-                                                villageTourEnabled ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-700"
-                                            }`}>
-                                                <div className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200 ${
-                                                    villageTourEnabled ? "translate-x-5" : "translate-x-0"
-                                                }`} />
+                                            <div className={`relative flex-shrink-0 w-10 h-5 rounded-full transition-colors duration-200 mt-0.5 ${villageTourEnabled ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-700"
+                                                }`}>
+                                                <div className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200 ${villageTourEnabled ? "translate-x-5" : "translate-x-0"
+                                                    }`} />
                                             </div>
                                         </div>
                                         <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
@@ -674,17 +681,7 @@ export default function Booking() {
                                                 </span>
                                             )}
                                         </p>
-                                        {/* Live add-on cost preview when enabled */}
-                                        {villageTourEnabled && villageTourPkg && (
-                                            <div className="mt-3 pt-2.5 border-t border-emerald-200 dark:border-emerald-800/40 flex items-center justify-between">
-                                                <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400">
-                                                    Village Tour Add-on
-                                                </span>
-                                                <span className="text-sm font-black text-emerald-700 dark:text-emerald-300">
-                                                    + $ {getVillageTourTotal().toFixed(2)}
-                                                </span>
-                                            </div>
-                                        )}
+
                                     </div>
                                 </div>
                             )}
@@ -707,7 +704,7 @@ export default function Booking() {
                                             type="date"
                                             name="Booking_Date"
                                             value={form.Booking_Date}
-                                            min={new Date().toISOString().split("T")[0]}
+                                            min={getSriLankaToday()}
                                             onChange={handleChange}
                                             className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white text-xs sm:text-sm font-bold py-3 px-3.5 sm:px-4 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-castleton transition-all min-h-[44px]"
                                             required
@@ -727,7 +724,7 @@ export default function Booking() {
                                                 required
                                             >
                                                 {getPickupTimeOptions(pkg).map((option) => (
-                                                    <option key={option.value} value={option.value}>
+                                                    <option key={option.value} value={option.value} disabled={isSriLankaPickupTimePast(form.Booking_Date, option.value)}>
                                                         {option.label}
                                                     </option>
                                                 ))}
@@ -738,6 +735,7 @@ export default function Booking() {
                                                 </svg>
                                             </div>
                                         </div>
+                                        {scheduleError && <p className="text-xs text-red-600" role="alert">{scheduleError}</p>}
                                     </div>
                                 </div>
 

@@ -233,7 +233,7 @@ export default function PromotionCodes() {
                   {codes.map((code) => (
                     <tr
                       key={code.id}
-                      className="hover:bg-slate-50/60 dark:hover:bg-surface-2/20 transition-colors"
+                      className="hover:bg-slate-50/60 dark:hover:bg-slate-700/50 transition-colors"
                     >
                       <td className="px-5 py-4">
                         <span className="px-3 py-1 rounded-xl bg-sacramento/10 text-sacramento dark:text-sacramento-300 font-mono font-bold text-sm">

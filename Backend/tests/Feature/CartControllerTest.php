@@ -75,7 +75,7 @@ class CartControllerTest extends TestCase
         $package = $this->createPackage(['Package_Name' => 'Evening Safari']);
 
         $response = $this->postJson('/api/cart', [
-            'Booking_Date'    => '2026-08-10',
+            'Booking_Date'    => now('Asia/Colombo')->addDays(30)->toDateString(),
             'Pickup_Time'     => '06:00',
             'Pickup_Location' => 'Dambulla',
             'No_of_adults'    => 2,
@@ -117,7 +117,7 @@ class CartControllerTest extends TestCase
 
         $response = $this->postJson('/api/cart', [
             'Customer_ID'     => $customer->Customer_ID,
-            'Booking_Date'    => '2026-09-01',
+            'Booking_Date'    => now('Asia/Colombo')->addDays(30)->toDateString(),
             'Pickup_Time'     => '08:00',
             'Pickup_Location' => 'Sigiriya',
             'No_of_adults'    => 3,
@@ -179,6 +179,32 @@ class CartControllerTest extends TestCase
             ->assertJsonValidationErrors(['Booking_Date']);
 
         $this->assertDatabaseCount('bookings', 0);
+    }
+
+    public function test_store_rejects_a_booking_schedule_in_the_past(): void
+    {
+        $package = $this->createPackage();
+
+        $response = $this->postJson('/api/cart', [
+            'Booking_Date' => now('Asia/Colombo')->subDay()->toDateString(),
+            'Pickup_Time' => '06:00',
+            'Pickup_Location' => 'Dambulla',
+            'No_of_adults' => 2,
+            'No_of_child' => 0,
+            'Package_ID' => $package->id,
+            'Payment' => 300.00,
+            'First_Name' => 'Guest',
+            'Last_Name' => 'Customer',
+            'Email' => 'guest@example.com',
+            'Phone_No' => '0771234567',
+            'NIC' => '123456789V',
+            'Country' => 'Sri Lanka',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['Booking_Date']);
+        $this->assertDatabaseCount('bookings', 0);
+        $this->assertDatabaseCount('customers', 0);
     }
 
     // -------------------------------------------------------------------------

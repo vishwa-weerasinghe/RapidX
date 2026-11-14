@@ -228,7 +228,7 @@ export default function Drivers() {
                     return (
                       <tr
                         key={driver.Driver_ID}
-                        className="hover:bg-slate-50/60 dark:hover:bg-surface-2/20 transition-colors"
+                        className="hover:bg-slate-50/60 dark:hover:bg-slate-700/50 transition-colors"
                       >
                         <td className="px-5 py-4 font-mono font-semibold text-xs text-slate-500 dark:text-slate-400">
                           #{driver.Driver_ID}
