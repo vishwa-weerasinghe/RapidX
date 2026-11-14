@@ -221,6 +221,39 @@ class AppointmentControllerTest extends TestCase
             ->assertJsonFragment(['Booking_Date' => '2026-07-25']);
     }
 
+    public function test_index_filters_common_leap_and_31_day_month_boundaries(): void
+    {
+        $datesByMonth = [
+            '2025-02' => ['2025-02-28'],
+            '2024-02' => ['2024-02-28', '2024-02-29'],
+            '2026-01' => ['2026-01-31'],
+        ];
+
+        foreach ([
+            '2025-02-28',
+            '2025-03-01',
+            '2024-02-28',
+            '2024-02-29',
+            '2024-03-01',
+            '2026-01-31',
+            '2026-02-01',
+        ] as $date) {
+            $this->createBookingForDate($date, 'Confirmed', 1000);
+        }
+
+        $admin = $this->adminUser();
+        foreach ($datesByMonth as $month => $expectedDates) {
+            $response = $this->actingAs($admin, 'sanctum')
+                ->getJson('/api/appointments?month=' . $month);
+
+            $response->assertStatus(200)
+                ->assertJsonCount(count($expectedDates));
+            foreach ($expectedDates as $date) {
+                $response->assertJsonFragment(['Booking_Date' => $date]);
+            }
+        }
+    }
+
     public function test_index_ignores_invalid_month_format_and_returns_all_bookings(): void
     {
         $this->createBookingForDate('2026-07-10', 'Confirmed', 1000);
@@ -356,6 +389,36 @@ class AppointmentControllerTest extends TestCase
             ->assertJson([
                 'total_confirmed' => 1,
             ]);
+    }
+
+    public function test_summary_filters_common_leap_and_31_day_month_boundaries(): void
+    {
+        $expectedCountsByMonth = [
+            '2025-02' => 1,
+            '2024-02' => 2,
+            '2026-01' => 1,
+        ];
+
+        foreach ([
+            '2025-02-28',
+            '2025-03-01',
+            '2024-02-28',
+            '2024-02-29',
+            '2024-03-01',
+            '2026-01-31',
+            '2026-02-01',
+        ] as $date) {
+            $this->createBookingForDate($date, 'Confirmed', 1000);
+        }
+
+        $admin = $this->adminUser();
+        foreach ($expectedCountsByMonth as $month => $expectedCount) {
+            $response = $this->actingAs($admin, 'sanctum')
+                ->getJson('/api/appointments/summary?month=' . $month);
+
+            $response->assertStatus(200)
+                ->assertJson(['total_confirmed' => $expectedCount]);
+        }
     }
 
     public function test_summary_without_month_parameter_aggregates_all_bookings(): void

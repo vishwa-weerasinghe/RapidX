@@ -55,7 +55,7 @@ class AuthController extends Controller
                     }
                 },
             ],
-            'NIC' => 'required|string|max:20',
+            'NIC' => ['required', 'string', 'max:20', 'regex:/^[A-Za-z0-9\/-]+$/'],
             'Country' => 'required|string|max:50',
             'Country_Code' => ['nullable', 'string', 'size:2', 'in:' . implode(',', $supportedRegions)],
         ]);
