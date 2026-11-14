@@ -5,3 +5,9 @@
 // instead of staying stale until the next polling cycle.
 export const ADMIN_BOOKING_NOTIFICATIONS_UPDATED =
   "rapidx:admin-booking-notifications-updated";
+
+export const ADMIN_CUSTOMER_NOTIFICATIONS_UPDATED =
+  "rapidx:admin-customer-notifications-updated";
+
+export const ADMIN_REVIEW_NOTIFICATIONS_VIEWED =
+  "rapidx:admin-review-notifications-viewed";

@@ -2,7 +2,11 @@ import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import api from "../axios";
 import logoImg from "../assets/logo.jpg";
-import { ADMIN_BOOKING_NOTIFICATIONS_UPDATED } from "../constants/notificationEvents";
+import {
+  ADMIN_BOOKING_NOTIFICATIONS_UPDATED,
+  ADMIN_CUSTOMER_NOTIFICATIONS_UPDATED,
+  ADMIN_REVIEW_NOTIFICATIONS_VIEWED,
+} from "../constants/notificationEvents";
 
 import {
   LayoutDashboard,
@@ -52,6 +56,7 @@ export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
 
   const [unreadBookings, setUnreadBookings] = useState(0);
   const [unreadReviews, setUnreadReviews] = useState(0);
+  const [unreadCustomers, setUnreadCustomers] = useState(0);
   const [unreadAppointments, setUnreadAppointments] = useState(0);
 
   useEffect(() => {
@@ -98,7 +103,11 @@ export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
         const response = await api.get("/reviews");
         const reviews = response.data || [];
         const storedLastId = parseInt(localStorage.getItem("lastSeenReviewId") || "0", 10);
-        const unseenCount = reviews.filter((review) => review.Review_ID > storedLastId).length;
+        const unseenCount = reviews.filter(
+          (review) =>
+            `${review?.source || review?.Source || ""}`.toLowerCase() !== "tripadvisor" &&
+            Number(review.Review_ID) > storedLastId
+        ).length;
         setUnreadReviews(unseenCount);
       } catch (err) {
         console.error(err);
@@ -109,6 +118,65 @@ export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
     const interval = setInterval(fetchUnreadReviews, 30000);
 
     return () => clearInterval(interval);
+  }, [normalizedRole]);
+
+  useEffect(() => {
+    if (normalizedRole !== "admin") return;
+
+    const fetchUnreadCustomers = async () => {
+      try {
+        const response = await api.get("/admin/customers");
+        const customers = Array.isArray(response.data) ? response.data : [];
+        const storedLastId = parseInt(
+          localStorage.getItem("lastSeenCustomerId") || "0",
+          10,
+        );
+        const unseenCount = customers.filter(
+          (customer) => Number(customer.Customer_ID) > storedLastId,
+        ).length;
+        setUnreadCustomers(unseenCount);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchUnreadCustomers();
+    const interval = setInterval(fetchUnreadCustomers, 30000);
+    const handleCustomerNotificationsUpdated = () => {
+      fetchUnreadCustomers();
+    };
+    window.addEventListener(
+      ADMIN_CUSTOMER_NOTIFICATIONS_UPDATED,
+      handleCustomerNotificationsUpdated,
+    );
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener(
+        ADMIN_CUSTOMER_NOTIFICATIONS_UPDATED,
+        handleCustomerNotificationsUpdated,
+      );
+    };
+  }, [normalizedRole]);
+
+  useEffect(() => {
+    if (normalizedRole !== "admin") return;
+
+    const handleReviewNotificationsViewed = () => {
+      setUnreadReviews(0);
+    };
+
+    window.addEventListener(
+      ADMIN_REVIEW_NOTIFICATIONS_VIEWED,
+      handleReviewNotificationsViewed,
+    );
+
+    return () => {
+      window.removeEventListener(
+        ADMIN_REVIEW_NOTIFICATIONS_VIEWED,
+        handleReviewNotificationsViewed,
+      );
+    };
   }, [normalizedRole]);
 
   useEffect(() => {
@@ -259,6 +327,11 @@ export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
               <NavLink
                 key={link.to}
                 to={link.to}
+                onClick={
+                  link.label === "Reviews" && normalizedRole === "admin"
+                    ? () => setUnreadReviews(0)
+                    : undefined
+                }
                 className={({ isActive }) =>
                   `
                   flex
@@ -328,6 +401,14 @@ export default function Sidebar({ role = "admin", isOpen, setIsOpen }) {
                     {unreadReviews}
                   </span>
                 )}
+
+                {link.label === "Customer Management" &&
+                  normalizedRole === "admin" &&
+                  unreadCustomers > 0 && (
+                    <span className="ml-auto min-w-5 rounded-full bg-red-500 px-1.5 py-0.5 text-center text-xs font-bold text-white">
+                      {unreadCustomers}
+                    </span>
+                  )}
 
                 {link.label === "Earnings and Reports" && normalizedRole === "admin" && unreadAppointments > 0 && (
                   <span className="ml-auto min-w-5 rounded-full bg-red-500 px-1.5 py-0.5 text-center text-xs font-bold text-white">

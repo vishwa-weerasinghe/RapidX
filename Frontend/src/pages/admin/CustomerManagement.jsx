@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Mail, Phone, RefreshCw, Search, Users, X } from "lucide-react";
 import api from "../../axios";
+import { ADMIN_CUSTOMER_NOTIFICATIONS_UPDATED } from "../../constants/notificationEvents";
 
 const formatDate = (value) => {
   if (!value) return "-";
@@ -23,7 +24,17 @@ export default function CustomerManagement() {
       setLoading(true);
       setError("");
       const response = await api.get("/admin/customers");
-      setCustomers(Array.isArray(response.data) ? response.data : []);
+      const nextCustomers = Array.isArray(response.data) ? response.data : [];
+      setCustomers(nextCustomers);
+
+      const latestCustomerId = nextCustomers.reduce(
+        (latestId, customer) => Math.max(latestId, Number(customer.Customer_ID) || 0),
+        0,
+      );
+      if (latestCustomerId > 0) {
+        localStorage.setItem("lastSeenCustomerId", String(latestCustomerId));
+        window.dispatchEvent(new CustomEvent(ADMIN_CUSTOMER_NOTIFICATIONS_UPDATED));
+      }
     } catch (requestError) {
       console.error(requestError);
       setError("Unable to load registered customers.");
