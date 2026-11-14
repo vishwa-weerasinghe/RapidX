@@ -4,13 +4,7 @@ namespace App\Services;
 
 use Carbon\Carbon;
 
-/**
- * Single source of truth for the booking refund tiers.
- *
- * Keeping every percentage and threshold here (and nowhere else) guarantees
- * the backend rules cannot drift apart from the policy text the frontend
- * shows on the cancellation modal.
- */
+
 class RefundCalculator
 {
     // Tier thresholds = whole days before the safari date.
@@ -21,12 +15,7 @@ class RefundCalculator
     public const HALF_REFUND = 50;
     public const NO_REFUND = 0;
 
-    /**
-     * Refund percentage for a booking.
-     *
-     * Only a confirmed, still-upcoming booking can earn money back. Anything
-     * else (pending, in cart, ...) was never paid, so the refund is 0.
-     */
+    
     public function calculate(string $status, mixed $bookingDate, mixed $today = null): int
     {
         if (!$this->isConfirmed($status)) {
@@ -51,11 +40,7 @@ class RefundCalculator
         return self::NO_REFUND;
     }
 
-    /**
-     * Whole days between "today" and the safari date, compared at midnight so
-     * the time of day a cancellation happens never shifts the tier.
-     * Returns null when the date cannot be parsed.
-     */
+    
     public function daysUntilSafari(mixed $bookingDate, mixed $today = null): ?int
     {
         if (!$bookingDate) {
@@ -81,10 +66,7 @@ class RefundCalculator
         return $this->normalizeStatus($status) === 'confirmed';
     }
 
-    /**
-     * Normalise a status for comparison: "In Cart" / "in cart" / "InCart"
-     * all become "incart", "Confirmed" becomes "confirmed", and so on.
-     */
+    
     public function normalizeStatus(string $status): string
     {
         return strtolower(str_replace(' ', '', (string) $status));

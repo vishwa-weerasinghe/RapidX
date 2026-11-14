@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import api from "../../axios";
 import { getApiErrorMessage } from "../../utils/apiErrorMessage";
+import { ADMIN_REVIEW_NOTIFICATIONS_VIEWED } from "../../constants/notificationEvents";
 import { Trash2, Star, Search, X, Bell, RefreshCw, Sparkles, MessageSquareQuote } from "lucide-react";
 
 export default function AdminReviews() {
@@ -40,6 +41,7 @@ export default function AdminReviews() {
         data.filter((r) => getReviewId(r) > storedLastId).map((r) => getReviewId(r))
       );
       setNewReviewIds(unseenIds);
+      window.dispatchEvent(new CustomEvent(ADMIN_REVIEW_NOTIFICATIONS_VIEWED));
     } catch {
       setError("Unable to load reviews right now.");
     } finally {
@@ -126,6 +128,7 @@ export default function AdminReviews() {
       reviews.length > 0 ? Math.max(...reviews.map((r) => getReviewId(r))) : 0;
     localStorage.setItem("lastSeenReviewId", String(maxId));
     setNewReviewIds(new Set());
+    window.dispatchEvent(new CustomEvent(ADMIN_REVIEW_NOTIFICATIONS_VIEWED));
     setShowNewOnly(true);
   };
 
