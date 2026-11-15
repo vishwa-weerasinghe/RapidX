@@ -159,7 +159,30 @@ class CancellationService
                 app(PayHereService::class)->refund($payment->payhere_payment_id, $refundAmount, $description);
                 Log::info("Refunded {$refundAmount} for Booking ID {$booking->Booking_ID}");
             } catch (\Exception $e) {
-                Log::error("Failed to process refund for Booking ID {$booking->Booking_ID}: " . $e->getMessage());
+                // IM-20: Log at ERROR level so the admin is alerted, and
+                // update the booking with a Refund_Status note when the
+                // column is available. The cancellation itself still proceeds
+                // so the customer is not stuck, but the admin must manually
+                // issue the refund through the PayHere dashboard.
+                Log::error(
+                    "REFUND GATEWAY FAILURE for Booking ID {$booking->Booking_ID}: "
+                    . $e->getMessage()
+                    . " | Amount: {$refundAmount} | PayHere Payment ID: {$payment->payhere_payment_id}"
+                    . " | ADMIN ACTION REQUIRED: issue refund manually."
+                );
+
+                // Store a note on the booking if the Admin_Message column exists
+                try {
+                    $booking->update([
+                        'Admin_Message' => '[REFUND FAILED] Gateway error when processing '
+                            . $percentage . '% refund of $' . number_format($refundAmount, 2)
+                            . '. Admin must issue refund manually via PayHere dashboard.'
+                            . ' PayHere Payment ID: ' . $payment->payhere_payment_id,
+                        'Admin_Seen'    => false,
+                    ]);
+                } catch (\Exception $innerEx) {
+                    Log::error('Could not update Admin_Message for Booking ID ' . $booking->Booking_ID . ': ' . $innerEx->getMessage());
+                }
             }
         }
 

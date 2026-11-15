@@ -409,10 +409,19 @@ export default function App() {
   const [galleryImages, setGalleryImages] = useState([]);
   const [packagesLoading, setPackagesLoading] = useState(true);
   const [showAllPackages, setShowAllPackages] = useState(false);
+  const [packageSearch, setPackageSearch] = useState("");
   const orderedPackages = orderHomePackages(packages);
+  const filteredPackages = orderedPackages.filter((pkg) => {
+    const q = packageSearch.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      (pkg.title || "").toLowerCase().includes(q) ||
+      (pkg.desc || "").toLowerCase().includes(q)
+    );
+  });
   const visiblePackages = showAllPackages
-    ? orderedPackages
-    : orderedPackages.slice(0, HOME_PACKAGE_LIMIT);
+    ? filteredPackages
+    : filteredPackages.slice(0, HOME_PACKAGE_LIMIT);
 
   useEffect(() => {
     // 1. Fetch Packages from DB
@@ -1305,6 +1314,30 @@ export default function App() {
               </p>
             </div>
 
+            {/* Search Bar */}
+            <div className="relative max-w-xl mx-auto mb-10">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                <Search size={18} />
+              </span>
+              <input
+                id="package-search"
+                type="search"
+                value={packageSearch}
+                onChange={(e) => setPackageSearch(e.target.value)}
+                placeholder="Search safari packages…"
+                className="w-full pl-11 pr-10 py-3 rounded-2xl bg-gray-50 border border-gray-200 text-gray-800 placeholder-gray-400 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-castleton/30 focus:border-castleton transition"
+              />
+              {packageSearch && (
+                <button
+                  onClick={() => setPackageSearch("")}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
+                  aria-label="Clear search"
+                >
+                  <X size={16} />
+                </button>
+              )}
+            </div>
+
             {/* Reserve Now & Pay Later Notice */}
             <ReserveNowNotice className="mb-12 max-w-5xl mx-auto" />
 
@@ -1314,6 +1347,19 @@ export default function App() {
                 Array.from({ length: HOME_PACKAGE_LIMIT }).map((_, idx) => (
                   <PackageCardSkeleton key={`pkg-skeleton-${idx}`} />
                 ))
+              ) : filteredPackages.length === 0 && packageSearch ? (
+                <div className="col-span-2 py-16 text-center">
+                  <p className="text-gray-500 text-sm">
+                    No packages match{" "}
+                    <span className="font-semibold text-gray-700">"{packageSearch}"</span>.
+                  </p>
+                  <button
+                    onClick={() => setPackageSearch("")}
+                    className="mt-3 text-xs font-bold text-castleton underline"
+                  >
+                    Clear search
+                  </button>
+                </div>
               ) : packages.length > 0 ? (
                 visiblePackages.map((pkg, idx) => {
                   const relatedSection = getStaticBlogPackageSection(

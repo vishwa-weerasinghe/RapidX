@@ -11,9 +11,9 @@ return [
     |
     */
 
-    'merchant_id' => env('PAYHERE_MERCHANT_ID', '1211149'), // Default Sandbox ID
+    'merchant_id' => env('PAYHERE_MERCHANT_ID'), // Set in .env — no default
 
-    'merchant_secret' => env('PAYHERE_MERCHANT_SECRET', '4MjIyMzE0NTgxNDQyNjY5Njg4MTg4MDgzODczODAyMTIyMzE0NTg='), // Default Sandbox Secret
+    'merchant_secret' => env('PAYHERE_MERCHANT_SECRET'), // Set in .env — never use a hardcoded default
 
     'app_id' => env('PAYHERE_APP_ID', ''),
 

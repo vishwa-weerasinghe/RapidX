@@ -176,7 +176,7 @@ class AppointmentController extends Controller
                 'earnings_unconfirmed' => (float) ($row->earnings_unconfirmed ?? 0),
                 'refunds'            => (float) ($row->refunds ?? 0),
             ];
-            $item['total'] = round(max(0, $item['earnings_confirmed'] - $item['refunds']), 2);
+            $item['total'] = round(max(0, $item['earnings_confirmed'] + $item['earnings_unconfirmed'] - $item['refunds']), 2);
             $item['net_earnings'] = $item['total'];
 
             foreach ($totals as $k => $v) {

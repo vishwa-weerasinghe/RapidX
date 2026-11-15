@@ -7,6 +7,7 @@ use App\Models\Cart;
 use App\Models\Customer;
 use App\Models\Package;
 use App\Models\Payment;
+use App\Models\PromotionCode;
 use App\Services\PayHereService;
 use App\Services\BookingSchedule;
 use Illuminate\Http\Request;
@@ -14,6 +15,7 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use App\Mail\BookingConfirmationMail;
 
 class PayHereController extends Controller
@@ -104,8 +106,8 @@ class PayHereController extends Controller
             $isPayLater = strcasecmp((string) $request->input('payment_method', 'PayHere'), 'Pay Later') === 0;
             $paymentMethod = $isPayLater ? 'Pay Later' : 'PayHere';
 
-            // Unique Order Reference
-            $orderId = 'SAFARI_BK_' . time() . '_' . rand(100, 999);
+            // IM-19: Use UUID for order IDs to prevent enumeration attacks
+            $orderId = 'SAFARI_BK_' . Str::uuid();
 
             // Create Payment Record (Pending)
             $payment = Payment::create([
@@ -226,19 +228,26 @@ class PayHereController extends Controller
             return (float) $b->Payment;
         });
 
+        // IM-17: Branch on discount_type (percentage vs fixed); cap at total
+        // IM-18: Do NOT increment usage_count here (payment not yet confirmed)
+        $promoCode = null;
         if ($promo) {
-            $discount = $totalAmount * ($promo->discount_value / 100);
+            if (($promo->discount_type ?? 'percentage') === 'fixed') {
+                $discount = min((float) $promo->discount_value, $totalAmount);
+            } else {
+                $discount = $totalAmount * (min((float) $promo->discount_value, 100) / 100);
+            }
             $totalAmount = max(0, $totalAmount - $discount);
-            // Increment usage count
-            $promo->increment('usage_count');
+            $promoCode = $promo->code;
         }
 
         $currency = config('payhere.currency', 'USD');
         $isPayLater = strcasecmp((string) $request->input('payment_method', 'PayHere'), 'Pay Later') === 0;
         $paymentMethod = $isPayLater ? 'Pay Later' : 'PayHere';
 
-        return DB::transaction(function () use ($customerId, $customer, $bookings, $totalAmount, $currency, $isPayLater, $paymentMethod) {
-            $orderId = 'SAFARI_CART_' . $customerId . '_' . time() . '_' . rand(100, 999);
+        return DB::transaction(function () use ($customerId, $customer, $bookings, $totalAmount, $currency, $isPayLater, $paymentMethod, $promoCode) {
+            // IM-19: Use UUID for cart order IDs to prevent enumeration attacks
+            $orderId = 'SAFARI_CART_' . Str::uuid();
 
             // Create 1 parent Payment record for all bookings in this cart
             $payment = Payment::create([
@@ -247,8 +256,10 @@ class PayHereController extends Controller
                 'amount'         => $totalAmount,
                 'currency'       => $currency,
                 'payment_method' => $paymentMethod,
-                'status'         => 'Pending',
-                'status_message' => $isPayLater ? 'Pay Later on Tour Date' : 'Pending Payment Initiation',
+                'status'          => 'Pending',
+                'status_message'  => $isPayLater ? 'Pay Later on Tour Date' : 'Pending Payment Initiation',
+                // IM-18: Store promo code so IPN success branch can increment usage_count
+                'promotion_code'  => $promoCode,
             ]);
 
             // Link all bookings to this Payment_ID
@@ -258,8 +269,14 @@ class PayHereController extends Controller
             ]);
 
             if ($isPayLater) {
-                // Remove from cart
-                Cart::where('Customer_ID', $customerId)->delete();
+                // IM-22: Only delete cart rows for bookings in this payment
+                $paidBookingIds = $bookings->pluck('Booking_ID');
+                Cart::whereIn('Booking_ID', $paidBookingIds)->delete();
+
+                // IM-18: Pay Later is effectively confirmed immediately — increment now
+                if ($promoCode) {
+                    PromotionCode::where('code', $promoCode)->increment('usage_count');
+                }
 
                 // Send confirmation emails
                 $this->sendConfirmationEmails($payment);
@@ -323,6 +340,27 @@ class PayHereController extends Controller
             return response()->json(['error' => 'Order not found'], 404);
         }
 
+        // IM-08: Idempotency guard — do not re-process an already-confirmed payment
+        if ($payment->status === 'Success') {
+            Log::info('PayHere IPN: payment already confirmed, skipping re-processing for order: ' . $orderId);
+            return response()->json(['status' => 'OK'], 200);
+        }
+
+        // IM-07: Verify that the notified amount and currency match what we stored
+        $notifiedAmount   = (float) ($request->payhere_amount ?? $request->amount ?? 0);
+        $notifiedCurrency = strtoupper(trim((string) ($request->payhere_currency ?? $request->currency ?? '')));
+        $storedCurrency   = strtoupper(trim((string) $payment->currency));
+
+        if ($notifiedAmount > 0 && abs($notifiedAmount - (float) $payment->amount) > 0.01) {
+            Log::warning('PayHere IPN amount mismatch for order ' . $orderId . ': notified=' . $notifiedAmount . ' stored=' . $payment->amount);
+            return response()->json(['error' => 'Amount mismatch'], 400);
+        }
+
+        if ($notifiedCurrency && $notifiedCurrency !== $storedCurrency) {
+            Log::warning('PayHere IPN currency mismatch for order ' . $orderId . ': notified=' . $notifiedCurrency . ' stored=' . $storedCurrency);
+            return response()->json(['error' => 'Currency mismatch'], 400);
+        }
+
         $statusCode = (int) $request->status_code;
 
         return DB::transaction(function () use ($payment, $request, $statusCode) {
@@ -339,16 +377,25 @@ class PayHereController extends Controller
                     'raw_response'       => $request->all(),
                 ]);
 
-                // Mark all associated bookings as 'Confirmed'
-                Booking::where('Payment_ID', $payment->Payment_ID)->update([
-                    'Status' => 'Confirmed',
-                ]);
+                // IM-09: Only confirm bookings that are still Pending or In Cart
+                // (never overwrite Cancelled bookings)
+                Booking::where('Payment_ID', $payment->Payment_ID)
+                    ->whereIn('Status', ['Pending', 'In Cart'])
+                    ->update(['Status' => 'Confirmed']);
 
-                // If this was a cart checkout, clean up cart items
-                Cart::where('Customer_ID', $payment->Customer_ID)->delete();
+                // IM-22: Only delete cart rows for bookings in this payment,
+                // not every cart item for the customer
+                $paidBookingIds = Booking::where('Payment_ID', $payment->Payment_ID)
+                    ->pluck('Booking_ID');
+                Cart::whereIn('Booking_ID', $paidBookingIds)->delete();
+
+                // IM-18: Increment promo usage_count now that payment succeeded
+                if (!empty($payment->promotion_code)) {
+                    PromotionCode::where('code', $payment->promotion_code)->increment('usage_count');
+                }
 
                 Log::info('Payment & Bookings confirmed for order: ' . $payment->order_id);
-                
+
                 $this->sendConfirmationEmails($payment);
             } elseif ($statusCode === 0) {
                 // Status Code 0 = Pending
@@ -367,12 +414,23 @@ class PayHereController extends Controller
                     'raw_response'   => $request->all(),
                 ]);
 
-                // Revert pending booking status back to 'In Cart' (for cart items) or 'Cancelled' so they are not confirmed
-                Booking::where('Payment_ID', $payment->Payment_ID)
+                // IM-11: For cancelled payments (status -1), only revert to
+                // 'In Cart' if a cart row actually exists for the booking.
+                // Otherwise use 'Cancelled' so non-cart bookings are not
+                // erroneously put into an 'In Cart' state.
+                $pendingBookings = Booking::where('Payment_ID', $payment->Payment_ID)
                     ->where('Status', '!=', 'Confirmed')
-                    ->update([
-                        'Status' => $statusCode === -1 ? 'In Cart' : 'Failed',
-                    ]);
+                    ->get();
+
+                foreach ($pendingBookings as $b) {
+                    if ($statusCode === -1) {
+                        $cartExists = Cart::where('Booking_ID', $b->Booking_ID)->exists();
+                        $newStatus  = $cartExists ? 'In Cart' : 'Cancelled';
+                    } else {
+                        $newStatus = 'Failed';
+                    }
+                    $b->update(['Status' => $newStatus]);
+                }
 
                 Log::warning('Payment failed for order: ' . $payment->order_id . ' with status code: ' . $statusCode);
             }
@@ -513,25 +571,47 @@ class PayHereController extends Controller
     /**
      * Check payment status by order_id (polled by frontend after checkout).
      */
-    public function status($orderId)
+    public function status(Request $request, $orderId)
     {
         $payment = Payment::with(['bookings.package', 'customer'])
             ->where('order_id', $orderId)
             ->firstOrFail();
 
+        // IM-19: Enforce ownership — authenticated users can only read their own payment.
+        // Unauthenticated callers (guests) receive a reduced response with no PII.
+        $user   = $request->user('sanctum') ?? auth('sanctum')->user();
+        $isAdmin = $user && in_array(strtolower($user->role ?? ''), ['admin', 'administrator', 'superadmin']);
+
+        if ($user && !$isAdmin && (int) $user->Customer_ID !== (int) $payment->Customer_ID) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        // For authenticated owners or admins, return the full record.
+        // For unauthenticated guests, return only the minimum needed to show a status page.
+        if ($user) {
+            return response()->json([
+                'order_id'           => $payment->order_id,
+                'status'             => $payment->status,
+                'amount'             => $payment->amount,
+                'currency'           => $payment->currency,
+                'payment_method'     => $payment->payment_method,
+                'payhere_payment_id' => $payment->payhere_payment_id,
+                'created_at'         => $payment->created_at,
+                'customer'           => $payment->customer ? [
+                    'First_Name' => $payment->customer->First_Name,
+                    'Last_Name'  => $payment->customer->Last_Name,
+                ] : null,
+                'bookings'           => $payment->bookings,
+            ]);
+        }
+
+        // Guest: minimal response (no customer PII, no booking details)
         return response()->json([
-            'order_id'           => $payment->order_id,
-            'status'             => $payment->status,
-            'amount'             => $payment->amount,
-            'currency'           => $payment->currency,
-            'payment_method'     => $payment->payment_method,
-            'payhere_payment_id' => $payment->payhere_payment_id,
-            'created_at'         => $payment->created_at,
-            'customer'           => $payment->customer ? [
-                'First_Name' => $payment->customer->First_Name,
-                'Last_Name'  => $payment->customer->Last_Name,
-            ] : null,
-            'bookings'           => $payment->bookings,
+            'order_id'   => $payment->order_id,
+            'status'     => $payment->status,
+            'amount'     => $payment->amount,
+            'currency'   => $payment->currency,
+            'created_at' => $payment->created_at,
         ]);
     }
 
