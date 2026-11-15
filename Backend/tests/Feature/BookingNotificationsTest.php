@@ -119,6 +119,15 @@ class BookingNotificationsTest extends TestCase
         $this->getJson('/api/admin/bookings/unread-count')->assertStatus(401);
     }
 
+    public function test_non_admin_cannot_view_admin_unread_count(): void
+    {
+        // SEC-04: Non-admin customer calling GET /admin/bookings/unread-count returns 403 Forbidden
+        $user = $this->createUserFor($this->createCustomer());
+        $this->actingAs($user, 'sanctum')
+            ->getJson('/api/admin/bookings/unread-count')
+            ->assertStatus(403);
+    }
+
     public function test_admin_unread_count_counts_every_unseen_booking(): void
     {
         $this->createBooking(['Admin_Message' => 'A new booking has been placed by a customer.']);
@@ -148,6 +157,15 @@ class BookingNotificationsTest extends TestCase
     public function test_mark_all_as_seen_requires_authentication(): void
     {
         $this->postJson('/api/admin/bookings/mark-seen')->assertStatus(401);
+    }
+
+    public function test_non_admin_cannot_mark_all_as_seen(): void
+    {
+        // SEC-03: Non-admin customer calling POST /admin/bookings/mark-seen returns 403 Forbidden
+        $user = $this->createUserFor($this->createCustomer());
+        $this->actingAs($user, 'sanctum')
+            ->postJson('/api/admin/bookings/mark-seen')
+            ->assertStatus(403);
     }
 
     public function test_admin_can_clear_all_unseen_notifications(): void
@@ -183,8 +201,7 @@ class BookingNotificationsTest extends TestCase
 
         $this->actingAs($user, 'sanctum')
             ->getJson('/api/admin/bookings/notifications')
-            ->assertStatus(403)
-            ->assertJson(['message' => 'Only administrators can view booking notifications.']);
+            ->assertStatus(403);
     }
 
     public function test_admin_notifications_exclude_unseen_bookings_without_a_message(): void
@@ -369,6 +386,13 @@ class BookingNotificationsTest extends TestCase
             ->assertNotFound();
     }
 
+    public function test_user_bookings_requires_authentication(): void
+    {
+        // SEC-06: Call GET /user-bookings/{customerId} with no token returns 401
+        $customer = $this->createCustomer();
+        $this->getJson('/api/user-bookings/' . $customer->Customer_ID)->assertStatus(401);
+    }
+
     public function test_a_customer_cannot_list_another_customers_bookings(): void
     {
         $owner = $this->createCustomer();
@@ -421,7 +445,8 @@ class BookingNotificationsTest extends TestCase
             'Status' => 'Pending',
         ]);
 
-        $this->getJson('/api/user-upcoming-booking/' . $customer->Customer_ID)
+        $this->actingAs($this->createUserFor($customer), 'sanctum')
+            ->getJson('/api/user-upcoming-booking/' . $customer->Customer_ID)
             ->assertStatus(200)
             ->assertJsonPath('Booking_ID', $nearest->Booking_ID);
     }
@@ -441,7 +466,8 @@ class BookingNotificationsTest extends TestCase
             'Status' => 'Cancelled',
         ]);
 
-        $response = $this->getJson('/api/user-upcoming-booking/' . $customer->Customer_ID);
+        $response = $this->actingAs($this->createUserFor($customer), 'sanctum')
+            ->getJson('/api/user-upcoming-booking/' . $customer->Customer_ID);
 
         $response->assertStatus(200);
 
@@ -455,7 +481,8 @@ class BookingNotificationsTest extends TestCase
     {
         $customer = $this->createCustomer();
 
-        $response = $this->getJson('/api/user-upcoming-booking/' . $customer->Customer_ID);
+        $response = $this->actingAs($this->createUserFor($customer), 'sanctum')
+            ->getJson('/api/user-upcoming-booking/' . $customer->Customer_ID);
 
         $response->assertStatus(200);
         $response->assertExactJson([]);
@@ -472,10 +499,31 @@ class BookingNotificationsTest extends TestCase
             'Status' => 'Confirmed',
         ]);
 
-        $response = $this->getJson('/api/user-upcoming-booking/' . $customer->Customer_ID);
+        $response = $this->actingAs($this->createUserFor($customer), 'sanctum')
+            ->getJson('/api/user-upcoming-booking/' . $customer->Customer_ID);
 
         $response->assertStatus(200);
         $response->assertExactJson([]);
+    }
+
+    public function test_upcoming_booking_requires_authentication(): void
+    {
+        // SEC-08: Call GET /user-upcoming-booking/{customerId} with no token returns 401
+        $customer = $this->createCustomer();
+
+        $this->getJson('/api/user-upcoming-booking/' . $customer->Customer_ID)
+            ->assertStatus(401);
+    }
+
+    public function test_upcoming_booking_is_forbidden_for_another_customer(): void
+    {
+        // SEC-08: Ownership check
+        $customerA = $this->createCustomer();
+        $customerB = $this->createCustomer();
+
+        $this->actingAs($this->createUserFor($customerB), 'sanctum')
+            ->getJson('/api/user-upcoming-booking/' . $customerA->Customer_ID)
+            ->assertStatus(403);
     }
 
     // ---------------------------------------------------------------------

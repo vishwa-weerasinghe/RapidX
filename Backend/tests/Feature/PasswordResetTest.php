@@ -68,8 +68,8 @@ class PasswordResetTest extends TestCase
         $response = $this->postJson('/api/reset-password', [
             'token' => $token,
             'Email' => 'reset2@example.com',
-            'Password' => 'newpassword123',
-            'Password_confirmation' => 'newpassword123',
+            'Password' => 'NewPassword@123',
+            'Password_confirmation' => 'NewPassword@123',
         ]);
 
         $response->assertStatus(200)
@@ -77,7 +77,7 @@ class PasswordResetTest extends TestCase
 
         // Verify the password was actually changed in the database
         $user->refresh();
-        $this->assertTrue(Hash::check('newpassword123', $user->Password));
+        $this->assertTrue(Hash::check('NewPassword@123', $user->Password));
     }
 
     public function test_cannot_reset_password_with_invalid_token()
@@ -85,12 +85,37 @@ class PasswordResetTest extends TestCase
         $response = $this->postJson('/api/reset-password', [
             'token' => 'invalid-token-string',
             'Email' => 'doesnotexist@example.com',
-            'Password' => 'newpassword123',
-            'Password_confirmation' => 'newpassword123',
+            'Password' => 'NewPassword@123',
+            'Password_confirmation' => 'NewPassword@123',
         ]);
 
         $response->assertStatus(400)
                  ->assertJsonFragment(['message' => 'Invalid token or email.']);
+    }
+
+    public function test_forgot_password_with_unregistered_email_returns_generic_success_response()
+    {
+        // AUTH-10: Unregistered email returns the same generic message as registered email
+        $response = $this->postJson('/api/forgot-password', [
+            'Email' => 'unregistered-person@example.com',
+        ]);
+
+        $response->assertStatus(200)
+                 ->assertJson(['message' => 'Reset link sent to your email.']);
+    }
+
+    public function test_reset_password_fails_validation_when_password_lacks_complexity()
+    {
+        // AUTH-11: Password must satisfy registration complexity rules
+        $response = $this->postJson('/api/reset-password', [
+            'token' => 'valid-or-dummy-token',
+            'Email' => 'user@example.com',
+            'Password' => 'password',
+            'Password_confirmation' => 'password',
+        ]);
+
+        $response->assertStatus(422)
+                 ->assertJsonValidationErrors(['Password']);
     }
 
     public function test_reset_password_fails_validation_when_confirmation_does_not_match()

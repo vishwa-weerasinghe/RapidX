@@ -28,6 +28,10 @@ class BrevoMailService
         ?string $replyToEmail = null,
         ?string $replyToName = null
     ): array {
+        if (app()->environment('testing')) {
+            return ['success' => true];
+        }
+
         $apiKey = config('services.brevo.key') ?? env('BREVO_API_KEY');
 
         if (!$apiKey) {

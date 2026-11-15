@@ -139,7 +139,10 @@ class ReviewControllerTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJsonCount(1)
-            ->assertJsonFragment(['Description' => 'A sample review']);
+            ->assertJsonFragment(['Description' => 'A sample review'])
+            ->assertJsonMissing(['Email' => $customer->Email])
+            ->assertJsonMissing(['Phone_No' => $customer->Phone_No])
+            ->assertJsonMissing(['NIC' => $customer->NIC]);
 
         $this->assertDatabaseCount('reviews', 1);
     }
@@ -383,6 +386,28 @@ class ReviewControllerTest extends TestCase
             ->assertJson(['message' => 'Please use the email from a booked safari to submit a review.']);
 
         $this->assertDatabaseCount('reviews', 0);
+    }
+
+    public function test_guest_cannot_create_review_with_registered_customers_email(): void
+    {
+        // SEC-18: As a guest, POST /reviews with another registered customer's email is rejected
+        $customer = $this->createCustomer(['Email' => 'registered-owner@example.com']);
+        \App\Models\User::create([
+            'User_Name' => 'Registered Owner',
+            'Email' => 'registered-owner@example.com',
+            'Password' => bcrypt('Password123'),
+            'Customer_ID' => $customer->Customer_ID,
+        ]);
+        $this->createBookingForCustomer($customer->Customer_ID);
+
+        $response = $this->postJson('/api/reviews', [
+            'Rate' => 5,
+            'Description' => 'Attempting to spoof review',
+            'Email' => 'registered-owner@example.com',
+        ]);
+
+        $response->assertStatus(403)
+            ->assertJson(['message' => 'This email belongs to a registered customer. Please sign in to submit your review.']);
     }
 
     public function test_authenticated_user_without_customer_profile_cannot_create_review(): void

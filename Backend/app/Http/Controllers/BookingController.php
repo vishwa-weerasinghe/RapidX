@@ -155,7 +155,10 @@ class BookingController extends Controller
     public function userBookings($customerId)
     {
         $user = request()->user('sanctum') ?? auth('sanctum')->user();
-        if ($user && !$this->isAdmin($user) && (int) $user->Customer_ID !== (int) $customerId) {
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+        if (!$this->isAdmin($user) && (int) $user->Customer_ID !== (int) $customerId) {
             return response()->json(['message' => 'Unauthorized: You can only view your own bookings.'], 403);
         }
 
@@ -429,6 +432,14 @@ class BookingController extends Controller
     // =========================
     public function upcomingBooking($customerId)
     {
+        $user = request()->user('sanctum') ?? auth('sanctum')->user();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+        if (!$this->isAdmin($user) && (int) $user->Customer_ID !== (int) $customerId) {
+            return response()->json(['message' => 'Unauthorized: You can only view your own bookings.'], 403);
+        }
+
         $booking = Booking::with(['package', 'vehicle.driver', 'vehicles.driver'])
             ->where('Customer_ID', $customerId)
             ->whereIn('Status', ['Pending', 'Confirmed'])
@@ -509,8 +520,16 @@ class BookingController extends Controller
         ]);
     }
 
-    public function unreadCount()
+    public function unreadCount(Request $request)
     {
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+        if (!$this->isAdmin($user)) {
+            return response()->json(['message' => 'Forbidden.'], 403);
+        }
+
         return response()->json([
             'count' => Booking::where('Admin_Seen', false)->count(),
         ]);
@@ -535,8 +554,16 @@ class BookingController extends Controller
         );
     }
 
-    public function markAllAsSeen()
+    public function markAllAsSeen(Request $request)
     {
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+        if (!$this->isAdmin($user)) {
+            return response()->json(['message' => 'Forbidden.'], 403);
+        }
+
         Booking::where('Admin_Seen', false)->update([
             'Admin_Seen' => true,
         ]);

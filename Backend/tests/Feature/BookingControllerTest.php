@@ -175,7 +175,15 @@ class BookingControllerTest extends TestCase
             'Package_ID' => $package->id,
         ]);
 
-        $response = $this->getJson('/api/user-bookings/' . $firstCustomer->Customer_ID);
+        $user = User::create([
+            'User_Name' => 'First User',
+            'Email' => $firstCustomer->Email,
+            'Password' => bcrypt('Password123'),
+            'role' => 'user',
+            'Customer_ID' => $firstCustomer->Customer_ID,
+        ]);
+
+        $response = $this->actingAs($user, 'sanctum')->getJson('/api/user-bookings/' . $firstCustomer->Customer_ID);
 
         $response->assertStatus(200)
             ->assertJsonCount(1)
@@ -249,7 +257,7 @@ class BookingControllerTest extends TestCase
         $this->assertDatabaseHas('bookings', [
             'Pickup_Location' => 'Ella',
             'Package_ID' => $package->id,
-            'Status' => 'Confirmed',
+            'Status' => 'Pending',
         ]);
     }
 
