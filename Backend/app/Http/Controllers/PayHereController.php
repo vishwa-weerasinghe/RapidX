@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Models\Package;
 use App\Models\Payment;
 use App\Models\PromotionCode;
+use App\Models\User;
 use App\Services\PayHereService;
 use App\Services\BookingSchedule;
 use Illuminate\Http\Request;
@@ -25,6 +26,30 @@ class PayHereController extends Controller
     public function __construct(PayHereService $payHereService)
     {
         $this->payHereService = $payHereService;
+    }
+
+    private function isAdmin(?User $user): bool
+    {
+        return $user && in_array(strtolower((string) $user->role), ['admin', 'administrator', 'superadmin'], true);
+    }
+
+    private function authorizeCustomer(Request $request, int $customerId)
+    {
+        $user = $request->user('sanctum') ?? auth('sanctum')->user();
+
+        if ($this->isAdmin($user) || ($user && (int) $user->Customer_ID === $customerId)) {
+            return null;
+        }
+
+        // Guest payment flows remain available, but registered customer data
+        // must never be used without the owning authenticated account.
+        if (!$user && !User::where('Customer_ID', $customerId)->exists()) {
+            return null;
+        }
+
+        return response()->json([
+            'message' => $user ? 'Unauthorized' : 'Authentication is required for this customer',
+        ], $user ? 403 : 401);
     }
 
     /**
@@ -70,6 +95,13 @@ class PayHereController extends Controller
         }
 
         $request->validate($rules);
+
+        if (isset($customerId)) {
+            $authorizationError = $this->authorizeCustomer($request, (int) $customerId);
+            if ($authorizationError) {
+                return $authorizationError;
+            }
+        }
 
         if (!BookingSchedule::isInFuture($request->Booking_Date, $request->Pickup_Time)) {
             throw ValidationException::withMessages([
@@ -194,6 +226,10 @@ class PayHereController extends Controller
         ]);
 
         $customerId = $request->Customer_ID;
+        $authorizationError = $this->authorizeCustomer($request, (int) $customerId);
+        if ($authorizationError) {
+            return $authorizationError;
+        }
         $customer = Customer::findOrFail($customerId);
 
         $promo = null;
@@ -425,7 +461,7 @@ class PayHereController extends Controller
                 foreach ($pendingBookings as $b) {
                     if ($statusCode === -1) {
                         $cartExists = Cart::where('Booking_ID', $b->Booking_ID)->exists();
-                        $newStatus  = $cartExists ? 'In Cart' : 'Cancelled';
+                        $newStatus  = ($cartExists || $b->Status === 'In Cart') ? 'In Cart' : 'Cancelled';
                     } else {
                         $newStatus = 'Failed';
                     }
@@ -577,41 +613,28 @@ class PayHereController extends Controller
             ->where('order_id', $orderId)
             ->firstOrFail();
 
-        // IM-19: Enforce ownership — authenticated users can only read their own payment.
-        // Unauthenticated callers (guests) receive a reduced response with no PII.
-        $user   = $request->user('sanctum') ?? auth('sanctum')->user();
-        $isAdmin = $user && in_array(strtolower($user->role ?? ''), ['admin', 'administrator', 'superadmin']);
-
-        if ($user && !$isAdmin && (int) $user->Customer_ID !== (int) $payment->Customer_ID) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+        if ($payment->Customer_ID) {
+            $authorizationError = $this->authorizeCustomer($request, (int) $payment->Customer_ID);
+            if ($authorizationError) {
+                return $authorizationError;
+            }
         }
 
-        // For authenticated owners or admins, return the full record.
-        // For unauthenticated guests, return only the minimum needed to show a status page.
-        if ($user) {
-            return response()->json([
-                'order_id'           => $payment->order_id,
-                'status'             => $payment->status,
-                'amount'             => $payment->amount,
-                'currency'           => $payment->currency,
-                'payment_method'     => $payment->payment_method,
-                'payhere_payment_id' => $payment->payhere_payment_id,
-                'created_at'         => $payment->created_at,
-                'customer'           => $payment->customer ? [
-                    'First_Name' => $payment->customer->First_Name,
-                    'Last_Name'  => $payment->customer->Last_Name,
-                ] : null,
-                'bookings'           => $payment->bookings,
-            ]);
-        }
+        $user = $request->user('sanctum') ?? auth('sanctum')->user();
 
-        // Guest: minimal response (no customer PII, no booking details)
         return response()->json([
-            'order_id'   => $payment->order_id,
-            'status'     => $payment->status,
-            'amount'     => $payment->amount,
-            'currency'   => $payment->currency,
-            'created_at' => $payment->created_at,
+            'order_id'           => $payment->order_id,
+            'status'             => $payment->status,
+            'amount'             => $payment->amount,
+            'currency'           => $payment->currency,
+            'payment_method'     => $payment->payment_method,
+            'payhere_payment_id' => $payment->payhere_payment_id,
+            'created_at'         => $payment->created_at,
+            'customer'           => $user && $payment->customer ? [
+                'First_Name' => $payment->customer->First_Name,
+                'Last_Name'  => $payment->customer->Last_Name,
+            ] : null,
+            'bookings'           => $payment->bookings,
         ]);
     }
 

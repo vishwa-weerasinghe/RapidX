@@ -5,23 +5,52 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Cart;
 use App\Models\Booking;
+use App\Models\User;
 use App\Services\BookingSchedule;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
 class CartController extends Controller
 {
+    private function isAdmin(?User $user): bool
+    {
+        return $user && in_array(strtolower((string) $user->role), ['admin', 'administrator', 'superadmin'], true);
+    }
+
+    private function registeredCustomerHasOwner(int $customerId): bool
+    {
+        return User::where('Customer_ID', $customerId)->exists();
+    }
+
+    private function authorizeCustomer(Request $request, int $customerId, string $message)
+    {
+        $user = $request->user('sanctum') ?? auth('sanctum')->user();
+
+        if ($this->isAdmin($user)) {
+            return null;
+        }
+
+        if ($user && (int) $user->Customer_ID === $customerId) {
+            return null;
+        }
+
+        if (!$user && !$this->registeredCustomerHasOwner($customerId)) {
+            return null;
+        }
+
+        return response()->json(['message' => $message], $user ? 403 : 401);
+    }
+
     // Fetch all cart items for a customer
     public function index(Request $request, $customerId)
     {
-        $user = $request->user('sanctum') ?? auth('sanctum')->user();
-        if ($user) {
-            $isAdmin = in_array(strtolower($user->role ?? ''), ['admin', 'administrator', 'superadmin']);
-            if (!$isAdmin && (int) $user->Customer_ID !== (int) $customerId) {
-                return response()->json([
-                    'message' => 'Unauthorized: You cannot view this cart'
-                ], 403);
-            }
+        $authorizationError = $this->authorizeCustomer(
+            $request,
+            (int) $customerId,
+            'Unauthorized: You cannot view this cart'
+        );
+        if ($authorizationError) {
+            return $authorizationError;
         }
 
         return response()->json(
@@ -35,6 +64,7 @@ class CartController extends Controller
     // Add booking to cart
     public function store(Request $request)
     {
+        $user = $request->user('sanctum') ?? auth('sanctum')->user();
         $rules = [
             'Booking_Date' => 'required|date',
             'Pickup_Time' => 'required',
@@ -59,6 +89,18 @@ class CartController extends Controller
         }
 
         $request->validate($rules);
+
+        if ($user && !$this->isAdmin($user) && (int) $user->Customer_ID !== (int) $customerId) {
+            return response()->json([
+                'message' => 'Unauthorized: You cannot add items to another customer\'s cart'
+            ], 403);
+        }
+
+        if (!$user && isset($customerId) && $this->registeredCustomerHasOwner((int) $customerId)) {
+            return response()->json([
+                'message' => 'Authentication is required for this customer cart'
+            ], 401);
+        }
 
         if (!BookingSchedule::isInFuture($request->Booking_Date, $request->Pickup_Time)) {
             throw ValidationException::withMessages([
@@ -142,26 +184,23 @@ class CartController extends Controller
             ], 400);
         }
 
-        // 3. Ownership check
-        $user = $request->user('sanctum') ?? auth('sanctum')->user();
-        if ($user) {
-            $isAdmin = in_array(strtolower($user->role ?? ''), ['admin', 'administrator', 'superadmin']);
-            if (!$isAdmin && (int) $user->Customer_ID !== (int) $cart->Customer_ID) {
-                return response()->json([
-                    'message' => 'Unauthorized: You do not own this cart item'
-                ], 403);
-            }
-        } else {
-            // Check request parameter / query / header for guest ownership verification if provided
-            $reqCustomerId = $request->input('Customer_ID')
-                ?? $request->query('Customer_ID')
-                ?? $request->header('X-Customer-ID');
+        $requestedCustomerId = $request->input('Customer_ID')
+            ?? $request->query('Customer_ID')
+            ?? $request->header('X-Customer-ID');
+        if ($requestedCustomerId !== null && (int) $requestedCustomerId !== (int) $cart->Customer_ID) {
+            return response()->json([
+                'message' => 'Unauthorized: You do not own this cart item'
+            ], 403);
+        }
 
-            if ($reqCustomerId && (int) $reqCustomerId !== (int) $cart->Customer_ID) {
-                return response()->json([
-                    'message' => 'Unauthorized: You do not own this cart item'
-                ], 403);
-            }
+        // 3. Ownership check
+        $authorizationError = $this->authorizeCustomer(
+            $request,
+            (int) $cart->Customer_ID,
+            'Unauthorized: You do not own this cart item'
+        );
+        if ($authorizationError) {
+            return $authorizationError;
         }
 
         // Safe removal: delete cart record first, then the associated 'In Cart' booking
