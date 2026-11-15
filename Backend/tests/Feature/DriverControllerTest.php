@@ -43,7 +43,9 @@ class DriverControllerTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJsonCount(1)
-            ->assertJsonFragment(['Driver_Name' => 'Alice Fernando']);
+            ->assertJsonFragment(['Driver_Name' => 'Alice Fernando'])
+            ->assertJsonMissing(['Phone_Number' => '0712345678'])
+            ->assertJsonMissing(['Email' => 'alice@example.com']);
 
         $this->assertDatabaseCount('drivers', 1);
     }
@@ -59,7 +61,9 @@ class DriverControllerTest extends TestCase
         $response = $this->getJson('/api/drivers/' . $driver->Driver_ID);
 
         $response->assertStatus(200)
-            ->assertJsonPath('Driver_Name', 'Bob Silva');
+            ->assertJsonPath('Driver_Name', 'Bob Silva')
+            ->assertJsonMissing(['Phone_Number' => '0776543210'])
+            ->assertJsonMissing(['Email' => 'bob@example.com']);
     }
 
     public function test_admin_can_create_a_driver_and_persist_it(): void

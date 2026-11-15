@@ -109,7 +109,8 @@ Route::put('/bookings/{id}/vehicles', [BookingController::class, 'assignVehicles
 Route::get('/bookings/{id}', [BookingController::class, 'show'])
     ->middleware('auth:sanctum');
 
-Route::get('/user-bookings/{customerId}', [BookingController::class, 'userBookings']);
+Route::get('/user-bookings/{customerId}', [BookingController::class, 'userBookings'])
+    ->middleware('auth:sanctum');
 
 Route::patch('/user/bookings/{id}/cancel', [CancellationController::class, 'cancel'])
     ->middleware('auth:sanctum');
@@ -120,10 +121,12 @@ Route::get('/user/bookings/{id}', [BookingController::class, 'show'])
 Route::put('/user/bookings/{id}', [BookingController::class, 'update'])
     ->middleware('auth:sanctum');
 
-Route::get('/user-upcoming-booking/{customerId}', [BookingController::class, 'upcomingBooking']);
+Route::get('/user-upcoming-booking/{customerId}', [BookingController::class, 'upcomingBooking'])
+    ->middleware('auth:sanctum');
 
 // Admin Dashboard Stats
-Route::get('/admin/stats', [DashboardController::class, 'stats']);
+Route::get('/admin/stats', [DashboardController::class, 'stats'])
+    ->middleware(['auth:sanctum', 'admin']);
 
 Route::get('/admin/customers', [CustomerController::class, 'index'])
     ->middleware('auth:sanctum');
@@ -133,13 +136,13 @@ Route::post('/admin/customers/bulk-delete', [CustomerController::class, 'bulkDes
     ->middleware('auth:sanctum');
 
 Route::get('/admin/bookings/unread-count', [BookingController::class, 'unreadCount'])
-    ->middleware('auth:sanctum');
+    ->middleware(['auth:sanctum', 'admin']);
 
 Route::get('/admin/bookings/notifications', [BookingController::class, 'adminNotifications'])
-    ->middleware('auth:sanctum');
+    ->middleware(['auth:sanctum', 'admin']);
 
 Route::post('/admin/bookings/mark-seen', [BookingController::class, 'markAllAsSeen'])
-    ->middleware('auth:sanctum');
+    ->middleware(['auth:sanctum', 'admin']);
 
 Route::get('/customer/{customerId}/booking-notifications/unread-count', [BookingController::class, 'customerUnreadCount'])
     ->middleware('auth:sanctum');

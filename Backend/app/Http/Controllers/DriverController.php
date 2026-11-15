@@ -13,9 +13,17 @@ class DriverController extends Controller
         return in_array(strtolower((string) $role), ['admin', 'administrator', 'superadmin'], true);
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(Driver::latest('Driver_ID')->get());
+        $user = $request->user('sanctum') ?? auth('sanctum')->user();
+        $isAdmin = $user && $this->isAdmin($user);
+
+        $drivers = Driver::latest('Driver_ID')->get();
+        if (!$isAdmin) {
+            $drivers->makeHidden(['Phone_Number', 'Email']);
+        }
+
+        return response()->json($drivers);
     }
 
     public function store(Request $request)
@@ -35,8 +43,15 @@ class DriverController extends Controller
         return response()->json($driver, 201);
     }
 
-    public function show(Driver $driver)
+    public function show(Request $request, Driver $driver)
     {
+        $user = $request->user('sanctum') ?? auth('sanctum')->user();
+        $isAdmin = $user && $this->isAdmin($user);
+
+        if (!$isAdmin) {
+            $driver->makeHidden(['Phone_Number', 'Email']);
+        }
+
         return response()->json($driver);
     }
 

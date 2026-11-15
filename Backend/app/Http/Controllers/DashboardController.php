@@ -12,8 +12,18 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
-    public function stats()
+    public function stats(Request $request)
     {
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+
+        $role = $user->role ?? $user->Role ?? $user->user_type ?? null;
+        if (!in_array(strtolower((string) $role), ['admin', 'administrator', 'superadmin'], true)) {
+            return response()->json(['message' => 'Unauthorized. Admin access required.'], 403);
+        }
+
         // ---- Core Counts ----
         $totalBookings  = Booking::count();
         $totalReviews   = Review::count();

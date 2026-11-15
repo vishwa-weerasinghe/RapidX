@@ -32,12 +32,12 @@ class PasswordResetController extends Controller
             'Email.email' => 'Please enter a valid email address.',
         ]);
 
-        // Check if user exists first to provide clear feedback
+        // Check if user exists first; if not, return the same generic success response to prevent email enumeration (AUTH-10)
         $user = User::where('Email', $email)->first();
         if (!$user) {
             return response()->json([
-                'message' => 'We could not find a user with that email address.'
-            ], 404);
+                'message' => 'Reset link sent to your email.'
+            ], 200);
         }
 
         try {
@@ -113,7 +113,16 @@ class PasswordResetController extends Controller
         $request->validate([
             'token' => 'required|string',
             'Email' => 'required|email',
-            'Password' => 'required|string|min:8|confirmed',
+            'Password' => [
+                'required',
+                'string',
+                'min:8',
+                'confirmed',
+                'regex:/[A-Z]/',
+                'regex:/[a-z]/',
+                'regex:/[0-9]/',
+                'regex:/[^A-Za-z0-9]/',
+            ],
         ], [
             'token.required' => 'Reset token is missing or invalid.',
             'Email.required' => 'Email address is required.',
@@ -121,6 +130,7 @@ class PasswordResetController extends Controller
             'Password.required' => 'Password is required.',
             'Password.min' => 'Password must be at least 8 characters long.',
             'Password.confirmed' => 'Password confirmation does not match.',
+            'Password.regex' => 'Password must include uppercase, lowercase, numbers, and symbols.',
         ]);
 
         $credentials = [

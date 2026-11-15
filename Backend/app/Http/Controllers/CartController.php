@@ -184,23 +184,36 @@ class CartController extends Controller
             ], 400);
         }
 
+        $user = $request->user('sanctum') ?? auth('sanctum')->user();
         $requestedCustomerId = $request->input('Customer_ID')
             ?? $request->query('Customer_ID')
             ?? $request->header('X-Customer-ID');
-        if ($requestedCustomerId !== null && (int) $requestedCustomerId !== (int) $cart->Customer_ID) {
-            return response()->json([
-                'message' => 'Unauthorized: You do not own this cart item'
-            ], 403);
-        }
 
-        // 3. Ownership check
-        $authorizationError = $this->authorizeCustomer(
-            $request,
-            (int) $cart->Customer_ID,
-            'Unauthorized: You do not own this cart item'
-        );
-        if ($authorizationError) {
-            return $authorizationError;
+        // SEC-15: Check ownership / authorization
+        if ($user) {
+            if (!$this->isAdmin($user) && (int) $user->Customer_ID !== (int) $cart->Customer_ID) {
+                return response()->json([
+                    'message' => 'Unauthorized: You do not own this cart item'
+                ], 403);
+            }
+        } else {
+            // If the cart belongs to a registered customer account, require authentication
+            if ($this->registeredCustomerHasOwner((int) $cart->Customer_ID)) {
+                return response()->json([
+                    'message' => 'Authentication is required for this customer cart'
+                ], 401);
+            }
+            // For guest carts, unauthenticated sequential deletion without customer identity is rejected
+            if ($requestedCustomerId === null) {
+                return response()->json([
+                    'message' => 'Unauthorized: You do not own this cart item'
+                ], 401);
+            }
+            if ((int) $requestedCustomerId !== (int) $cart->Customer_ID) {
+                return response()->json([
+                    'message' => 'Unauthorized: You do not own this cart item'
+                ], 403);
+            }
         }
 
         // Safe removal: delete cart record first, then the associated 'In Cart' booking

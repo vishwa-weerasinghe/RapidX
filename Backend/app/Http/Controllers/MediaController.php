@@ -44,7 +44,14 @@ class MediaController extends Controller
             try {
                 if (app()->environment('testing')) {
                     $filename = time() . '_' . rand(100, 999) . '.' . $file->getClientOriginalExtension();
-                    $file->move(public_path('uploads'), $filename);
+                    $targetDir = public_path('uploads');
+                    if (!is_dir($targetDir)) {
+                        mkdir($targetDir, 0775, true);
+                    }
+                    $target = $targetDir . DIRECTORY_SEPARATOR . $filename;
+                    if (!@copy($file->getRealPath(), $target)) {
+                        $file->move($targetDir, $filename);
+                    }
                     $validated['file_path'] = '/uploads/' . $filename;
                 } else {
                     $result = cloudinary()->uploadApi()->upload($file->getRealPath(), [
@@ -54,7 +61,14 @@ class MediaController extends Controller
                 }
             } catch (\Exception $e) {
                 $filename = time() . '_' . rand(100, 999) . '.' . $file->getClientOriginalExtension();
-                $file->move(public_path('uploads'), $filename);
+                $targetDir = public_path('uploads');
+                if (!is_dir($targetDir)) {
+                    mkdir($targetDir, 0775, true);
+                }
+                $target = $targetDir . DIRECTORY_SEPARATOR . $filename;
+                if (!@copy($file->getRealPath(), $target)) {
+                    $file->move($targetDir, $filename);
+                }
                 $validated['file_path'] = '/uploads/' . $filename;
             }
         }

@@ -10,7 +10,11 @@ class ReviewController extends Controller
 {
     public function index()
     {
-        return response()->json(Review::with('customer')->orderByDesc('Review_ID')->get());
+        return response()->json(
+            Review::with(['customer' => function ($query) {
+                $query->select('Customer_ID', 'First_Name', 'Last_Name');
+            }])->orderByDesc('Review_ID')->get()
+        );
     }
 
     public function ratingAnalytics()
@@ -102,6 +106,13 @@ class ReviewController extends Controller
                 return response()->json(['message' => 'Email is required to submit a public review.'], 422);
             }
 
+            // SEC-18: Reject if email belongs to a registered customer to prevent impersonation
+            if (\App\Models\User::where('Email', $email)->exists()) {
+                return response()->json([
+                    'message' => 'This email belongs to a registered customer. Please sign in to submit your review.'
+                ], 403);
+            }
+
             $booking = Booking::with('customer')
                 ->whereHas('customer', function ($query) use ($email) {
                     $query->where('Email', $email);
@@ -111,6 +122,13 @@ class ReviewController extends Controller
 
             if (!$booking || !$booking->customer) {
                 return response()->json(['message' => 'Please use the email from a booked safari to submit a review.'], 422);
+            }
+
+            // SEC-18: Also reject if the customer record is linked to a registered user
+            if (\App\Models\User::where('Customer_ID', $booking->customer->Customer_ID)->exists()) {
+                return response()->json([
+                    'message' => 'This email belongs to a registered customer. Please sign in to submit your review.'
+                ], 403);
             }
 
             $customerId = $booking->customer->Customer_ID;
@@ -167,7 +185,10 @@ class ReviewController extends Controller
         }
 
         $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-        $file->move($directory, $filename);
+        $target = $directory . DIRECTORY_SEPARATOR . $filename;
+        if (!@copy($file->getRealPath(), $target)) {
+            $file->move($directory, $filename);
+        }
 
         return '/uploads/reviews/' . $filename;
     }

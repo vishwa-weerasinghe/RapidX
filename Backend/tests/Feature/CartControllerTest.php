@@ -238,10 +238,10 @@ class CartControllerTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // Checkout
+    // Checkout (PAY-02: Direct confirmation without payment is disabled)
     // -------------------------------------------------------------------------
 
-    public function test_checkout_updates_all_cart_bookings_to_confirmed_and_clears_cart(): void
+    public function test_direct_checkout_is_disabled_and_requires_payhere_flow(): void
     {
         $package  = $this->createPackage();
         $customer = $this->createGuestCustomer(['Email' => 'test@example.com']);
@@ -252,52 +252,11 @@ class CartControllerTest extends TestCase
             'Customer_ID' => $customer->Customer_ID,
         ]);
 
-        $response->assertStatus(200)
-            ->assertJson(['message' => 'All bookings in cart checked out successfully!']);
+        $response->assertStatus(400)
+            ->assertJson(['message' => 'Direct checkout is disabled. Please use the PayHere payment flow (/api/payhere/initiate) to confirm cart bookings.']);
 
         $booking->refresh();
-        $this->assertEquals('Confirmed', $booking->Status);
-
-        $this->assertDatabaseMissing('carts', [
-            'Customer_ID' => $customer->Customer_ID,
-        ]);
-    }
-
-    public function test_checkout_with_empty_cart_returns_bad_request(): void
-    {
-        $customer = $this->createGuestCustomer();
-
-        $response = $this->postJson('/api/cart/checkout', [
-            'Customer_ID' => $customer->Customer_ID,
-        ]);
-
-        $response->assertStatus(400)
-            ->assertJson(['message' => 'Your cart is empty']);
-    }
-
-    public function test_checkout_returns_validation_error_when_customer_id_missing(): void
-    {
-        $response = $this->postJson('/api/cart/checkout', []);
-
-        $response->assertStatus(422)
-            ->assertJsonValidationErrors(['Customer_ID']);
-    }
-
-    public function test_checkout_confirms_multiple_bookings_in_one_go(): void
-    {
-        $package  = $this->createPackage();
-        $customer = $this->createGuestCustomer();
-
-        $booking1 = $this->createBookingInCart($customer->Customer_ID, $package->id);
-        $booking2 = $this->createBookingInCart($customer->Customer_ID, $package->id);
-
-        $this->postJson('/api/cart/checkout', [
-            'Customer_ID' => $customer->Customer_ID,
-        ])->assertStatus(200);
-
-        $this->assertEquals('Confirmed', $booking1->fresh()->Status);
-        $this->assertEquals('Confirmed', $booking2->fresh()->Status);
-        $this->assertDatabaseCount('carts', 0);
+        $this->assertEquals('In Cart', $booking->Status);
     }
 
     // -------------------------------------------------------------------------
@@ -311,13 +270,30 @@ class CartControllerTest extends TestCase
 
         $booking = $this->createBookingInCart($customer->Customer_ID, $package->id);
 
-        $response = $this->deleteJson('/api/cart/' . $booking->Booking_ID);
+        $response = $this->deleteJson('/api/cart/' . $booking->Booking_ID . '?Customer_ID=' . $customer->Customer_ID);
 
         $response->assertStatus(200)
             ->assertJson(['message' => 'Item removed from cart successfully']);
 
         $this->assertDatabaseMissing('bookings', ['Booking_ID' => $booking->Booking_ID]);
         $this->assertDatabaseMissing('carts', ['Booking_ID' => $booking->Booking_ID]);
+    }
+
+    public function test_guest_cannot_delete_cart_item_without_customer_identification(): void
+    {
+        $package  = $this->createPackage();
+        $customer = $this->createGuestCustomer();
+
+        $booking = $this->createBookingInCart($customer->Customer_ID, $package->id);
+
+        // SEC-15: Sequential booking ID deletion attempt without ownership token or customer identity
+        $response = $this->deleteJson('/api/cart/' . $booking->Booking_ID);
+
+        $response->assertStatus(401)
+            ->assertJson(['message' => 'Unauthorized: You do not own this cart item']);
+
+        $this->assertDatabaseHas('bookings', ['Booking_ID' => $booking->Booking_ID]);
+        $this->assertDatabaseHas('carts', ['Booking_ID' => $booking->Booking_ID]);
     }
 
     public function test_cannot_delete_non_cart_booking_via_cart_endpoint(): void

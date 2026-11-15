@@ -180,4 +180,22 @@ class AuthSecurityTest extends TestCase
         // Token must be permanently removed from the database
         $this->assertDatabaseCount('personal_access_tokens', 0);
     }
+
+    public function test_expired_token_is_rejected_with_unauthorized(): void
+    {
+        // AUTH-13: Tokens older than sanctum.expiration are rejected with 401
+        $customer = $this->createCustomer(['Email' => 'expireduser@example.com']);
+        $this->createUser($customer->Customer_ID, 'expireduser@example.com');
+
+        $token = $this->loginAndGetToken('expireduser@example.com');
+
+        // Backdate token to 30 days ago
+        \Illuminate\Support\Facades\DB::table('personal_access_tokens')
+            ->update(['created_at' => now()->subDays(30)]);
+
+        $response = $this->withHeaders(['Authorization' => 'Bearer ' . $token])
+            ->getJson('/api/dashboard');
+
+        $response->assertStatus(401);
+    }
 }

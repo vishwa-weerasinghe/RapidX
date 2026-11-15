@@ -66,6 +66,18 @@ class DashboardControllerTest extends TestCase
         ]);
     }
 
+    protected function createAdmin(array $overrides = []): User
+    {
+        $customer = $this->createCustomer(['Email' => fake()->unique()->safeEmail()]);
+        return User::create(array_merge([
+            'Email'       => fake()->unique()->safeEmail(),
+            'User_Name'   => 'Admin User',
+            'Password'    => Hash::make('Password@123'),
+            'role'        => 'admin',
+            'Customer_ID' => $customer->Customer_ID,
+        ], $overrides));
+    }
+
     protected function loginAndGetToken(string $email, string $password = 'Password@123'): string
     {
         return $this->postJson('/api/login', [
@@ -98,7 +110,8 @@ class DashboardControllerTest extends TestCase
 
         $this->createReview($customer->Customer_ID, 4, 'Great experience!');
 
-        $response = $this->getJson('/api/admin/stats');
+        $admin = $this->createAdmin();
+        $response = $this->actingAs($admin, 'sanctum')->getJson('/api/admin/stats');
 
         $response->assertStatus(200)
             ->assertJsonStructure([
@@ -124,7 +137,8 @@ class DashboardControllerTest extends TestCase
 
     public function test_admin_stats_returns_zero_counts_when_no_data_exists(): void
     {
-        $response = $this->getJson('/api/admin/stats');
+        $admin = $this->createAdmin();
+        $response = $this->actingAs($admin, 'sanctum')->getJson('/api/admin/stats');
 
         $response->assertStatus(200);
 
@@ -147,7 +161,8 @@ class DashboardControllerTest extends TestCase
         $this->createBooking($customer->Customer_ID, $package->id, ['Status' => 'Pending', 'Payment' => 100.00]);
         $this->createBooking($customer->Customer_ID, $package->id, ['Status' => 'Cancelled', 'Payment' => 150.00]);
 
-        $response = $this->getJson('/api/admin/stats');
+        $admin = $this->createAdmin();
+        $response = $this->actingAs($admin, 'sanctum')->getJson('/api/admin/stats');
 
         $response->assertStatus(200);
         $this->assertEquals(550.00, $response->json('total_revenue'));
@@ -162,7 +177,8 @@ class DashboardControllerTest extends TestCase
         $this->createReview($customer->Customer_ID, 4);
         $this->createReview($customer->Customer_ID, 5);
 
-        $response = $this->getJson('/api/admin/stats');
+        $admin = $this->createAdmin();
+        $response = $this->actingAs($admin, 'sanctum')->getJson('/api/admin/stats');
 
         $response->assertStatus(200);
         // (3 + 4 + 5) / 3 = 4.0
@@ -176,7 +192,8 @@ class DashboardControllerTest extends TestCase
 
         $this->createBooking($customer->Customer_ID, $package->id);
 
-        $response = $this->getJson('/api/admin/stats');
+        $admin = $this->createAdmin();
+        $response = $this->actingAs($admin, 'sanctum')->getJson('/api/admin/stats');
 
         $response->assertStatus(200);
 
@@ -200,10 +217,34 @@ class DashboardControllerTest extends TestCase
             $this->createReview($customer->Customer_ID, $i <= 5 ? $i : 5, "Review number {$i}");
         }
 
-        $response = $this->getJson('/api/admin/stats');
+        $admin = $this->createAdmin();
+        $response = $this->actingAs($admin, 'sanctum')->getJson('/api/admin/stats');
 
         $response->assertStatus(200);
         $this->assertCount(4, $response->json('recent_reviews'));
+    }
+
+    public function test_admin_stats_fails_without_authentication(): void
+    {
+        // SEC-05: Call GET /admin/stats with no token returns 401
+        $this->getJson('/api/admin/stats')->assertStatus(401);
+    }
+
+    public function test_admin_stats_fails_for_non_admin_customer(): void
+    {
+        // SEC-05: Non-admin user cannot access admin stats
+        $customer = $this->createCustomer();
+        $user = User::create([
+            'Email'       => 'customer@example.com',
+            'User_Name'   => 'Customer User',
+            'Password'    => Hash::make('Password@123'),
+            'role'        => 'user',
+            'Customer_ID' => $customer->Customer_ID,
+        ]);
+
+        $this->actingAs($user, 'sanctum')
+            ->getJson('/api/admin/stats')
+            ->assertStatus(403);
     }
 
     // -------------------------------------------------------------------------
