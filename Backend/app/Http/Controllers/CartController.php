@@ -213,45 +213,13 @@ class CartController extends Controller
     }
 
     // Bulk checkout bookings from cart
+    // IM-02: This endpoint must NOT confirm bookings directly — confirmation
+    // is only authorised after a successful PayHere IPN or admin action.
+    // Callers should use POST /api/payhere/initiate with checkout_type=cart.
     public function checkout(Request $request)
     {
-        $request->validate([
-            'Customer_ID' => 'required',
-        ]);
-
-        $customerId = (int) $request->Customer_ID;
-
-        $authorizationError = $this->authorizeCustomer(
-            $request,
-            $customerId,
-            'Unauthorized: You cannot checkout another customer\'s cart'
-        );
-        if ($authorizationError) {
-            return $authorizationError;
-        }
-
-        // Get all cart entries
-        $cartEntries = Cart::where('Customer_ID', $customerId)->get();
-
-        if ($cartEntries->isEmpty()) {
-            return response()->json([
-                'message' => 'Your cart is empty'
-            ], 400);
-        }
-
-        // Extract booking IDs
-        $bookingIds = $cartEntries->pluck('Booking_ID');
-
-        // Update booking status from 'In Cart' to 'Confirmed'
-        Booking::whereIn('Booking_ID', $bookingIds)->update([
-            'Status' => 'Confirmed'
-        ]);
-
-        // Delete cart entries
-        Cart::where('Customer_ID', $customerId)->delete();
-
         return response()->json([
-            'message' => 'All bookings in cart checked out successfully!'
-        ]);
+            'message' => 'Direct checkout is disabled. Please use the PayHere payment flow (/api/payhere/initiate) to confirm cart bookings.',
+        ], 400);
     }
 }
