@@ -1,6 +1,7 @@
 import { Navigate } from "react-router-dom";
 
 export default function ProtectedRoute({ children, role = "customer" }) {
+  const token = localStorage.getItem("token");
   const user = (() => {
     try {
       const userData = localStorage.getItem("user");
@@ -10,8 +11,8 @@ export default function ProtectedRoute({ children, role = "customer" }) {
     }
   })();
 
-  // If no user is logged in, redirect to login
-  if (!user) {
+  // If no user or token is present, redirect to login
+  if (!user || !token) {
     return <Navigate to="/login" replace />;
   }
 
