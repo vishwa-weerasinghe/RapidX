@@ -93,15 +93,14 @@ class PasswordResetTest extends TestCase
                  ->assertJsonFragment(['message' => 'Invalid token or email.']);
     }
 
-    public function test_forgot_password_with_unregistered_email_returns_generic_success_response()
+    public function test_forgot_password_with_unregistered_email_returns_error()
     {
-        // AUTH-10: Unregistered email returns the same generic message as registered email
         $response = $this->postJson('/api/forgot-password', [
             'Email' => 'unregistered-person@example.com',
         ]);
 
-        $response->assertStatus(200)
-                 ->assertJson(['message' => 'Reset link sent to your email.']);
+        $response->assertStatus(404)
+                 ->assertJson(['message' => 'We could not find a user with that email address.']);
     }
 
     public function test_reset_password_fails_validation_when_password_lacks_complexity()

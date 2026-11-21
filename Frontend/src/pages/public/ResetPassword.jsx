@@ -96,6 +96,9 @@ export default function ResetPassword() {
       setRedirectCountdown(4);
     } catch (err) {
       setError(
+        err.response?.data?.errors?.Password?.[0] ||
+        err.response?.data?.errors?.Email?.[0] ||
+        err.response?.data?.errors?.token?.[0] ||
         err.response?.data?.message ||
         "Failed to reset password. The reset link may be invalid or expired."
       );

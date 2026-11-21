@@ -77,16 +77,26 @@ class User extends Authenticatable implements CanResetPasswordContract
     public function sendPasswordResetNotification($token)
     {
         try {
-            $origin = request()->header('Origin') ?: request()->header('Referer');
+            $origin = request()->input('origin') ?: request()->header('Origin') ?: request()->header('Referer');
             $frontendUrl = null;
             if ($origin) {
+                if (!preg_match('~^https?://~i', $origin)) {
+                    $origin = 'http://' . $origin;
+                }
                 $parsed = parse_url($origin);
-                if (isset($parsed['scheme']) && isset($parsed['host'])) {
-                    $frontendUrl = $parsed['scheme'] . '://' . $parsed['host'] . (isset($parsed['port']) ? ':' . $parsed['port'] : '');
+                if (!empty($parsed['host'])) {
+                    $scheme = !empty($parsed['scheme']) ? $parsed['scheme'] : 'http';
+                    $port = !empty($parsed['port']) ? ':' . $parsed['port'] : '';
+                    $frontendUrl = $scheme . '://' . $parsed['host'] . $port;
                 }
             }
             if (empty($frontendUrl)) {
-                $frontendUrl = env('FRONTEND_URL') ?: config('app.frontend_url', 'http://localhost:5173');
+                $frontendUrl = env('FRONTEND_URL') ?: config('app.frontend_url');
+            }
+            if (empty($frontendUrl)) {
+                $frontendUrl = app()->environment('production')
+                    ? 'https://www.minneriyawildjeepsafari.com'
+                    : 'http://localhost:5173';
             }
             $frontendUrl = rtrim($frontendUrl, '/');
             $resetUrl = $frontendUrl . '/password-reset/' . $token . '?email=' . urlencode($this->Email);
@@ -94,12 +104,19 @@ class User extends Authenticatable implements CanResetPasswordContract
 
             $htmlContent = (new \App\Mail\ResetPasswordMail($this, $resetUrl, $expireMinutes))->render();
 
-            \App\Services\BrevoMailService::send(
-                $this->Email,
-                'Reset Your Password - Minneriya Wild Jeep Safari',
-                $htmlContent,
-                $this->User_Name ?? 'Valued Customer'
-            );
+            try {
+                \App\Services\BrevoMailService::send(
+                    $this->Email,
+                    'Reset Your Password - Minneriya Wild Jeep Safari',
+                    $htmlContent,
+                    $this->User_Name ?? 'Valued Customer'
+                );
+            } catch (\Exception $be) {
+                \Illuminate\Support\Facades\Log::warning('Brevo send failed in sendPasswordResetNotification, falling back to Mail: ' . $be->getMessage());
+                \Illuminate\Support\Facades\Mail::to($this->Email)->send(
+                    new \App\Mail\ResetPasswordMail($this, $resetUrl, $expireMinutes)
+                );
+            }
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('sendPasswordResetNotification failed: ' . $e->getMessage());
         }
