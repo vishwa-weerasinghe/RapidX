@@ -11,6 +11,7 @@ import {
   X,
   ArrowRight,
   ChevronDown,
+  SlidersHorizontal,
 } from "lucide-react";
 import ThemeToggle from "./components/ThemeToggle";
 import { useTheme } from "./context/ThemeContext";
@@ -29,8 +30,14 @@ import {
 } from "./components/Skeletons";
 import { getStaticBlogPackageSection } from "./constants/staticBlogPackages";
 import PackageImageCarousel from "./components/PackageImageCarousel";
-import { FALLBACK_PACKAGE_IMAGE, getPackageImageUrls } from "./utils/packageImages";
-import { HOME_PACKAGE_LIMIT, orderHomePackages } from "./utils/homePackageOrdering";
+import {
+  FALLBACK_PACKAGE_IMAGE,
+  getPackageImageUrls,
+} from "./utils/packageImages";
+import {
+  HOME_PACKAGE_LIMIT,
+  orderHomePackages,
+} from "./utils/homePackageOrdering";
 import TripAdvisorWidget from "./components/TripAdvisorWidget";
 import { STATIC_TRIPADVISOR_REVIEWS } from "./constants/staticTripadvisorReviews";
 import ReserveNowNotice from "./components/ReserveNowNotice";
@@ -56,9 +63,7 @@ function ReviewCardContent({ rev }) {
         </div>
         <span className="text-neutral-400 text-xs">{rev.date}</span>
       </div>
-      <h3 className="text-base font-bold mb-2 line-clamp-1">
-        "{rev.title}"
-      </h3>
+      <h3 className="text-base font-bold mb-2 line-clamp-1">"{rev.title}"</h3>
       <p className="text-neutral-400 text-xs sm:text-sm leading-relaxed mb-4 line-clamp-5">
         {rev.text}
       </p>
@@ -81,12 +86,13 @@ function ReviewCardContent({ rev }) {
         </div>
       )}
       <span
-        className={`mt-auto self-start font-bold text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider ${rev.isGuest
-          ? "bg-amber-100 text-amber-800"
-          : rev.source === "TripAdvisor"
-            ? "bg-blue-50 text-blue-700"
-            : "bg-castleton-50 text-castleton"
-          }`}
+        className={`mt-auto self-start font-bold text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider ${
+          rev.isGuest
+            ? "bg-amber-100 text-amber-800"
+            : rev.source === "TripAdvisor"
+              ? "bg-blue-50 text-blue-700"
+              : "bg-castleton-50 text-castleton"
+        }`}
       >
         {rev.source || (rev.isGuest ? "Guest" : "Verified")}
       </span>
@@ -168,8 +174,18 @@ function ReviewCarousel({
         aria-label="Previous reviews"
         className="absolute left-0 top-1/2 -translate-y-1/2 -ml-3 z-10 w-9 h-9 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center text-gray-500 hover:text-gray-900 hover:shadow-xl transition-all duration-200"
       >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+        <svg
+          className="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2.5}
+            d="M15 19l-7-7 7-7"
+          />
         </svg>
       </button>
       <button
@@ -178,8 +194,18 @@ function ReviewCarousel({
         aria-label="Next reviews"
         className="absolute right-0 top-1/2 -translate-y-1/2 -mr-3 z-10 w-9 h-9 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center text-gray-500 hover:text-gray-900 hover:shadow-xl transition-all duration-200"
       >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+        <svg
+          className="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2.5}
+            d="M9 5l7 7-7 7"
+          />
         </svg>
       </button>
 
@@ -208,10 +234,11 @@ function ReviewCarousel({
               type="button"
               onClick={() => setIndex(i)}
               aria-label={`Go to slide ${i + 1}`}
-              className={`h-2 rounded-full transition-all duration-300 ${i === index
-                ? "w-6 bg-sacramento"
-                : "w-2 bg-gray-300 hover:bg-gray-400"
-                }`}
+              className={`h-2 rounded-full transition-all duration-300 ${
+                i === index
+                  ? "w-6 bg-sacramento"
+                  : "w-2 bg-gray-300 hover:bg-gray-400"
+              }`}
             />
           ))}
         </div>
@@ -302,16 +329,56 @@ export default function App() {
   ];
 
   const blogLinks = [
-    { label: "Minneriya National Park", path: "/blog#minneriya", description: "The Great Elephant Gathering" },
-    { label: "Kaudulla National Park", path: "/blog#kaudulla", description: "The Pristine Wildlife Corridor" },
-    { label: "Wasgamuwa National Park", path: "/blog#wasgamuwa", description: "The Gathering Place of Bears" },
-    { label: "Hurulu Eco Park", path: "/blog#hurulu", description: "The Vital Elephant Corridor" },
-    { label: "Full Day Safari Experience", path: "/blog#full-day-safari", description: "Hurulu Eco Park & Minneriya or Kaudulla" },
-    { label: "Dambulla Cultural & Safari Tour", path: "/blog#dambulla-safari", description: "Cave Temple, Economic Center & Evening Safari" },
-    { label: "Village Tour", path: "/blog#hiriwadunna-village-tour", description: "Experience Authentic Sri Lankan Rural Life" },
-    { label: "Polonnaruwa Ruins & Safari Tour", path: "/blog#polonnaruwa-safari", description: "Medieval Capital & Evening Safari" },
-    { label: "Sigiriya / Pidurangala & Safari Tour", path: "/blog#sigiriya-pidurangala-safari", description: "Majestic Rock Hiking & Evening Safari" },
-    { label: "Sigiriya Village Tour", path: "/blog#sigiriya-village-tour", description: "Experience Authentic Sri Lankan Rural Life" },
+    {
+      label: "Minneriya National Park",
+      path: "/blog#minneriya",
+      description: "The Great Elephant Gathering",
+    },
+    {
+      label: "Kaudulla National Park",
+      path: "/blog#kaudulla",
+      description: "The Pristine Wildlife Corridor",
+    },
+    {
+      label: "Wasgamuwa National Park",
+      path: "/blog#wasgamuwa",
+      description: "The Gathering Place of Bears",
+    },
+    {
+      label: "Hurulu Eco Park",
+      path: "/blog#hurulu",
+      description: "The Vital Elephant Corridor",
+    },
+    {
+      label: "Full Day Safari Experience",
+      path: "/blog#full-day-safari",
+      description: "Hurulu Eco Park & Minneriya or Kaudulla",
+    },
+    {
+      label: "Dambulla Cultural & Safari Tour",
+      path: "/blog#dambulla-safari",
+      description: "Cave Temple, Economic Center & Evening Safari",
+    },
+    {
+      label: "Village Tour",
+      path: "/blog#hiriwadunna-village-tour",
+      description: "Experience Authentic Sri Lankan Rural Life",
+    },
+    {
+      label: "Polonnaruwa Ruins & Safari Tour",
+      path: "/blog#polonnaruwa-safari",
+      description: "Medieval Capital & Evening Safari",
+    },
+    {
+      label: "Sigiriya / Pidurangala & Safari Tour",
+      path: "/blog#sigiriya-pidurangala-safari",
+      description: "Majestic Rock Hiking & Evening Safari",
+    },
+    {
+      label: "Sigiriya Village Tour",
+      path: "/blog#sigiriya-village-tour",
+      description: "Experience Authentic Sri Lankan Rural Life",
+    },
   ];
 
   useEffect(() => {
@@ -338,9 +405,6 @@ export default function App() {
   const [bookingDate, setBookingDate] = useState("");
   const [adultsCount, setAdultsCount] = useState(1);
   const [childrenCount, setChildrenCount] = useState(0);
-
-
-
 
   const handleWidgetSubmit = (e) => {
     e.preventDefault();
@@ -414,14 +478,13 @@ export default function App() {
   const filteredPackages = orderedPackages.filter((pkg) => {
     const q = packageSearch.trim().toLowerCase();
     if (!q) return true;
-    return (
-      (pkg.title || "").toLowerCase().includes(q) ||
-      (pkg.desc || "").toLowerCase().includes(q)
-    );
+    const name = (pkg.Package_Name || pkg.title || "").toLowerCase();
+    return name.includes(q);
   });
-  const visiblePackages = showAllPackages
-    ? filteredPackages
-    : filteredPackages.slice(0, HOME_PACKAGE_LIMIT);
+  const visiblePackages =
+    packageSearch.trim().length > 0 || showAllPackages
+      ? filteredPackages
+      : filteredPackages.slice(0, HOME_PACKAGE_LIMIT);
 
   useEffect(() => {
     // 1. Fetch Packages from DB
@@ -429,7 +492,6 @@ export default function App() {
       .get("/packages")
       .then((res) => {
         if (res.data && res.data.length > 0) {
-
           const mapped = res.data.map((pkg) => {
             const images = getPackageImageUrls(pkg);
             const oneAdult = Number(pkg.price_one_adult) || 0;
@@ -467,7 +529,9 @@ export default function App() {
       .then((res) => {
         if (res.data && res.data.length > 0) {
           const mapped = res.data.map((item) => {
-            const baseUrl = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : "http://127.0.0.1:8000";
+            const baseUrl = import.meta.env.VITE_API_URL
+              ? import.meta.env.VITE_API_URL.replace("/api", "")
+              : "http://127.0.0.1:8000";
             const src = item.file_path.startsWith("http")
               ? item.file_path
               : `${baseUrl}${item.file_path}`;
@@ -532,7 +596,9 @@ export default function App() {
       }
 
       if (matchedSection) {
-        setActiveSection((prev) => (prev !== matchedSection ? matchedSection : prev));
+        setActiveSection((prev) =>
+          prev !== matchedSection ? matchedSection : prev,
+        );
       }
     };
 
@@ -629,7 +695,9 @@ export default function App() {
   };
 
   const [reviews, setReviews] = useState([]);
-  const [tripadvisorReviews, setTripadvisorReviews] = useState(STATIC_TRIPADVISOR_REVIEWS);
+  const [tripadvisorReviews, setTripadvisorReviews] = useState(
+    STATIC_TRIPADVISOR_REVIEWS,
+  );
   const [reviewsLoading, setReviewsLoading] = useState(true);
   const [tripadvisorLoading, setTripadvisorLoading] = useState(false);
   const [guestVisibleCount, setGuestVisibleCount] = useState(6);
@@ -763,7 +831,7 @@ export default function App() {
   const systemAverageRating =
     systemReviews.length > 0
       ? systemReviews.reduce((sum, rev) => sum + (Number(rev.rate) || 0), 0) /
-      systemReviews.length
+        systemReviews.length
       : 0;
   const systemFullStars = Math.round(systemAverageRating);
   const homepageStructuredData = getHomepageStructuredData(systemReviews);
@@ -778,18 +846,20 @@ export default function App() {
         structuredData={homepageStructuredData}
       />
       <div
-        className={`font-sans antialiased overflow-x-hidden selection:bg-[var(--primary)] selection:text-white transition-colors duration-200 ${theme === "dark"
-          ? "bg-[#101813] text-[#F5F5F5]"
-          : "bg-[#F8F6F0] text-[#263238]"
-          }`}
+        className={`font-sans antialiased overflow-x-hidden selection:bg-[var(--primary)] selection:text-white transition-colors duration-200 ${
+          theme === "dark"
+            ? "bg-[#101813] text-[#F5F5F5]"
+            : "bg-[#F8F6F0] text-[#263238]"
+        }`}
       >
         {/* Toast Notification Alert Box */}
         {notification && (
           <div
-            className={`fixed top-24 right-5 p-5 rounded-xl shadow-2xl z-[9999] border-l-4 ${notification.type === "error" ? "border-red-500" : "border-sacramento"} max-w-sm animate-fade-in-left ${theme === "dark"
-              ? "bg-neutral-900 text-white"
-              : "bg-white text-neutral-800"
-              }`}
+            className={`fixed top-24 right-5 p-5 rounded-xl shadow-2xl z-[9999] border-l-4 ${notification.type === "error" ? "border-red-500" : "border-sacramento"} max-w-sm animate-fade-in-left ${
+              theme === "dark"
+                ? "bg-neutral-900 text-white"
+                : "bg-white text-neutral-800"
+            }`}
           >
             <p className="text-sm font-medium">{notification.text}</p>
           </div>
@@ -805,18 +875,20 @@ export default function App() {
 
         {/* Synchronized Header & Navbar */}
         <header
-          className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${isScrolled ? "px-3 pt-3 md:px-8" : "px-0 pt-0"
-            }`}
+          className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
+            isScrolled ? "px-3 pt-3 md:px-8" : "px-0 pt-0"
+          }`}
         >
           {/* Subtle dark gradient overlay for nav readability */}
           {!isScrolled && (
             <div className="absolute top-0 left-0 w-full h-40 bg-gradient-to-b from-black/70 to-transparent pointer-events-none -z-10"></div>
           )}
           <div
-            className={`max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between transition-all duration-500 relative ${isScrolled
-              ? "bg-[var(--page-bg)]/90 dark:bg-[var(--surface)]/90 backdrop-blur-xl rounded-full shadow-lg border border-[var(--border)]/40 py-2.5"
-              : "bg-transparent py-5 border-b border-white/10"
-              }`}
+            className={`max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between transition-all duration-500 relative ${
+              isScrolled
+                ? "bg-[var(--page-bg)]/90 dark:bg-[var(--surface)]/90 backdrop-blur-xl rounded-full shadow-lg border border-[var(--border)]/40 py-2.5"
+                : "bg-transparent py-5 border-b border-white/10"
+            }`}
           >
             {/* Logo & Brand Name */}
             <div
@@ -831,10 +903,11 @@ export default function App() {
                 />
               </div>
               <span
-                className={`font-outfit text-lg sm:text-xl md:text-2xl font-extrabold tracking-tight transition-all duration-500 ${isScrolled
-                  ? "bg-clip-text text-transparent bg-gradient-to-r from-sacramento to-castleton dark:from-white dark:to-gray-400"
-                  : "text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)]"
-                  }`}
+                className={`font-outfit text-lg sm:text-xl md:text-2xl font-extrabold tracking-tight transition-all duration-500 ${
+                  isScrolled
+                    ? "bg-clip-text text-transparent bg-gradient-to-r from-sacramento to-castleton dark:from-white dark:to-gray-400"
+                    : "text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)]"
+                }`}
               >
                 Wild Jeep Safari
               </span>
@@ -856,12 +929,13 @@ export default function App() {
                   <li key={section}>
                     <button
                       onClick={() => scrollToSection(section)}
-                      className={`px-2 lg:px-2.5 py-1 sm:py-1.5 rounded-full text-xs font-bold uppercase tracking-wide transition-all duration-300 ${activeSection === section
-                        ? "bg-sacramento text-white shadow shadow-sacramento/25"
-                        : isScrolled
-                          ? "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-slate-800/50"
-                          : "text-white/80 hover:text-white hover:bg-white/10"
-                        }`}
+                      className={`px-2 lg:px-2.5 py-1 sm:py-1.5 rounded-full text-xs font-bold uppercase tracking-wide transition-all duration-300 ${
+                        activeSection === section
+                          ? "bg-sacramento text-white shadow shadow-sacramento/25"
+                          : isScrolled
+                            ? "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-slate-800/50"
+                            : "text-white/80 hover:text-white hover:bg-white/10"
+                      }`}
                     >
                       {section}
                     </button>
@@ -875,15 +949,18 @@ export default function App() {
                       setIsHelpMenuOpen((prev) => !prev);
                       setIsBlogMenuOpen(false);
                     }}
-                    className={`flex items-center gap-1 px-2 lg:px-2.5 py-1 sm:py-1.5 rounded-full text-xs font-bold uppercase tracking-wide transition-all duration-300 ${isHelpMenuOpen
-                      ? "bg-sacramento text-white shadow shadow-sacramento/25"
-                      : isScrolled
-                        ? "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-slate-800/50"
-                        : "text-white/80 hover:text-white hover:bg-white/10"
-                      }`}
+                    className={`flex items-center gap-1 px-2 lg:px-2.5 py-1 sm:py-1.5 rounded-full text-xs font-bold uppercase tracking-wide transition-all duration-300 ${
+                      isHelpMenuOpen
+                        ? "bg-sacramento text-white shadow shadow-sacramento/25"
+                        : isScrolled
+                          ? "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-slate-800/50"
+                          : "text-white/80 hover:text-white hover:bg-white/10"
+                    }`}
                   >
                     Help
-                    <span className={`text-[10px] transition-transform duration-200 ${isHelpMenuOpen ? "rotate-180" : ""}`}>
+                    <span
+                      className={`text-[10px] transition-transform duration-200 ${isHelpMenuOpen ? "rotate-180" : ""}`}
+                    >
                       ▾
                     </span>
                   </button>
@@ -908,15 +985,18 @@ export default function App() {
                   <button
                     type="button"
                     onClick={() => setIsBlogMenuOpen((prev) => !prev)}
-                    className={`flex items-center gap-1 px-2 lg:px-2.5 py-1 sm:py-1.5 rounded-full text-xs font-bold uppercase tracking-wide transition-all duration-300 ${isBlogMenuOpen
-                      ? "bg-sacramento text-white shadow shadow-sacramento/25"
-                      : isScrolled
-                        ? "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-slate-800/50"
-                        : "text-white/80 hover:text-white hover:bg-white/10"
-                      }`}
+                    className={`flex items-center gap-1 px-2 lg:px-2.5 py-1 sm:py-1.5 rounded-full text-xs font-bold uppercase tracking-wide transition-all duration-300 ${
+                      isBlogMenuOpen
+                        ? "bg-sacramento text-white shadow shadow-sacramento/25"
+                        : isScrolled
+                          ? "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-slate-800/50"
+                          : "text-white/80 hover:text-white hover:bg-white/10"
+                    }`}
                   >
                     Blog
-                    <span className={`text-[10px] transition-transform duration-200 ${isBlogMenuOpen ? "rotate-180" : ""}`}>
+                    <span
+                      className={`text-[10px] transition-transform duration-200 ${isBlogMenuOpen ? "rotate-180" : ""}`}
+                    >
                       ▾
                     </span>
                   </button>
@@ -946,7 +1026,9 @@ export default function App() {
                           >
                             <span className="text-xs font-bold text-[#1d4334] group-hover:text-[#1b5d3d] dark:text-slate-200 dark:group-hover:text-white flex items-center justify-between">
                               {item.label}
-                              <span className="text-xs text-castleton opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                              <span className="text-xs text-castleton opacity-0 group-hover:opacity-100 transition-opacity">
+                                →
+                              </span>
                             </span>
                             {item.description && (
                               <span className="text-[11px] text-slate-400 dark:text-slate-500 line-clamp-1">
@@ -978,10 +1060,11 @@ export default function App() {
                 {user ? (
                   <Link
                     to={dashboardLink}
-                    className={`flex items-center gap-1.5 text-xs font-bold px-4 py-2 border rounded-full hover:shadow transition-all duration-300 ${isScrolled
-                      ? "text-sacramento border-sacramento/25 hover:bg-sacramento/5 dark:text-white dark:border-neutral-800 dark:hover:bg-neutral-800"
-                      : "text-white border-white/20 hover:bg-white/10"
-                      }`}
+                    className={`flex items-center gap-1.5 text-xs font-bold px-4 py-2 border rounded-full hover:shadow transition-all duration-300 ${
+                      isScrolled
+                        ? "text-sacramento border-sacramento/25 hover:bg-sacramento/5 dark:text-white dark:border-neutral-800 dark:hover:bg-neutral-800"
+                        : "text-white border-white/20 hover:bg-white/10"
+                    }`}
                   >
                     <LayoutDashboard size={13} />
                     Dashboard
@@ -990,14 +1073,14 @@ export default function App() {
                   <>
                     <Link
                       to="/login"
-                      className={`text-xs font-bold px-4 py-2 border rounded-full hover:shadow transition-all duration-300 ${isScrolled
-                        ? "text-slate-700 dark:text-slate-350 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-850"
-                        : "text-white border-white/20 hover:bg-white/10"
-                        }`}
+                      className={`text-xs font-bold px-4 py-2 border rounded-full hover:shadow transition-all duration-300 ${
+                        isScrolled
+                          ? "text-slate-700 dark:text-slate-350 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-850"
+                          : "text-white border-white/20 hover:bg-white/10"
+                      }`}
                     >
                       Log in
                     </Link>
-
                   </>
                 )}
               </div>
@@ -1013,12 +1096,13 @@ export default function App() {
                   setIsMobileBlogOpen(false);
                   setIsMobileHelpOpen(false);
                 }}
-                className={`md:hidden flex items-center justify-center p-2.5 rounded-full transition-all duration-300 active:scale-95 ${isMobileMenuOpen
-                  ? "bg-sacramento text-white shadow-md"
-                  : isScrolled
-                    ? "bg-slate-100 dark:bg-neutral-800 text-slate-800 dark:text-white"
-                    : "bg-white/20 text-white backdrop-blur-md"
-                  }`}
+                className={`md:hidden flex items-center justify-center p-2.5 rounded-full transition-all duration-300 active:scale-95 ${
+                  isMobileMenuOpen
+                    ? "bg-sacramento text-white shadow-md"
+                    : isScrolled
+                      ? "bg-slate-100 dark:bg-neutral-800 text-slate-800 dark:text-white"
+                      : "bg-white/20 text-white backdrop-blur-md"
+                }`}
                 aria-label="Toggle navigation interface"
               >
                 {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
@@ -1042,10 +1126,11 @@ export default function App() {
                     <button
                       key={section}
                       onClick={() => scrollToSection(section)}
-                      className={`py-2.5 px-3 rounded-xl text-xs font-bold capitalize tracking-wide transition-all duration-200 text-left ${activeSection === section
-                        ? "bg-sacramento text-white shadow-md shadow-sacramento/30"
-                        : "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-neutral-800"
-                        }`}
+                      className={`py-2.5 px-3 rounded-xl text-xs font-bold capitalize tracking-wide transition-all duration-200 text-left ${
+                        activeSection === section
+                          ? "bg-sacramento text-white shadow-md shadow-sacramento/30"
+                          : "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-neutral-800"
+                      }`}
                     >
                       {section}
                     </button>
@@ -1057,13 +1142,16 @@ export default function App() {
                       setIsMobileHelpOpen((prev) => !prev);
                       setIsMobileBlogOpen(false);
                     }}
-                    className={`py-2.5 px-3 rounded-xl text-xs font-bold capitalize tracking-wide transition-all duration-200 text-left flex items-center justify-between ${isMobileHelpOpen
-                      ? "bg-sacramento text-white shadow-md shadow-sacramento/30"
-                      : "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-neutral-800"
-                      }`}
+                    className={`py-2.5 px-3 rounded-xl text-xs font-bold capitalize tracking-wide transition-all duration-200 text-left flex items-center justify-between ${
+                      isMobileHelpOpen
+                        ? "bg-sacramento text-white shadow-md shadow-sacramento/30"
+                        : "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-neutral-800"
+                    }`}
                   >
                     <span>Help</span>
-                    <span className={`text-[10px] transition-transform duration-200 ${isMobileHelpOpen ? "rotate-180" : ""}`}>
+                    <span
+                      className={`text-[10px] transition-transform duration-200 ${isMobileHelpOpen ? "rotate-180" : ""}`}
+                    >
                       ▾
                     </span>
                   </button>
@@ -1090,13 +1178,16 @@ export default function App() {
                       setIsMobileBlogOpen((prev) => !prev);
                       setIsMobileHelpOpen(false);
                     }}
-                    className={`py-2.5 px-3 rounded-xl text-xs font-bold capitalize tracking-wide transition-all duration-200 text-left flex items-center justify-between ${isMobileBlogOpen
-                      ? "bg-sacramento text-white shadow-md shadow-sacramento/30"
-                      : "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-neutral-800"
-                      }`}
+                    className={`py-2.5 px-3 rounded-xl text-xs font-bold capitalize tracking-wide transition-all duration-200 text-left flex items-center justify-between ${
+                      isMobileBlogOpen
+                        ? "bg-sacramento text-white shadow-md shadow-sacramento/30"
+                        : "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-neutral-800"
+                    }`}
                   >
                     <span>Blog</span>
-                    <span className={`text-[10px] transition-transform duration-200 ${isMobileBlogOpen ? "rotate-180" : ""}`}>
+                    <span
+                      className={`text-[10px] transition-transform duration-200 ${isMobileBlogOpen ? "rotate-180" : ""}`}
+                    >
                       ▾
                     </span>
                   </button>
@@ -1134,7 +1225,9 @@ export default function App() {
                         >
                           <span className="text-xs font-bold text-[#1d4334] group-hover:text-[#1b5d3d] dark:text-slate-200 dark:group-hover:text-white flex items-center justify-between">
                             {item.label}
-                            <span className="text-xs text-castleton opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                            <span className="text-xs text-castleton opacity-0 group-hover:opacity-100 transition-opacity">
+                              →
+                            </span>
                           </span>
                           {item.description && (
                             <span className="text-[11px] text-slate-400 dark:text-slate-500 line-clamp-1">
@@ -1242,7 +1335,12 @@ export default function App() {
 
               {/* Description */}
               <p className="text-neutral-100 dark:text-neutral-300 font-medium tracking-wide text-sm sm:text-base mb-8 drop-shadow-md max-w-xl leading-relaxed">
-                Book official <strong>Minneriya safari</strong>, <strong>Kaudulla jeep safari</strong>, <strong>Hurulu Eco Park</strong>, and <strong>Wasgamuwa</strong> safaries online. Witness the famous Sri Lanka Elephant Gathering and wild leopards with licensed local drivers and hotel pickup in Habarana, Sigiriya, Kandalama &amp; Dambulla.
+                Book official <strong>Minneriya safari</strong>,{" "}
+                <strong>Kaudulla jeep safari</strong>,{" "}
+                <strong>Hurulu Eco Park</strong>, and <strong>Wasgamuwa</strong>{" "}
+                safaries online. Witness the famous Sri Lanka Elephant Gathering
+                and wild leopards with licensed local drivers and hotel pickup
+                in Habarana, Sigiriya, Kandalama &amp; Dambulla.
               </p>
 
               {/* Action Buttons */}
@@ -1310,32 +1408,56 @@ export default function App() {
               </h2>
 
               <p className="mt-4 text-gray-500">
-                Book private jeep safaris across Minneriya National Park, Kaudulla, Hurulu Eco Park, and Wasgamuwa with experienced local drivers, park permits, and best price guarantee.
+                Book private jeep safaris across Minneriya National Park,
+                Kaudulla, Hurulu Eco Park, and Wasgamuwa with experienced local
+                drivers, park permits, and best price guarantee.
               </p>
             </div>
 
             {/* Search Bar */}
-            <div className="relative max-w-xl mx-auto mb-10">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-                <Search size={18} />
-              </span>
-              <input
-                id="package-search"
-                type="search"
-                value={packageSearch}
-                onChange={(e) => setPackageSearch(e.target.value)}
-                placeholder="Search safari packages…"
-                className="w-full pl-11 pr-10 py-3 rounded-2xl bg-gray-50 border border-gray-200 text-gray-800 placeholder-gray-400 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-castleton/30 focus:border-castleton transition"
-              />
-              {packageSearch && (
-                <button
-                  onClick={() => setPackageSearch("")}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
-                  aria-label="Clear search"
-                >
-                  <X size={16} />
-                </button>
-              )}
+            <div className="max-w-2xl mx-auto mb-10">
+              <div className={`group relative flex items-center gap-3 px-5 py-4 rounded-2xl bg-white border-2 shadow-lg transition-all duration-300 ${packageSearch ? "border-castleton shadow-castleton/10" : "border-gray-100 hover:border-gray-200 shadow-gray-100"}`}>
+                {/* Icon */}
+                <span className={`shrink-0 transition-colors duration-200 ${packageSearch ? "text-castleton" : "text-gray-400 group-hover:text-gray-500"}`}>
+                  <Search size={20} strokeWidth={2.2} />
+                </span>
+
+                {/* Input */}
+                <input
+                  id="package-search"
+                  type="text"
+                  value={packageSearch}
+                  onChange={(e) => setPackageSearch(e.target.value)}
+                  placeholder="Search safari packages by name…"
+                  className="flex-1 bg-transparent text-gray-800 placeholder-gray-400 text-sm font-medium outline-none"
+                />
+
+                {/* Result count badge */}
+                {packageSearch && (
+                  <span className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-castleton/10 text-castleton text-xs font-semibold">
+                    {filteredPackages.length} found
+                  </span>
+                )}
+
+                {/* Clear button */}
+                {packageSearch && (
+                  <button
+                    onClick={() => setPackageSearch("")}
+                    className="shrink-0 w-7 h-7 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 transition-all duration-150"
+                    aria-label="Clear search"
+                  >
+                    <X size={13} strokeWidth={2.5} />
+                  </button>
+                )}
+
+                {/* Divider + filter icon (decorative) */}
+                {!packageSearch && (
+                  <span className="shrink-0 flex items-center gap-2 text-gray-300">
+                    <span className="w-px h-5 bg-gray-200" />
+                    <SlidersHorizontal size={16} className="text-gray-400" />
+                  </span>
+                )}
+              </div>
             </div>
 
             {/* Reserve Now & Pay Later Notice */}
@@ -1351,7 +1473,10 @@ export default function App() {
                 <div className="col-span-2 py-16 text-center">
                   <p className="text-gray-500 text-sm">
                     No packages match{" "}
-                    <span className="font-semibold text-gray-700">"{packageSearch}"</span>.
+                    <span className="font-semibold text-gray-700">
+                      "{packageSearch}"
+                    </span>
+                    .
                   </p>
                   <button
                     onClick={() => setPackageSearch("")}
@@ -1363,11 +1488,17 @@ export default function App() {
               ) : packages.length > 0 ? (
                 visiblePackages.map((pkg, idx) => {
                   const relatedSection = getStaticBlogPackageSection(
-                    pkg.blog_id || pkg.related_package
+                    pkg.blog_id || pkg.related_package,
                   );
 
-                  const nameLower = (pkg.Package_Name || pkg.title || "").toLowerCase();
-                  const sectionLower = String(relatedSection || "").toLowerCase();
+                  const nameLower = (
+                    pkg.Package_Name ||
+                    pkg.title ||
+                    ""
+                  ).toLowerCase();
+                  const sectionLower = String(
+                    relatedSection || "",
+                  ).toLowerCase();
                   const isSigiriyaOrPidurangala =
                     nameLower.includes("sigiriya") ||
                     nameLower.includes("pidurangala") ||
@@ -1390,7 +1521,11 @@ export default function App() {
                       <div className="absolute bottom-0 inset-x-6 h-[2px] bg-gradient-to-r from-transparent via-white/80 dark:via-emerald-300/80 to-transparent pointer-events-none z-20 shadow-[0_0_8px_rgba(255,255,255,0.6)]" />
                       {/* Image */}
                       <div className="relative h-64 sm:h-72 overflow-hidden bg-gray-50 dark:bg-neutral-800">
-                        <PackageImageCarousel images={pkg.images} fallbackSrc={pkg.img} alt={pkg.title} />
+                        <PackageImageCarousel
+                          images={pkg.images}
+                          fallbackSrc={pkg.img}
+                          alt={pkg.title}
+                        />
 
                         {pkg.popular && (
                           <span className="absolute top-4 right-4 bg-pink-600 text-white text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full border border-pink-500 shadow-md hover:scale-105 transition-all duration-300">
@@ -1450,8 +1585,12 @@ export default function App() {
 
                           {isSigiriyaOrPidurangala && (
                             <li className="flex items-center gap-2">
-                              <span className="text-red-500 font-bold shrink-0">✗</span>
-                              <span className="text-red-600 dark:text-red-400 font-medium">Rock Entrance Ticket</span>
+                              <span className="text-red-500 font-bold shrink-0">
+                                ✗
+                              </span>
+                              <span className="text-red-600 dark:text-red-400 font-medium">
+                                Rock Entrance Ticket
+                              </span>
                             </li>
                           )}
 
@@ -1515,7 +1654,10 @@ export default function App() {
         </section>
 
         {/* --- ABOUT SECTION --- */}
-        <section id="about" className="py-20 md:py-32 overflow-hidden bg-white border-t border-gray-100">
+        <section
+          id="about"
+          className="py-20 md:py-32 overflow-hidden bg-white border-t border-gray-100"
+        >
           <div className="max-w-7xl mx-auto px-4 md:px-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
               {/* Image Side with Modern Overlap effect */}
@@ -1547,13 +1689,13 @@ export default function App() {
                     <div>
                       <span
                         className="block text-gray-800 font-bold text-lg leading-none trusted-badge-text-primary"
-                        style={{ color: '#1f2937' }}
+                        style={{ color: "#1f2937" }}
                       >
                         Since 2016
                       </span>
                       <span
                         className="text-gray-500 text-sm trusted-badge-text-secondary"
-                        style={{ color: '#6b7280' }}
+                        style={{ color: "#6b7280" }}
                       >
                         Trusted Safari
                       </span>
@@ -1571,11 +1713,20 @@ export default function App() {
 
                 <h2 className="font-outfit text-4xl sm:text-5xl font-bold mb-6 text-gray-900 leading-[1.15]">
                   Sri Lanka's Premier Safari for <br />
-                  <span className="text-castleton">Minneriya, Kaudulla, Hurulu Eco &amp; Wasgamuwa</span>
+                  <span className="text-castleton">
+                    Minneriya, Kaudulla, Hurulu Eco &amp; Wasgamuwa
+                  </span>
                 </h2>
 
                 <p className="text-gray-500 text-lg leading-relaxed mb-10">
-                  Based in Habarana, we operate trusted private safaris across <strong>Minneriya National Park</strong>, <strong>Kaudulla National Park</strong>, <strong>Hurulu Eco Park</strong>, and <strong>Wasgamuwa National Park</strong>. Our experienced local drivers monitor elephant and wildlife migrations daily to guarantee you the closest, safest encounters with wild elephants, leopards, and sloth bears.
+                  Based in Habarana, we operate trusted private safaris across{" "}
+                  <strong>Minneriya National Park</strong>,{" "}
+                  <strong>Kaudulla National Park</strong>,{" "}
+                  <strong>Hurulu Eco Park</strong>, and{" "}
+                  <strong>Wasgamuwa National Park</strong>. Our experienced
+                  local drivers monitor elephant and wildlife migrations daily
+                  to guarantee you the closest, safest encounters with wild
+                  elephants, leopards, and sloth bears.
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-10">
@@ -1893,8 +2044,8 @@ export default function App() {
                 Their Journey. Their Words.
               </h2>
               <p className="text-sm sm:text-base text-gray-500 mb-6">
-                Explore genuine guest experiences and trusted TripAdvisor reviews
-                from travelers who chose us.
+                Explore genuine guest experiences and trusted TripAdvisor
+                reviews from travelers who chose us.
               </p>
               <TripAdvisorWidget />
             </div>
@@ -2025,10 +2176,11 @@ export default function App() {
                                     );
                                     setGuestMenuOpen(false);
                                   }}
-                                  className={`w-full text-left px-4 py-3 text-sm transition-colors hover:bg-gray-50 ${isActive
-                                    ? "bg-sacramento/10 text-sacramento font-semibold"
-                                    : "text-gray-700"
-                                    }`}
+                                  className={`w-full text-left px-4 py-3 text-sm transition-colors hover:bg-gray-50 ${
+                                    isActive
+                                      ? "bg-sacramento/10 text-sacramento font-semibold"
+                                      : "text-gray-700"
+                                  }`}
                                 >
                                   {opt.label}
                                 </button>
@@ -2167,7 +2319,10 @@ export default function App() {
         )}
 
         {/* --- SEO FAQ & TRAVEL GUIDE SECTION --- */}
-        <section id="guide" className="py-20 md:py-28 bg-white dark:bg-[#132E24] border-t border-[#D8D3C9] dark:border-[#244236] transition-colors duration-200">
+        <section
+          id="guide"
+          className="py-20 md:py-28 bg-white dark:bg-[#132E24] border-t border-[#D8D3C9] dark:border-[#244236] transition-colors duration-200"
+        >
           <div className="max-w-4xl mx-auto px-4 md:px-6">
             <div className="text-center max-w-2xl mx-auto mb-14">
               <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#EFEEE9] text-[#152A44] text-xs font-bold uppercase tracking-widest mb-4 border border-[#D8D3C9] dark:bg-[#244236] dark:text-[#F3F3F1] dark:border-[#244236]">
@@ -2178,7 +2333,9 @@ export default function App() {
                 Safari Travel Guide &amp; Questions
               </h2>
               <p className="text-[#5B6E87] text-sm sm:text-base dark:text-[#D8D5B5]">
-                Everything you need to know about booking private jeep safaris to Minneriya, Kaudulla, Hurulu Eco Park, and Wasgamuwa National Parks.
+                Everything you need to know about booking private jeep safaris
+                to Minneriya, Kaudulla, Hurulu Eco Park, and Wasgamuwa National
+                Parks.
               </p>
             </div>
 
@@ -2186,24 +2343,24 @@ export default function App() {
               {[
                 {
                   q: "What is the difference between Minneriya, Kaudulla, and Hurulu Eco Park safaris?",
-                  a: "Minneriya, Kaudulla, and Hurulu Eco Park are interconnected elephant corridors in Sri Lanka's cultural triangle. During the dry season (July to October), herds of 200–300+ wild elephants gather around Minneriya Tank and Kaudulla Tank. From November to April (wet season), the herds migrate through Hurulu Eco Park. Our licensed local drivers check sightings twice daily and take you to whichever park has the largest elephant gathering on the day of your safari."
+                  a: "Minneriya, Kaudulla, and Hurulu Eco Park are interconnected elephant corridors in Sri Lanka's cultural triangle. During the dry season (July to October), herds of 200–300+ wild elephants gather around Minneriya Tank and Kaudulla Tank. From November to April (wet season), the herds migrate through Hurulu Eco Park. Our licensed local drivers check sightings twice daily and take you to whichever park has the largest elephant gathering on the day of your safari.",
                 },
                 {
                   q: "Can I do a safari in Wasgamuwa National Park?",
-                  a: "Yes! We operate dedicated private jeep safaris to Wasgamuwa National Park. Wasgamuwa is celebrated for its thriving elephant population, lush wilderness, and is one of the premier locations in Sri Lanka to spot the elusive Sri Lankan sloth bear, leopards, marsh crocodiles, and rare birds without the crowds."
+                  a: "Yes! We operate dedicated private jeep safaris to Wasgamuwa National Park. Wasgamuwa is celebrated for its thriving elephant population, lush wilderness, and is one of the premier locations in Sri Lanka to spot the elusive Sri Lankan sloth bear, leopards, marsh crocodiles, and rare birds without the crowds.",
                 },
                 {
                   q: "What is the best time for a Minneriya Jeep Safari?",
-                  a: "The afternoon / evening safari (1:30 PM – 6:30 PM) is the absolute best time to experience the famous Elephant Gathering. During the hot midday hours, elephants rest in the dense jungle and emerge onto the open reservoir plains as temperatures cool down. Morning safaris (5:30 AM – 9:00 AM) are peaceful, cooler, and ideal for spotting predatory birds, deer, water buffalo, and taking sunrise photographs."
+                  a: "The afternoon / evening safari (1:30 PM – 6:30 PM) is the absolute best time to experience the famous Elephant Gathering. During the hot midday hours, elephants rest in the dense jungle and emerge onto the open reservoir plains as temperatures cool down. Morning safaris (5:30 AM – 9:00 AM) are peaceful, cooler, and ideal for spotting predatory birds, deer, water buffalo, and taking sunrise photographs.",
                 },
                 {
                   q: "How do I book a Minneriya, Kaudulla, Hurulu or Wasgamuwa safari online?",
-                  a: "You can easily book online directly on our website! Simply choose your desired park or package, select your safari date and passenger count, and complete your reservation. You receive instant confirmation and also you can contact us via website."
+                  a: "You can easily book online directly on our website! Simply choose your desired park or package, select your safari date and passenger count, and complete your reservation. You receive instant confirmation and also you can contact us via website.",
                 },
                 {
                   q: "What animals can I see during the safari?",
-                  a: "Along with hundreds of Asian elephants, you have great chances of spotting spotted deer, sambar deer, water buffaloes, wild boars, toque macaques, grey langurs, jackals, marsh crocodiles, water monitor lizards, and over 160 bird species including white-bellied sea eagles, grey herons, and painted storks. Sloth bears and leopards are also present in Wasgamuwa and Minneriya."
-                }
+                  a: "Along with hundreds of Asian elephants, you have great chances of spotting spotted deer, sambar deer, water buffaloes, wild boars, toque macaques, grey langurs, jackals, marsh crocodiles, water monitor lizards, and over 160 bird species including white-bellied sea eagles, grey herons, and painted storks. Sloth bears and leopards are also present in Wasgamuwa and Minneriya.",
+                },
               ].map((item, idx) => (
                 <div
                   key={idx}
@@ -2216,8 +2373,9 @@ export default function App() {
                   >
                     <span className="text-base sm:text-lg">{item.q}</span>
                     <ChevronDown
-                      className={`w-5 h-5 shrink-0 text-gray-500 transition-transform duration-300 ${openFaq === idx ? "rotate-180 text-castleton" : ""
-                        }`}
+                      className={`w-5 h-5 shrink-0 text-gray-500 transition-transform duration-300 ${
+                        openFaq === idx ? "rotate-180 text-castleton" : ""
+                      }`}
                     />
                   </button>
                   {openFaq === idx && (
@@ -2253,7 +2411,10 @@ export default function App() {
         </section>
 
         {/* --- CONTACT SECTION --- */}
-        <section id="contact" className="relative py-20 md:py-32 overflow-hidden">
+        <section
+          id="contact"
+          className="relative py-20 md:py-32 overflow-hidden"
+        >
           {/* Decorative background blur */}
           <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
             <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] rounded-full bg-castleton/10 blur-[100px]"></div>
@@ -2411,7 +2572,10 @@ export default function App() {
                         className="w-12 h-12 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300 hover:text-white hover:bg-sacramento dark:hover:bg-sacramento hover:border-sacramento rounded-full flex items-center justify-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-sacramento/30"
                         aria-label={soc.label}
                       >
-                        <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                        <svg
+                          className="w-5 h-5 fill-current"
+                          viewBox="0 0 24 24"
+                        >
                           <path d={soc.icon} />
                         </svg>
                       </a>
@@ -2540,7 +2704,9 @@ export default function App() {
                                 </option>
                               </>
                             )}
-                            <option value="Other">Other / Custom Inquiry</option>
+                            <option value="Other">
+                              Other / Custom Inquiry
+                            </option>
                           </select>
                           <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-castleton">
                             <svg
@@ -2653,7 +2819,10 @@ export default function App() {
             <div className="flex flex-col lg:flex-row justify-between items-start gap-12 lg:gap-8 mb-16">
               {/* Brand & Description */}
               <div className="max-w-sm">
-                <div className="flex items-center gap-3 mb-6 cursor-pointer" onClick={() => scrollToSection("home")}>
+                <div
+                  className="flex items-center gap-3 mb-6 cursor-pointer"
+                  onClick={() => scrollToSection("home")}
+                >
                   <img
                     src={logoImg}
                     alt="Wild Jeep Safari"
@@ -2664,27 +2833,34 @@ export default function App() {
                   </span>
                 </div>
                 <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">
-                  Curating unforgettable wildlife experiences and adventures across Sri Lanka's most breathtaking national parks.
+                  Curating unforgettable wildlife experiences and adventures
+                  across Sri Lanka's most breathtaking national parks.
                 </p>
               </div>
 
               {/* Links Grid */}
               <div className="grid grid-cols-2 md:grid-cols-3 gap-x-12 gap-y-10 w-full lg:w-auto">
                 <div className="flex flex-col gap-4">
-                  <h4 className="font-bold text-neutral-900 dark:text-white text-sm uppercase tracking-wider">Explore</h4>
-                  {["home", "about", "packages", "gallery", "contact"].map((sect) => (
-                    <button
-                      key={sect}
-                      onClick={() => scrollToSection(sect)}
-                      className="text-left text-sm text-neutral-500 hover:text-sacramento dark:text-neutral-400 dark:hover:text-emerald-400 transition-colors capitalize font-medium"
-                    >
-                      {sect}
-                    </button>
-                  ))}
+                  <h4 className="font-bold text-neutral-900 dark:text-white text-sm uppercase tracking-wider">
+                    Explore
+                  </h4>
+                  {["home", "about", "packages", "gallery", "contact"].map(
+                    (sect) => (
+                      <button
+                        key={sect}
+                        onClick={() => scrollToSection(sect)}
+                        className="text-left text-sm text-neutral-500 hover:text-sacramento dark:text-neutral-400 dark:hover:text-emerald-400 transition-colors capitalize font-medium"
+                      >
+                        {sect}
+                      </button>
+                    ),
+                  )}
                 </div>
 
                 <div className="flex flex-col gap-4">
-                  <h4 className="font-bold text-neutral-900 dark:text-white text-sm uppercase tracking-wider">Destinations</h4>
+                  <h4 className="font-bold text-neutral-900 dark:text-white text-sm uppercase tracking-wider">
+                    Destinations
+                  </h4>
                   {[
                     "Minneriya",
                     "Kaudulla",
@@ -2702,11 +2878,16 @@ export default function App() {
                 </div>
 
                 <div className="flex flex-col gap-4 col-span-2 md:col-span-1">
-                  <h4 className="font-bold text-neutral-900 dark:text-white text-sm uppercase tracking-wider">Legal</h4>
+                  <h4 className="font-bold text-neutral-900 dark:text-white text-sm uppercase tracking-wider">
+                    Legal
+                  </h4>
                   {[
                     { label: "FAQ & Help", path: "/help/frequently" },
                     { label: "Privacy Policy", path: "/privacy-policy" },
-                    { label: "Terms of Service", path: "/terms-and-conditions" },
+                    {
+                      label: "Terms of Service",
+                      path: "/terms-and-conditions",
+                    },
                     { label: "Refund Policy", path: "/return-refund-policy" },
                   ].map((item) => (
                     <Link
@@ -2724,7 +2905,8 @@ export default function App() {
             {/* Bottom Bar */}
             <div className="pt-8 border-t border-neutral-200/60 dark:border-neutral-800/60 flex justify-center items-center">
               <p className="text-xs text-neutral-400 font-medium text-center">
-                &copy; {new Date().getFullYear()} Wild Jeep Safari. All rights reserved.
+                &copy; {new Date().getFullYear()} Wild Jeep Safari. All rights
+                reserved.
               </p>
             </div>
           </div>

@@ -24,13 +24,17 @@ export default function ForgotPassword() {
     setLoading(true);
 
     try {
-      const response = await api.post("/forgot-password", { Email: Email.trim() });
+      const response = await api.post("/forgot-password", {
+        Email: Email.trim(),
+        origin: window.location.origin,
+      });
       setMessage(
         response.data.message ||
         "Password reset link has been sent! Please check your email inbox."
       );
     } catch (err) {
       setError(
+        err.response?.data?.errors?.Email?.[0] ||
         err.response?.data?.message ||
         "Unable to process password reset request. Please check your email address."
       );

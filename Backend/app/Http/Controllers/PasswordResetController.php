@@ -21,7 +21,7 @@ class PasswordResetController extends Controller
      */
     public function sendResetLinkEmail(Request $request)
     {
-        $email = $request->input('Email', $request->input('email'));
+        $email = trim((string) $request->input('Email', $request->input('email')));
 
         $request->merge(['Email' => $email]);
 
@@ -32,12 +32,15 @@ class PasswordResetController extends Controller
             'Email.email' => 'Please enter a valid email address.',
         ]);
 
-        // Check if user exists first; if not, return the same generic success response to prevent email enumeration (AUTH-10)
-        $user = User::where('Email', $email)->first();
+        // Check if user exists in the database
+        $user = User::where('Email', $email)
+            ->orWhereRaw('LOWER(Email) = ?', [strtolower($email)])
+            ->first();
+
         if (!$user) {
             return response()->json([
-                'message' => 'Reset link sent to your email.'
-            ], 200);
+                'message' => 'We could not find a user with that email address.'
+            ], 404);
         }
 
         try {
@@ -45,18 +48,29 @@ class PasswordResetController extends Controller
             $token = Password::broker()->createToken($user);
 
             // Determine frontend SPA URL dynamically based on request origin
-            $origin = $request->header('Origin') ?: $request->header('Referer');
+            $origin = $request->input('origin') ?: $request->header('Origin') ?: $request->header('Referer');
             $frontendUrl = null;
 
             if ($origin) {
+                if (!preg_match('~^https?://~i', $origin)) {
+                    $origin = 'http://' . $origin;
+                }
                 $parsed = parse_url($origin);
-                if (isset($parsed['scheme']) && isset($parsed['host'])) {
-                    $frontendUrl = $parsed['scheme'] . '://' . $parsed['host'] . (isset($parsed['port']) ? ':' . $parsed['port'] : '');
+                if (!empty($parsed['host'])) {
+                    $scheme = !empty($parsed['scheme']) ? $parsed['scheme'] : 'http';
+                    $port = !empty($parsed['port']) ? ':' . $parsed['port'] : '';
+                    $frontendUrl = $scheme . '://' . $parsed['host'] . $port;
                 }
             }
 
             if (empty($frontendUrl)) {
-                $frontendUrl = env('FRONTEND_URL') ?: config('app.frontend_url', 'http://localhost:5173');
+                $frontendUrl = env('FRONTEND_URL') ?: config('app.frontend_url');
+            }
+
+            if (empty($frontendUrl)) {
+                $frontendUrl = app()->environment('production')
+                    ? 'https://www.minneriyawildjeepsafari.com'
+                    : 'http://localhost:5173';
             }
 
             $frontendUrl = rtrim($frontendUrl, '/');
@@ -66,13 +80,20 @@ class PasswordResetController extends Controller
             // Render HTML content using Mailable (matching BookingConfirmationMail & ContactMessage)
             $htmlContent = (new ResetPasswordMail($user, $resetUrl, $expireMinutes))->render();
 
-            // Send directly via Brevo REST API (Port 443)
-            BrevoMailService::send(
-                $user->Email,
-                'Reset Your Password - Minneriya Wild Jeep Safari',
-                $htmlContent,
-                $user->User_Name ?? 'Valued Customer'
-            );
+            try {
+                // Send directly via Brevo REST API (Port 443)
+                BrevoMailService::send(
+                    $user->Email,
+                    'Reset Your Password - Minneriya Wild Jeep Safari',
+                    $htmlContent,
+                    $user->User_Name ?? 'Valued Customer'
+                );
+            } catch (\Exception $brevoException) {
+                Log::warning('Brevo direct send failed, attempting fallback to default mailer: ' . $brevoException->getMessage());
+                \Illuminate\Support\Facades\Mail::to($user->Email)->send(
+                    new ResetPasswordMail($user, $resetUrl, $expireMinutes)
+                );
+            }
 
             return response()->json([
                 'message' => 'Reset link sent to your email.'
@@ -98,7 +119,7 @@ class PasswordResetController extends Controller
      */
     public function reset(Request $request)
     {
-        $email = $request->input('Email', $request->input('email'));
+        $email = trim((string) $request->input('Email', $request->input('email')));
         $password = $request->input('Password', $request->input('password'));
         $passwordConfirmation = $request->input('Password_confirmation', $request->input('password_confirmation'));
         $token = $request->input('token');
@@ -133,8 +154,12 @@ class PasswordResetController extends Controller
             'Password.regex' => 'Password must include uppercase, lowercase, numbers, and symbols.',
         ]);
 
+        $existingUser = User::where('Email', $email)
+            ->orWhereRaw('LOWER(Email) = ?', [strtolower($email)])
+            ->first();
+
         $credentials = [
-            'Email' => $email,
+            'Email' => $existingUser ? $existingUser->Email : $email,
             'password' => $password,
             'password_confirmation' => $passwordConfirmation,
             'token' => $token,
