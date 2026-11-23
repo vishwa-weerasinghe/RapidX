@@ -1416,9 +1416,13 @@ export default function App() {
 
             {/* Search Bar */}
             <div className="max-w-2xl mx-auto mb-10">
-              <div className={`group relative flex items-center gap-3 px-5 py-4 rounded-2xl bg-white border-2 shadow-lg transition-all duration-300 ${packageSearch ? "border-castleton shadow-castleton/10" : "border-gray-100 hover:border-gray-200 shadow-gray-100"}`}>
+              <div
+                className={`group relative flex items-center gap-3 px-5 py-4 rounded-2xl bg-white border-2 shadow-lg transition-all duration-300 ${packageSearch ? "border-castleton shadow-castleton/10" : "border-gray-100 hover:border-gray-200 shadow-gray-100"}`}
+              >
                 {/* Icon */}
-                <span className={`shrink-0 transition-colors duration-200 ${packageSearch ? "text-castleton" : "text-gray-400 group-hover:text-gray-500"}`}>
+                <span
+                  className={`shrink-0 transition-colors duration-200 ${packageSearch ? "text-castleton" : "text-gray-400 group-hover:text-gray-500"}`}
+                >
                   <Search size={20} strokeWidth={2.2} />
                 </span>
 
@@ -1601,6 +1605,21 @@ export default function App() {
                             </li>
                           )}
                         </ul>
+
+                        {/* Price */}
+                        {pkg.price > 0 && (
+                          <div className="flex items-baseline gap-1.5 mb-4">
+                            <span className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                              Starting from
+                            </span>
+                            <span className="text-2xl font-extrabold text-castleton dark:text-emerald-400">
+                              ${pkg.price}
+                            </span>
+                            <span className="text-xs text-gray-400 dark:text-gray-500">
+                              / person
+                            </span>
+                          </div>
+                        )}
 
                         {/* Buttons */}
                         <div className="flex gap-3 mt-auto pt-4 border-t border-gray-100 dark:border-neutral-800">
